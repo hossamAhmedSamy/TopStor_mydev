@@ -4,6 +4,7 @@ iscsimapping='/pacedata/iscsimapping';
 runningpools='/pacedata/runningpools';
 myhost=`hostname`
 poollist='/pacedata/pools/'${myhost}'poollist';
+cachestate=0;
 cd /pacedata/pools/
 allpools=`cat /pacedata/pools/$(ls /pacedata/pools/ | grep poollist)`
 cd /pace
@@ -24,24 +25,28 @@ for pool in "${pools[@]}"; do
    faildisk=`/sbin/zpool status $pool | grep "was /dev" | awk -F'-id/' '{print $2}' | awk -F'-part' '{print $1}'`;
    /sbin/zpool detach $pool $faildisk &>/dev/null;
    /sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool;
+   cachestate=1;
   fi 
   /sbin/zpool status $pool | grep "was /dev/s" ;
   if [ $? -eq 0 ]; then
    faildisk=`/sbin/zpool status $pool | grep "was /dev/s" | awk -F'was ' '{print $2}'`;
    /sbin/zpool detach $pool $faildisk &>/dev/null;
    /sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool ;
+   cachestate=1;
   fi 
   /sbin/zpool status $pool | grep OFFLINE &>/dev/null
   if [ $? -eq 0 ]; then
    faildisk=`/sbin/zpool status $pool | grep OFFLINE | awk '{print $1}'`;
    /sbin/zpool detach $pool $faildisk &>/dev/null;
    /sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool;
+   cachestate=1;
   fi
   /sbin/zpool status $pool | grep UNAVAIL &>/dev/null
   if [ $? -eq 0 ]; then
    faildisk=`/sbin/zpool status $pool | grep UNAVAIL | awk '{print $1}'`;
    /sbin/zpool detach $pool $faildisk &>/dev/null;
    /sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool;
+   cachestate=1;
   fi 
  fi
 done
@@ -55,6 +60,7 @@ while read -r  hostline ; do
    if [ $? -eq 0 ]; then 
     /sbin/zpool offline $pool2 "$hostdiskid" &>/dev/null;
     /sbin/zpool set cachefile=/pacedata/pools/${pool2}.cache $pool2;
+   cachestate=1;
    fi
   done
   cat ${iscsimapping}new | grep -w "$host" | grep "notconnected"
@@ -67,6 +73,7 @@ while read -r  hostline ; do
      if [ $? -eq 0 ]; then 
       /sbin/zpool offline $pool2 "$hostdiskid" &>/dev/null;
       /sbin/zpool set cachefile=/pacedata/pools/${pool2}.cache $pool2;
+      cachestate=1;
      fi
     done
    done;
@@ -130,6 +137,7 @@ for pool in "${pools[@]}"; do
     /sbin/zpool attach -f $pool $runningdisk $newdisk ;
     if [ $? -eq 0 ]; then 
      /sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool;
+      cachestate=1;
      unset idledisk[$i];
     fi
    fi
@@ -144,6 +152,7 @@ for pool in "${pools[@]}"; do
     echo /sbin/zpool attach -f $pool $runningdisk $newdisk ;
     if [ $? -eq 0 ]; then 
      /sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool ;
+      cachestate=1;
      unset hostdisk[$i];
     fi
    fi
@@ -154,6 +163,10 @@ done
 diff ${poollist} ${poollist}local  &>/dev/null
 if [ $? -ne 0 ]; then 
  cp ${poollist}local $poollist
+ cachestate=1;
+fi
+if [ $cachestate -ne 0 ]; then
+ cachestate=0;
  while read -r  hostline ; do
   host=`echo $hostline | awk '{print $1}'`
   echo $hostline | grep "notconnected"  &>/dev/null
