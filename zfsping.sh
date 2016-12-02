@@ -182,4 +182,11 @@ tomount=`zpool import | grep "pool:" | awk '{print $2}'`
 cat $runningpools | grep $tomount
 if [ $? -ne 0 ]; then
  zpool import $tomount
+ poollist=`zpool list -Hv`
+ echo $myhost' '$poollist >> $runningpools 
 fi 
+mypool=`cat $runningpools | grep "$myhost" | awk '{print $2}'`;
+cat $runningpools | grep "$mypool" | grep -v "$myhost" 
+if [ $? -ne 0 ]; then
+ zpool import $mypool
+fi
