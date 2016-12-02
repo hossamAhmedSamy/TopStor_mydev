@@ -1,8 +1,8 @@
 cd /pace
 touch /tmp/zfsping
 iscsimapping='/pacedata/iscsimapping';
-runningpools='/pacedata/runningpools';
-myhost=`hostname`
+runningpools='/pacedata/pools/runningpools';
+myhost=`hostname -s`
 poollist='/pacedata/pools/'${myhost}'poollist';
 cachestate=0;
 cd /pacedata/pools/
@@ -178,4 +178,8 @@ if [ $cachestate -ne 0 ]; then
   fi
  done < ${iscsimapping}
 fi
-
+tomount=`zpool import | grep "pool:" | awk '{print $2}'`
+cat $runningpools | grep $tomount
+if [ $? -ne 0 ]; then
+ zpool import $tomount
+fi 

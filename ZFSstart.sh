@@ -2,7 +2,7 @@ cd /pace
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 iscsimapping='/pacedata/iscsimapping'
 runningpools='/pacedata/pools/runningpools';
-myhost=`hostname`
+myhost=`hostname -s`
 echo runningpools > ${runningpools}
 /sbin/zpool list -H > ${runningpools}$myhost
 while read -r runpool; do

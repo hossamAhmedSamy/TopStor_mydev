@@ -1,6 +1,6 @@
 cd /pace
 iscsimapping='/pacedata/iscsimapping';
-myhost=`hostname`
+myhost=`hostname -s`
 runningpools='/pacedata/pools/runningpools';
 declare -a idledisk=();
 declare -a hostdisk=();
