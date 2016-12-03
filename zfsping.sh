@@ -178,15 +178,23 @@ if [ $cachestate -ne 0 ]; then
   fi
  done < ${iscsimapping}
 fi
-tomount=`zpool import | grep "pool:" | awk '{print $2}'`
-cat $runningpools | grep $tomount
-if [ $? -ne 0 ]; then
- zpool import $tomount
- poollist=`zpool list -Hv`
- echo $myhost' '$poollist >> $runningpools 
-fi 
+tomount=`zpool import | grep "pool:" `
+echo $tomount | grep "pool:"
+if [ $? -eq 0 ]; then
+ tomount=`echo $tomount | awk '{print $2}'`
+ cat $runningpools | grep $tomount
+ if [ $? -ne 0 ]; then
+  zpool import $tomount
+  poollist=`zpool list -Hv`
+  echo $myhost' '$poollist >> $runningpools 
+ fi 
+fi
 mypool=`cat $runningpools | grep "$myhost" | awk '{print $2}'`;
 cat $runningpools | grep "$mypool" | grep -v "$myhost" 
 if [ $? -ne 0 ]; then
- zpool import $mypool
+ runpools=`zpool list | grep "$mypool"`
+ echo $runpools | grep $mypool
+ if [ $? -ne 0 ]; then
+  zpool import $mypool
+ fi
 fi
