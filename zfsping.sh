@@ -3,18 +3,19 @@ touch /tmp/zfsping
 iscsimapping='/pacedata/iscsimapping';
 runningpools='/pacedata/pools/runningpools';
 myhost=`hostname -s`
+hostnam=`cat /TopStordata/hostname`
 poollist='/pacedata/pools/'${myhost}'poollist';
 cachestate=0;
 cd /pacedata/pools/
 allpools=`cat /pacedata/pools/$(ls /pacedata/pools/ | grep poollist)`
-cd /pace
 cp ${iscsimapping} ${iscsimapping}new;
 declare -a pools=(`/sbin/zpool list -H | awk '{print $1}'`)
 declare -a idledisk=();
 declare -a hostdisk=();
 declare -a alldevdisk=();
-sh iscsirefresh.sh  &>/dev/null &
-sh listingtargets.sh
+cd /pace
+sh iscsirefresh.sh  
+sh listingtargets.sh 
 sleep 1
 runninghosts=`cat $iscsimapping | grep -v notconnected | awk '{print $1}'`
 for pool in "${pools[@]}"; do
@@ -186,7 +187,7 @@ if [ $? -eq 0 ]; then
  if [ $? -ne 0 ]; then
   zpool import $tomount
   poollist=`zpool list -Hv`
-  echo $myhost' '$poollist >> $runningpools 
+  echo $myhost' '$poollist' '$hostnam >> $runningpools 
  fi 
 fi
 mypool=`cat $runningpools | grep "$myhost" | awk '{print $2}'`;
@@ -196,5 +197,7 @@ if [ $? -ne 0 ]; then
  echo $runpools | grep $mypool
  if [ $? -ne 0 ]; then
   zpool import $mypool
+  newline=`zpool list -Hv $mypool`' '$hostnam
+  sed -i "/$mypool/c/$newline" $runningpools 
  fi
 fi

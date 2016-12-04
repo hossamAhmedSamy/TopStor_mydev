@@ -1,3 +1,4 @@
+cd /pace
 iscsimapping='/pacedata/iscsimapping'
 myhost=`hostname`;
 iscsitargets='/pacedata/iscsitargets';

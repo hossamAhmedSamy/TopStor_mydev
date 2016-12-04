@@ -103,6 +103,7 @@ END
 }
 
 dummy_start() {
+    sh /pace/startzfs.sh 	
     dummy_monitor
     if [ $? =  $OCF_SUCCESS ]; then
 	return $OCF_SUCCESS

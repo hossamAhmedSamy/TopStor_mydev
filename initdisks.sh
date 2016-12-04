@@ -11,6 +11,7 @@ for host in "${runninghosts[@]}" ; do
  if [ $? -ne 0 ]; then
   phost=${phost}' '${host};
   hostp=`ssh $host /sbin/zpool list -Hv ` 
+  hostp=${hostp}' '`ssh $host cat /TopStordata/hostname ` 
   hostps=${hostps}' '${hostp};
  fi
 done
