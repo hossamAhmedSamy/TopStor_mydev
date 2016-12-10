@@ -14,8 +14,8 @@ declare -a idledisk=();
 declare -a hostdisk=();
 declare -a alldevdisk=();
 cd /pace
-sh iscsirefresh.sh  
-sh listingtargets.sh 
+sh iscsirefresh.sh   &>/dev/null &
+sh listingtargets.sh  &>/dev/null
 sleep 1
 runninghosts=`cat $iscsimapping | grep -v notconnected | awk '{print $1}'`
 for pool in "${pools[@]}"; do
@@ -64,9 +64,9 @@ while read -r  hostline ; do
    cachestate=1;
    fi
   done
-  cat ${iscsimapping}new | grep -w "$host" | grep "notconnected"
+  cat ${iscsimapping}new | grep -w "$host" | grep "notconnected" &>/dev/null
   if [ $? -ne 0 ]; then 
-   echo disconnecting $host disks
+#   echo disconnecting $host disks
    declare -a hostdiskids=(`cat ${iscsimapping}new | grep -w "$host" | awk '{print $3}'`);
    for hostdiskid in "${hostdiskids[@]}"; do
     for pool2 in "${pools[@]}"; do
@@ -86,34 +86,34 @@ needlist=1;
 for pool in "${pools[@]}"; do
  runningdisk=`/sbin/zpool list -Hv $pool | grep -v "$pool" | grep -v mirror | awk '{print $1}'`
  single=`/sbin/zpool list -Hv $pool | grep -v "$pool" | grep -v mirror | wc -l`
- echo single count=$single
+# echo single count=$single
  if [ "$single" -eq 1 ]; then
   if [ "$needlist" -eq 1 ] ; then 
-   echo here1
+#   echo here1
    needlist=2;
    expopool=`/sbin/zpool import 2>/dev/null`
    while read -r  hostline ; do
     diskid=`echo $hostline | awk '{print $3}'`
     host=`echo $hostline | awk '{print $1}'`
-    echo host,diskid= $host, $diskid
+#    echo host,diskid= $host, $diskid
     echo $hostline | grep "notconnected" &>/dev/null
     if [ $? -ne 0 ]; then
-     echo here1_2
+#     echo here1_2
      echo $allpools | grep "$diskid" &>/dev/null
      if [ $? -ne 0 ]; then
-      echo not in a runningpool 
+#      echo not in a runningpool 
       echo $myhost | grep "$host" &>/dev/null
       if [ $? -eq 0 ]; then
-          echo local disk
+#          echo local disk
        hostdisk=("${hostdisk[@]}" "$host,$diskid");
-       echo hostdisk=${hostdisk[@]};
+#       echo hostdisk=${hostdisk[@]};
       else
-        echo foreign disk
+#        echo foreign disk
        idledisk=("${idledisk[@]}" "$host,$diskid");
-       echo idledisk=${idledisk[@]};
+#       echo idledisk=${idledisk[@]};
       fi
-      echo idledisk=${idledisk[@]}
-      echo hostdisk=${hostdisk[@]}
+#      echo idledisk=${idledisk[@]}
+#      echo hostdisk=${hostdisk[@]}
      fi
     else
      echo $runninghosts | grep $host &>/dev/null
@@ -123,17 +123,17 @@ for pool in "${pools[@]}"; do
     fi
    done < $iscsimapping
   fi
-  echo here2
+#  echo here2
   /sbin/zpool clear $pool &>/dev/null
   singlehost=`cat $iscsimapping | grep "$runningdisk" `;
-  echo $singlehost | grep "$myhost" 
+  echo $singlehost | grep "$myhost" &>/dev/null
   if [ $? -eq 0 ]; then
-   echo here3
+#   echo here3
    i=$((${#idledisk[@]}-1))
-   echo i = $i
+#   echo i = $i
    if [ $i -ge 0 ]; then
     newdisk=`echo ${idledisk[$i]} | awk -F',' '{print $2}'`
-    echo /sbn/zpool attach -f $pool $runningdisk $newdisk ;
+#    echo /sbn/zpool attach -f $pool $runningdisk $newdisk ;
     zpool labelclear /dev/disk/by-id/$newdisk
     /sbin/zpool attach -f $pool $runningdisk $newdisk ;
     if [ $? -eq 0 ]; then 
@@ -143,14 +143,14 @@ for pool in "${pools[@]}"; do
     fi
    fi
   else
-   echo here5
+#   echo here5
    i=$((${#hostdisk[@]}-1));
-   echo i=$i
+#   echo i=$i
    if [ $i -ge 0 ]; then
     newdisk=`echo ${hostdisk[$i]} | awk -F',' '{print $2}'`
     zpool labelclear /dev/disk/by-id/$newdisk
     /sbin/zpool attach -f $pool $runningdisk $newdisk ;
-    echo /sbin/zpool attach -f $pool $runningdisk $newdisk ;
+#    echo /sbin/zpool attach -f $pool $runningdisk $newdisk ;
     if [ $? -eq 0 ]; then 
      /sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool ;
       cachestate=1;
@@ -179,22 +179,22 @@ if [ $cachestate -ne 0 ]; then
   fi
  done < ${iscsimapping}
 fi
-tomount=`zpool import | grep "pool:" `
-echo $tomount | grep "pool:"
+tomount=`zpool import 2>/dev/null | grep "pool:" `
+echo $tomount | grep "pool:" &>/dev/null
 if [ $? -eq 0 ]; then
  tomount=`echo $tomount | awk '{print $2}'`
- cat $runningpools | grep $tomount
+ cat $runningpools | grep $tomount &>/dev/null
  if [ $? -ne 0 ]; then
-  zpool import $tomount
+  zpool import $tomount 
   poollist=`zpool list -Hv`
   echo $myhost' '$poollist' '$hostnam >> $runningpools 
  fi 
 fi
 mypool=`cat $runningpools | grep "$myhost" | awk '{print $2}'`;
-cat $runningpools | grep "$mypool" | grep -v "$myhost" 
+cat $runningpools | grep "$mypool" | grep -v "$myhost"  &>/dev/null
 if [ $? -ne 0 ]; then
  runpools=`zpool list | grep "$mypool"`
- echo $runpools | grep $mypool
+ echo $runpools | grep $mypool &>/dev/null
  if [ $? -ne 0 ]; then
   zpool import $mypool
   newline=`zpool list -Hv $mypool`' '$hostnam
