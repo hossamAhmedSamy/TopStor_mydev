@@ -197,7 +197,7 @@ if [ $? -ne 0 ]; then
  echo $runpools | grep $mypool &>/dev/null
  if [ $? -ne 0 ]; then
   zpool import $mypool
-  newline=`zpool list -Hv $mypool`' '$hostnam
+  newline=$myhost' '`zpool list -Hv $mypool`' '$hostnam
   sed -i "/$mypool/c/$newline" $runningpools 
  fi
 fi
