@@ -18,4 +18,5 @@ if [ $secdiff -ne 0 ]; then
  zpool export -a
  sh iscsirefresh.sh
  sh listingtargets.sh
+ touch /var/www/html/des20/Data/Getstatspid
 fi

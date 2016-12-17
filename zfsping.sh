@@ -190,6 +190,9 @@ if [ $? -eq 0 ]; then
   echo $myhost' '$poollist' '$hostnam >> $runningpools 
   systemctl start nfs
   collectl -D /etc/collectl.conf
+  rm -rf /var/www/html/des20/Data/Getstatspid &>/dev/null
+  chgrp apache /var/www/html/des20/Data/*
+  chmod g+r /var/www/html/des20/Data/*
  fi 
 fi
 mypool=`cat $runningpools | grep "$myhost" | awk '{print $2}'`;
@@ -203,5 +206,8 @@ if [ $? -ne 0 ]; then
   sed -i "/$mypool/c/$newline" $runningpools 
   systemctl start nfs
   collectl -D /etc/collectl.conf
+  rm -rf /var/www/html/des20/Data/Getstatspid &>/dev/null
+  chgrp apache /var/www/html/des20/Data/*
+  chmod g+r /var/www/html/des20/Data/*
  fi
 fi
