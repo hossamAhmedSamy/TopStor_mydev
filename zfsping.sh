@@ -188,6 +188,8 @@ if [ $? -eq 0 ]; then
   zpool import $tomount 
   poollist=`zpool list -Hv`
   echo $myhost' '$poollist' '$hostnam >> $runningpools 
+  systemctl start nfs
+  collectl -D /etc/collectl.conf
  fi 
 fi
 mypool=`cat $runningpools | grep "$myhost" | awk '{print $2}'`;
@@ -199,5 +201,7 @@ if [ $? -ne 0 ]; then
   zpool import $mypool
   newline=$myhost' '`zpool list -Hv $mypool`' '$hostnam
   sed -i "/$mypool/c/$newline" $runningpools 
+  systemctl start nfs
+  collectl -D /etc/collectl.conf
  fi
 fi
