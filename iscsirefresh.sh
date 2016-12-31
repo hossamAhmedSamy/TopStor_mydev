@@ -3,8 +3,13 @@ iscsimapping='/pacedata/iscsimapping';
 iscsitargets='/pacedata/iscsitargets';
 #/sbin/iscsiadm -m session --rescan &>/dev/null
 needrescan=0;
+myhost=`hostname -s`
 while read -r  hostline ; do
  host=`echo $hostline | awk '{print $2}'`
+ echo $myhost | grep $host
+ if [ $? -eq 0 ]; then
+  host='127.0.0.1'
+ fi
  ping -c 1 -W 1 $host &>/dev/null
  if [ $? -eq 0 ]; then
   needrescan=1;
