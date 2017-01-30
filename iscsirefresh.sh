@@ -1,7 +1,7 @@
 cd /pace
 iscsimapping='/pacedata/iscsimapping';
 iscsitargets='/pacedata/iscsitargets';
-#/sbin/iscsiadm -m session --rescan &>/dev/null
+/sbin/iscsiadm -m session --rescan &>/dev/null
 needrescan=0;
 myhost=`hostname -s`
 while read -r  hostline ; do
