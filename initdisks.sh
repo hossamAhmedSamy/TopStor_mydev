@@ -43,7 +43,12 @@ for localdisk in "${hostdisk[@]}"; do
    disk2=`echo ${localdisk} | awk -F',' '{print $2}'`
    /sbin/zpool labelclear /dev/disk/by-id/${disk2};
    rm -rf /p${nextpool} &>/dev/null
-   /sbin/zpool create -f p${nextpool} ${disk2} ;
+   /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk2} ;
+   /sbin/zfs set compression=lz4 p${nextpool}
+   /sbin/zfs set atime=off p${nextpool}
+   /sbin/zfs set xattr=sa p${nextpool}
+   /sbin/zfs set redundant_metadata=most p${nextpool}
+   /sbin/zfs set dedup=on p${nextpool}
    echo /sbin/zpool create p${nextpool} /dev/disk/by-id/scsi-${disk2} ;
  else
   x=$((${#idledisk[@]}-1));
@@ -53,7 +58,12 @@ for localdisk in "${hostdisk[@]}"; do
    /sbin/zpool labelclear /dev/disk/by-id/${disk1};
    /sbin/zpool labelclear /dev/disk/by-id/${disk2};
    rm -rf /p${nextpool} &>/dev/null
-   /sbin/zpool create -f p${nextpool} mirror ${disk1} ${disk2} ;
+   /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} mirror ${disk1} ${disk2} ;
+   /sbin/zfs set compression=lz4 p${nextpool}
+   /sbin/zfs set atime=off p${nextpool}
+   /sbin/zfs set xattr=sa p${nextpool}
+   /sbin/zfs set redundant_metadata=most p${nextpool}
+   /sbin/zfs set dedup=on p${nextpool}
    echo /sbin/zpool create p${nextpool} mirror /dev/disk/by-id/scsi-${disk1} /dev/disk/by-id/scsi-${disk2} ;
    if [ $? -eq 0 ]; then 
     unset idledisk[$x];
