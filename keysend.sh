@@ -1,8 +1,16 @@
-#!/bin/sh
+/bin/sh
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/root
 declare -a targets=(`cat /pacedata/iscsitargets | awk '{print $2}'`);
 #node=`echo $@ | awk '{print $1}'`
-#node=`hostname -s`
+myhost=`hostname -s`
+myadd=`host $myhost | awk '{print $NF}'`
+grep $myhost /etc/hosts &>/dev/null
+if [ $? -ne 0 ]; then
+ echo $myadd $myhost >> /etc/hosts
+else
+ oldadd=`cat /etc/hosts | grep "$myhost" | awk '{print $1}'`
+ sed -i "s/$oldadd/$myadd/g" /etc/hosts
+fi
 if [ ! -f /root/.ssh/id_rsa ] ;then 
  ssh-keygen -t rsa -f /root/.ssh/id_rsa -q -P "";
 fi
