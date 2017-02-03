@@ -7,6 +7,12 @@ poollist='/pacedata/pools/'${myhost}'poollist';
 lastreboot=`uptime -s`
 seclastreboot=`date --date="$lastreboot" +%s`
 secrunning=`cat $runningpools | grep runningpools | awk '{print $2}'`
+ ./addtargetdisks.sh
+lsblk -Sn | grep LIO &>/dev/null
+if [ $? -ne 0 ]; then
+sleep 6
+fi
+ ./initdisks.sh
 if [ -z $secrunning ]; then
  echo hithere: $lastreboot : $seclastreboot
  secdiff=222;
