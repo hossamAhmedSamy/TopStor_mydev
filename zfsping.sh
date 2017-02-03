@@ -16,6 +16,10 @@ declare -a alldevdisk=();
 cd /pace
 sh iscsirefresh.sh   &>/dev/null &
 sh listingtargets.sh  &>/dev/null
+echo $pools | grep "no pools"
+if [ $? -eq 0  ]; then
+ ./initdisks.sh
+fi
 sleep 1
 runninghosts=`cat $iscsimapping | grep -v notconnected | awk '{print $1}'`
 for pool in "${pools[@]}"; do
