@@ -10,7 +10,7 @@ secrunning=`cat $runningpools | grep runningpools | awk '{print $2}'`
  ./addtargetdisks.sh
 lsblk -Sn | grep LIO &>/dev/null
 if [ $? -ne 0 ]; then
-sleep 6
+sleep 12
 fi
  ./initdisks.sh
 if [ -z $secrunning ]; then
