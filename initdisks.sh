@@ -17,7 +17,7 @@ for host in "${runninghosts[@]}" ; do
   hostps=${hostps}' '${hostp};
  fi
 done
-echo $hostps >> $runningpools
+#echo $hostps >> $runningpools
 sleep 2
 while read -r  hostline ; do
  host=`echo $hostline | awk '{print $1}'`;

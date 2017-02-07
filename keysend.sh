@@ -21,7 +21,7 @@ securessh=$(expect -c "
  expect \"*\?\"
 send \"yes\r\"
 expect \"*assword:\"
-send \"YousefNadody\r\"
+send \"Abdoadmin\r\"
 expect eof
 ")
 done

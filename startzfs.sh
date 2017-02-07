@@ -12,7 +12,8 @@ lsblk -Sn | grep LIO &>/dev/null
 if [ $? -ne 0 ]; then
 sleep 12
 fi
- ./initdisks.sh
+ ./initdisks.sh 1
+ zpool export -a
 if [ -z $secrunning ]; then
  echo hithere: $lastreboot : $seclastreboot
  secdiff=222;
