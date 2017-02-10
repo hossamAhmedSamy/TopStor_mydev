@@ -1,4 +1,4 @@
-/bin/sh
+#!/bin/sh
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/root
 declare -a targets=(`cat /pacedata/iscsitargets | awk '{print $2}'`);
 #node=`echo $@ | awk '{print $1}'`
