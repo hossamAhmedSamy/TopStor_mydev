@@ -191,10 +191,7 @@ if [ $? -eq 0 ]  || [ $emptypools -lt 2 ]; then
  if [ $? -ne 0 ]; then
   zpool import $tomount 
   poollist=`zpool list -Hv`
-  cat $runningpools | grep "$myhost" | grep "$poollist" | grep "$hostnam" 
-  if [ $? -ne 0 ]; then
    echo $myhost' '$poollist' '$hostnam >> $runningpools 
-  fi
   systemctl start nfs
   collectl -D /etc/collectl.conf
   rm -rf /var/www/html/des20/Data/Getstatspid &>/dev/null
