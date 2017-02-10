@@ -183,14 +183,18 @@ if [ $cachestate -ne 0 ]; then
  done < ${iscsimapping}
 fi
 tomount=`zpool import 2>/dev/null | grep "pool:" `
+emptypools=`cat $runningpools | wc -l `
 echo $tomount | grep "pool:" &>/dev/null
-if [ $? -eq 0 ]; then
+if [ $? -eq 0 ]  || [ $emptypools -lt 2 ]; then
  tomount=`echo $tomount | awk '{print $2}'`
  cat $runningpools | grep $tomount &>/dev/null
  if [ $? -ne 0 ]; then
   zpool import $tomount 
   poollist=`zpool list -Hv`
-  echo $myhost' '$poollist' '$hostnam >> $runningpools 
+  cat $runningpools | grep "$myhost" | grep "$poollist" | grep "$hostnam" 
+  if [ $? -ne 0 ]; then
+   echo $myhost' '$poollist' '$hostnam >> $runningpools 
+  fi
   systemctl start nfs
   collectl -D /etc/collectl.conf
   rm -rf /var/www/html/des20/Data/Getstatspid &>/dev/null
