@@ -17,7 +17,7 @@ cd /pace
 sh iscsirefresh.sh   &>/dev/null &
 sh listingtargets.sh  &>/dev/null
 if [ -z $pools ]; then
- ./initdisks.sh
+ ./initdisks.sh 1
 fi
 sleep 1
 runninghosts=`cat $iscsimapping | grep -v notconnected | awk '{print $1}'`
@@ -190,8 +190,10 @@ if [ $? -eq 0 ]  || [ $emptypools -lt 2 ]; then
  cat $runningpools | grep $tomount &>/dev/null
  if [ $? -ne 0 ]; then
   zpool import $tomount 
-  poollist=`zpool list -Hv`
-   echo $myhost' '$poollist' '$hostnam >> $runningpools 
+  poollist=`zpool list -Hv`;
+  if [ ! -z "$poollist" ]; then
+   echo $myhost' '$poollist' '$hostnam >> $runningpools ; 
+  fi
   systemctl start nfs
   collectl -D /etc/collectl.conf
   rm -rf /var/www/html/des20/Data/Getstatspid &>/dev/null

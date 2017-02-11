@@ -1,9 +1,13 @@
+#!/bin/sh 
 cd /pace
 #### typeis : 1 for mirror... 0 for capacity stripe  ######
 typeis=`echo $@ | awk '{print $1}'`
 iscsimapping='/pacedata/iscsimapping';
 myhost=`hostname -s`
 runningpools='/pacedata/pools/runningpools';
+/sbin/zpool status > /pacedata/zpoolstatus
+/sbin/zpool import >>/pacedata/zpoolstatus
+runningpools='/pacedata/zpoolstatus';
 declare -a idledisk=();
 declare -a hostdisk=();
 declare -a runninghosts=(`cat $iscsimapping | grep -v notconnected | awk '{print $1}'`);
@@ -48,7 +52,7 @@ for localdisk in "${hostdisk[@]}"; do
  echo nextpool=$nextpool disk2=$disk2
    /sbin/zpool labelclear /dev/disk/by-id/${disk2};
    rm -rf /p${nextpool} &>/dev/null
-   if [ $nextpool -ge 1 ]; then
+   if [ $nextpool -gt 1 ]; then
     if [ $typeis -eq 1 ]; then
      olddisk=`cat $runningpools | grep "$myhost" | grep p1 | awk '{print $12}' | grep scsi`
      echo olddisk=$olddisk

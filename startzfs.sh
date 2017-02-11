@@ -12,8 +12,6 @@ lsblk -Sn | grep LIO &>/dev/null
 if [ $? -ne 0 ]; then
 sleep 2
 fi
- ./initdisks.sh 1
- zpool export -a
 if [ -z $secrunning ]; then
  echo hithere: $lastreboot : $seclastreboot
  secdiff=222;
@@ -29,3 +27,6 @@ if [ $secdiff -ne 0 ]; then
  sh listingtargets.sh
  touch /var/www/html/des20/Data/Getstatspid
 fi
+ ./initdisks.sh 1
+ zpool export -a
+systemctl start smb
