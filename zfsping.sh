@@ -190,8 +190,9 @@ if [ $? -eq 0 ]  || [ $emptypools -lt 2 ]; then
  cat $runningpools | grep $tomount &>/dev/null
  if [ $? -ne 0 ]; then
   zpool import $tomount 
+  npools=`zpool list -Hv | wc -l`;
   poollist=`zpool list -Hv`;
-  if [ ! -z "$poollist" ]; then
+  if [ $npools -ge 2 ]; then
    echo $myhost' '$poollist' '$hostnam >> $runningpools ; 
   fi
   systemctl start nfs
