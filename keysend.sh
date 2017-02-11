@@ -4,12 +4,16 @@ declare -a targets=(`cat /pacedata/iscsitargets | awk '{print $2}'`);
 #node=`echo $@ | awk '{print $1}'`
 myhost=`hostname -s`
 myadd=`host $myhost | awk '{print $NF}'`
-grep $myhost /etc/hosts &>/dev/null
+echo $myadd | grep DOM
 if [ $? -ne 0 ]; then
- echo $myadd $myhost >> /etc/hosts
-else
- oldadd=`cat /etc/hosts | grep "$myhost" | awk '{print $1}'`
- sed -i "s/$oldadd/$myadd/g" /etc/hosts
+ grep $myhost /etc/hosts &>/dev/null
+ if [ $? -ne 0 ]; then
+  echo $myadd | grep DOM
+  echo $myadd $myhost >> /etc/hosts
+ else
+  oldadd=`cat /etc/hosts | grep "$myhost" | awk '{print $1}'`
+  sed -i "s/$oldadd/$myadd/g" /etc/hosts
+ fi
 fi
 if [ ! -f /root/.ssh/id_rsa ] ;then 
  ssh-keygen -t rsa -f /root/.ssh/id_rsa -q -P "";
