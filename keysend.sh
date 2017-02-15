@@ -20,7 +20,12 @@ myhostCC=`cat /TopStordata/hostname`
 myaddCC=`/sbin/pcs resource show CC | grep Attrib | awk '{print $2}' | awk -F'=' '{print $2}'`
 grep $myhostCC /etc/hosts &>/dev/null
 if [ $? -ne 0 ]; then
+ grep $myaddCC /etc/hosts &>/dev/null
+ if [ $? -ne 0 ]; then
  echo $myaddCC $myhostCC >> /etc/hosts
+ else
+  sed -i "/$myaddCC/c$myaddCC $myhostCC" /etc/hosts
+ fi
 else
  sed -i "/$myhostCC/c$myaddCC $myhostCC" /etc/hosts
 fi
@@ -36,14 +41,12 @@ securessh=$(expect -c "
  send \"Abdoadmin\r\"
  expect eof
  ")
-for node in "${targets[@]}"; do
 securessh=$(expect -c "
  set timeout 10
- spawn ssh-copy-id -i /root/.ssh/id_rsa.pub root@$node 
+ spawn ssh-copy-id -i /root/.ssh/id_rsa.pub root@$myhost 
  expect \"*\?\"
  send \"yes\r\"
  expect \"*assword:\"
  send \"Abdoadmin\r\"
  expect eof
  ")
-done
