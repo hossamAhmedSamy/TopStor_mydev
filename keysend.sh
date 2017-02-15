@@ -1,18 +1,19 @@
 #!/bin/sh
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/root
 declare -a targets=(`cat /pacedata/iscsitargets | awk '{print $2}'`);
+#sleep 15
 #node=`echo $@ | awk '{print $1}'`
 myhost=`hostname -s`
-myadd=`host $myhost | awk '{print $NF}'`
+#myadd=`host $myhost | awk '{print $NF}'`
+myadd=`ip a | grep dynamic | awk '{print $2}' | awk -F/ '{print $1}'`
+echo $myadd
 echo $myadd | grep -E 'DOM|found'
 if [ $? -ne 0 ]; then
  grep $myhost /etc/hosts &>/dev/null
  if [ $? -ne 0 ]; then
-  echo $myadd | grep DOM
   echo $myadd $myhost >> /etc/hosts
  else
-  oldadd=`cat /etc/hosts | grep "$myhost" | awk '{print $1}'`
-  sed -i "s/$oldadd/$myadd/g" /etc/hosts
+  sed -i "/$myhost/c$myadd $myhost" /etc/hosts
  fi
 fi
 myhostCC=`cat /TopStordata/hostname`
@@ -21,8 +22,7 @@ grep $myhostCC /etc/hosts &>/dev/null
 if [ $? -ne 0 ]; then
  echo $myaddCC $myhostCC >> /etc/hosts
 else
- oldaddCC=`cat /etc/hosts | grep "$myhostCC" | awk '{print $1}'`
- sed -i "s/$oldadd/$myaddCC/g" /etc/hosts
+ sed -i "/$myhostCC/c$myaddCC $myhostCC" /etc/hosts
 fi
 if [ ! -f /root/.ssh/id_rsa ] ;then 
  ssh-keygen -t rsa -f /root/.ssh/id_rsa -q -P "";
