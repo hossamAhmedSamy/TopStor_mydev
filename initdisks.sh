@@ -62,6 +62,7 @@ for localdisk in "${hostdisk[@]}"; do
    /sbin/zfs set xattr=sa p${nextpool}
    /sbin/zfs set redundant_metadata=most p${nextpool}
    /sbin/zfs set dedup=on p${nextpool}
+   /sbin/zfs set acltype=posixacl p${nextpool}
    echo /sbin/zpool create p${nextpool} /dev/disk/by-id/scsi-${disk2} ;
   fi
  else
@@ -78,6 +79,7 @@ for localdisk in "${hostdisk[@]}"; do
    /sbin/zfs set xattr=sa p${nextpool}
    /sbin/zfs set redundant_metadata=most p${nextpool}
    /sbin/zfs set dedup=on p${nextpool}
+   /sbin/zfs set acltype=posixacl p${nextpool}
    echo /sbin/zpool create p${nextpool} mirror /dev/disk/by-id/scsi-${disk1} /dev/disk/by-id/scsi-${disk2} ;
    if [ $? -eq 0 ]; then 
     unset idledisk[$x];
