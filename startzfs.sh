@@ -21,7 +21,8 @@ fi
 if [ $secdiff -ne 0 ]; then
  echo runningpools $seclastreboot > $runningpools
  ./keysend.sh &>/dev/null
- pcs resource create IPinit ocf:heartbeat:IPaddr ip="10.11.11.254" cidr_netmask=24
+ ccnic=`pcs resource show CC | grep nic\= | awk -F'nic=' '{print $2}' | awk '{print $1}'`
+ pcs resource create IPinit ocf:heartbeat:IPaddr nic="$ccnic" ip="10.11.11.254" cidr_netmask=24
  zpool export -a
  sh iscsirefresh.sh
  sh listingtargets.sh
