@@ -16,9 +16,6 @@ declare -a alldevdisk=();
 cd /pace
 sh iscsirefresh.sh   &>/dev/null &
 sh listingtargets.sh  &>/dev/null
-if [ -z $pools ]; then
- ./initdisks.sh 1
-fi
 sleep 1
 runninghosts=`cat $iscsimapping | grep -v notconnected | awk '{print $1}'`
 for pool in "${pools[@]}"; do
@@ -101,7 +98,7 @@ for pool in "${pools[@]}"; do
 #    echo host,diskid= $host, $diskid
     echo $hostline | grep "notconnected" &>/dev/null
     if [ $? -ne 0 ]; then
-#     echo here1_2
+#     echo here1_2 $allpools
      echo $allpools | grep "$diskid" &>/dev/null
      if [ $? -ne 0 ]; then
 #      echo not in a runningpool 
@@ -126,7 +123,7 @@ for pool in "${pools[@]}"; do
     fi
    done < $iscsimapping
   fi
-#  echo here2
+#  echo here2 $pool
   /sbin/zpool clear $pool &>/dev/null
   singlehost=`cat $iscsimapping | grep "$runningdisk" `;
   echo $singlehost | grep "$myhost" &>/dev/null
@@ -182,18 +179,28 @@ if [ $cachestate -ne 0 ]; then
   fi
  done < ${iscsimapping}
 fi
-tomount=`zpool import 2>/dev/null | grep "pool:" `
 emptypools=`cat $runningpools | wc -l `
+if [ $emptypools -lt 2 ]; then
+ poollist=`zpool list -Hv 2>/dev/null`;
+# echo here $poollist
+ if [ ! -z  $polllist ]; then
+#  echo here npools $npools and $poollist
+  echo ${myhost}' '${poollist}' hellow  '$hostnam>> $runningpools ; 
+ fi
+fi
+tomount=`zpool import 2>/dev/null | grep "pool:" `
+#echo here $tomount
 echo $tomount | grep "pool:" &>/dev/null
-if [ $? -eq 0 ]  || [ $emptypools -lt 2 ]; then
+if [ $? -eq 0 ]  && [ ! -z $tomount ]; then
+# echo here $emptypools and $tomount
  tomount=`echo $tomount | awk '{print $2}'`
  cat $runningpools | grep $tomount &>/dev/null
  if [ $? -ne 0 ]; then
   zpool import $tomount 
-  npools=`zpool list -Hv | wc -l`;
-  poollist=`zpool list -Hv`;
+  poollist=`zpool list -Hv 2>/dev/null`;
+  npools=`echo $poollist | wc -l`
   if [ $npools -ge 2 ]; then
-   echo $myhost' '$poollist' '$hostnam >> $runningpools ; 
+   echo ${myhost}' '${poollist}' hellow2 '$hostnam >> $runningpools ; 
   fi
   systemctl start nfs
   collectl -D /etc/collectl.conf
