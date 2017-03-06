@@ -1,3 +1,4 @@
+#!/usr/bin/sh
 cd /pace
 touch /tmp/zfsping
 iscsimapping='/pacedata/iscsimapping';
@@ -183,23 +184,22 @@ emptypools=`cat $runningpools | wc -l `
 if [ $emptypools -lt 2 ]; then
  poollist=`zpool list -Hv 2>/dev/null`;
 # echo here $poollist
- if [ ! -z  $polllist ]; then
-#  echo here npools $npools and $poollist
+ if [[ ! -z  $poollist ]]; then
+#  echo here npools and $poollist
   echo ${myhost}' '${poollist}' hellow  '$hostnam>> $runningpools ; 
  fi
 fi
-tomount=`zpool import 2>/dev/null | grep "pool:" `
+tomount=`zpool import | grep "pool\:" `
 #echo here $tomount
-echo $tomount | grep "pool:" &>/dev/null
-if [ $? -eq 0 ]  && [ ! -z $tomount ]; then
+#echo $tomount | grep "pool:" &>/dev/null
+if [[ ! -z $tomount ]]; then
 # echo here $emptypools and $tomount
  tomount=`echo $tomount | awk '{print $2}'`
  cat $runningpools | grep $tomount &>/dev/null
  if [ $? -ne 0 ]; then
   zpool import $tomount 
   poollist=`zpool list -Hv 2>/dev/null`;
-  npools=`echo $poollist | wc -l`
-  if [ $npools -ge 2 ]; then
+  if [[ ! -z $poollist ]]; then
    echo ${myhost}' '${poollist}' hellow2 '$hostnam >> $runningpools ; 
   fi
   systemctl start nfs
@@ -210,14 +210,18 @@ if [ $? -eq 0 ]  && [ ! -z $tomount ]; then
  fi 
 fi
 mypool=`cat $runningpools | grep "$myhost" | awk '{print $2}'`;
-cat $runningpools | grep "$mypool" | grep -v "$myhost"  &>/dev/null
+cat $runningpools | grep -v runningpools | grep -v "$myhost"  &>/dev/null
 if [ $? -ne 0 ]; then
- runpools=`zpool list | grep "$mypool"`
- echo $runpools | grep $mypool &>/dev/null
+ zpool list | grep "$mypool"
  if [ $? -ne 0 ]; then
   zpool import $mypool
-  newline=$myhost' '`zpool list -Hv $mypool`' '$hostnam
-  sed -i "/$mypool/c/$newline" $runningpools 
+  poollist=`zpool list -Hv $mypool`
+  if [[ ! -z $poollist ]]; then
+   newline=$myhost' '`zpool list -Hv $mypool`' '$hostnam
+  else
+   newline=""
+  fi
+  sed -i "/$mypool/c\\$newline" $runningpools 
   systemctl start nfs
   collectl -D /etc/collectl.conf
   rm -rf /var/www/html/des20/Data/Getstatspid &>/dev/null
