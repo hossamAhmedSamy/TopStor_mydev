@@ -28,6 +28,9 @@ if [ $secdiff -ne 0 ]; then
  sh listingtargets.sh
  touch /var/www/html/des20/Data/Getstatspid
 fi
+declare -a pools=(`/sbin/zpool list -H | awk '{print $1}'`)
+if [ -z $pools ]; then
  ./initdisks.sh 1
+fi
  zpool export -a
 systemctl start smb
