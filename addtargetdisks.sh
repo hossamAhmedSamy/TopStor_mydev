@@ -3,7 +3,8 @@ myhost=`hostname`;
 declare -a iscsitargets=(`cat /pacedata/iscsitargets | awk '{print $2}' `);
 declare -a disks=(`lsblk -nS | grep -v sr0 | grep -v sda | grep -v LIO | awk '{print $1}'`)
 mappedhosts=`targetcli ls /iscsi | grep Mapped`;
-targets=`targetcli ls backstores/block | grep dev | awk -F'[' '{print $2}' | awk '{print $1}'`
+targets=`targetcli ls backstores/block | grep -v deactivated |  grep dev | awk -F'[' '{print $2}' | awk '{print $1}'`
+tpgs=(`targetcli ls /iscsi | grep iqn | grep TPG | awk -F'iqn' '{print $2}' | awk '{print $1}'`)
 declare -a newdisks=();
 targetcli ls iscsi/ | grep ".$myhost:t1" &>/dev/null
 if [ $? -ne 0 ]; then
@@ -20,8 +21,9 @@ done
 for devdisk in "${newdisks[@]}"; do
  /sbin/zpool labelclear /dev/$devdisk;
  targetcli backstores/block create $devdisk /dev/$devdisk
- targetcli iscsi/iqn.2016-03.com.${myhost}:t1/tpg1/luns/ create /backstores/block/$devdisk   
-    
+ for iqn in "${tpgs[@]}"; do
+  targetcli iscsi/iqn${iqn}/tpg1/luns/ create /backstores/block/$devdisk   
+ done
 done;
 
 for target in "${iscsitargets[@]}"; do
