@@ -23,6 +23,7 @@ if [ $secdiff -ne 0 ]; then
  ./keysend.sh &>/dev/null
  ccnic=`pcs resource show CC | grep nic\= | awk -F'nic=' '{print $2}' | awk '{print $1}'`
  pcs resource create IPinit ocf:heartbeat:IPaddr nic="$ccnic" ip="10.11.11.254" cidr_netmask=24
+ rm -rf /TopStor/key/admin && cp /TopStor/factory/factoryadmin /TopStor/key/admin
  zpool export -a
  sh iscsirefresh.sh
  sh listingtargets.sh
