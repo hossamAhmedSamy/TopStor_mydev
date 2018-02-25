@@ -15,6 +15,27 @@ declare -a idledisk=();
 declare -a hostdisk=();
 declare -a alldevdisk=();
 cd /pace
+fdisk -l 2>&1 | grep "cannot open"
+if [ $? -eq 0 ];
+then
+ faileddisk=`fdisk -l 2>&1 | grep "cannot open" | awk '{print $4}' | awk -F':' '{print $1}' | awk -F'/' '{print $3}'`
+ echo "offline" > /sys/block/$faileddisk/device/state
+ echo "1" > /sys/block/$faileddisk/device/delete
+ sleep 2
+ systemctl restart target
+else
+ targetcli ls
+ if [ $? -ne 0 ];
+ then
+  systemctl restart target
+ fi
+ lsblk -Sn | md5sum --check sumfile
+ if [ $? -ne 0 ];
+ then
+  lsblk -Sn | md5sum > sumfile
+  ./addtargetdisks.sh
+ fi
+fi
 sh iscsirefresh.sh   &>/dev/null &
 sh listingtargets.sh  &>/dev/null
 sleep 1

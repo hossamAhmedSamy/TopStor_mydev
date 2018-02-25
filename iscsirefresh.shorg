@@ -18,7 +18,7 @@ while read -r  hostline ; do
   cat $iscsimapping |  grep "$host" | grep notconnected &>/dev/null
   if [ $? -eq 0 ]; then
    echo here
-   #rm -rf /var/lib/iscsi/nodes/send_targets/$host* &>/dev/null
+   rm -rf /var/lib/iscsi/nodes/send_targets/$host* &>/dev/null
    hostiqn=`/sbin/iscsiadm -m discovery --portal $host --type sendtargets | awk '{print $2}'`
    /sbin/iscsiadm -m node --targetname $hostiqn --portal $host -u
    /sbin/iscsiadm -m node --targetname $hostiqn --portal $host -l

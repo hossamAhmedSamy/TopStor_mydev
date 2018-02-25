@@ -27,18 +27,22 @@ for host in "${hosts[@]}"; do
   rm -rf $( ls /pacedata/pools/* | grep "$host") &>/dev/null
   cd /pace
  else
-  sesid=`iscsiadm -m node | grep $host | awk '{print $1}' | awk -F',' '{print $2}'`
-  sesinfo=`iscsiadm -m session -r $sesid -P 3 | grep Lun | awk -F'csi' '{print $2}' | awk '{print $1}' | head -1`
-  #alldevdisk=(`ls -l /dev/disk/by-path/ | grep  "$host"  | grep -v part | grep -v wwn | awk '{print $11}'`)
-  alldevdisk=(`lsblk -Sn | grep ${sesinfo}\: | awk '{print $1}'`)
+  alldevdisk=(`ls -l /dev/disk/by-path/ | grep  "$host"  | grep -v part | grep -v wwn | awk '{print $11}'`)
  echo alldev=${alldevdisk[@]}
   for devdisk in "${alldevdisk[@]}"; do
    diskid=`ls -l /dev/disk/by-id/ | grep  "$devdisk" | grep -v wwn | grep -v part | awk '{print $9}'`
-   devformatted='/dev/'$devdisk 
-   alphadisk=$devdisk
-   disksize=`lsblk -b | grep -w "$alphadisk" | awk '{print $4}'`
-   diskgiga=$(($disksize/1000/1000/1000));
-   echo "$host" $devformatted $diskid $diskgiga >> $iscsimapping;
+   devformatted='/dev/'`echo $devdisk | awk -F'/' '{print $3}'`
+   if [ -z $diskid ]; then
+    echo "$host" null null notconnected >> $iscsimapping;
+    cd /pacedata/pools/
+    rm -rf $( ls /pacedata/pools/* | grep "$host") &>/dev/null
+    cd /pace
+   else
+    alphadisk=`echo $devdisk | awk -F'/' '{print $3}'`
+    disksize=`lsblk -b | grep -w "$alphadisk" | awk '{print $4}'`
+    diskgiga=$(($disksize/1000/1000/1000));
+    echo "$host" $devformatted $diskid $diskgiga >> $iscsimapping;
+   fi
   done;
   i=$((i+1));
  fi
