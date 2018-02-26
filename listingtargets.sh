@@ -33,7 +33,8 @@ for host in "${hosts[@]}"; do
   alldevdisk=(`lsblk -Sn | grep ${sesinfo}\: | awk '{print $1}'`)
  echo alldev=${alldevdisk[@]}
   for devdisk in "${alldevdisk[@]}"; do
-   diskid=`ls -l /dev/disk/by-id/ | grep  "$devdisk" | grep -v wwn | grep -v part | awk '{print $9}'`
+#   diskid=`ls -l /dev/disk/by-id/ | grep  "$devdisk" | grep -v wwn | grep -v part | awk '{print $9}'`
+   diskid='scsi-3'`lsblk -Sn -o name,serial | grep "$devdisk" | awk '{print $2}'`
    devformatted='/dev/'$devdisk 
    alphadisk=$devdisk
    disksize=`lsblk -b | grep -w "$alphadisk" | awk '{print $4}'`

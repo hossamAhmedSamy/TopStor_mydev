@@ -31,8 +31,8 @@ while read -r  hostline ; do
   fi
  else
   echo deleteing $host
-  rm -rf /var/lib/iscsi/nodes/iqn.2016-03.com.${host}:t1 
-  rm -rf /var/lib/iscsi/nodes/${host}* &>/dev/null
+  #rm -rf /var/lib/iscsi/nodes/iqn.2016-03.com.${host}:t1 
+  #rm -rf /var/lib/iscsi/nodes/${host}* &>/dev/null
  fi
 done < $iscsitargets
 if [ $needrescan -eq 1 ]; then
