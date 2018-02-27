@@ -35,28 +35,21 @@ else
  then
   lsblk -Sn | md5sum > sumfile
   ./addtargetdisks.sh
-  ids=`lsblk -Sn -o serial`
-  for pool in "${pools[@]}"; do
-   spares=(`/sbin/zpool status $pool | grep AVAIL | awk '{print $1}'`)  
-   for spare in "${spares[@]}"; do
-    echo $ids | grep $spare &>/dev/null
-    if [ $? -ne 0 ]; then
-     zpool remove $pool $spare;
-    fi  
-   done 
-  done
  fi
 fi
-  ids=`lsblk -Sn -o serial`
-  for pool in "${pools[@]}"; do
-   spares=(`/sbin/zpool status $pool | grep AVAIL | awk '{print $1}'`)  
-   for spare in "${spares[@]}"; do
-    echo $ids | grep $spare &>/dev/null
-    if [ $? -ne 0 ]; then
-     zpool remove $pool $spare;
-    fi  
-   done 
-  done
+ids=`lsblk -Sn -o serial`
+for pool in "${pools[@]}"; do
+ spares=(`/sbin/zpool status $pool | grep scsi | awk '{print $1}'`)  
+ for spare in "${spares[@]}"; do
+  echo $ids | grep ${spare:8} &>/dev/null
+  if [ $? -ne 0 ]; then
+   zpool remove $pool $spare;
+   if [ $? -eq 0 ]; then
+    cachestate=1
+   fi
+  fi  
+ done 
+done
 sh iscsirefresh.sh   &>/dev/null &
 sh listingtargets.sh  &>/dev/null
 sleep 1
@@ -225,6 +218,8 @@ if [ $? -ne 0 ]; then
 fi
 if [ $cachestate -ne 0 ]; then
  cachestate=0;
+ zeros=`cat $runningpools | grep runningpool`
+ echo $zeros > $runningpools 
  while read -r  hostline ; do
   host=`echo $hostline | awk '{print $1}'`
   echo $hostline | grep "notconnected"  &>/dev/null
