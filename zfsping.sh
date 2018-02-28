@@ -39,13 +39,21 @@ else
 fi
 ids=`lsblk -Sn -o serial`
 for pool in "${pools[@]}"; do
- spares=(`/sbin/zpool status $pool | grep scsi | awk '{print $1}'`)  
+ spares=(`/sbin/zpool status $pool | grep scsi | grep -v OFFLINE | awk '{print $1}'`)  
  for spare in "${spares[@]}"; do
   echo $ids | grep ${spare:8} &>/dev/null
   if [ $? -ne 0 ]; then
+   diskid=`python3.6 diskinfo.py /pacedata/disklist.txt $spare`
+   /TopStor/logmsg.sh Diwa4 warning system $diskid 
    zpool remove $pool $spare;
    if [ $? -eq 0 ]; then
+    /TopStor/logmsg.sh Disu4 info system $diskid 
     cachestate=1
+   else 
+   /TopStor/logmsg.sh Dist5 info system $diskid 
+    zpool offline $pool $spare
+    echo $spare >/pacedata/Offlinedisks
+   /TopStor/logmsg.sh Disu5 info system $diskid 
    fi
   fi  
  done 
@@ -58,15 +66,28 @@ for pool in "${pools[@]}"; do
  singledisk=`/sbin/zpool list -Hv $pool | wc -l`
  zpool=`/sbin/zpool status $pool`
  if [ $singledisk -gt 3 ]; then
-  echo "${zpool[@]}" | grep "FAULT" &>/dev/null
+  echo "${zpool[@]}" | grep -E "FAULT|OFFLI" &>/dev/null
   if [ $? -eq 0 ];
   then
-   echo zpool=${zpool[@]};
-   faildisk=`echo "${zpool[@]}" | grep "FAULT" | awk '{print $1}'`
+   /TopStor/GetDisklist a
+   faildisk=`echo "${zpool[@]}" | grep -E "FAULT|OFFLI" | awk '{print $1}'`
+   diskidf=`python3.6 diskinfo.py /pacedata/disklist.txt $faildisk`
+   cat /pacedata/Offlinedisks | grep $faildisk
+   if [ $? -ne 0 ]; then
+    /TopStor/logmsg.sh Difa1 error system $diskidf 
+    echo $faildisk > /pacedata/Offlinedisks
+    echo hi
+   fi
    sparedisk=`echo "${zpool[@]}" | grep "AVAIL" | awk '{print $1}' | head -1`
    if [ ! -z $sparedisk ]; then
+   diskids=`python3.6 diskinfo.py /pacedata/disklist.txt $sparedisk`
+    /TopStor/logmsg.sh Dist2 info system $diskidf $diskids  
     /sbin/zpool replace $pool $faildisk $sparedisk
+    /TopStor/logmsg.sh Disu2 info system $diskidf $diskidf  
+    /TopStor/logmsg.sh Dist3 info system $diskf
     /sbin/zpool detach $pool $faildisk &>/dev/null;
+    /TopStor/logmsg.sh Disu3 info system $diskidf
+    echo hi > /pacedata/Offlinedisks
     #/sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool;
     cachestate=1;
    fi
@@ -85,13 +106,13 @@ for pool in "${pools[@]}"; do
    #/sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool ;
    cachestate=1;
   fi 
-  /sbin/zpool status $pool | grep OFFLINE &>/dev/null
-  if [ $? -eq 0 ]; then
-   faildisk=`/sbin/zpool status $pool | grep OFFLINE | awk '{print $1}'`;
-   /sbin/zpool detach $pool $faildisk &>/dev/null;
-   #/sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool;
-   cachestate=1;
-  fi
+#  /sbin/zpool status $pool | grep OFFLINE &>/dev/null
+#  if [ $? -eq 0 ]; then
+#   faildisk=`/sbin/zpool status $pool | grep OFFLINE | awk '{print $1}'`;
+#   /sbin/zpool detach $pool $faildisk &>/dev/null;
+#   #/sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool;
+#   cachestate=1;
+#  fi
   /sbin/zpool status $pool | grep UNAVAIL &>/dev/null
   if [ $? -eq 0 ]; then
    faildisk=`/sbin/zpool status $pool | grep UNAVAIL | awk '{print $1}'`;
