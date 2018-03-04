@@ -189,7 +189,9 @@ for pool in "${pools[@]}"; do
     else
      echo $runninghosts | grep $host &>/dev/null
      if [ $? -eq 0 ]; then
+# suspects it distrup connection
        /sbin/iscsiadm -m session --rescan &>/dev/null
+        sleep 1;
      fi
     fi
    done < $iscsimapping
@@ -258,7 +260,9 @@ if [ $emptypools -lt 2 ]; then
 # echo here $poollist
  if [[ ! -z  $poollist ]]; then
 #  echo here npools and $poollist
-  echo ${myhost}' '${poollist}' hellow  '$hostnam>> $runningpools ; 
+ allbutp1=`cat $runningpools | grep -v "$myhost $poollist"`
+ echo $allbutp1 > $runningpools ;
+ echo ${myhost}' '${poollist}' hellow  '$hostnam>> $runningpools ; 
  fi
 fi
 tomount=`zpool import | grep "pool\:" `
@@ -270,12 +274,13 @@ if [[ ! -z $tomount ]]; then
  cat $runningpools | grep $tomount &>/dev/null
  if [ $? -ne 0 ]; then
   zpool import $tomount 
+  echo imported 1 >> /pacedata/imported
   poollist=`zpool list -Hv 2>/dev/null`;
   if [[ ! -z $poollist ]]; then
    echo ${myhost}' '${poollist}' hellow2 '$hostnam >> $runningpools ; 
   fi
   systemctl start nfs
-  collectl -D /etc/collectl.conf
+  #collectl -D /etc/collectl.conf
   rm -rf /var/www/html/des20/Data/Getstatspid &>/dev/null
   chgrp apache /var/www/html/des20/Data/*
   chmod g+r /var/www/html/des20/Data/*

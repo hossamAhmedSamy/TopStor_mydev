@@ -5,6 +5,7 @@ iscsitargets='/pacedata/iscsitargets';
 declare -a hosts=(`cat $iscsitargets |  awk '{print $2}'`);
 declare -a alldevdisk=();
 declare -a hostline=();
+diskstatus='free'
 i=0;
 cp $iscsimapping ${iscsimapping}old
 rm -r $iscsimapping 2>/dev/null
@@ -31,16 +32,23 @@ for host in "${hosts[@]}"; do
   sesinfo=`iscsiadm -m session -r $sesid -P 3 | grep Lun | awk -F'csi' '{print $2}' | awk '{print $1}' | head -1`
   #alldevdisk=(`ls -l /dev/disk/by-path/ | grep  "$host"  | grep -v part | grep -v wwn | awk '{print $11}'`)
   alldevdisk=(`lsblk -Sn | grep ${sesinfo}\: | awk '{print $1}'`)
- echo alldev=${alldevdisk[@]}
+  echo alldev=${alldevdisk[@]}
+  alldev2=`zpool status | grep scsi | awk '{print $1" "$2}'`
   for devdisk in "${alldevdisk[@]}"; do
+    diskstatus='free'
 #   diskid=`ls -l /dev/disk/by-id/ | grep  "$devdisk" | grep -v wwn | grep -v part | awk '{print $9}'`
    diskid='scsi-3'`lsblk -Sn -o name,serial | grep "$devdisk" | awk '{print $2}'`
    devformatted='/dev/'$devdisk 
    alphadisk=$devdisk
    disksize=`lsblk -b | grep -w "$alphadisk" | awk '{print $4}'`
    diskgiga=$(($disksize/1000/1000/1000));
-   echo "$host" $devformatted $diskid $diskgiga >> $iscsimapping;
+   diskstatus=`echo "${alldev2[@]}" | grep $diskid | awk '{print $2}'`
+   if [ -z $diskstatus ]; then
+    diskstatus="free"
+   fi
+   echo "$host" $devformatted $diskid $diskgiga $diskstatus >> $iscsimapping;
   done;
+  python3.6 diskstatus.py $host >> $iscsimapping;
   i=$((i+1));
  fi
 done
