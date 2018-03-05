@@ -2,6 +2,7 @@
 cd /pace
 touch /tmp/zfsping
 iscsimapping='/pacedata/iscsimapping';
+sumfile='/pacedata/sumfile';
 runningpools='/pacedata/pools/runningpools';
 myhost=`hostname -s`
 hostnam=`cat /TopStordata/hostname`
@@ -30,10 +31,10 @@ else
   systemctl restart target
   targetcli saveconfig
  fi
- lsblk -Sn | md5sum --check sumfile
+ lsblk -Sn | md5sum --check $sumfile
  if [ $? -ne 0 ];
  then
-  lsblk -Sn | md5sum > sumfile
+  lsblk -Sn | md5sum > $sumfile
   ./addtargetdisks.sh
  fi
 fi
