@@ -1,5 +1,8 @@
 cd /pace
-iscsimapping='/pacedata/iscsimapping'
+iscsimappingorig='/pacedata/iscsimapping'
+iscsimapping='/pacedata/iscsimappinglisting'
+cp $iscsimappingorig ${iscsimapping}old
+rm -rf $iscsimapping 2>/dev/null
 myhost=`hostname`;
 iscsitargets='/pacedata/iscsitargets';
 declare -a hosts=(`cat $iscsitargets |  awk '{print $2}'`);
@@ -7,8 +10,6 @@ declare -a alldevdisk=();
 declare -a hostline=();
 diskstatus='free'
 i=0;
-cp $iscsimapping ${iscsimapping}old
-rm -r $iscsimapping 2>/dev/null
 for host in "${hosts[@]}"; do
  ls /var/lib/iscsi/nodes/  | grep  "$host" &>/dev/null
  if [ $? -ne 0 ] ; then
@@ -53,3 +54,4 @@ for host in "${hosts[@]}"; do
  fi
 done
 
+cp $iscsimapping $iscsimappingorig 
