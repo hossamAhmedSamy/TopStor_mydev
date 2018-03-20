@@ -38,6 +38,7 @@ for host in "${hosts[@]}"; do
   for devdisk in "${alldevdisk[@]}"; do
     diskstatus='free'
 #   diskid=`ls -l /dev/disk/by-id/ | grep  "$devdisk" | grep -v wwn | grep -v part | awk '{print $9}'`
+   echo devdisk=$devdisk
    diskid='scsi-3'`lsblk -Sn -o name,serial | grep "$devdisk" | awk '{print $2}'`
    devformatted='/dev/'$devdisk 
    alphadisk=$devdisk
@@ -47,7 +48,10 @@ for host in "${hosts[@]}"; do
    if [ -z $diskstatus ]; then
     diskstatus="free"
    fi
-   echo "$host" $devformatted $diskid $diskgiga $diskstatus >> $iscsimapping;
+   echo $diskstatus | grep 'OFFL' 
+   if [ $? -ne 0 ]; then
+    echo "$host" $devformatted $diskid $diskgiga $diskstatus >> $iscsimapping;
+   fi
   done;
   python3.6 diskstatus.py $host >> $iscsimapping;
   i=$((i+1));

@@ -2,7 +2,7 @@
 cd /pace
 myhost=`hostname`;
 declare -a iscsitargets=(`cat /pacedata/iscsitargets | awk '{print $2}' `);
-currentdisks=`targetcli ls`
+currentdisks=`targetcli ls /iscsi`
 disks=(`lsblk -nS -o name,serial,vendor | grep -v sr0 | grep -v sda | grep -v LIO | awk '{print $1}'`)
 diskids=`lsblk -nS -o name,serial,vendor | grep -v sr0 | grep -v sda | grep -v LIO | awk '{print $1" "$2}'`
 mappedhosts=`targetcli ls /iscsi | grep Mapped`;
@@ -22,7 +22,9 @@ for ddisk in "${disks[@]}"; do
 done
 for ddisk in "${disks[@]}"; do
  devdisk=$ddisk 
+ echo devdisk-ddisk=$ddisk
  idisk=`echo "$diskids" | grep $ddisk | awk '{print $2}'`
+ echo idisk=$idisk
  echo $currentdisks | grep $idisk &>/dev/null
  if [ $? -eq 0 ]; then
    continue
