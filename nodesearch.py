@@ -17,4 +17,6 @@ serverstatus=str(serverstatus)[2:]
 print('etcdserver',etcdserver,'\noutput:', str(serverstatus))
 serverstatus=serverstatus[:-3]
 print('etcdserver',etcdserver,'\noutput:', str(serverstatus))
-
+etcdfile=open('/pacedata/runningetcdnodes.txt','w')
+etcdfile.write(serverstatus)
+etcdfile.close()
