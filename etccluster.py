@@ -17,8 +17,10 @@ for line in etcfile:
   token=item[0]
   thisname=item[1]
   thisip=item[2]
-
-cmdline=['etcd', '--data-dir=data.etcd ','--name='+thisname,'--initial-advertise-peer-urls=http://'+thisip+':2380','--listen-peer-urls=http://'+thisip+':2380','--advertise-client-urls=http://'+thisip+':2379','--listen-client-urls=http://'+thisip+':2379','--initial-cluster='+cluster,'--initial-cluster-state='+cluster_state,'--initial-cluster-token='+token]
-result=subprocess.run(cmdline,stdout=subprocess.PIPE,)
-etcfile.close()
-print(result.stdout)
+#cmdline=['etcd', '--data-dir=data.etcd ','--name='+thisname,'--initial-advertise-peer-urls=http://'+thisip+':2380','--listen-peer-urls=http://'+thisip+':2380','--advertise-client-urls=http://'+thisip+':2379','--listen-client-urls=http://'+thisip+':2379','--initial-cluster='+cluster,'--initial-cluster-state='+cluster_state,'--initial-cluster-token='+token]
+cmdline=['name: '+thisname+'\n', 'data-dir: /var/lib/etcd\n', 'initial-advertise-peer-urls: http://'+thisip+':2380\n','listen-peer-urls: http://'+thisip+':2380\n','advertise-client-urls: http://'+thisip+':2379\n','listen-client-urls: http://'+thisip+':2379\n','initial-cluster: '+cluster+'\n','initial-cluster-state: '+cluster_state+'\n','initial-cluster-token: '+token+'\n']
+with open('/etc/etcd/etcd.conf.yml','w') as f:
+ f.writelines(cmdline)
+#result=subprocess.run(cmdline,stdout=subprocess.PIPE,)
+#etcfile.close()
+#print(result.stdout)
