@@ -2,7 +2,8 @@
 import nmap
 import sys, subprocess
 
-hostrange=sys.argv[1]
+ip=sys.argv[1].split('.')
+hostrange=ip[0]+'.'+ip[1]+'.'+ip[2]+'.0'
 nm=nmap.PortScanner()
 nm.scan(hostrange+'/24','22')
 serverstatus='nothing'
@@ -20,6 +21,8 @@ for host in nm.all_hosts():
   serverstatus=result.stdout
 serverstatus=str(serverstatus)[2:]
 serverstatus=serverstatus[:-3]
+if len(serverstatus) < 6:
+ serverstatus='nothing'
 etcdfile=open('/pacedata/runningetcdnodes.txt','w')
 etcdfile.write(serverstatus)
 etcdfile.close()
