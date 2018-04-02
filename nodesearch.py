@@ -13,7 +13,6 @@ for host in hostlist:
  cmdline=['etcdctl','-w','json','--endpoints='+host['addresses']['ipv4']+':2379','member','list','2>/dev/null']
 #subprocess.run('export','ETCDCTL_API=3')
 for host in nm.all_hosts():
- print('checking:',host)
  cmdline=['etcdctl','-w','json','--endpoints='+host+':2379','member','list']
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  if result.returncode==0:
