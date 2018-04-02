@@ -1,3 +1,4 @@
+#!/bin/bash
 cd /pace
 iscsimapping='/pacedata/iscsimapping';
 runningpools='/pacedata/pools/runningpools';
@@ -7,14 +8,14 @@ result=`ETCDCTL_API=3 ./nodesearch.py $myip`
 echo $result | grep nothing 
 if [ $? -ne 0 ];
 then
- ./etcdput possible$myhost $myip
+ ETCDCTL_API=3 ./etcdput.py possible$myhost $myip
  exit
 fi
 ./etccluster.py
 systemctl daemon-reload
 systemctl start etcd
-ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
 ETCDCTL_API=3 ./runningetcdnodes.py $myip
+ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
 myhost=`hostname -s`
 hostnam=`cat /TopStordata/hostname`
 poollist='/pacedata/pools/'${myhost}'poollist';
