@@ -2,14 +2,15 @@ cd /pace
 iscsimapping='/pacedata/iscsimapping';
 runningpools='/pacedata/pools/runningpools';
 myip=`/sbin/pcs resource show CC | grep Attributes | awk '{print $2}' | awk -F'=' '{print $2}'`
+systemctl stop etcd 
 result=`./nodesearch.py $myip`
 echo $result | grep nothing 
 if [ $? -ne 0 ];
 then
  exit
 fi
-systemctl stop etcd 
 ./etccluster.py
+systemctl daemon-reload
 systemctl start etcd
 myhost=`hostname -s`
 hostnam=`cat /TopStordata/hostname`
