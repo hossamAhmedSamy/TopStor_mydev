@@ -1,16 +1,20 @@
 cd /pace
 iscsimapping='/pacedata/iscsimapping';
 runningpools='/pacedata/pools/runningpools';
+myhost=`hostname -s`
 myip=`/sbin/pcs resource show CC | grep Attributes | awk '{print $2}' | awk -F'=' '{print $2}'`
 result=`ETCDCTL_API=3 ./nodesearch.py $myip`
 echo $result | grep nothing 
 if [ $? -ne 0 ];
 then
+ ./etcdput possible$myhost $myip
  exit
 fi
 ./etccluster.py
 systemctl daemon-reload
 systemctl start etcd
+ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
+ETCDCTL_API=3 ./runningetcdnodes.py $myip
 myhost=`hostname -s`
 hostnam=`cat /TopStordata/hostname`
 poollist='/pacedata/pools/'${myhost}'poollist';
