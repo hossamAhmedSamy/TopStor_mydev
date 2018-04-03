@@ -5,6 +5,21 @@ iscsimapping='/pacedata/iscsimapping';
 sumfile='/pacedata/sumfile';
 runningpools='/pacedata/pools/runningpools';
 myhost=`hostname -s`
+systemctl status etcd &>/dev/null
+if [ $? -eq 0 ];
+then
+ leader=`ETCDCTL_API=3 ./etcdget.py leader --prefix`
+ echo $leader | grep $myhost &>/dev/null
+ if [ $? -eq 0 ]; 
+ then
+  ETCDCTL_API=3 ./addmember.py 
+#  ETCDCTL_API=3 ./addjoined.py 
+ fi
+else
+ #ETCDCTL_API=3 ./etcdjoin.py
+fi
+ 
+ 
 hostnam=`cat /TopStordata/hostname`
 poollist='/pacedata/pools/'${myhost}'poollist';
 cachestate=0;

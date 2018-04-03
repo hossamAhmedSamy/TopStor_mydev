@@ -6,7 +6,7 @@ key=sys.argv[1]
 try:
  prefix=sys.argv[2]
 except:
- prefix=' '
+ prefix=''
 endpoints=''
 data=json.load(open('/pacedata/runningetcdnodes.txt'));
 for x in data['members']:
@@ -14,7 +14,7 @@ for x in data['members']:
 cmdline=['etcdctl','--endpoints='+endpoints,'del',key,prefix]
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 try:
- if(prefix !=' '):
+ if(prefix !=''):
   mylist=str(result.stdout)[2:][:-3].split('\\n')
   print(mylist)
   zipped=zip(mylist[0::2],mylist[1::2])
