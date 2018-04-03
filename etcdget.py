@@ -10,7 +10,7 @@ except:
 endpoints=''
 data=json.load(open('/pacedata/runningetcdnodes.txt'));
 for x in data['members']:
- endpoints=endpoints+str(x['clientURLs'])[2:][:-2]
+ endpoints=endpoints+str(x['clientURLs'])[2:][:-2]+','
 cmdline=['etcdctl','--endpoints='+endpoints,'get',key,prefix]
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 try:

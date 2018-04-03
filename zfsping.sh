@@ -17,7 +17,12 @@ then
  fi
 else
  #ETCDCTL_API=3 ./etcdjoin.py
- sleep 1
+ #ETCDCTL_API=3 ./etcdjoin.py
+ myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{print $2'`
+ systemctl start etcd
+ if [ $? -eq 0 ];
+ then 
+  ./etcdput.py run$myhost $myip
 fi
  
  
