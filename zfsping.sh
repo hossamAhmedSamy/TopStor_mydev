@@ -17,6 +17,7 @@ then
  fi
 else
  #ETCDCTL_API=3 ./etcdjoin.py
+ sleep 1
 fi
  
  
