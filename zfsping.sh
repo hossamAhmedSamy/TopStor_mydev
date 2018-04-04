@@ -14,10 +14,10 @@ then
  then
   ETCDCTL_API=3 ./runningetcdnodes.py $myip
   ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
-  ETCDCTL_API=3 ./addknown.py
  fi
+  ETCDCTL_API=3 ./addknown.py
 else
- known=`ETCDCTL_API=3 ./etcdget knwon --prefix 2>&1`
+ known=`ETCDCTL_API=3 ./etcdget known --prefix 2>&1`
  echo $known | grep Error  &>/dev/null
  if [ $? -eq 0 ];
  then
