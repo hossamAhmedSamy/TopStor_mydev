@@ -4,25 +4,33 @@ touch /tmp/zfsping
 iscsimapping='/pacedata/iscsimapping';
 sumfile='/pacedata/sumfile';
 runningpools='/pacedata/pools/runningpools';
+myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{print $2 }'`
 myhost=`hostname -s`
 systemctl status etcd &>/dev/null
 if [ $? -eq 0 ];
 then
  leader=`ETCDCTL_API=3 ./etcdget.py leader --prefix`
+ if [ -z $leader ]; 
+ then
+  ETCDCTL_API=3 ./etcdput.py leader$mhyost $myip
+  leader=`ETCDCTL_API=3 ./etcdget.py leader --prefix`
+ fi
+  
  echo $leader | grep $myhost &>/dev/null
  if [ $? -eq 0 ]; 
  then
   ETCDCTL_API=3 ./addmember.py 
-#  ETCDCTL_API=3 ./addjoined.py 
  fi
 else
- #ETCDCTL_API=3 ./etcdjoin.py
- #ETCDCTL_API=3 ./etcdjoin.py
- myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{print $2'`
- systemctl start etcd
+ promoted=`ETCDCTL_API=3 ./etcdjoin.py`
+ echo $promoted | grep iampromoted &>/dev/null
  if [ $? -eq 0 ];
- then 
-  ./etcdput.py run$myhost $myip
+ then
+  systemctl start etcd
+  if [ $? -eq 0 ];
+  then 
+   ./etcdput.py run$myhost $myip
+  fi
  fi
 fi
  

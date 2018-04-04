@@ -4,6 +4,7 @@ from ast import literal_eval as mtuple
 import json
 
 myname=socket.gethostname()
+myip=socket.gethostbyname(myname)
 endpoints=''
 cluster=''
 data=json.load(open('/pacedata/runningetcdnodes.txt'))
@@ -18,10 +19,14 @@ if myname in str(promote.stdout):
  cluster_state='existing'
  token='token-01'
  thisname=myname
- thisip=socket.gethostbyname(thisname)
+ thisip=myip
  cluster+=thisname+'='+'http//'+thisip+':2380'
-
+ print('promoted')
  cmdline=['name: '+thisname+'\n', 'data-dir: /var/lib/etcd\n', 'initial-advertise-peer-urls: http://'+thisip+':2380\n','listen-peer-urls: http://'+thisip+':2380\n','advertise-client-urls: http://'+thisip+':2379\n','listen-client-urls: http://'+thisip+':2379\n','initial-cluster: '+cluster+'\n','initial-cluster-state: '+cluster_state+'\n','initial-cluster-token: '+token+'\n']
  with open('/etc/etcd/etcd.conf.yml','w') as f:
   f.writelines(cmdline)
  etcfile.close()
+else:
+ cmdline=['./etcdput.py','possible'+myname, myip]
+ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ 
