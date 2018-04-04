@@ -12,26 +12,27 @@ then
  leader=`ETCDCTL_API=3 ./etcdget.py leader --prefix`
  if [ -z $leader ]; 
  then
+  ETCDCTL_API=3 ./runningetcdnodes.py $myip
   ETCDCTL_API=3 ./etcdput.py leader$mhyost $myip
-  leader=`ETCDCTL_API=3 ./etcdget.py leader --prefix`
- fi
-  
- echo $leader | grep $myhost &>/dev/null
- if [ $? -eq 0 ]; 
- then
-  ETCDCTL_API=3 ./addmember.py 
+  ETCDCTL_API=3 ./addknown.py $myip
  fi
 else
- promoted=`ETCDCTL_API=3 ./etcdjoin.py`
- echo $promoted | grep iampromoted &>/dev/null
+ known=`ETCDCTL_API=3 ./etcdget knwon --prefix 2>&1`
+ echo $known | grep Error  &>/dev/null
  if [ $? -eq 0 ];
  then
+  ./etccluster.py
+  systemctl daemon-reload
   systemctl start etcd
-  if [ $? -eq 0 ];
-  then 
-   ./etcdput.py run$myhost $myip
+  ETCDCTL_API=3 ./runningetcdnodes.py $myip
+  ETCDCTL_API=3 ./etcdput.py leader$mhyost $myip
+ else 
+  echo $known | grep $myhost  &>/dev/null
+  if [ $? -ne 0 ];
+  then
+   ETCDCTL_API=3 ./etcdput.py possible$mhyost $myip
   fi
- fi
+ fi 
 fi
  
  
