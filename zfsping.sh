@@ -30,7 +30,7 @@ else
   echo $known | grep $myhost  &>/dev/null
   if [ $? -ne 0 ];
   then
-   ETCDCTL_API=3 ./etcdput.py possible$mhyost $myip
+   ETCDCTL_API=3 ./etcdput.py possible$myhost $myip
   fi
  fi 
 fi

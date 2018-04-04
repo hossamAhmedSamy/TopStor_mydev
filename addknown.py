@@ -9,7 +9,7 @@ for x in data['members']:
 cmdline=['./etcdget.py','possible','--prefix']
 possibleres=subprocess.run(cmdline,stdout=subprocess.PIPE)
 possible=str(possibleres.stdout)[2:][:-3].split('\\n')
-print('possible',possible)
+print('the possible',possible)
 for x in possible:
  print('x=',mtuple(x)[0], mtuple(x)[1])
  cmdline=['etcdctl','--endpoints='+endpoints,'del',mtuple(x)[0]]
