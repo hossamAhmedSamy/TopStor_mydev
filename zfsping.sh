@@ -23,6 +23,7 @@ else
  if [ $? -eq 0 ];
  then 
   ./etcdput.py run$myhost $myip
+ fi
 fi
  
  
