@@ -13,8 +13,8 @@ then
  if [ -z $leader ]; 
  then
   ETCDCTL_API=3 ./runningetcdnodes.py $myip
-  ETCDCTL_API=3 ./etcdput.py leader$mhyost $myip
-  ETCDCTL_API=3 ./addknown.py $myip
+  ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
+  ETCDCTL_API=3 ./addknown.py
  fi
 else
  known=`ETCDCTL_API=3 ./etcdget knwon --prefix 2>&1`
@@ -25,7 +25,7 @@ else
   systemctl daemon-reload
   systemctl start etcd
   ETCDCTL_API=3 ./runningetcdnodes.py $myip
-  ETCDCTL_API=3 ./etcdput.py leader$mhyost $myip
+  ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
  else 
   echo $known | grep $myhost  &>/dev/null
   if [ $? -ne 0 ];
