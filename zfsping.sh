@@ -1,6 +1,10 @@
 #!/usr/bin/sh
 cd /pace
 touch /tmp/zfsping
+if [ -f /pacedata/startzfs ];
+then
+ exit
+fi
 iscsimapping='/pacedata/iscsimapping';
 sumfile='/pacedata/sumfile';
 runningpools='/pacedata/pools/runningpools';
@@ -23,18 +27,27 @@ else
  count=0
  while [ ! -f /pacedata/runningetcdnodes.txt ];
  do
-  sleep 0
+  sleep 2 
   count=$((count+1))
   if [ count -eq 10 ]; 
   then
    ETCDCTL_API=3 ./nodesearch.py $myip
   fi
  done
+ cat /pacedata/runningeetcdnodes.txt | grep $myip
+ if [ $? -eq 0 ];
+ then
+  systemctl start etcd
+  ETCDCTL_API=3 ./runningetcdnodes.py $myip
+  ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
+  exit
+ fi
+ ETCDCTL_API=3 ./etcdget.py clusterip > /pacedata/clusterip
  known=`ETCDCTL_API=3 ./etcdget.py known --prefix 2>&1`
  echo $known | grep Error  &>/dev/null
  if [ $? -eq 0 ];
  then
- echo hi three
+ echo hi three > /root/tmpzfsing
   clusterip=`cat /pacedata/clusterip`
   ./etccluster.py
   systemctl daemon-reload;

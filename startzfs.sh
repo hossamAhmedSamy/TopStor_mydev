@@ -1,7 +1,6 @@
 #!/bin/bash
 cd /pace
-rm -rf /var/lib/etcd/*
-rm -rf /pacedata/running*
+touch /pacedata/startzfs
 iscsimapping='/pacedata/iscsimapping';
 runningpools='/pacedata/pools/runningpools';
 clusterip='10.11.11.230'
@@ -9,6 +8,12 @@ enpdev='enp0s8'
 myhost=`hostname -s`
 myip=`/sbin/pcs resource show CC | grep Attributes | awk '{print $2}' | awk -F'=' '{print $2}'`
  ccnic=`pcs resource show CC | grep nic\= | awk -F'nic=' '{print $2}' | awk '{print $1}'`
+systemctl status etcd &>/dev/null
+if [ $? -eq 0 ];
+then
+ rm -rf /pacedata/startzfs
+ exit
+fi
 if [ ! -f /pacedata/clusterip ];
 then
  echo $clusterip > /pacedata/clusterip
@@ -21,7 +26,10 @@ freshcluster=0
 echo $result | grep nothing 
 if [ $? -eq 0 ];
 then
+ rm -rf /var/lib/etcd/*
+ rm -rf /pacedata/running*
  freshcluster=1
+ echo here=$clusterip
  ./etccluster.py
  systemctl daemon-reload
  systemctl start etcd
@@ -37,7 +45,7 @@ else
  if [ $? -ne 0 ];
  then
   /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev
-  ETCDCTL_API=3 ./etcdget.py clusterip  > /pacedata/clusterip
+#  ETCDCTL_API=3 ./etcdget.py clusterip  > /pacedata/clusterip
  fi
 fi
 
@@ -73,4 +81,5 @@ if [ $secdiff -ne 0 ]; then
  touch /var/www/html/des20/Data/Getstatspid
 fi
  zpool export -a
+rm -rf /pacedata/startzfs
 
