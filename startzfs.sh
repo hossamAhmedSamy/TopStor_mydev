@@ -8,12 +8,12 @@ enpdev='enp0s8'
 myhost=`hostname -s`
 myip=`/sbin/pcs resource show CC | grep Attributes | awk '{print $2}' | awk -F'=' '{print $2}'`
  ccnic=`pcs resource show CC | grep nic\= | awk -F'nic=' '{print $2}' | awk '{print $1}'`
-systemctl status etcd &>/dev/null
-if [ $? -eq 0 ];
-then
- rm -rf /pacedata/startzfs
- exit
-fi
+#systemctl status etcd &>/dev/null
+#if [ $? -eq 0 ];
+#then
+# rm -rf /pacedata/startzfs
+# exit
+#fi
 if [ ! -f /pacedata/clusterip ];
 then
  echo $clusterip > /pacedata/clusterip
@@ -34,18 +34,22 @@ then
  systemctl daemon-reload
  systemctl start etcd
  ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
- /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev
- sleep 3
+ 
+i# /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev
+ pcs resource update clusterip nic="$enpdev" ip=$clusterip cidr_netmask=24
+ if [ $? -ne 0 ];
+ then
  pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24
+ fi
  ETCDCTL_API=3 ./runningetcdnodes.py $myip
- sleep 3;
+ #sleep 3;
  ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
 else
  cat /pacedata/runningetcdnodes.txt | grep $myhost &>/dev/null
  if [ $? -ne 0 ];
  then
+  ETCDCTL_API=3 ./etcdget.py clusterip  > /pacedata/clusterip
   /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev
-#  ETCDCTL_API=3 ./etcdget.py clusterip  > /pacedata/clusterip
  fi
 fi
 
@@ -58,7 +62,7 @@ secrunning=`cat $runningpools | grep runningpools | awk '{print $2}'`
  ./addtargetdisks.sh
 lsblk -Sn | grep LIO &>/dev/null
 if [ $? -ne 0 ]; then
-sleep 2
+ sleep 2
 fi
 if [ -z $secrunning ]; then
  echo hithere: $lastreboot : $seclastreboot
