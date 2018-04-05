@@ -34,9 +34,19 @@ else
  echo $known | grep Error  &>/dev/null
  if [ $? -eq 0 ];
  then
+ echo hi three
+  clusterip=`cat /pacedata/clusterip`
   ./etccluster.py
-  systemctl daemon-reload
-  systemctl start etcd
+  systemctl daemon-reload;
+  systemctl start etcd;
+  ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
+  pcs resource | grep clusterip &>/dev/null
+  if [ $? -eq 0 ];
+  then
+   /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev &>/dev/null;
+   sleep 3
+  fi
+  pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24;
   ETCDCTL_API=3 ./runningetcdnodes.py $myip
   ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
   freshcluster=1
