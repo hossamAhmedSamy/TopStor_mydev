@@ -55,6 +55,11 @@ poollist='/pacedata/pools/'${myhost}'poollist';
 cachestate=0;
 cd /pacedata/pools/
 allpools=`cat /pacedata/pools/$(ls /pacedata/pools/ | grep poollist)`
+if [ ! -f ${iscsimapping} ];
+then 
+ exit
+fi
+echo ${iscsimapping} ${iscsimapping}new;
 cp ${iscsimapping} ${iscsimapping}new;
 declare -a pools=(`/sbin/zpool list -H | awk '{print $1}'`)
 declare -a idledisk=();
@@ -288,6 +293,7 @@ done
 /sbin/zpool list -Hv | awk '{print $1}' > ${poollist}local
 diff ${poollist} ${poollist}local  &>/dev/null
 if [ $? -ne 0 ]; then 
+ echo ${poollist}local $poollist
  cp ${poollist}local $poollist
  cachestate=1;
 fi
@@ -328,7 +334,6 @@ if [[ ! -z $tomount ]]; then
    echo ${myhost}' '${poollist}' hellow2 '$hostnam >> $runningpools ; 
   fi
   systemctl start nfs
-  #collectl -D /etc/collectl.conf
   rm -rf /var/www/html/des20/Data/Getstatspid &>/dev/null
   chgrp apache /var/www/html/des20/Data/*
   chmod g+r /var/www/html/des20/Data/*
@@ -348,7 +353,7 @@ if [ $? -ne 0 ]; then
   fi
   sed -i "/$mypool/c\\$newline" $runningpools 
   systemctl start nfs
-  collectl -D /etc/collectl.conf
+#  collectl -D /etc/collectl.conf
   rm -rf /var/www/html/des20/Data/Getstatspid &>/dev/null
   chgrp apache /var/www/html/des20/Data/*
   chmod g+r /var/www/html/des20/Data/*
