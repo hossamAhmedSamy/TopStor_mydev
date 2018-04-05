@@ -6,9 +6,14 @@ sumfile='/pacedata/sumfile';
 runningpools='/pacedata/pools/runningpools';
 myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{print $2 }'`
 myhost=`hostname -s`
+freshcluster=0
+systemctl status etcd &>/dev/null
+echo ??=$?
 systemctl status etcd &>/dev/null
 if [ $? -eq 0 ];
 then
+ echo here
+ freshcluster=1
  leader=`ETCDCTL_API=3 ./etcdget.py leader --prefix`
  if [ -z $leader ]; 
  then
@@ -17,15 +22,28 @@ then
  fi
   ETCDCTL_API=3 ./addknown.py
 else
+ count=0
+ while [ ! -f /pacedata/runningetcdnodes.txt ];
+ do
+  sleep 0
+  count=$((count+1))
+  if [ count -eq 10 ]; 
+  then
+   ETCDCTL_API=3 ./nodesearch.py $myip
+  fi
+ done
  known=`ETCDCTL_API=3 ./etcdget.py known --prefix 2>&1`
  echo $known | grep Error  &>/dev/null
  if [ $? -eq 0 ];
  then
+  cat /pacedata/runningetcdnodes.txt >> tmpetcc
+  echo zfsping >> /root/tmpetcc
   ./etccluster.py
   systemctl daemon-reload
   systemctl start etcd
   ETCDCTL_API=3 ./runningetcdnodes.py $myip
   ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
+  freshcluster=1
  else 
   echo $known | grep $myhost  &>/dev/null
   if [ $? -ne 0 ];
@@ -69,6 +87,12 @@ else
   ./addtargetdisks.sh
  fi
 fi
+echo $freshcluster | grep 1
+if [ $? -ne 0 ];
+then
+ echo not leader
+ exit
+fi
 ids=`lsblk -Sn -o serial`
 for pool in "${pools[@]}"; do
  spares=(`/sbin/zpool status $pool | grep scsi | grep -v OFFLINE | awk '{print $1}'`)  
@@ -90,9 +114,14 @@ for pool in "${pools[@]}"; do
   fi  
  done 
 done
-sh iscsirefresh.sh   &>/dev/null &
-sh listingtargets.sh  &>/dev/null
-sleep 1
+echo $freshcluster | grep 1
+if [ $? -ne 0 ];
+then
+ exit
+fi
+ sh iscsirefresh.sh   &>/dev/null &
+ sh listingtargets.sh  &>/dev/null
+ sleep 1
 runninghosts=`cat $iscsimapping | grep -v notconnected | awk '{print $1}'`
 for pool in "${pools[@]}"; do
  singledisk=`/sbin/zpool list -Hv $pool | wc -l`
