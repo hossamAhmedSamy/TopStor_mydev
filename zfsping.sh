@@ -47,7 +47,6 @@ else
  echo $known | grep Error  &>/dev/null
  if [ $? -eq 0 ];
  then
- echo hi three > /root/tmpzfsing
   clusterip=`cat /pacedata/clusterip`
   ./etccluster.py
   systemctl daemon-reload;
