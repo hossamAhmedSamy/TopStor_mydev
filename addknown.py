@@ -10,11 +10,14 @@ cmdline=['./etcdget.py','possible','--prefix']
 possibleres=subprocess.run(cmdline,stdout=subprocess.PIPE)
 possible=str(possibleres.stdout)[2:][:-3].split('\\n')
 print('the possible',possible)
-for x in possible:
- print('x=',mtuple(x)[0], mtuple(x)[1])
- cmdline=['etcdctl','--endpoints='+endpoints,'del',mtuple(x)[0]]
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
- print('result=',result)
- cmdline=['etcdctl','--endpoints='+endpoints,'put','known'+mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
- print(result)
+try:
+ for x in possible:
+  print('x=',mtuple(x)[0], mtuple(x)[1])
+  cmdline=['etcdctl','--endpoints='+endpoints,'del',mtuple(x)[0]]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  print('result=',result)
+  cmdline=['etcdctl','--endpoints='+endpoints,'put','known'+mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  print(result)
+except:
+ print('possible is empty')

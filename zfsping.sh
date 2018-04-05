@@ -8,14 +8,12 @@ myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{pri
 myhost=`hostname -s`
 freshcluster=0
 systemctl status etcd &>/dev/null
-echo ??=$?
-systemctl status etcd &>/dev/null
 if [ $? -eq 0 ];
 then
- echo here
  freshcluster=1
- leader=`ETCDCTL_API=3 ./etcdget.py leader --prefix`
- if [ -z $leader ]; 
+ leader='"'`ETCDCTL_API=3 ./etcdget.py leader --prefix`'"'
+ echo $leader | grep '""'
+ if [ $? -eq 0 ]; 
  then
   ETCDCTL_API=3 ./runningetcdnodes.py $myip
   ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
@@ -36,8 +34,6 @@ else
  echo $known | grep Error  &>/dev/null
  if [ $? -eq 0 ];
  then
-  cat /pacedata/runningetcdnodes.txt >> tmpetcc
-  echo zfsping >> /root/tmpetcc
   ./etccluster.py
   systemctl daemon-reload
   systemctl start etcd
@@ -221,7 +217,6 @@ for pool in "${pools[@]}"; do
 # echo single count=$single
  if [ "$single" -eq 1 ]; then
   if [ "$needlist" -eq 1 ] ; then 
-#   echo here1
    needlist=2;
    expopool=`/sbin/zpool import 2>/dev/null`
    while read -r  hostline ; do
@@ -230,7 +225,6 @@ for pool in "${pools[@]}"; do
 #    echo host,diskid= $host, $diskid
     echo $hostline | grep "notconnected" &>/dev/null
     if [ $? -ne 0 ]; then
-#     echo here1_2 $allpools
      echo $allpools | grep "$diskid" &>/dev/null
      if [ $? -ne 0 ]; then
 #      echo not in a runningpool 
@@ -257,12 +251,10 @@ for pool in "${pools[@]}"; do
     fi
    done < $iscsimapping
   fi
-#  echo here2 $pool
   /sbin/zpool clear $pool &>/dev/null
   singlehost=`cat $iscsimapping | grep "$runningdisk" `;
   echo $singlehost | grep "$myhost" &>/dev/null
   if [ $? -eq 0 ]; then
-#   echo here3
    i=$((${#idledisk[@]}-1))
 #   echo i = $i
    if [ $i -ge 0 ]; then
@@ -277,7 +269,6 @@ for pool in "${pools[@]}"; do
     fi
    fi
   else
-#   echo here5
    i=$((${#hostdisk[@]}-1));
 #   echo i=$i
    if [ $i -ge 0 ]; then
@@ -318,19 +309,15 @@ fi
 emptypools=`cat $runningpools | wc -l `
 if [ $emptypools -lt 2 ]; then
  poollist=`zpool list -Hv 2>/dev/null`;
-# echo here $poollist
  if [[ ! -z  $poollist ]]; then
-#  echo here npools and $poollist
  allbutp1=`cat $runningpools | grep -v "$myhost $poollist"`
  echo $allbutp1 > $runningpools ;
  echo ${myhost}' '${poollist}' hellow  '$hostnam>> $runningpools ; 
  fi
 fi
 tomount=`zpool import | grep "pool\:" `
-#echo here $tomount
 #echo $tomount | grep "pool:" &>/dev/null
 if [[ ! -z $tomount ]]; then
-# echo here $emptypools and $tomount
  tomount=`echo $tomount | awk '{print $2}'`
  cat $runningpools | grep $tomount &>/dev/null
  if [ $? -ne 0 ]; then
