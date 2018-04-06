@@ -18,7 +18,13 @@ if [ ! -f /pacedata/clusterip ];
 then
  echo $clusterip > /pacedata/clusterip
 else
- clusterip=`cat /pacedata/clusterip` 
+ len=`wl -c /pacedata/clusterip`
+ if [ $len -ge 6 ];
+ then
+  clusterip=`cat /pacedata/clusterip` 
+ else
+  echo $clusterip > /pacedata/clusterip
+ fi
 fi
 
 result=`ETCDCTL_API=3 ./nodesearch.py $myip`
@@ -33,6 +39,7 @@ then
  ./etccluster.py
  systemctl daemon-reload
  systemctl start etcd
+ ETCDCTL_API=3 ./runningetcdnodes.py $myip
  ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
  
 i# /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev
@@ -41,7 +48,6 @@ i# /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/2
  then
  pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24
  fi
- ETCDCTL_API=3 ./runningetcdnodes.py $myip
  #sleep 3;
  ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
 else
