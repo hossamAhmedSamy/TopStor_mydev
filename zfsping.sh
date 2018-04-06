@@ -29,8 +29,8 @@ then
   fi
   ETCDCTL_API=3 ./addknown.py
 else
- known=`ETCDCTL_API=3 ./etcdget.py known --prefix 2>&1`
- echo $known | grep Error  &>/dev/null
+ leader=`ETCDCTL_API=3 ./etcdget.py leader --prefix 2>&1`
+ echo $leader | grep Error  &>/dev/null
  if [ $? -eq 0 ];
  then
   clusterip=`cat /pacedata/clusterip`
@@ -50,6 +50,7 @@ else
  else 
   echo checking leader
   ETCDCTL_API=3 ./etcdget.py clusterip > /pacedata/clusterip 
+  known=`ETCDCTL_API=3 ./etcdget.py known --prefix 2>&1`
   echo $known | grep $myhost  &>/dev/null
   if [ $? -ne 0 ];
   then
