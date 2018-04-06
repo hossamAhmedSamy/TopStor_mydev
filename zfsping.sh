@@ -38,13 +38,13 @@ else
   then 
    pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24;
   fi
+  pcs resource enable clusterip
   ETCDCTL_API=3 ./runningetcdnodes.py $myip
   ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
   freshcluster=1
  else 
   echo checking leader
   ETCDCTL_API=3 ./etcdget.py clusterip > /pacedata/clusterip 
-  ETCDCTL_API=3 ./etcdget.py clusterip > tmp 
   echo $known | grep $myhost  &>/dev/null
   if [ $? -ne 0 ];
   then

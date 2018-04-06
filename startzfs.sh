@@ -26,6 +26,11 @@ else
   echo $clusterip > /pacedata/clusterip
  fi
 fi
+systemctl status etcd &>/dev/null
+if [ $? -ne 0 ];
+then
+ pcs resource disable clusterip
+fi
 
 result=`ETCDCTL_API=3 ./nodesearch.py $myip`
 freshcluster=0
@@ -40,22 +45,26 @@ then
  systemctl daemon-reload
  systemctl start etcd
  ETCDCTL_API=3 ./runningetcdnodes.py $myip
- ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
+# sleep 1 
+# ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
  
-i# /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev
+# /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev
  pcs resource update clusterip nic="$enpdev" ip=$clusterip cidr_netmask=24
  if [ $? -ne 0 ];
  then
  pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24
  fi
+ pcs resource enable clusterip
  #sleep 3;
  ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
+ ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
 else
  cat /pacedata/runningetcdnodes.txt | grep $myhost &>/dev/null
  if [ $? -ne 0 ];
  then
   ETCDCTL_API=3 ./etcdget.py clusterip  > /pacedata/clusterip
-  /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev
+#  /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev
+  pcs resource disable clusterip
  fi
 fi
 
