@@ -24,25 +24,6 @@ then
  fi
   ETCDCTL_API=3 ./addknown.py
 else
- count=0
- while [ ! -f /pacedata/runningetcdnodes.txt ];
- do
-  sleep 2 
-  count=$((count+1))
-  if [ count -eq 10 ]; 
-  then
-   ETCDCTL_API=3 ./nodesearch.py $myip
-  fi
- done
- cat /pacedata/runningeetcdnodes.txt | grep $myip
- if [ $? -eq 0 ];
- then
-  systemctl start etcd
-  ETCDCTL_API=3 ./runningetcdnodes.py $myip
-  ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
-  exit
- fi
- ETCDCTL_API=3 ./etcdget.py clusterip > /pacedata/clusterip
  known=`ETCDCTL_API=3 ./etcdget.py known --prefix 2>&1`
  echo $known | grep Error  &>/dev/null
  if [ $? -eq 0 ];
@@ -52,17 +33,18 @@ else
   systemctl daemon-reload;
   systemctl start etcd;
   ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
-  pcs resource | grep clusterip &>/dev/null
-  if [ $? -eq 0 ];
-  then
-   /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev &>/dev/null;
-   sleep 3
+  pcs resource update clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24 &>/dev/null
+  if [ $? -ne 0 ];
+  then 
+   pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24;
   fi
-  pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24;
   ETCDCTL_API=3 ./runningetcdnodes.py $myip
   ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
   freshcluster=1
  else 
+  echo checking leader
+  ETCDCTL_API=3 ./etcdget.py clusterip > /pacedata/clusterip 
+  ETCDCTL_API=3 ./etcdget.py clusterip > tmp 
   echo $known | grep $myhost  &>/dev/null
   if [ $? -ne 0 ];
   then
