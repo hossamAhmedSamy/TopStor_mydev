@@ -22,6 +22,11 @@ then
   ETCDCTL_API=3 ./runningetcdnodes.py $myip
   ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
  fi
+  echo $leader | grep $myip
+  if [ $? -ne 0 ];
+  then
+    systemctl stop etcd
+  fi
   ETCDCTL_API=3 ./addknown.py
 else
  known=`ETCDCTL_API=3 ./etcdget.py known --prefix 2>&1`
