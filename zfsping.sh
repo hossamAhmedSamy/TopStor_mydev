@@ -28,6 +28,7 @@ then
     systemctl stop etcd
   fi
   ETCDCTL_API=3 ./addknown.py
+  ETCDCTL_API=3 ./allconfirmed.py
 else
  leader=`ETCDCTL_API=3 ./etcdget.py leader --prefix 2>&1`
  echo $leader | grep Error  &>/dev/null
