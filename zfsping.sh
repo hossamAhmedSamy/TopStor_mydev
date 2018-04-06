@@ -56,6 +56,8 @@ else
   if [ $? -ne 0 ];
   then
    ETCDCTL_API=3 ./etcdput.py possible$myhost $myip
+  else
+   ETCDCTL_API=3 ./changeetcd.py
   fi
  fi 
 fi
