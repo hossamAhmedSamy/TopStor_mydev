@@ -16,7 +16,7 @@ try:
   cmdline=['etcdctl','--endpoints='+endpoints,'del',mtuple(x)[0]]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   print('result=',result)
-  cmdline=['etcdctl','--endpoints='+endpoints,'put','known'+mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
+  cmdline=['etcdctl','--endpoints='+endpoints,'put','known/'+mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   print(result)
 except:
