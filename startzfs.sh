@@ -1,5 +1,6 @@
 #!/bin/bash
 cd /pace
+echo start >> /root/tmp2
 touch /pacedata/startzfs
 iscsimapping='/pacedata/iscsimapping';
 runningpools='/pacedata/pools/runningpools';
@@ -18,7 +19,7 @@ if [ ! -f /pacedata/clusterip ];
 then
  echo $clusterip > /pacedata/clusterip
 else
- len=`wl -c /pacedata/clusterip`
+ len=`wc -c /pacedata/clusterip | awk '{print $1}'`
  if [ $len -ge 6 ];
  then
   clusterip=`cat /pacedata/clusterip` 
@@ -29,7 +30,8 @@ fi
 systemctl status etcd &>/dev/null
 if [ $? -ne 0 ];
 then
- pcs resource disable clusterip
+  /sbin/pcs resource delete --force clusterip
+# pcs resource disable clusterip
 fi
 
 result=`ETCDCTL_API=3 ./nodesearch.py $myip`
@@ -63,8 +65,8 @@ else
  if [ $? -ne 0 ];
  then
   ETCDCTL_API=3 ./etcdget.py clusterip  > /pacedata/clusterip
-#  /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev
-  pcs resource disable clusterip
+  /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev
+#  pcs resource disable clusterip
  fi
 fi
 

@@ -38,12 +38,12 @@ else
   systemctl daemon-reload;
   systemctl start etcd;
   ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
-  pcs resource update clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24 &>/dev/null
-  if [ $? -ne 0 ];
-  then 
-   pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24;
-  fi
-  pcs resource enable clusterip
+#  pcs resource update clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24 &>/dev/null
+#  if [ $? -ne 0 ];
+#  then 
+  pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24;
+#  fi
+#  pcs resource enable clusterip
   ETCDCTL_API=3 ./runningetcdnodes.py $myip
   ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
   freshcluster=1
