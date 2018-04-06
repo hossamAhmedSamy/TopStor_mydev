@@ -29,6 +29,10 @@ for c in change:
  if len(yy)>=len(known):
   cmdline=['/pace/etcddel.py','change/'+ch[0],'--prefix']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  for kn in known:
+   kno=mtuple(kn)
+   cmdline=['/pace/etcddel.py','confirmed/'+kno[0]+'/'+ch[0],'--prefix']
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  
 #print('known=',known)
 #for x in known:

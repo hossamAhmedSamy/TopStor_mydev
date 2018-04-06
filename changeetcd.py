@@ -7,7 +7,8 @@ myhost=socket.gethostname()
 cmdline=['/pace/etcdget.py','change','--prefix']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 mylist=str(result.stdout)[2:][:-3].split('\\n')
-if len(mylist)< 2:
+print(mylist)
+if mylist==['']:
  exit()
 for x in mylist:
  y=mtuple(x)
