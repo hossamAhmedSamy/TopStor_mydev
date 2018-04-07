@@ -22,13 +22,14 @@ then
   ETCDCTL_API=3 ./runningetcdnodes.py $myip
   ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
  fi
-  echo $leader | grep $myip
-  if [ $? -ne 0 ];
-  then
-    systemctl stop etcd
-  fi
-  ETCDCTL_API=3 ./addknown.py
-  ETCDCTL_API=3 ./allconfirmed.py
+ echo $leader | grep $myip
+ if [ $? -ne 0 ];
+ then
+   systemctl stop etcd
+ fi
+ ETCDCTL_API=3 ./addknown.py
+ ETCDCTL_API=3 ./allconfirmed.py
+ ETCDCTL_API=3 ./broadcastlog.py
 else
  leader=`ETCDCTL_API=3 ./etcdget.py leader --prefix 2>&1`
  echo $leader | grep Error  &>/dev/null
@@ -58,6 +59,7 @@ else
    ETCDCTL_API=3 ./etcdput.py possible$myhost $myip
   else
    ETCDCTL_API=3 ./changeetcd.py
+   ETCDCTL_API=3 ./receivelog.py
   fi
  fi 
 fi
