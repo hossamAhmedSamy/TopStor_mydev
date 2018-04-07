@@ -25,7 +25,6 @@ onlyfiles = [f for f in listdir(fpath) if isfile(join(fpath, f)) and "TopStor.lo
 if onlyfiles==[''] or len(known) > len(onlyfiles):
  cmdline=['/pace/etcdput.py','broadcast/request/'+myhost, '1']
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
- exit()
 preptimes=[]
 mini=99999999999999999
 for f in onlyfiles:
