@@ -30,6 +30,7 @@ then
  ETCDCTL_API=3 ./addknown.py
  ETCDCTL_API=3 ./allconfirmed.py
  ETCDCTL_API=3 ./broadcastlog.py
+ ETCDCTL_API=3 ./receivelog.py
 else
  leader=`ETCDCTL_API=3 ./etcdget.py leader --prefix 2>&1`
  echo $leader | grep Error  &>/dev/null
@@ -60,6 +61,7 @@ else
   else
    ETCDCTL_API=3 ./changeetcd.py
    ETCDCTL_API=3 ./receivelog.py
+   ETCDCTL_API=3 ./broadcastlog.py
   fi
  fi 
 fi

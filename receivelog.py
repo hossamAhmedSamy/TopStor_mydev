@@ -16,8 +16,8 @@ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 broad=str(result.stdout).replace('broadcast/response/','')[2:][:-3].split('\\n')
 ######### if no broadcast response from othrs
 isbroad=0
- 
-if broad==[''] or all(myhost in mtuple(x.replace('\\',''))[0] for x in broad):
+if broad==[''] or all(myhost not in mtuple(x.replace('\\',''))[0] for x in broad):
+ print('hi there')
  onlyfiles = [f for f in listdir(fpath) if isfile(join(fpath, f)) and "TopStor.log." in f]
  if onlyfiles==[''] or len(known) > len(onlyfiles):
   cmdline=['/pace/etcdput.py','broadcast/request/'+myhost, '1']

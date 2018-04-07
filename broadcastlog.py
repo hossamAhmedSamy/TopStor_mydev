@@ -26,6 +26,8 @@ if br==['']:
  exit();
 broad=[]
 for c in br:
+ if myhost in mtuple(c)[0]:
+  continue
  broad.append(mtuple(c))
 start=min(broad,key=lambda t: t[1])
 broad=[]
