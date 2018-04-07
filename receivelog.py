@@ -76,7 +76,7 @@ for k in broad:
    f.writelines(cmdline[::-1])
    confirmed=True;
 if confirmed:
- cmdline=['/pace/etcdput.py','broadcast/confirmed/'+host+'/'+myhost, 'done']
+ cmdline=['/pace/etcdput.py','broadcast/confirmed/'+myhost, 'done']
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 else:
  cmdline=['/pace/etcdput.py','broadcast/request/'+myhost, str(mini) ]
