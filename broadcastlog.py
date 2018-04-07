@@ -29,11 +29,15 @@ for c in br:
  if myhost in mtuple(c)[0]:
   continue
  broad.append(mtuple(c))
+print(broad)
+if broad == []:
+  exit()
 start=min(broad,key=lambda t: t[1])
 broad=[]
 counter=0
 with open('/var/www/html/des20/Data/TopStor.log','rt') as f:
- for line in f:
+ revf=f.readlines()[::-1]
+ for line in revf:
   line=str(line).split(' ')
   if float(start[1]) <= float(line[5]):
    counter+=1

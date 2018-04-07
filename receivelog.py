@@ -16,8 +16,7 @@ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 broad=str(result.stdout).replace('broadcast/response/','')[2:][:-3].split('\\n')
 ######### if no broadcast response from othrs
 isbroad=0
-if broad==[''] or all(myhost not in mtuple(x.replace('\\',''))[0] for x in broad):
- print('hi there')
+if broad==[''] or all(myhost in mtuple(x.replace('\\',''))[0] for x in broad):
  onlyfiles = [f for f in listdir(fpath) if isfile(join(fpath, f)) and "TopStor.log." in f]
  if onlyfiles==[''] or len(known) > len(onlyfiles):
   cmdline=['/pace/etcdput.py','broadcast/request/'+myhost, '1']
@@ -26,26 +25,29 @@ if broad==[''] or all(myhost not in mtuple(x.replace('\\',''))[0] for x in broad
  mini=99999999999999999
  for f in onlyfiles:
   with open(fpath+f) as ff:
-   last=int(ff.readlines()[1].split('  ')[5])
+  
+   last=int(str(ff.readlines()[-1]).split(' ')[5][1:][:-3])
    if last < mini: 
     mini=last
  cmdline=['/pace/etcdput.py','broadcast/request/'+myhost, str(mini+1)]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  exit()
-print(broad)
+cmdline=[]
+counter=0
 for k in broad:
- k=mtuple(k.replace('\\',''))
+ k=k.replace('\\','')
+ k=mtuple(k)
  host=k[0].split('/')[0]
- cmdline=[]
- print('k=',host)
  if host==myhost:
   continue
- with open('/var/www/html/des20/Data/TopStor.log.'+host,'a') as f:
-  for br in broad:
-   br=br.replace('\\','')
-   br=mtuple(br)
-   cmdline.append(str(br[1]).replace(',',' ').replace('[','').replace(']','').replace('"','').replace("'",'')+'\n')
-  print(cmdline)
+ cmdline=[]
+ counter=0
+ with  open('/var/www/html/des20/Data/TopStor.log.'+host,'at') as f:
+  a=str(k[1])
+  h=mtuple(a)
+  for m in h:
+   ss=str(m).replace('[','').replace(']','')+'\n'
+   cmdline.append(ss)
   f.writelines(cmdline[::-1])
-  cmdline=['/pace/etcdput.py','broadcast/confirmed/'+host+'/'+myhost, 'done']
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ cmdline=['/pace/etcdput.py','broadcast/confirmed/'+host+'/'+myhost, 'done']
+ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
