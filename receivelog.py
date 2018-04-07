@@ -70,8 +70,9 @@ for k in broad:
    ssfirst=int(ss.split(' ')[5])
    if first > ssfirst:
      first=ssfirst
-   cmdline.append(ss.replace(',','')+'\n')
-  if first > last:
+   if first > last:
+    cmdline.append(ss.replace(',','')+'\n')
+  if len(cmdline) > 0:
    f.writelines(cmdline[::-1])
    confirmed=True;
 if confirmed:
