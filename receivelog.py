@@ -8,8 +8,9 @@ from os.path import isfile, join
 myhost=socket.gethostname()
 fpath='/var/www/html/des20/Data/'
 
-cmdline=['/pace/etcdget.py','broadcast/response','--prefix']
+cmdline=['/pace/etcdget.py','known','--prefix']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+known=str(result.stdout).replace('known/','')[2:][:-3].split('\\n')
 cmdline=['/pace/etcdget.py','broadcast/response','--prefix']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 broad=str(result.stdout).replace('broadcast/response/','')[2:][:-3].split('\\n')
@@ -17,7 +18,7 @@ broad=str(result.stdout).replace('broadcast/response/','')[2:][:-3].split('\\n')
 isbroad=0
 if broad==[''] or all(myhost in mtuple(x)[0] for x in broad):
  onlyfiles = [f for f in listdir(fpath) if isfile(join(fpath, f)) and "TopStor.log." in f]
- if onlyfiles==['']:
+ if onlyfiles==[''] or len(kown) > len(onlyfiles):
   cmdline=['/pace/etcdput.py','broadcast/request/'+myhost, '1']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   exit()
