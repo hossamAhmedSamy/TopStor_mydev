@@ -10,6 +10,11 @@ known=str(result.stdout).replace('known/','')[2:][:-3].split('\\n')
 if known==['']:
  print('no partners')
  exit();
+cmdline=['/pace/etcdget.py','broadcast/response/'+myhost,'--prefix']
+result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+respo=str(result.stdout).replace('broadcast/response/'+myhost,'')[2:][:-3].split('\\n')
+if respo != ['']:
+ exit()
 cmdline=['/pace/etcdget.py','broadcast/confirmed','--prefix']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 conf=str(result.stdout).replace('broadcast/confirmed/','')[2:][:-3].split('\\n')
@@ -33,12 +38,14 @@ start=min(broad,key=lambda t: t[1])
 broad=[]
 counter=0
 with open('/var/www/html/des20/Data/TopStor.log','rt') as f:
- for line in f:
+ revf=f.readlines()[::-1]
+ for line in revf:
   line=str(line).split(' ')
   if float(start[1]) <= float(line[5]):
    counter+=1
    line[5]=line[5].replace('\n','')
-   cmdline=['/pace/etcdput.py','broadcast/response/'+myhost+'/'+str(counter),str(line)]
-   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-   print(line)
-
+   broad.append(line)
+ cmdline=['/pace/etcdput.py','broadcast/response/'+myhost,str(broad)]
+ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ print(line)
+print('counter=',counter)
