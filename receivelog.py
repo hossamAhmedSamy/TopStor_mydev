@@ -16,9 +16,10 @@ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 broad=str(result.stdout).replace('broadcast/response/','')[2:][:-3].split('\\n')
 ######### if no broadcast response from othrs
 isbroad=0
-if broad==[''] or all(myhost in mtuple(x)[0] for x in broad):
+ 
+if broad==[''] or all(myhost in mtuple(x.replace('\\',''))[0] for x in broad):
  onlyfiles = [f for f in listdir(fpath) if isfile(join(fpath, f)) and "TopStor.log." in f]
- if onlyfiles==[''] or len(kown) > len(onlyfiles):
+ if onlyfiles==[''] or len(known) > len(onlyfiles):
   cmdline=['/pace/etcdput.py','broadcast/request/'+myhost, '1']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   exit()
@@ -33,16 +34,18 @@ if broad==[''] or all(myhost in mtuple(x)[0] for x in broad):
  exit()
 print(broad)
 for k in broad:
- k=mtuple(k)
+ k=mtuple(k.replace('\\',''))
+ host=k[0].split('/')[0]
  cmdline=[]
- if k[0]==myhost:
+ print('k=',host)
+ if host==myhost:
   continue
- with open('/var/www/html/des20/Data/TopStor.log.'+k[0],'a') as f:
+ with open('/var/www/html/des20/Data/TopStor.log.'+host,'a') as f:
   for br in broad:
    br=br.replace('\\','')
    br=mtuple(br)
    cmdline.append(str(br[1]).replace(',',' ').replace('[','').replace(']','').replace('"','').replace("'",'')+'\n')
   print(cmdline)
   f.writelines(cmdline[::-1])
-  cmdline=['/pace/etcdput.py','broadcast/confirmed/'+k[0]+'/'+myhost, 'done']
+  cmdline=['/pace/etcdput.py','broadcast/confirmed/'+host+'/'+myhost, 'done']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
