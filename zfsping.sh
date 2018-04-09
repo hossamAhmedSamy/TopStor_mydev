@@ -109,29 +109,35 @@ echo $freshcluster | grep 1
 if [ $? -ne 0 ];
 then
  echo not leader
- exit
+ sh iscsirefresh.sh   &>/dev/null &
+ sh listingtargets.sh  &>/dev/null
+ ./addtargetdisks.sh
 fi
 ids=`lsblk -Sn -o serial`
-for pool in "${pools[@]}"; do
- spares=(`/sbin/zpool status $pool | grep scsi | grep -v OFFLINE | awk '{print $1}'`)  
- for spare in "${spares[@]}"; do
-  echo $ids | grep ${spare:8} &>/dev/null
-  if [ $? -ne 0 ]; then
-   diskid=`python3.6 diskinfo.py /pacedata/disklist.txt $spare`
-   /TopStor/logmsg.sh Diwa4 warning system $diskid 
-   zpool remove $pool $spare;
-   if [ $? -eq 0 ]; then
-    /TopStor/logmsg.sh Disu4 info system $diskid 
-    cachestate=1
-   else 
-   /TopStor/logmsg.sh Dist5 info system $diskid 
-    zpool offline $pool $spare
-    echo $spare >/pacedata/Offlinedisks
-   /TopStor/logmsg.sh Disu5 info system $diskid 
-   fi
-  fi  
- done 
-done
+echo $freshcluster | grep 1
+if [ $? -ne 0 ];
+then
+ for pool in "${pools[@]}"; do
+  spares=(`/sbin/zpool status $pool | grep scsi | grep -v OFFLINE | awk '{print $1}'`)  
+  for spare in "${spares[@]}"; do
+   echo $ids | grep ${spare:8} &>/dev/null
+   if [ $? -ne 0 ]; then
+    diskid=`python3.6 diskinfo.py /pacedata/disklist.txt $spare`
+    /TopStor/logmsg.sh Diwa4 warning system $diskid 
+    zpool remove $pool $spare;
+    if [ $? -eq 0 ]; then
+     /TopStor/logmsg.sh Disu4 info system $diskid 
+     cachestate=1
+    else 
+    /TopStor/logmsg.sh Dist5 info system $diskid 
+     zpool offline $pool $spare
+     echo $spare >/pacedata/Offlinedisks
+    /TopStor/logmsg.sh Disu5 info system $diskid 
+    fi
+   fi  
+  done 
+ done
+fi
 echo $freshcluster | grep 1
 if [ $? -ne 0 ];
 then
