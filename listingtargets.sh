@@ -5,7 +5,9 @@ cp $iscsimappingorig ${iscsimapping}old
 rm -rf $iscsimapping 2>/dev/null
 myhost=`hostname`;
 iscsitargets='/pacedata/iscsitargets';
-declare -a hosts=(`cat $iscsitargets |  awk '{print $2}'`);
+#declare -a hosts=(`cat $iscsitargets |  awk '{print $2}'`);
+declare -a hosts=(`ETCDCTL_API=3 ./iscsiclients.py`);
+
 declare -a alldevdisk=();
 declare -a hostline=();
 diskstatus='free'

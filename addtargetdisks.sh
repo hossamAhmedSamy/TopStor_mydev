@@ -1,7 +1,8 @@
-#!
+#!/bin/sh
 cd /pace
 myhost=`hostname`;
-declare -a iscsitargets=(`cat /pacedata/iscsitargets | awk '{print $2}' `);
+#declare -a iscsitargets=(`cat /pacedata/iscsitargets | awk '{print $2}' `);
+declare -a iscsitargets=(`ETCDCTL_API=3 ./iscsiclients.py`);
 currentdisks=`targetcli ls /iscsi`
 disks=(`lsblk -nS -o name,serial,vendor | grep -v sr0 | grep -v sda | grep -v LIO | awk '{print $1}'`)
 diskids=`lsblk -nS -o name,serial,vendor | grep -v sr0 | grep -v sda | grep -v LIO | awk '{print $1" "$2}'`
