@@ -9,12 +9,6 @@ enpdev='enp0s8'
 myhost=`hostname -s`
 myip=`/sbin/pcs resource show CC | grep Attributes | awk '{print $2}' | awk -F'=' '{print $2}'`
  ccnic=`pcs resource show CC | grep nic\= | awk -F'nic=' '{print $2}' | awk '{print $1}'`
-#systemctl status etcd &>/dev/null
-#if [ $? -eq 0 ];
-#then
-# rm -rf /pacedata/startzfs
-# exit
-#fi
 if [ ! -f /pacedata/clusterip ];
 then
  echo $clusterip > /pacedata/clusterip
@@ -98,9 +92,10 @@ if [ $secdiff -ne 0 ]; then
  then 
   sh iscsirefresh.sh
   sh listingtargets.sh
+  zpool import -a
  fi
  touch /var/www/html/des20/Data/Getstatspid
 fi
- zpool export -a
+#zpool export -a
 rm -rf /pacedata/startzfs
 
