@@ -292,8 +292,8 @@ for pool in "${pools[@]}"; do
    if [ $i -ge 0 ]; then
     newdisk=`echo ${idledisk[$i]} | awk -F',' '{print $2}'`
 #    echo /sbn/zpool attach -f $pool $runningdisk $newdisk ;
-    zpool labelclear /dev/disk/by-id/$newdisk
-    /sbin/zpool attach -f $pool $runningdisk $newdisk ;
+#    zpool labelclear /dev/disk/by-id/$newdisk
+#    /sbin/zpool attach -f $pool $runningdisk $newdisk ;
     if [ $? -eq 0 ]; then 
     # /sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool;
       cachestate=1;
