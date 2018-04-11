@@ -195,13 +195,6 @@ for pool in "${pools[@]}"; do
    #/sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool ;
    cachestate=1;
   fi 
-#  /sbin/zpool status $pool | grep OFFLINE &>/dev/null
-#  if [ $? -eq 0 ]; then
-#   faildisk=`/sbin/zpool status $pool | grep OFFLINE | awk '{print $1}'`;
-#   /sbin/zpool detach $pool $faildisk &>/dev/null;
-#   #/sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool;
-#   cachestate=1;
-#  fi
   /sbin/zpool status $pool | grep UNAVAIL &>/dev/null
   if [ $? -eq 0 ]; then
    faildisk=`/sbin/zpool status $pool | grep UNAVAIL | awk '{print $1}'`;
