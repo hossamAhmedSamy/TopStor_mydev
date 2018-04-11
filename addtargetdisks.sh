@@ -23,18 +23,19 @@ for ddisk in "${disks[@]}"; do
 done
 for ddisk in "${disks[@]}"; do
  devdisk=$ddisk 
+ echo ddisk===$ddisk
  echo devdisk-ddisk=$ddisk
  idisk=`echo "$diskids" | grep $ddisk | awk '{print $2}'`
- echo idisk=$idisk
  echo $currentdisks | grep $idisk &>/dev/null
  if [ $? -eq 0 ]; then
    continue
  fi
- #/sbin/zpool labelclear /dev/$devdisk;
  pdisk=`ls /dev/disk/by-id/ | grep $idisk | grep -v part`
- targetcli backstores/block create ${devdisk}org /dev/disk/by-id/$pdisk
+ targetcli backstores/block create ${devdisk}-${myhost} /dev/disk/by-id/$pdisk
+ echo currentdisks $currentdisks
  for iqn in "${tpgs[@]}"; do
-  targetcli iscsi/iqn${iqn}/tpg1/luns/ create /backstores/block/${devdisk}org  
+  echo iqn= $iqn
+  targetcli iscsi/iqn${iqn}/tpg1/luns/ create /backstores/block/${devdisk}-${myhost}  
  done
 done;
 
