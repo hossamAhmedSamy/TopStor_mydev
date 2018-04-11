@@ -13,5 +13,8 @@ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 clients+=str(result.stdout).replace('leader','')[2:][:-3].split('\\n')
 client=[]
 for c in clients:
- c=mtuple(c)
- print(c[0])
+ try:
+  c=mtuple(c)
+  print(c[0])
+ except:
+  pass

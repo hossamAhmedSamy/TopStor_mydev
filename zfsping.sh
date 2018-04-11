@@ -3,6 +3,7 @@ cd /pace
 touch /tmp/zfsping
 if [ -f /pacedata/startzfs ];
 then
+ echo here??
  exit
 fi
 iscsimapping='/pacedata/iscsimapping';
@@ -74,6 +75,7 @@ cd /pacedata/pools/
 allpools=`cat /pacedata/pools/$(ls /pacedata/pools/ | grep poollist)`
 if [ ! -f ${iscsimapping} ];
 then 
+  echo here
  exit
 fi
 echo ${iscsimapping} ${iscsimapping}new;
@@ -102,6 +104,7 @@ else
  if [ $? -ne 0 ];
  then
   lsblk -Sn | md5sum > $sumfile
+  echo hereherehere
   ./addtargetdisks.sh
  fi
 fi
@@ -141,6 +144,7 @@ fi
 echo $freshcluster | grep 1
 if [ $? -ne 0 ];
 then
+ echo here here
  exit
 fi
  sh iscsirefresh.sh   &>/dev/null &
