@@ -238,6 +238,7 @@ echo $freshcluster | grep 1
 if [ $? -eq 0 ];
 then
  /sbin/zpool import -a
+ ETCDCTL_API=3 ./putzpool.py
  systemctl start nfs
  chgrp apache /var/www/html/des20/Data/*
  chmod g+r /var/www/html/des20/Data/*

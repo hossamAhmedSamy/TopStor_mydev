@@ -93,6 +93,7 @@ if [ $secdiff -ne 0 ]; then
   sh iscsirefresh.sh
   sh listingtargets.sh
   zpool import -a
+  ETCDCTL_API=3 ./putzpool.py
  fi
  touch /var/www/html/des20/Data/Getstatspid
 fi

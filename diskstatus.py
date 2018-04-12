@@ -1,3 +1,4 @@
+#!/bin/python3.6
 import subprocess
 import sys
 
