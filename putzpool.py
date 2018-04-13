@@ -5,6 +5,9 @@ import socket
 
 myhost=socket.gethostname()
 myhost='run/'+myhost
+cmdline=['lsscsi','-i']
+result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+lsscsi=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
 cmdline=['/sbin/zpool','status']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 try:
@@ -27,7 +30,11 @@ try:
    z.append((myhost+'/pool/raid/'+str(count)+'/status',raidstat))
    diskc=0
   else:
-   diskc+=1
+   for l in lsscsi:
+    ll=l.split()
+    if ll[6] in c.split()[1]:
+     diskc=lsscsi.index(l)
+     break;
    z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/uuid',c.split()[1]))
    z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/status',c.split()[2]))
  if count==0 and diskc > 0:
@@ -42,10 +49,10 @@ cmdline=['lsscsi','-i']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 lsscsi=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
 diskc=0
-for c in lsscsi:
-  c=c.split()
+for cc in lsscsi:
+  c=cc.split()
   if c[6] not in str(z):
-   diskc+=1
+   diskc=lsscsi.index(cc)
    cmdline=['./etcdput.py',myhost+'/free/disk/'+str(diskc)+'/uuid',c[6]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
    cmdline=['./etcdput.py',myhost+'/free/disk/'+str(diskc)+'/fromhost',c[3]]
