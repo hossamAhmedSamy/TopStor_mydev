@@ -1,8 +1,16 @@
-import sys
+#!/bin/python3.6
+import sys,subprocess
 import json
 
+cmdline=['/pace/etcdgets.py',sys.argv[1],'--prefix']
+result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+data=json.loads('{'+str(result.stdout)[2:][:-3].replace('\\','').replace("',","':").replace('[','').replace(']','').replace('"','').replace("'",'"')+'}');
+if sys.argv[2] in 'getkey':
+ for x in data:
+  if sys.argv[3] in data[x]:
+   print(x)
+else:
+ for x in data:
+  if sys.argv[3] in x:
+   print(data[x])
 
-data=json.load(open(sys.argv[1]));
-for x in data:
-  if x["name"]==sys.argv[2]:
-   print(x["id"])

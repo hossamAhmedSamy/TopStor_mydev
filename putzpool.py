@@ -10,6 +10,8 @@ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 lsscsi=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
 cmdline=['/sbin/zpool','status']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+#cmdline=['/pace/etcddel.py',myhost,'--prefix']
+#subprocess.run(cmdline,stdout=subprocess.PIPE)
 try:
  zpool=str(result.stdout)[2:][:-3].split('\\n')
  z=[]
@@ -27,17 +29,21 @@ try:
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  zlist=str(result.stdout)[2:][:-3].split('\\t')
  z.append((myhost+'/pool/compressratio',zlist[2]))
- print(zlist)
  raid='stripe'
  count=0
  diskc=0
+ tmpc=6
  for c in zpool[7:-1]:
   if c.replace(' ','')=='':
    continue
   if 'scsi' not in c:
-   raid=c.split()[1]
-   raidstat=c.split()[2]
    count+=1
+   cc=c.split()
+   cc.append(cc[0].replace('\\t','').replace('\\',''))
+   cc.append('ONLINE/AVAIL')
+   raid=cc[1]
+   raidstat=cc[2]
+   print(count,raid,raidstat)
    z.append((myhost+'/pool/raid/'+str(count)+'/type',raid))
    z.append((myhost+'/pool/raid/'+str(count)+'/status',raidstat))
    diskc=0
@@ -47,6 +53,7 @@ try:
     if ll[6] in c.split()[1]:
      diskc=lsscsi.index(l)
      break;
+   print(count,diskc,c.split()[1])
    z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/uuid',c.split()[1]))
    z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/status',c.split()[2]))
    z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/fromhost',ll[3]))
@@ -55,7 +62,7 @@ try:
   z.append((myhost+'/pool/raid/'+str(count)+'/type',raid))
    
  for c in z:
-  cmdline=['./etcdput.py',c[0],c[1]]
+  cmdline=['/pace/etcdput.py',c[0],c[1]]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 except:
  pass  
@@ -64,11 +71,11 @@ for cc in lsscsi:
   c=cc.split()
   if c[6] not in str(z):
    diskc=lsscsi.index(cc)
-   cmdline=['./etcdput.py',myhost+'/free/disk/'+str(diskc)+'/uuid',c[6]]
+   cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/uuid',c[6]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-   cmdline=['./etcdput.py',myhost+'/free/disk/'+str(diskc)+'/fromhost',c[3]]
+   cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/fromhost',c[3]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-   cmdline=['./etcdput.py',myhost+'/free/disk/'+str(diskc)+'/size',c[7]]
+   cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/size',c[7]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 
  
