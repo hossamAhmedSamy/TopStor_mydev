@@ -7,8 +7,6 @@ then
  echo here??
  exit
 fi
-sumfile='/pacedata/sumfile';
-runningpools='/pacedata/pools/runningpools';
 myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{print $2 }'`
 myhost=`hostname -s`
 runningcluster=0
@@ -66,6 +64,9 @@ else
   fi
  fi 
 fi
+sh iscsirefresh.sh   &>/dev/null &
+sh listingtargets.sh  &>/dev/null
+./addtargetdisks.sh
 echo $runningcluster | grep 1
 if [ $? -eq 0 ];
 then
@@ -82,13 +83,9 @@ then
    echo lsscsi no change
    exit
   fi
-  ETCDCTL_API=3 /pace/etcdput.py checks/$myhost/zpool $zpool1 
  fi
  ETCDCTL_API=3 /pace/etcdput.py checks/$myhost/lsscsi $lsscsi 
 fi
-sh iscsirefresh.sh   &>/dev/null &
-sh listingtargets.sh  &>/dev/null
-./addtargetdisks.sh
 hostnam=`cat /TopStordata/hostname`
 declare -a pools=(`/sbin/zpool list -H | awk '{print $1}'`)
 declare -a idledisk=();
@@ -147,23 +144,23 @@ for pool in "${pools[@]}"; do
    diskidf=`echo $diskpath | awk -F'/' '{print $(NF-1)}'`
    echo diskidf=$diskidf
    ETCDCTL_API=3 /pace/diskinfo.py run getkey $diskpath | awk -F'/' '{print $(NF-1)}'
-   /TopStor/logmsg.sh Difa1 error system $diskidf 
+   /TopStor/logmsg.sh Difa1 error system $diskidf $hostnam
    sparedisk=`echo "${zpool[@]}" | grep "AVAIL" | awk '{print $1}' | head -1`
    echo sparedisk=$sparedisk
    sparedisk=`echo "${zpool[@]}" | grep "AVAIL" | awk '{print $1}' | head -1`
    if [ ! -z $sparedisk ]; then
     diskids=`ETCDCTL_API=3 /pace/diskinfo.py run getkey $sparedisk | awk -F'/' '{print $(NF-1)}'`
     echo diskids=$diskids
-    /TopStor/logmsg.sh Dist2 info system $diskidf $diskids  
+    /TopStor/logmsg.sh Dist2 info system $diskidf $diskids $hostnam
     echo /sbin/zpool offline $pool $faildisk
     /sbin/zpool offline $pool $faildisk
-    echo /sbin/zpool replace $pool $faildisk $sparedisk
+    echo /sbin/zpool replace $pool $faildisk $sparedisk $hostnam
     /sbin/zpool replace $pool $faildisk $sparedisk
     echo is repalced ?
-    /TopStor/logmsg.sh Disu2 info system $diskidf $diskidf  
-    /TopStor/logmsg.sh Dist3 info system $diskf
+    /TopStor/logmsg.sh Disu2 info system $diskidf $diskidf $hostnam
+    /TopStor/logmsg.sh Dist3 info system $diskidf $hostnam
     /sbin/zpool detach $pool $faildisk &>/dev/null;
-    /TopStor/logmsg.sh Disu3 info system $diskidf
+    /TopStor/logmsg.sh Disu3 info system $diskidf $hostnam
     ETCDCTL_API=3 /pace/etcddel.py run/$myhost --prefix
     ETCDCTL_API=3 /pace/putzpool.py run/$myhost --prefix
    fi
@@ -199,3 +196,7 @@ for pool in "${pools[@]}"; do
   fi 
  fi
 done
+ ETCDCTL_API=3 /pace/etcddel.py run/$myhost --prefix
+ ETCDCTL_API=3 /pace/putzpool.py run/$myhost --prefix
+ zpool1=`zpool status | md5sum`
+ ETCDCTL_API=3 /pace/etcdput.py checks/$myhost/zpool $zpool1 
