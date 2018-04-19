@@ -1,6 +1,5 @@
 #!/usr/bin/sh
 cd /pace
-touch /tmp/zfsping
 ps -ef |grep startzfs.sh | grep -v tty | grep -v grep 
 if [ $? -eq 0 ];
 then
@@ -66,6 +65,7 @@ else
 fi
 sh iscsirefresh.sh   &>/dev/null &
 sh listingtargets.sh  &>/dev/null
+./addtargetdisks.sh
 echo $runningcluster | grep 1
 if [ $? -eq 0 ];
 then
@@ -84,7 +84,6 @@ then
   fi
  fi
 fi
-./addtargetdisks.sh
 hostnam=`cat /TopStordata/hostname`
 declare -a pools=(`/sbin/zpool list -H | awk '{print $1}'`)
 declare -a idledisk=();

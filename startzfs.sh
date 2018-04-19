@@ -53,7 +53,7 @@ then
  pcs resource update clusterip nic="$enpdev" ip=$clusterip cidr_netmask=24
  if [ $? -ne 0 ];
  then
- pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24
+ pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24 op monitor on-fail=ignore
  fi
  pcs resource enable clusterip
  #sleep 3;

@@ -9,6 +9,7 @@ myhost='run/'+myhost
 cmdline=['lsscsi','-i','--size']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 lsscsi=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
+ata=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' not in x]
 cmdline=['/sbin/zpool','status']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 #cmdline=['/pace/etcddel.py',myhost,'--prefix']
@@ -63,15 +64,16 @@ try:
      ll=l.split()
      if ll[6] in c.split()[1]:
       diskc=lsscsi.index(l)
+      print(ll[3].split('-')[0]) 
+      if ll[3].split('-')[0] not in str(ata) or ll[7]=='-':
+       status='FAULT'
+      else:
+       status=c.split()[2]
       break;
-    
     z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/uuid',c.split()[1]))
     z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/fromhost',ll[3]))
     z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/size',ll[7]))
-    if ll[7]=='-':
-     z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/status','FAULT'))
-    else:
-     z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/status',c.split()[2]))
+    z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/status',status))
   if count==0 and diskc > 0:
    z.append((myhost+'/pool/raid/'+str(count)+'/type',raid))
    

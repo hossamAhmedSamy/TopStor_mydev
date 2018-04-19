@@ -5,26 +5,28 @@ declare -a targets=(`cat /pacedata/iscsitargets | awk '{print $2}'`);
 #node=`echo $@ | awk '{print $1}'`
 myhost=`hostname -s`
 #myadd=`host $myhost | awk '{print $NF}'`
-myadd=`ip a | grep dynamic | awk '{print $2}' | awk -F/ '{print $1}'`
-echo $myadd
-echo $myadd | grep -E 'DOM|found'
-if [ $? -ne 0 ]; then
+#myadd=`ip a | grep dynamic | awk '{print $2}' | awk -F/ '{print $1}'`
+myaddCC=`/sbin/pcs resource show CC | grep Attrib | awk '{print $2}' | awk -F'=' '{print $2}'`
+#echo $myadd $myhost | grep -E 'DOM|found'
+#if [ $? -ne 0 ]; then
  echo 127.0.0.1 localhost > /etc/hosts
- echo $myadd $myhost >> /etc/hosts
-fi
+#fi
 myhostCC=`cat /TopStordata/hostname`
 myaddCC=`/sbin/pcs resource show CC | grep Attrib | awk '{print $2}' | awk -F'=' '{print $2}'`
-grep $myhostCC /etc/hosts &>/dev/null
-if [ $? -ne 0 ]; then
- grep $myaddCC /etc/hosts &>/dev/null
- if [ $? -ne 0 ]; then
+# echo $myadd $myhost >> /etc/hosts
+#grep $myhostCC /etc/hosts &>/dev/null
+#if [ $? -ne 0 ]; then
+# grep $myaddCC /etc/hosts &>/dev/null
+# if [ $? -ne 0 ]; then
+ echo 127.0.0.1 localhost > /etc/hosts
  echo $myaddCC $myhostCC >> /etc/hosts
- else
-  sed -i "/$myaddCC/c$myaddCC $myhostCC" /etc/hosts
- fi
-else
- sed -i "/$myhostCC/c$myaddCC $myhostCC" /etc/hosts
-fi
+ echo $myaddCC $myhost >> /etc/hosts
+# else
+#  sed -i "/$myaddCC/c$myaddCC $myhostCC" /etc/hosts
+# fi
+#else
+# sed -i "/$myhostCC/c$myaddCC $myhostCC" /etc/hosts
+#fi
 if [ ! -f /root/.ssh/id_rsa ] ;then 
  ssh-keygen -t rsa -f /root/.ssh/id_rsa -q -P "";
 fi
