@@ -66,7 +66,6 @@ else
 fi
 sh iscsirefresh.sh   &>/dev/null &
 sh listingtargets.sh  &>/dev/null
-./addtargetdisks.sh
 echo $runningcluster | grep 1
 if [ $? -eq 0 ];
 then
@@ -84,8 +83,8 @@ then
    exit
   fi
  fi
- ETCDCTL_API=3 /pace/etcdput.py checks/$myhost/lsscsi $lsscsi 
 fi
+./addtargetdisks.sh
 hostnam=`cat /TopStordata/hostname`
 declare -a pools=(`/sbin/zpool list -H | awk '{print $1}'`)
 declare -a idledisk=();
@@ -200,3 +199,5 @@ done
  ETCDCTL_API=3 /pace/putzpool.py run/$myhost --prefix
  zpool1=`zpool status | md5sum`
  ETCDCTL_API=3 /pace/etcdput.py checks/$myhost/zpool $zpool1 
+ lsscsi=`lsscsi -i --size | md5sum`
+ ETCDCTL_API=3 /pace/etcdput.py checks/$myhost/lsscsi $lsscsi 
