@@ -1,5 +1,10 @@
 #!/bin/bash
 cd /pace
+ps -ef | grep zfsping.sh | grep -v tty | grep -v grep
+if [ $? -eq 0 ];
+then
+ exit
+fi
 echo start >> /root/tmp2
 touch /pacedata/startzfs
 iscsimapping='/pacedata/iscsimapping';

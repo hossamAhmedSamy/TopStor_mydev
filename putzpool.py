@@ -54,22 +54,24 @@ try:
     z.append((myhost+'/pool/raid/'+str(count)+'/status',raidstat))
     diskc=0
    else:
-    for l in lsscsi:
-     ll=l.split()
-     if ll[6] in c.split()[1]:
-      diskc=lsscsi.index(l)
-      break;
     if count==0:
      count+=1
      z.append((myhost+'/pool/raid/'+str(count)+'/type','stripe'))
      raidstat=zpool[1].split(':')[1].replace(' ','')
      z.append((myhost+'/pool/raid/'+str(count)+'/status',raidstat))
-  
-    print(count,diskc,c.split()[1])
+    for l in lsscsi:
+     ll=l.split()
+     if ll[6] in c.split()[1]:
+      diskc=lsscsi.index(l)
+      break;
+    
     z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/uuid',c.split()[1]))
-    z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/status',c.split()[2]))
     z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/fromhost',ll[3]))
     z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/size',ll[7]))
+    if ll[7]=='-':
+     z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/status','FAULT'))
+    else:
+     z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/status',c.split()[2]))
   if count==0 and diskc > 0:
    z.append((myhost+'/pool/raid/'+str(count)+'/type',raid))
    
@@ -91,5 +93,10 @@ for cc in lsscsi:
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
    cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/size',c[7]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   status='AVAIL'
+   if c[7]=='-':
+    status='FAULT'
+    cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/status',status]
+    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 
  
