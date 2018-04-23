@@ -12,8 +12,6 @@ lsscsi=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
 ata=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' not in x]
 cmdline=['/sbin/zpool','status']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-#cmdline=['/pace/etcddel.py',myhost,'--prefix']
-#subprocess.run(cmdline,stdout=subprocess.PIPE)
 try:
  zpool=str(result.stdout)[2:][:-3].split('\\n')
  z=[]
@@ -22,6 +20,39 @@ try:
   subprocess.run(cmdline,stdout=subprocess.PIPE)
   zpool=[':nopool',':nopool',':nopool','nopool','nopool','nopool','nopool','nopool']
  else:
+  cmdline=['/sbin/zfs','list','-H']
+  vollist=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  vollist=[x.split('\\')[0] for x in str(vollist.stdout)[2:][:-3].split('\\n')]
+  for y in vollist:
+   cmdline=['/sbin/zfs','get','all','-H',y]
+   volprop=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   volprop=[x.split('\\t') for x in str(volprop.stdout)[2:][:-3].split('\\n')]
+   thisvolvalue=''
+   try:
+    thisvol=volprop[0][0]
+    for zz in volprop:
+     if (zz[1]=='quota'):
+      thisvolvalue+=zz[2]
+      break;
+    for zz in volprop:
+     if (zz[1]=='used'):
+      thisvolvalue+='/'+zz[2]
+      break;
+    for zz in volprop:
+     if (zz[1]=='usedbysnapshots'):
+      thisvolvalue+='/'+zz[2]
+      break;
+    for zz in volprop:
+     if (zz[1]=='refcompressratio'):
+      thisvolvalue+='/'+zz[2]
+      break;
+    for zz in volprop:
+     if (zz[1]=='prot:kind'):
+      prot=zz[2]
+      break;
+    z.append((myhost+'/vol/'+thisvol+'/'+prot,thisvolvalue))
+   except:
+    pass
   z.append((myhost+'/pool/name',zpool[0].split(':')[1].replace(' ','')))
   z.append((myhost+'/pool/state',zpool[1].split(':')[1].replace(' ','')))
   z.append((myhost+'/pool/scan',zpool[2].split(':')[1]))
