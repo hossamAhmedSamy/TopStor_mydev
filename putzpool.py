@@ -20,39 +20,28 @@ try:
   subprocess.run(cmdline,stdout=subprocess.PIPE)
   zpool=[':nopool',':nopool',':nopool','nopool','nopool','nopool','nopool','nopool']
  else:
-  cmdline=['/sbin/zfs','list','-H']
+  cmdline=['/sbin/zfs','list','-t','snapshot,filesystem','-o','name,creation,used,quota,usedbysnapshots,refcompressratio,prot:kind','-H']
   vollist=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  vollist=[x.split('\\')[0] for x in str(vollist.stdout)[2:][:-3].split('\\n')]
+  vollist=[x.split('\\t') for x in str(vollist.stdout)[2:][:-3].split('\\n')]
+  snap=[]
   for y in vollist:
-   cmdline=['/sbin/zfs','get','all','-H',y]
-   volprop=subprocess.run(cmdline,stdout=subprocess.PIPE)
-   volprop=[x.split('\\t') for x in str(volprop.stdout)[2:][:-3].split('\\n')]
-   thisvolvalue=''
    try:
-    thisvol=volprop[0][0]
-    for zz in volprop:
-     if (zz[1]=='quota'):
-      thisvolvalue+=zz[2]
-      break;
-    for zz in volprop:
-     if (zz[1]=='used'):
-      thisvolvalue+='/'+zz[2]
-      break;
-    for zz in volprop:
-     if (zz[1]=='usedbysnapshots'):
-      thisvolvalue+='/'+zz[2]
-      break;
-    for zz in volprop:
-     if (zz[1]=='refcompressratio'):
-      thisvolvalue+='/'+zz[2]
-      break;
-    for zz in volprop:
-     if (zz[1]=='prot:kind'):
-      prot=zz[2]
-      break;
-    z.append((myhost+'/vol/'+thisvol+'/'+prot,thisvolvalue))
+    names=y[0].split('/')
+    snap=y[0].split('@')[1]
+    thisvol='pool/'+names[0]+'/vol/'+names[1].split('@')[0]+'/snapshot/'+names[1].split('@')[1]+y[6]
+    thisvolvalue=y[1]+'/'+y[2]+'/'+y[5]
+    print('is a snapshot')
    except:
-    pass
+    try:
+     names=y[0].split('/')
+     thisvol='pool/'+names[0]+'/vol/'+names[1]+'/'+y[6]
+     thisvolvalue=y[3]+'/'+y[2]+'/'+y[4]+'/'+y[5]
+     print('is a vol')
+    except:
+     thisvol='pool/'
+     thisvolvalue=y[3]+'/'+y[2]+'/'+y[4]+'/'+y[5]
+     print('is a pool')
+   z.append((myhost+thisvol,thisvolvalue))
   z.append((myhost+'/pool/name',zpool[0].split(':')[1].replace(' ','')))
   z.append((myhost+'/pool/state',zpool[1].split(':')[1].replace(' ','')))
   z.append((myhost+'/pool/scan',zpool[2].split(':')[1]))
@@ -81,7 +70,6 @@ try:
     cc.append('ONLINE/AVAIL')
     raid=cc[1]
     raidstat=cc[2]
-    print(count,raid,raidstat)
     z.append((myhost+'/pool/raid/'+str(count)+'/type',raid))
     z.append((myhost+'/pool/raid/'+str(count)+'/status',raidstat))
     diskc=0
@@ -95,7 +83,6 @@ try:
      ll=l.split()
      if ll[6] in c.split()[1]:
       diskc=lsscsi.index(l)
-      print(ll[3].split('-')[0]) 
       if ll[3].split('-')[0] not in str(ata) or ll[7]=='-':
        status='FAULT'
       else:
