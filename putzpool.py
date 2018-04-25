@@ -20,6 +20,10 @@ try:
   subprocess.run(cmdline,stdout=subprocess.PIPE)
   zpool=[':nopool',':nopool',':nopool','nopool','nopool','nopool','nopool','nopool']
  else:
+  poolname=zpool[0].split(':')[1].replace(' ','')
+  z.append((myhost+'/pool/'+poolname+'/name',poolname))
+  z.append((myhost+'/pool/'+poolname+'/state',zpool[1].split(':')[1].replace(' ','')))
+  z.append((myhost+'/pool/'+poolname+'/scan',zpool[2].split(':')[1]))
   cmdline=['/sbin/zfs','list','-t','snapshot,filesystem','-o','name,creation,used,quota,usedbysnapshots,refcompressratio,prot:kind','-H']
   vollist=subprocess.run(cmdline,stdout=subprocess.PIPE)
   vollist=[x.split('\\t') for x in str(vollist.stdout)[2:][:-3].split('\\n')]
@@ -28,34 +32,33 @@ try:
    try:
     names=y[0].split('/')
     snap=y[0].split('@')[1]
-    thisvol='pool/'+names[0]+'/vol/'+names[1].split('@')[0]+'/snapshot/'+names[1].split('@')[1]+y[6]
+    thisvol='/pool/'+names[0]+'/vol/'+names[1].split('@')[0]+'/snapshot/'+names[1].split('@')[1]
     thisvolvalue=y[1]+'/'+y[2]+'/'+y[5]
+    print(thisvol, thisvolvalue)
     print('is a snapshot')
    except:
     try:
      names=y[0].split('/')
-     thisvol='pool/'+names[0]+'/vol/'+names[1]+'/'+y[6]
+     thisvol='/pool/'+names[0]+'/vol/'+names[1]+'/'+y[6]
      thisvolvalue=y[3]+'/'+y[2]+'/'+y[4]+'/'+y[5]
      print('is a vol')
     except:
-     thisvol='pool/'
-     thisvolvalue=y[3]+'/'+y[2]+'/'+y[4]+'/'+y[5]
-     print('is a pool')
+     continue 
+     #thisvol='/pool/'
+     #thisvolvalue=y[3]+'/'+y[2]+'/'+y[4]+'/'+y[5]
+     #print('is a pool')
    z.append((myhost+thisvol,thisvolvalue))
-  z.append((myhost+'/pool/name',zpool[0].split(':')[1].replace(' ','')))
-  z.append((myhost+'/pool/state',zpool[1].split(':')[1].replace(' ','')))
-  z.append((myhost+'/pool/scan',zpool[2].split(':')[1]))
   cmdline=['/sbin/zpool','list','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   zlist=str(result.stdout)[2:][:-3].split('\\t')
-  z.append((myhost+'/pool/size',zlist[1]))
-  z.append((myhost+'/pool/alloc',zlist[2]))
-  z.append((myhost+'/pool/empty',zlist[3]))
-  z.append((myhost+'/pool/dedup',zlist[7]))
+  z.append((myhost+'/pool/'+poolname+'/size',zlist[1]))
+  z.append((myhost+'/pool/'+poolname+'/alloc',zlist[2]))
+  z.append((myhost+'/pool/'+poolname+'/empty',zlist[3]))
+  z.append((myhost+'/pool/'+poolname+'/dedup',zlist[7]))
   cmdline=['/sbin/zfs','get','compressratio','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   zlist=str(result.stdout)[2:][:-3].split('\\t')
-  z.append((myhost+'/pool/compressratio',zlist[2]))
+  z.append((myhost+'/pool/'+poolname+'/compressratio',zlist[2]))
   raid='stripe'
   count=0
   diskc=0
@@ -70,15 +73,15 @@ try:
     cc.append('ONLINE/AVAIL')
     raid=cc[1]
     raidstat=cc[2]
-    z.append((myhost+'/pool/raid/'+str(count)+'/type',raid))
-    z.append((myhost+'/pool/raid/'+str(count)+'/status',raidstat))
+    z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/type',raid))
+    z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/status',raidstat))
     diskc=0
    else:
     if count==0:
      count+=1
-     z.append((myhost+'/pool/raid/'+str(count)+'/type','stripe'))
+     z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/type','stripe'))
      raidstat=zpool[1].split(':')[1].replace(' ','')
-     z.append((myhost+'/pool/raid/'+str(count)+'/status',raidstat))
+     z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/status',raidstat))
     for l in lsscsi:
      ll=l.split()
      if ll[6] in c.split()[1]:
@@ -88,12 +91,12 @@ try:
       else:
        status=c.split()[2]
       break;
-    z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/uuid',c.split()[1]))
-    z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/fromhost',ll[3]))
-    z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/size',ll[7]))
-    z.append((myhost+'/pool/raid/'+str(count)+'/disk/'+str(diskc)+'/status',status))
+    z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/disk/'+str(diskc)+'/uuid',c.split()[1]))
+    z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/disk/'+str(diskc)+'/fromhost',ll[3]))
+    z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/disk/'+str(diskc)+'/size',ll[7]))
+    z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/disk/'+str(diskc)+'/status',status))
   if count==0 and diskc > 0:
-   z.append((myhost+'/pool/raid/'+str(count)+'/type',raid))
+   z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/type',raid))
    
   for c in z:
    cmdline=['/pace/etcdput.py',c[0],c[1]]
@@ -120,3 +123,5 @@ for cc in lsscsi:
     result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 
  
+cmdline=['/pace/etcdput.py',myhost+'/stub/stub/stub/stub','stub']
+result=subprocess.run(cmdline,stdout=subprocess.PIPE)
