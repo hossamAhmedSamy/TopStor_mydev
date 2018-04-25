@@ -4,8 +4,8 @@ import subprocess
 from ast import literal_eval as mtuple
 import socket
 
-myhost=socket.gethostname()
-myhost='run/'+myhost
+myhostorg=socket.gethostname()
+myhost='run/'+myhostorg
 cmdline=['lsscsi','-i','--size']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 lsscsi=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
@@ -101,6 +101,18 @@ try:
   for c in z:
    cmdline=['/pace/etcdput.py',c[0],c[1]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+
+ cmdline=['crontab','-l']
+ crons=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ autosnap=[x for x in str(crons.stdout)[2:][:-3].split('\\n') if 'Snapshotnowhost' in x]
+ h=[]
+ for x in autosnap:
+  y=x.split()
+  print(y)
+  cmdline=['/pace/etcdput.py',myhost+'/pool/'+poolname+'/snapperiod/'+y[-1],y[-2].split('.')[0]+'/'+y[-3].split('/')[-1]+'/'+y[-2].split('.')[1]+'/'+y[-2].split('.')[2]+'/'+y[-2].split('.')[3]+'/'+y[-2].split('.')[4]+'/'+y[0].replace('/','::')+'/'+y[1].replace('/','::')+'/'+y[2].replace('/','::')+'/'+y[3].replace('/','::')+'/'+y[4].replace('/','::')]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+
+ 
 except Exception as e:
  traceback.print_exc()
  pass  
