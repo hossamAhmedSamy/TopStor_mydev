@@ -1,4 +1,4 @@
-#!/usr/local/bin/zsh
+#!/bin/sh
 cd /TopStor
 web='/var/www/html/des20/Data/currentinfo2.log2';
 glog='/var/www/html/des20/Data/TopStor.log';
@@ -10,7 +10,7 @@ echo $pDG
 myhost=`hostname -s`
 echo $pDG | grep $myhost
 if [ $? -ne 0 ]; then exit; fi
-pp=`zpool list -H | awk '{ print $1 }' | head -1`
+pp=`/sbin/zpool list -H | awk '{ print $1 }' | head -1`
 echo $pDG | grep $pp
 if [ $? -ne 0 ]; then exit; fi
   res=`./Snapshotnow $@`
