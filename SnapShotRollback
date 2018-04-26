@@ -1,5 +1,6 @@
-#!/usr/local/bin/zsh
+#!/bin/sh
 cd /TopStor/
+myhost=`hostname -s`
 web='/var/www/html/des20/Data/Snapsstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStor.log';
@@ -16,13 +17,14 @@ privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
-/TopStor/logmsg.st Snap1040 info $userreq $snaprol
+/TopStor/logmsg.sh Snap1040 info $userreq $snaprol
 /sbin/zfs rollback -r  $snaprol  2> $txtres;
 err=`wc -c  $txtres | awk '{print $1}'`;
 if [[ $err -ge  4  ]]; then
- /TopStor/logmsg.st Snap1041 error $userreq $snaprol
+ /TopStor/logmsg.sh Snap1041 error $userreq $snaprol
 else 
- /TopStor/logmsg.st Snap1042 info $userreq $snaprol
+ /TopStor/logmsg.sh Snap1042 info $userreq $snaprol
 fi;
-oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging;
+ETCDCTL_API=3 /pace/etcddel.py run/$myhost --prefix
+ETCDCTL_API=3 /pace/putzpool.py
 fi
