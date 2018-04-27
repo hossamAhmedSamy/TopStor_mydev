@@ -21,6 +21,7 @@ myaddCC=`/sbin/pcs resource show CC | grep Attrib | awk '{print $2}' | awk -F'='
  echo 127.0.0.1 localhost > /etc/hosts
  echo $myaddCC $myhostCC >> /etc/hosts
  echo $myaddCC $myhost >> /etc/hosts
+ echo 127.0.0.1 $myhost >> /etc/hosts
 # else
 #  sed -i "/$myaddCC/c$myaddCC $myhostCC" /etc/hosts
 # fi
