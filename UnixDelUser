@@ -1,8 +1,10 @@
 #!/usr/local/bin/zsh
+echo $@ > /root/tmp
 web="/var/www/html/des20/Data/Usersstatus.log";
 logging="/var/www/html/des20/Data/currentinfo2.log";
 txtres='/TopStordata/'`basename $0`'.txt'
 rm -rf $txtres &>/dev/null
+myhost=`hostname -s`
 glog='/var/www/html/des20/Data/TopStor.log'
 username=`echo $@ | awk '{print $1}'`;
 userreq=`echo $@ | awk '{print $2}'`;
@@ -41,6 +43,6 @@ dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
 echo $datenow $timenow info $userreq Unlin1010@@@$username $dtn >> $glog
 fi;
 oldlog=`cat $logging | sed 's/]//g' `; newlog=$oldlog,$logthis]; echo $newlog > $logging;
-./UnisListUsers;
+ETCDCTL_API=3 /pace/etcddel.py run/$myhost/user/$username
 fi
 rm txt/${0:2}$userreq.txt

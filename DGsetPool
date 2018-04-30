@@ -110,13 +110,13 @@ then
   fi
  fi 
  if [[ $raid == "Single" ]]; then
-  /TopStor/logmsg.sh DG1st6 info $userreq ${nextpool} $diskn 
+  /TopStor/logmsg.sh DG1st6 info $userreq ${nextpool} $diskn1
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
   /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -ne 0 ]; then
-   /TopStor/logmsg.sh DG1fa6 error $userreq ${nextpool} $diskn 
+   /TopStor/logmsg.sh DG1fa6 error $userreq ${nextpool} $diskn1 
   else 
-   /TopStor/logmsg.sh DG1su6 info $userreq ${nextpool} $diskn 
+   /TopStor/logmsg.sh DG1su6 info $userreq ${nextpool} $diskn1 
   fi
  fi 
  if [[ $raid == "addparity3" ]]; then
