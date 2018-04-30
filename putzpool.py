@@ -6,6 +6,12 @@ import socket
 
 myhostorg=socket.gethostname()
 myhost='run/'+myhostorg
+with open('/etc/passwd') as f:
+ for fline in f:
+  if 'TopStor' in fline:
+   y=fline.split(":")
+   cmdline=['/pace/etcdput.py',myhost+'/user/'+y[0],y[2]]
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 cmdline=['lsscsi','-i','--size']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 lsscsi=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
@@ -16,7 +22,7 @@ try:
  zpool=str(result.stdout)[2:][:-3].split('\\n')
  z=[]
  if zpool==['']:
-  cmdline=['/pace/etcddel.py',myhost,'--prefix']
+  cmdline=['/pace/etcddel.py',myhost+'/pool','--prefix']
   subprocess.run(cmdline,stdout=subprocess.PIPE)
   zpool=[':nopool',':nopool',':nopool','nopool','nopool','nopool','nopool','nopool']
  else:
