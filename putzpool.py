@@ -143,3 +143,9 @@ for cc in lsscsi:
  
 cmdline=['/pace/etcdput.py',myhost+'/stub/stub/stub/stub','stub']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+cmdline=['/pace/verdef.sh']
+result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+vers=str(result.stdout)[2:][:-3]
+cmdline=['/pace/etcdput.py',myhost+'/hostfw/',vers]
+result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+
