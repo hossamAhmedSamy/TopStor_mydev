@@ -1,4 +1,4 @@
-#!/usr/local/bin/zsh
+#!/bin/sh
 cd /TopStor/key;
 web='/var/www/html/des20/Data/isuser.txt';
 resulting="not found";
@@ -8,8 +8,6 @@ userpass=`echo $@ | awk '{print $3}'`;
 rm -rf ${username}fixed
 gpg --batch --passphrase YousefNadody ${username}fixed.gpg
 pass1=`cat ${username}fixed`
-echo $pass1,$userpass,$username,$userchk > ~/tmp2
-echo $@ >> ~/tmp2
 echo $pass1 | grep -w $userpass
 if [[ $? -eq 0 ]]; then
  resulting="ok";

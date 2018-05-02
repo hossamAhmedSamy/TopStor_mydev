@@ -1,4 +1,4 @@
-#!/usr/local/bin/zsh
+#!/bin/sh
 web='/var/www/html/des20/Data/Usersstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log';
 resweb='/var/www/html/des20/Data/userpass.txtupdated';
@@ -7,7 +7,6 @@ glog='/var/www/html/des20/Data/TopStor.log';
 passchange='/TopStordata/passchange'
 txtres='/TopStordata/'`basename $0`'.txt'
 cd /TopStor
-echo $@ > ~/tmp
 rm -rf $txtres 2>/dev/null
 userpass=`echo $@ | awk '{print $1}'`;
 username=`echo $@ | awk '{print $2}'`;
