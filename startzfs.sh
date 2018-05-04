@@ -38,7 +38,7 @@ freshcluster=0
 echo $result | grep nothing 
 if [ $? -eq 0 ];
 then
- rm -rf /var/lib/etcd/*
+# rm -rf /var/lib/etcd/*
  rm -rf /pacedata/running*
  freshcluster=1
  echo here=$clusterip
@@ -59,6 +59,7 @@ then
  #sleep 3;
  ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
  ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
+ ETCDCTL_API=3 ./etcddel.py known --prefix
 else
  cat /pacedata/runningetcdnodes.txt | grep $myhost &>/dev/null
  if [ $? -ne 0 ];
