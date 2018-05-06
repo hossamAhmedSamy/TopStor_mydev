@@ -1,4 +1,4 @@
-#!/usr/local/bin/zsh
+#!/bin/sh
 web='/var/www/html/des20/Data/Usersstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log';
 resweb='/var/www/html/des20/Data/userpass.txtupdated';
@@ -7,7 +7,6 @@ glog='/var/www/html/des20/Data/TopStor.log';
 passchange='/TopStordata/passchange'
 txtres='/TopStordata/'`basename $0`'.txt'
 cd /TopStor
-echo $@ > ~/tmp
 rm -rf $txtres 2>/dev/null
 userpass=`echo $@ | awk '{print $1}'`;
 username=`echo $@ | awk '{print $2}'`;
@@ -22,6 +21,8 @@ echo $datenow $timenow info $userreq Unlin1012@@@$username $dtn>> $glog
 oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging
 cp $logthis $logging 2>/dev/null ; rm -rf $logthis 2>/dev/null;
 usermod  -p $userpass $username 2> $txtres
+pas=`echo $userpass | openssl enc -e -base64 -aes-256-ctr -nopad -nosalt -k '#skMe22'$username`
+ usermod $username -c"TopStor"$pas
 ( echo $userpass; echo $userpass) | /bin/smbpasswd -s -a $username 2>> $txtres
 cat $txtres >> $passchange 
 cat $txtres 
