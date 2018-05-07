@@ -28,6 +28,7 @@ then
  git commit -am"changing to $realfw" ; git checkout $realfw
  cd $TopStor 
  git commit -am"changing to $realfw" ; git checkout $realfw
+ ETCDCTL_API=3 /pace/putzpool.py
  datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
  logdata='Success upgrading from version '$currentfw' to version '$realfw;
  logthis=`./jsonthis3.sh Date $datenow time $timenow msg info user $userreq data $logdata code Upsu1010@@@$currentfw@$realfw`;
