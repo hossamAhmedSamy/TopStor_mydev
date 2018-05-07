@@ -33,7 +33,8 @@ then
 # pcs resource disable clusterip
 fi
 
-result=`ETCDCTL_API=3 ./nodesearch.py $myip`
+#result=`ETCDCTL_API=3 ./nodesearch.py $myip`
+result=`cat /pacedata/nodesearch.txt`
 freshcluster=0
 echo $result | grep nothing 
 if [ $? -eq 0 ];
@@ -42,7 +43,7 @@ then
  rm -rf /pacedata/running*
  freshcluster=1
  echo here=$clusterip
- ./etccluster.py 'new'
+ ETCDCTL_API=3 ./etccluster.py 'new'
  systemctl daemon-reload
  systemctl start etcd
  ETCDCTL_API=3 ./runningetcdnodes.py $myip
@@ -55,9 +56,10 @@ then
  pcs resource update clusterip nic="$enpdev" ip=$clusterip cidr_netmask=24
  if [ $? -ne 0 ];
  then
- pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24 op monitor on-fail=ignore
+ pcs resource create clusterip ocf:heartbeat:IPaddr2 nic="$enpdev" ip=$clusterip cidr_netmask=24 op monitor on-fail=restart
  fi
  pcs resource enable clusterip
+ pcs resource debug-start clusterip
  #sleep 3;
  ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
  ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
@@ -68,7 +70,7 @@ else
  then
   ETCDCTL_API=3 ./etcdget.py clusterip  > /pacedata/clusterip
   /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev
- ./etccluster.py 'local'
+ ETCDCTL_API=3 ./etccluster.py 'local'
  systemctl daemon-reload
  systemctl start etcd
 #  pcs resource disable clusterip
@@ -95,16 +97,17 @@ fi
 if [ $secdiff -ne 0 ]; then
  echo runningpools $seclastreboot > $runningpools
  ./keysend.sh &>/dev/null
- pcs resource create IPinit ocf:heartbeat:IPaddr nic="$ccnic" ip="10.11.11.254" cidr_netmask=24
+ pcs resource create IPinit ocf:heartbeat:IPaddr2 nic="$ccnic" ip="10.11.11.254" cidr_netmask=24 op monitor on-fail=restart
+ pcs resource debug-start IPinit
  rm -rf /TopStor/key/adminfixed.gpg && cp /TopStor/factory/factoryadmin /TopStor/key/adminfixed.gpg
- zpool export -a
+ zpool export -a 2>/dev/null
  echo $freshcluster | grep 1
  if [ $? -eq 0 ];
  then 
-  sh iscsirefresh.sh
-  sh listingtargets.sh
-  zpool import -a
-  ETCDCTL_API=3 ./putzpool.py
+#  sh iscsirefresh.sh
+#  sh listingtargets.sh
+  zpool import -a 2>/dev/null
+  ETCDCTL_API=3 ./putzpool.py 2>/dev/null
  fi
  touch /var/www/html/des20/Data/Getstatspid
 fi
