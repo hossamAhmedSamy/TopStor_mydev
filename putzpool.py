@@ -146,6 +146,7 @@ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 cmdline=['/pace/verdef.sh']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 vers=str(result.stdout)[2:][:-3]
-cmdline=['/pace/etcdput.py',myhost+'/hostfw/',vers]
+curver=vers.split()[0]
+cmdline=['/pace/etcdput.py',myhost+'/hostfw/'+curver,vers.replace(" ","/")]
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 

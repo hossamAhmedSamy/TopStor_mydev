@@ -1,3 +1,5 @@
 #!/bin/sh
 cd /TopStor
-/bin/git branch | grep \* | awk '{print $2}'
+rb=`/bin/git branch | grep \* | awk '{print $2}'`
+rbs=`/bin/git branch | sed 's/\*/ /g' `
+echo $rb $rbs
