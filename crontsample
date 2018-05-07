@@ -1,0 +1,7 @@
+@reboot /TopStor/initcron.sh
+<<<<<<< HEAD
+*/4 * * * * sh /pace/iscsirefresh.sh && sh /pace/listingtargets.sh && sh /pace/addtargetdisks.sh
+*/4 * * * * /TopStor/Snapshotnowhost dhcp17360/p1/hihi Minutely.2.4.na.na 1525615645
+=======
+*/4 * * * * sh /pace/iscsiwatchdog.sh
+>>>>>>> 7c92fef2a555ee4e89ec4617adfd7ac40f3cad1c

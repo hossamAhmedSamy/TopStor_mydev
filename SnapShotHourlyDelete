@@ -1,0 +1,23 @@
+#!/usr/local/bin/zsh
+cd /TopStor
+web='/usr/local/www/apache24/data/des19/Data/status.log';
+logging='/usr/local/www/apache24/data/des19/Data/currentinfo2.log'
+myhost=`hostname -s`
+rm txt/cronthis.txt;
+oper1=` echo $@ | awk '{print $1}'`;
+userreq=` echo $@ | awk '{print $2}'`;
+/TopStor/logmsg.sh Snap1043 info $userreq $oper1
+crontab -l > txt/cronthis.txt;
+snapsched=`echo $oper1 | awk -F@ '{print $2}'`;
+cat txt/cronthis.txt | grep -v $snapsched > txt/cronthis.txt
+crontab txt/cronthis.txt 2>txt/${0:2}$userreq.txt;
+err=`wc -c  txt/${0:2}$userreq.txt | awk '{print $1}'`;
+if [[ $err -ge  4  ]]; then
+/TopStor/logmsg.sh Snap1044 error $userreq $oper1
+else 
+/TopStor/logmsg.sh Snap1045 info $userreq $oper1
+fi;
+rm txt/${0:2}$userreq.txt
+oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging;
+ETCDCTL_API=3 /pace/etcddel.py run/$myhost --prefix
+ETCDCTL_API=3 /pace/putzpool.py
