@@ -1,27 +1,40 @@
 #!/bin/python3.6
 import subprocess,sys
 import json
-
-key=sys.argv[1]
-try:
- prefix=sys.argv[2]
-except:
- prefix=''
+if sys.argv[-1]=='--prefix':
+ pointer=-1
+else:
+ pointer=0
 endpoints=''
 data=json.load(open('/pacedata/runningetcdnodes.txt'));
 for x in data['members']:
  endpoints=endpoints+str(x['clientURLs'])[2:][:-2]
-cmdline=['etcdctl','--endpoints='+endpoints,'del',key,prefix]
+if len(sys.argv) > 2:
+ cmdline=['etcdctl','--endpoints='+endpoints,'get',sys.argv[1],'--prefix']
+else:
+ cmdline=['etcdctl','--endpoints='+endpoints,'get',sys.argv[1]]
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-try:
- if(prefix !=''):
-  mylist=str(result.stdout)[2:][:-3].split('\\n')
-  print(mylist)
-  zipped=zip(mylist[0::2],mylist[1::2])
-  for x in zipped:
-   print(x)
- else:
-  print(str(result.stdout).split(key)[1][2:][:-3])
- 
-except:
+mylist=str(result.stdout)[2:][:-3].split('\\n')
+if mylist==['']:
  print('-1')
+ exit()
+if len(sys.argv) > 2 and sys.argv[2] !='--prefix':
+ todel=[]
+ args=sys.argv[2:]
+ for x in args:
+  for y in mylist:
+   if x in y:
+    todel.append(y)
+else:
+ todel=mylist
+if todel == []:
+ print('-1')
+ exit()
+count=0
+for key in todel:
+ cmdline=['etcdctl','--endpoints='+endpoints,'del',key]
+ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ reslist=str(result.stdout)[2:][:-3]
+ if '1' in reslist:
+  count+=1
+print(count)

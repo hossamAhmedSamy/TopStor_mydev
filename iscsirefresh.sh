@@ -2,6 +2,11 @@ cd /pace
 iscsimapping='/pacedata/iscsimapping';
 iscsitargets='/pacedata/iscsitargets';
 declare -a iscsitargets=(`ETCDCTL_API=3 ./iscsiclients.py`);
+systemctl status target
+if [ $? -ne 0 ];
+then
+ systemctl start target
+fi
 
 /sbin/iscsiadm -m session --rescan &>/dev/null
 needrescan=0;
