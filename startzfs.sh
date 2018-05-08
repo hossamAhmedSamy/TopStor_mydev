@@ -30,21 +30,18 @@ systemctl status etcd &>/dev/null
 if [ $? -ne 0 ];
 then
   /sbin/pcs resource delete --force clusterip 2>/dev/null
-# pcs resource disable clusterip
 fi
 if [ ! -f /pacedata/nodesearch.txt ];
 then
- result=`ETCDCTL_API=3 ./nodesearch.py $myipi 2>/dev/null`
+ result=`ETCDCTL_API=3 ./nodesearch.py $myip 2>/dev/null`
  echo $result > /pacedata/nodesearch.txt
 else
  result=`cat /pacedata/nodesearch.txt`
 fi 
-#result=`cat /pacedata/nodesearch.txt`
 freshcluster=0
 echo $result | grep nothing 
 if [ $? -eq 0 ];
 then
-# rm -rf /var/lib/etcd/*
  rm -rf /pacedata/running*
  freshcluster=1
  echo here=$clusterip
@@ -55,11 +52,7 @@ then
  ETCDCTL_API=3 ./runningetcdnodes.py $myip
  ETCDCTL_API=3 ./etcddel.py run disk  
  ETCDCTL_API=3 ./etcddel.py known --prefix 
- /pace/iscsiwatchdog.sh
-# sleep 1 
-# ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
- 
-# /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev
+ /pace/iscsiwatchdog.sh 2>/dev/null
  pcs resource update clusterip nic="$enpdev" ip=$clusterip cidr_netmask=24 2>/dev/null
  if [ $? -ne 0 ];
  then
@@ -67,7 +60,6 @@ then
  fi
  pcs resource enable clusterip 2>/dev/null
  pcs resource debug-start clusterip 2>/dev/null
- #sleep 3;
  ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
  ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
  ETCDCTL_API=3 ./etcddel.py known --prefix
