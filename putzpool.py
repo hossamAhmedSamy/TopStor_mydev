@@ -90,7 +90,7 @@ try:
      z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/status',raidstat))
     for l in lsscsi:
      ll=l.split()
-     if ll[6] in c.split()[1]:
+     if ll[6] in c.split()[1] and len(ll[6]) > 3:
       diskc=lsscsi.index(l)
       if ll[3].split('-')[0] not in str(ata) or ll[7]=='-':
        status='FAULT'
@@ -125,8 +125,7 @@ except Exception as e:
 diskc=0
 for cc in lsscsi:
   c=cc.split()
-  if c[6] not in str(z):
-   print('hi',c)
+  if len(c[6]) < 3 or c[6] not in str(z):
    diskc=lsscsi.index(cc)
    cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/uuid',c[6]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
@@ -135,12 +134,11 @@ for cc in lsscsi:
    cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/size',c[7]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
    status='AVAIL'
-   if c[7]=='-':
+   if c[6]=='-':
     status='FAULT'
-    cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/status',status]
-    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/status',status]
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 
- 
 cmdline=['/pace/etcdput.py',myhost+'/stub/stub/stub/stub','stub']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 cmdline=['/pace/verdef.sh']
