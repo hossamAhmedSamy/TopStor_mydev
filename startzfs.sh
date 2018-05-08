@@ -29,12 +29,17 @@ fi
 systemctl status etcd &>/dev/null
 if [ $? -ne 0 ];
 then
-  /sbin/pcs resource delete --force clusterip
+  /sbin/pcs resource delete --force clusterip 2>/dev/null
 # pcs resource disable clusterip
 fi
-
-#result=`ETCDCTL_API=3 ./nodesearch.py $myip`
-result=`cat /pacedata/nodesearch.txt`
+if [ ! -f /pacedata/nodesearch.txt ];
+then
+ result=`ETCDCTL_API=3 ./nodesearch.py $myipi 2>/dev/null`
+ echo $result > /pacedata/nodesearch.txt
+else
+ result=`cat /pacedata/nodesearch.txt`
+fi 
+#result=`cat /pacedata/nodesearch.txt`
 freshcluster=0
 echo $result | grep nothing 
 if [ $? -eq 0 ];
@@ -44,6 +49,7 @@ then
  freshcluster=1
  echo here=$clusterip
  ETCDCTL_API=3 ./etccluster.py 'new'
+ chmod +r /etc/etcd/etcd.conf.yml
  systemctl daemon-reload
  systemctl start etcd
  ETCDCTL_API=3 ./runningetcdnodes.py $myip
@@ -53,13 +59,13 @@ then
 # ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
  
 # /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev
- pcs resource update clusterip nic="$enpdev" ip=$clusterip cidr_netmask=24
+ pcs resource update clusterip nic="$enpdev" ip=$clusterip cidr_netmask=24 2>/dev/null
  if [ $? -ne 0 ];
  then
- pcs resource create clusterip ocf:heartbeat:IPaddr2 nic="$enpdev" ip=$clusterip cidr_netmask=24 op monitor on-fail=restart
+ pcs resource create clusterip ocf:heartbeat:IPaddr2 nic="$enpdev" ip=$clusterip cidr_netmask=24 op monitor on-fail=restart 2>/dev/null
  fi
- pcs resource enable clusterip
- pcs resource debug-start clusterip
+ pcs resource enable clusterip 2>/dev/null
+ pcs resource debug-start clusterip 2>/dev/null
  #sleep 3;
  ETCDCTL_API=3 ./etcdput.py leader$myhost $myip
  ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
@@ -69,9 +75,11 @@ else
  if [ $? -ne 0 ];
  then
   ETCDCTL_API=3 ./etcdget.py clusterip  > /pacedata/clusterip
-  /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev
+  /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
  ETCDCTL_API=3 ./etccluster.py 'local'
+ chmod +r /etc/etcd/etcd.conf.yml
  systemctl daemon-reload
+ systemctl stop etcd 2>/dev/null
  systemctl start etcd
 #  pcs resource disable clusterip
  fi
@@ -97,8 +105,8 @@ fi
 if [ $secdiff -ne 0 ]; then
  echo runningpools $seclastreboot > $runningpools
  ./keysend.sh &>/dev/null
- pcs resource create IPinit ocf:heartbeat:IPaddr2 nic="$ccnic" ip="10.11.11.254" cidr_netmask=24 op monitor on-fail=restart
- pcs resource debug-start IPinit
+ pcs resource create IPinit ocf:heartbeat:IPaddr2 nic="$ccnic" ip="10.11.11.254" cidr_netmask=24 op monitor on-fail=restart 2>/dev/null
+ pcs resource debug-start IPinit 2>/dev/null
  rm -rf /TopStor/key/adminfixed.gpg && cp /TopStor/factory/factoryadmin /TopStor/key/adminfixed.gpg
  zpool export -a 2>/dev/null
  echo $freshcluster | grep 1

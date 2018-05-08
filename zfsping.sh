@@ -13,7 +13,7 @@ systemctl status etcd &>/dev/null
 if [ $? -eq 0 ];
 then
  runningcluster=1
- leader='"'`ETCDCTL_API=3 ./etcdget.py leader --prefix`'"'
+ leader='"'`ETCDCTL_API=3 ./etcdget.py leader --prefix 2>/dev/null`'"'
  echo $leader | grep '""'
  if [ $? -eq 0 ]; 
  then
@@ -35,7 +35,8 @@ else
  if [ $? -eq 0 ];
  then
   clusterip=`cat /pacedata/clusterip`
-  ./etccluster.py
+  ./etccluster.py 'new'
+  chmod +r /etc/etcd/etcd.conf.yml
   systemctl daemon-reload;
   systemctl start etcd;
   ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
@@ -66,17 +67,17 @@ fi
 #sh iscsirefresh.sh   &>/dev/null &
 #sh listingtargets.sh  &>/dev/null
 #./addtargetdisks.sh
-echo $runningcluster | grep 1
+echo $runningcluster | grep 1 &>/dev/null
 if [ $? -eq 0 ];
 then
  lsscsi=`lsscsi -i --size | md5sum`
- lsscsiold=`ETCDCTL_API=3 /pace/etcdget.py checks/$myhost/lsscsi `
+ lsscsiold=`ETCDCTL_API=3 /pace/etcdget.py checks/$myhost/lsscsi 2>/dev/null`
  echo $lsscsi | grep $lsscsiold
  if [ $? -eq 0 ];
  then
-  zpool1=`zpool status 2>/dev/null | md5sum`
-  zpool1old=`ETCDCTL_API=3 /pace/etcdget.py checks/$myhost/zpool `
-  echo $zpool1 | grep $zpool1old
+  zpool1=`zpool status 2>/dev/null 2>/dev/null | md5sum`
+  zpool1old=`ETCDCTL_API=3 /pace/etcdget.py checks/$myhost/zpool 2>/dev/null`
+  echo $zpool1 | grep $zpool1old &>/dev/null
   if [ $? -eq 0 ];
   then 
    echo lsscsi no change
