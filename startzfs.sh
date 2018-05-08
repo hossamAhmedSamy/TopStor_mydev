@@ -55,6 +55,7 @@ then
  ETCDCTL_API=3 ./runningetcdnodes.py $myip
  ETCDCTL_API=3 ./etcddel.py run disk  
  ETCDCTL_API=3 ./etcddel.py known --prefix 
+ /pace/iscsiwatchdog.sh
 # sleep 1 
 # ETCDCTL_API=3 ./etcdput.py clusterip $clusterip
  
