@@ -18,6 +18,7 @@ then
  systemctl start iscsi 
 fi
 
+echo /sbin/iscsiadm -m session --rescan
 /sbin/iscsiadm -m session --rescan &>/dev/null
 needrescan=0;
 myhost=`hostname -s`
@@ -35,8 +36,15 @@ do
 #  if [ $? -eq 0 ]; then
 #   echo herehihi
 #   #rm -rf /var/lib/iscsi/nodes/send_targets/$host* &>/dev/null
+   echo /sbin/iscsiadm -m discovery --portal $host --type sendtargets 
    hostiqn=`/sbin/iscsiadm -m discovery --portal $host --type sendtargets | awk '{print $2}'`
-#   /sbin/iscsiadm -m node --targetname $hostiqn --portal $host -u
+   if [ $? -ne 0 ];
+   then
+    ff=`ls /var/lib/iscsi/nodes/* | awk '{print $NF}' | grep $myhost` 
+    rm -rf /var/lib/iscsi/nodes/$ff 
+    hostiqn=`/sbin/iscsiadm -m discovery --portal $host --type sendtargets | awk '{print $2}'`
+   fi
+   echo /sbin/iscsiadm --mode node --targetname $hostiqn --portal $host --login
    /sbin/iscsiadm --mode node --targetname $hostiqn --portal $host --login
  fi
 done

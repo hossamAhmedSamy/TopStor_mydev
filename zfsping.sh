@@ -6,11 +6,12 @@ then
  echo here??
  exit
 fi
+needlocal=0
 myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{print $2 }'`
 myhost=`hostname -s`
 runningcluster=0
-systemctl status etcd &>/dev/null
-if [ $? -eq 0 ];
+netstat -ant | grep 2379 | grep $myip | grep LISTEN &>/dev/null
+if [ $? -eq 0 ]; 
 then
  runningcluster=1
  leader='"'`ETCDCTL_API=3 ./etcdget.py leader --prefix 2>/dev/null`'"'
@@ -23,7 +24,8 @@ then
  echo $leader | grep $myip
  if [ $? -ne 0 ];
  then
-   systemctl stop etcd
+  systemctl stop etcd 2>/dev/null
+  needlocal=1
  fi
  ETCDCTL_API=3 ./addknown.py
  ETCDCTL_API=3 ./allconfirmed.py
@@ -34,8 +36,9 @@ else
  echo $leader | grep Error  &>/dev/null
  if [ $? -eq 0 ];
  then
+   systemctl stop etcd 2>/dev/null
   clusterip=`cat /pacedata/clusterip`
-  ./etccluster.py 'new'
+  ETCDCTL_API=3 ./etccluster.py 'new' 2>/dev/null
   chmod +r /etc/etcd/etcd.conf.yml
   systemctl daemon-reload;
   systemctl start etcd;
@@ -50,20 +53,45 @@ else
   chmod g+r /var/www/html/des20/Data/*
   runningcluster=1
  else 
+  netstat -ant | grep 2378 | grep $myip | grep LISTEN &>/dev/null
+  if [ $? -ne 0 ];
+  then
+   needlocal=1
+  else
+   needlocal=2
+  fi
   echo checking leader
-  ETCDCTL_API=3 ./etcdget.py clusterip > /pacedata/clusterip 
-  known=`ETCDCTL_API=3 ./etcdget.py known --prefix 2>&1`
+  echo $needlocal
+  ETCDCTL_API=3 ./etcdget.py clusterip > /pacedata/clusterip
+  known=`ETCDCTL_API=3 ./etcdget.py known --prefix 2>/dev/null`
   echo $known | grep $myhost  &>/dev/null
   if [ $? -ne 0 ];
   then
    ETCDCTL_API=3 ./etcdput.py possible$myhost $myip
   else
-   ETCDCTL_API=3 ./changeetcd.py
-   ETCDCTL_API=3 ./receivelog.py
-   ETCDCTL_API=3 ./broadcastlog.py
+   echo I am possible
+   ETCDCTL_API=3 ./changeetcd.py 2>/dev/null
+   ETCDCTL_API=3 ./receivelog.py 2>/dev/null
+   ETCDCTL_API=3 ./broadcastlog.py 2>/dev/null
   fi
  fi 
 fi
+echo $needlocal | grep 1 &>/dev/null
+if [ $? -eq 0 ];
+then
+  ETCDCTL_API=3 ./etccluster.py 'local' 2>/dev/null
+  chmod +r /etc/etcd/etcd.conf.yml
+  systemctl daemon-reload
+  systemctl stop etcd 2>/dev/null
+  systemctl start etcd 2>/dev/null
+  exit
+fi
+echo $needlocal | grep 2 &>/dev/null
+if [ $? -eq 0 ];
+then
+ exit
+fi
+
 #sh iscsirefresh.sh   &>/dev/null &
 #sh listingtargets.sh  &>/dev/null
 #./addtargetdisks.sh
