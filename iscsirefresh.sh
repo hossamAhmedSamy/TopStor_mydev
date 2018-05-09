@@ -20,6 +20,12 @@ fi
 
 echo /sbin/iscsiadm -m session --rescan
 /sbin/iscsiadm -m session --rescan &>/dev/null
+if [ $? -ne 0 ];
+then
+ ff=`ls /var/lib/iscsi/nodes/* | awk '{print $NF}' | grep $myhost` 
+ echo ff=$ff
+ rm -rf /var/lib/iscsi/nodes/$ff 
+fi
 needrescan=0;
 myhost=`hostname -s`
 for hostline in "${iscsitargets[@]}"
@@ -36,14 +42,19 @@ do
 #  if [ $? -eq 0 ]; then
 #   echo herehihi
 #   #rm -rf /var/lib/iscsi/nodes/send_targets/$host* &>/dev/null
+   echo firsthost=$host
    echo /sbin/iscsiadm -m discovery --portal $host --type sendtargets 
-   hostiqn=`/sbin/iscsiadm -m discovery --portal $host --type sendtargets | awk '{print $2}'`
-   if [ $? -ne 0 ];
+   hostiqn=`/sbin/iscsiadm -m discovery --portal $host --type sendtargets 2>&1`
+   echo $hostiqn | grep stat
+   if [ $? -eq 0 ];
    then
+    echo ls /var/lib/iscsi/nodes/* \| awk '{print $NF}' \| grep $myhost
     ff=`ls /var/lib/iscsi/nodes/* | awk '{print $NF}' | grep $myhost` 
+    echo ff=$ff
     rm -rf /var/lib/iscsi/nodes/$ff 
-    hostiqn=`/sbin/iscsiadm -m discovery --portal $host --type sendtargets | awk '{print $2}'`
+    hostiqn=`/sbin/iscsiadm -m discovery --portal $host --type sendtargets 2>&1| awk '{print $2}'`
    fi
+   echo hostiqn=$hostiqn
    echo /sbin/iscsiadm --mode node --targetname $hostiqn --portal $host --login
    /sbin/iscsiadm --mode node --targetname $hostiqn --portal $host --login
  fi

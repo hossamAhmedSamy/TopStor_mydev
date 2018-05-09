@@ -52,6 +52,8 @@ then
  ETCDCTL_API=3 ./runningetcdnodes.py $myip
  ETCDCTL_API=3 ./etcddel.py run disk  
  ETCDCTL_API=3 ./etcddel.py known --prefix 
+ rm -rf /var/lib/iscsi/nodes/* 2>/dev/null
+ /pace/iscsiwatchdog.sh 2>/dev/null
  pcs resource update clusterip nic="$enpdev" ip=$clusterip cidr_netmask=24 2>/dev/null
  if [ $? -ne 0 ];
  then
