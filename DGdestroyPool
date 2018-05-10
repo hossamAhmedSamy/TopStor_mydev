@@ -15,7 +15,7 @@ then
  if [ $? -ne 0 ]; then
   /TopStor/logmsg.sh DGfa5 error $userreq $pool
  else
-  crontab -l | grep reboot  > /TopStordata/cronfile
+  crontab -l | grep -v Snap > /TopStordata/cronfile
   crontab -r 
   crontab /TopStordata/cronfile
 
