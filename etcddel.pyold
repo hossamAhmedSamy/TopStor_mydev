@@ -1,0 +1,42 @@
+#!/bin/python3.6
+import subprocess,sys
+import json
+
+key=sys.argv[1]
+try:
+ seed=sys.argv[2]
+ try:
+  prefix=sys.argv[3]
+ except:
+  prefix=seed
+  seed=''
+except:
+ seed=''
+ prefix=''
+endpoints=''
+data=json.load(open('/pacedata/runningetcdnodes.txt'));
+for x in data['members']:
+ endpoints=endpoints+str(x['clientURLs'])[2:][:-2]
+cmdline=['etcdctl','--endpoints='+endpoints,'get',key,prefix]
+result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+mylist=str(result.stdout)[2:][:-3].split('\\n')
+print('original',mylist)
+if seed != '':
+ mylist=[x for x in mylist if seed in x]
+for x in mylist:
+ print(x)
+exit()
+cmdline=['etcdctl','--endpoints='+endpoints,'del',key,prefix]
+result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+try:
+ if(prefix !=''):
+  mylist=str(result.stdout)[2:][:-3].split('\\n')
+  print(mylist)
+  zipped=zip(mylist[0::2],mylist[1::2])
+  for x in zipped:
+   print(x)
+ else:
+  print(str(result.stdout).split(key)[1][2:][:-3])
+ 
+except:
+ print('-1')
