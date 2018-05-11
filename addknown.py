@@ -18,7 +18,9 @@ try:
   print('result=',result)
   cmdline=['etcdctl','--endpoints='+endpoints,'put','known/'+mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  cmdline=['./etcdput.py','change/'+mtuple(x)[0]+'/booted','done']
+  cmdline=['./etcdput.py','change/'+mtuple(x)[0]+'/booted',mtuple(x)[1]]
+  subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline=['./iscsiwatchdog.sh','2>/dev/null']
   subprocess.run(cmdline,stdout=subprocess.PIPE)
   print(result)
 except:
