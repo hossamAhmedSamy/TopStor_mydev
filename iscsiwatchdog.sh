@@ -7,4 +7,5 @@ then
  sh /pace/iscsirefresh.sh
  sh /pace/listingtargets.sh
  sh /pace/addtargetdisks.sh
+ ETCDCTL_API=3 /pace/putzpool.py
 fi

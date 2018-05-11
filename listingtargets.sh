@@ -31,12 +31,12 @@ for host in "${hosts[@]}"; do
   rm -rf $( ls /pacedata/pools/* | grep "$host") &>/dev/null
   cd /pace
  else
-  sesid=`iscsiadm -m node | grep $host | awk '{print $1}' | awk -F',' '{print $2}'`
-  sesinfo=`iscsiadm -m session -r $sesid -P 3 | grep Lun | awk -F'csi' '{print $2}' | awk '{print $1}' | head -1`
+  sesid=`/sbin/iscsiadm -m node | grep $host | awk '{print $1}' | awk -F',' '{print $2}'`
+  sesinfo=`/sbin/iscsiadm -m session -r $sesid -P 3 | grep Lun | awk -F'csi' '{print $2}' | awk '{print $1}' | head -1`
   #alldevdisk=(`ls -l /dev/disk/by-path/ | grep  "$host"  | grep -v part | grep -v wwn | awk '{print $11}'`)
   alldevdisk=(`lsblk -Sn | grep ${sesinfo}\: | awk '{print $1}'`)
   echo alldev=${alldevdisk[@]}
-  alldev2=`zpool status | grep scsi | awk '{print $1" "$2}'`
+  alldev2=`/sbin/zpool status | grep scsi | awk '{print $1" "$2}'`
   for devdisk in "${alldevdisk[@]}"; do
     diskstatus='free'
 #   diskid=`ls -l /dev/disk/by-id/ | grep  "$devdisk" | grep -v wwn | grep -v part | awk '{print $9}'`
