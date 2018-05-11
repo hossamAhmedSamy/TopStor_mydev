@@ -1,15 +1,25 @@
 #!/bin/sh
 rm -rf /pacedata/nodesearch.txt
+touch /pacedata/forzfsping
 pcs property set stonith-enabled=false
-myhost=`hostname -s`
-myip=`cat /etc/hosts | grep $myhost | head -1 | awk '{print $1}'`
-#ETCDCTL_API=3 /pace/nodesearch.py  $myip  > /pacedata/nodesearch.txt
-#sh /pace/iscsirefresh.sh
-#sh /pace/listingtargets.sh
-#sh /pace/addtargetdisks.sh
+nic=`/sbin/pcs resource show CC | grep nic | awk -F'nic=' '{print $2}' | awk '{print $1}'`
+while [ $? -ne 0 ];
+do
+sleep 1;
+nic=`/sbin/pcs resource show CC | grep nic | awk -F'nic=' '{print $2}' | awk '{print $1}'`
+done
+/sbin/pcs resource create IPinit ocf:heartbeat:IPaddr2 nic=$nic ip="10.11.11.254" cidr_netmask=24 op monitor on-fail=restart 2>/root/tmpinit
+/sbin/pcs resource restart keyweb
+while [ $? -ne 0 ];
+do
+sleep 1;
+/sbin/pcs resource restart keyweb
+done
 sleep 120 
 /sbin/pcs resource delete --force IPinit
 /sbin/ip addr del 10.11.11.254/24 dev enp0s8 
+rm -rf /pacedata/forzfsping
+rm -rf /pacedata/forstartzfs
 /TopStor/factory.sh
 
 
