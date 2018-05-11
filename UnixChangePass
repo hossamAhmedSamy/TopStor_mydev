@@ -22,7 +22,13 @@ oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $
 cp $logthis $logging 2>/dev/null ; rm -rf $logthis 2>/dev/null;
 usermod  -p $userpass $username 2> $txtres
 pas=`echo $userpass | openssl enc -e -base64 -aes-256-ctr -nopad -nosalt -k '#skMe22'$username`
+echo $username | grep -w admin
+if [ $? -eq 0 ];
+then
+ usermod $username -c"AdminStor"$pas
+else
  usermod $username -c"TopStor"$pas
+fi
 ( echo $userpass; echo $userpass) | /bin/smbpasswd -s -a $username 2>> $txtres
 cat $txtres >> $passchange 
 cat $txtres 
