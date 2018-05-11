@@ -99,6 +99,7 @@ else
   systemctl daemon-reload 2>/dev/null
   systemctl stop etcd 2>/dev/null
   systemctl start etcd 2>/dev/null
+  ETCDCTL_API=3 ./etcdputlocal.py $myip 'local/'$myhost $myip
   echo etcd started as local >>/root/tmp2
   rm -rf /var/lib/iscsi/nodes/* 2>/dev/null
   echo starting iscsiwaatchdog >>/root/tmp2

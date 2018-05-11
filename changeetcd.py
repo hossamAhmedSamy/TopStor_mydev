@@ -13,7 +13,10 @@ if mylist==['']:
 for x in mylist:
  y=mtuple(x)
  z=y[0].replace('change/','')
- if 'disk' not in z :
+ if 'booted' in z:
+  cmdline=['/pace/iscsiwatchdog.sh']
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ if 'stub' in z :
   with open('/pacedata/'+z,'w') as f:
    f.write(y[1])
  cmdline=['/pace/etcdput.py','confirmed/'+myhost+'/'+z, y[1]]
