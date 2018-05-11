@@ -88,15 +88,20 @@ else
  cat /pacedata/runningetcdnodes.txt | grep $myhost &>/dev/null
  if [ $? -ne 0 ];
  then
+ echo getting clusterip from another leader >>/root/tmp2
   ETCDCTL_API=3 ./etcdget.py clusterip 2>/dev/null > /pacedata/clusterip
   /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
+ echo starting etcd as local >>/root/tmp2
  ETCDCTL_API=3 ./etccluster.py 'local' 2>/dev/null
  chmod +r /etc/etcd/etcd.conf.yml 2>/dev/null
  systemctl daemon-reload 2>/dev/null
  systemctl stop etcd 2>/dev/null
  systemctl start etcd 2>/dev/null
+ echo etcd started as local >>/root/tmp2
  rm -rf /var/lib/iscsi/nodes/* 2>/dev/null
+ echo starting iscsiwaatchdog >>/root/tmp2
  /pace/iscsiwatchdog.sh 2>/dev/null
+ echo started iscsiwaatchdog >>/root/tmp2
 #  pcs resource disable clusterip
  fi
 fi
