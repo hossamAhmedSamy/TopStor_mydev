@@ -18,6 +18,28 @@ try:
   print('result=',result)
   cmdline=['etcdctl','--endpoints='+endpoints,'put','known/'+mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline=['./etcdput.py','change/'+mtuple(x)[0]+'/booted','done']
+  subprocess.run(cmdline,stdout=subprocess.PIPE)
   print(result)
 except:
  print('possible is empty')
+cmdline=['./etcdget.py','known','--prefix']
+knownres=subprocess.run(cmdline,stdout=subprocess.PIPE)
+known=str(knownres.stdout)[2:][:-3].replace('known/','').split('\\n')
+for kno in known:
+ kn=mtuple(kno) 
+ cmdline=['./etcdgetlocal.py',str(kn[1]),'local','--prefix','2>/dev/null']
+ heartres=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ heart=str(heartres.stdout)[2:][:-3].split('\\n')
+ if(heart == ['-1']):
+  cmdline=['/pace/hostlost.sh',str(kn[0])]
+  subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline=['/pace/etcddel.py','known/'+str(kn[0])]
+  subprocess.run(cmdline,stdout=subprocess.PIPE)
+ elif (mtuple(heart[0])[1] not in str(kn[1])):
+  cmdline=['/pace/hostlost.sh',str(kn[0])]
+  subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline=['/pace/etcddel.py','known/'+str(kn[0])]
+  subprocess.run(cmdline,stdout=subprocess.PIPE)
+   
+ 

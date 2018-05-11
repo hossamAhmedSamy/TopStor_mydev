@@ -10,9 +10,9 @@ known=str(result.stdout).replace('known/','')[2:][:-3].split('\\n')
 if known==['']:
  exit();
 lenknown=len(known)
-cmdline=['/pace/etcdget.py','conf','--prefix']
+cmdline=['/pace/etcdget.py','confirmed','--prefix']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-confirmed=str(result.stdout).replace('confirm/','')[2:][:-3].split('\\n')
+confirmed=str(result.stdout).replace('confirmed/','')[2:][:-3].split('\\n')
 if confirmed==['']:
  exit()
 lenconf=len(confirmed)
@@ -29,17 +29,5 @@ for c in change:
  if len(yy)>=len(known):
   cmdline=['/pace/etcddel.py','change/'+ch[0],'--prefix']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  for kn in known:
-   kno=mtuple(kn)
-   cmdline=['/pace/etcddel.py','confirmed/'+kno[0]+'/'+ch[0],'--prefix']
-   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
- 
-#print('known=',known)
-#for x in known:
-# y=mtuple(x)
-# z=y[0].replace('change/','')
-# if 'disk' not in z :
-#  with open('/pacedata/'+z,'w') as f:
-#   f.write(y[1])
-# cmdline=['/pace/etcdput.py','confirmed/'+myhost+'/'+z, y[1]]
-# result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline=['/pace/etcddel.py','confirmed/',ch[0],]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
