@@ -15,6 +15,7 @@ else:
  cmdline=['etcdctl','--endpoints='+endpoints,'get',sys.argv[1]]
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 mylist=str(result.stdout)[2:][:-3].split('\\n')
+zipped=zip(mylist[0::2],mylist[1::2])
 if mylist==['']:
  print('-1')
  exit()
@@ -22,9 +23,9 @@ if len(sys.argv) > 2 and sys.argv[2] !='--prefix':
  todel=[]
  args=sys.argv[2:]
  for x in args:
-  for y in mylist:
-   if x in y:
-    todel.append(y)
+  for y in zipped:
+   if x in str(y):
+    todel.append(y[0])
 else:
  todel=mylist
 if todel == []:

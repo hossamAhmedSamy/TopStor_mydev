@@ -11,7 +11,8 @@ fpath='/var/www/html/des20/Data/'
 cmdline=['/pace/etcdget.py','broadcast/confirmed','--prefix']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 conf=str(result.stdout).replace('broadcast/confirmed/','')[2:][:-3].split('\\n')
-if myhost in str(conf):
+print('conf==',str(conf))
+if myhost in str(conf) or conf==['']:
  exit()
 #############
 cmdline=['/pace/etcdget.py','known','--prefix']

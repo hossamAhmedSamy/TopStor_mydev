@@ -28,8 +28,11 @@ then
  fi
  echo adding known from list of possbiles >> /root/zfspingtmp
  ETCDCTL_API=3 ./addknown.py 2>/dev/null
+ echo checking confirmed >> /root/zfspingtmp
  ETCDCTL_API=3 ./allconfirmed.py 2>/dev/null
+ echo broadcasting log >> /root/zfspingtmp
  ETCDCTL_API=3 ./broadcastlog.py 2>/dev/null
+ echo receiving log >> /root/zfspingtmp
  ETCDCTL_API=3 ./receivelog.py 2>/dev/null
  echo after checking logs and broadcasts..etc >> /root/zfspingtmp
 else
@@ -122,7 +125,7 @@ echo $runningcluster,Yes I am a primary so will collect the scsi config for etcd
  if [ $? -eq 0 ];
  then
   echo collecting the zpool status too as long the scsi config stabilized >> /root/zfspingtmp
-  zpool=`zpool status 2>/dev/null`
+  zpool=`/sbin/zpool status 2>/dev/null`
   if [[ -z $zpool ]];
    then
     zpool='0'
@@ -188,13 +191,13 @@ then
    if [ $? -ne 0 ]; then
     diskid=`python3.6 diskinfo.py /pacedata/disklist.txt $spare`
     /TopStor/logmsg.sh Diwa4 warning system $diskid $hostnam
-    zpool remove $pool $spare 2>/dev/null;
+    /sbin/zpool remove $pool $spare 2>/dev/null;
     if [ $? -eq 0 ]; then
      /TopStor/logmsg.sh Disu4 info system $diskid $hostnam 
      cachestate=1
     else 
      /TopStor/logmsg.sh Dist5 info system $diskid  $hostnam
-     zpool offline $pool $spare 2>/dev/null
+     /sbin/zpool offline $pool $spare 2>/dev/null
      /TopStor/logmsg.sh Disu5 info system $diskid $hostnam 
     fi
    fi
@@ -233,7 +236,7 @@ then
      /TopStor/logmsg.sh Dist3 info system $diskidf $hostnam
      /sbin/zpool detach $pool $faildisk &>/dev/null
      /TopStor/logmsg.sh Disu3 info system $diskidf $hostnam
-     ETCDCTL_API=3 /pace/etcddel.py run/$myhost --prefix
+     ETCDCTL_API=3 /pace/etcddel.py run disk
      ETCDCTL_API=3 /pace/putzpool.py run/$myhost --prefix 2>/dev/null
     fi
     diskstatus=`echo $diskpath | awk -F'/' '{OFS=FS;$NF=""; print}' `'status'
@@ -241,7 +244,7 @@ then
     echo $diskfs | grep ONLINE
     if [ $? -eq 0 ];
     then
-     ETCDCTL_API=3 ./etcddel.py run/myhost --prefix
+     ETCDCTL_API=3 ./etcddel.py run disk
      ETCDCTL_API=3 ./putzpool.py 2>/dev/null
     fi
    fi
@@ -271,7 +274,7 @@ then
  echo after long operations due to a faulty disk is inside a pool>> /root/zfspingtmp
  ETCDCTL_API=3 /pace/etcddel.py run/$myhost --prefix
  ETCDCTL_API=3 /pace/putzpool.py run/$myhost --prefix 2>/dev/null
- zpool1=`zpool status 2>/dev/null | md5sum | awk '{print $1}'`
+ zpool1=`/sbin/zpool status 2>/dev/null | md5sum | awk '{print $1}'`
  ETCDCTL_API=3 /pace/etcdput.py checks/$myhost/zpool $zpool1 
  lsscsi=`lsscsi -i --size | md5sum | awk '{print $1}'`
  ETCDCTL_API=3 /pace/etcdput.py checks/$myhost/lsscsi $lsscsi 

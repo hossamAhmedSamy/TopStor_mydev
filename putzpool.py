@@ -15,6 +15,17 @@ with open('/etc/passwd') as f:
 cmdline=['lsscsi','-i','--size']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 lsscsi=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
+pscsi=lsscsi
+for x in pscsi:
+ for y in pscsi:
+  if (x != y):
+   if(x.split()[3] == y.split()[3]):
+    if (len(x.split()[6]) > 3):
+     lsscsi.remove(y)
+    else:
+     lsscsi.remove(x)
+print('lsscsi=',lsscsi)
+
 ata=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' not in x]
 cmdline=['/sbin/zpool','status']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
