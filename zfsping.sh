@@ -1,4 +1,5 @@
 #!/usr/bin/sh
+cd /pace
 export ETCDCTL_API=3
 cd /pace
 if [ -f /pacedata/forzfsping ];
@@ -13,7 +14,7 @@ myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{pri
 myhost=`hostname -s`
 runningcluster=0
 echo check if I primary etcd >> /root/zfspingtmp
-netstat -ant | grep 2379 | grep $myip | grep LISTEN &>/dev/null
+netstat -ant | grep 2379 | grep LISTEN &>/dev/null
 if [ $? -eq 0 ]; 
 then
  echo I am primary etcd >> /root/zfspingtmp
