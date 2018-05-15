@@ -57,6 +57,7 @@ else
   echo importing all pools >> /root/zfspingtmp
   /sbin/zpool import -a &>/dev/null
   echo running putzpool and nfs >> /root/zfspingtmp
+  ETCDCTL_API=3 ./etcddel.py run disk 2>/dev/null 
   ETCDCTL_API=3 ./putzpool.py 2>/dev/null
   systemctl start nfs 2>/dev/null
   chgrp apache /var/www/html/des20/Data/* 2>/dev/null
@@ -131,6 +132,7 @@ echo $runningcluster,Yes I am a primary so will collect the scsi config for etcd
     zpool='0'
     echo no pools are found >> /root/zfspingtmp
   fi
+  echo old zpool and new zpool status compare >> /root/zfspingtmp
   zpool1=`echo $zpool | md5sum | awk '{print $1}'`
   zpool1old=`ETCDCTL_API=3 /pace/etcdget.py checks/$myhost/zpool 2>/dev/null`
   if [[ -z $zpool1old ]];
@@ -142,7 +144,14 @@ echo $runningcluster,Yes I am a primary so will collect the scsi config for etcd
   if [ $? -eq 0 ];
   then 
    echo no new change either in scsi nor in a zpool>> /root/zfspingtmp
-   exit
+   echo $zpool | grep -E "FAIL|OFFL|was " &>/dev/null
+   if [ $? -ne 0 ];
+   then
+    echo no new change either in scsi nor in a zpool..exiting>> /root/zfspingtmp
+    exit
+   fi
+    echo no new changes either in scsi nor in a zpool. but zpool degraded>> /root/zfspingtmp
+   
   else
    echo collecting new change in pool>> /root/zfspingtmp
    ETCDCTL_API=3 /pace/etcdput.py checks/$myhost/zpool $zpool1
@@ -185,8 +194,9 @@ then
  ids=`lsblk -Sn -o serial`
  for pool in "${pools[@]}"; do
  echo checking if a fualty disk is part of a pool>> /root/zfspingtmp
- spares=(`/sbin/zpool status $pool 2>/dev/null | grep scsi | grep -v OFFLINE | awk '{print $1}'`)  
+ spares=(`/sbin/zpool status $pool 2>/dev/null | grep scsi | grep -v OFFLINE | grep -v ONLINE | awk '{print $1}'`)  
   for spare in "${spares[@]}"; do
+   echo disk $spare is faulty >> /root/zfspingtmp
    echo $ids | grep ${spare:8} &>/dev/null
    if [ $? -ne 0 ]; then
     diskid=`python3.6 diskinfo.py /pacedata/disklist.txt $spare`
@@ -204,41 +214,44 @@ then
   done 
  done
  for pool in "${pools[@]}"; do
+  echo checking if a offline disk in the pool>> /root/zfspingtmp
   singledisk=`/sbin/zpool list -Hv $pool 2>/dev/null | wc -l`
   zpool=`/sbin/zpool status $pool 2>/dev/null`
   if [ $singledisk -gt 3 ]; then
    echo "${zpool[@]}" | grep -E "FAULT|OFFLI" &>/dev/null
    if [ $? -eq 0 ];
    then
-    ETCDCTL_API=3 /pace/etcddel.py run/$myhost --prefix
-    ETCDCTL_API=3 /pace/putzpool.py run/$myhost --prefix 2>/dev/null
+    echo found FAULT/OFFLINE disk in the pool>> /root/zfspingtmp
     faildisk=`echo "${zpool[@]}" | grep -E "FAULT|OFFLI" | awk '{print $1}'`
     diskpath=`ETCDCTL_API=3 /pace/diskinfo.py run getkey $faildisk `
-    echo $diskpath
-    echo faildisk=$faildisk
     diskidf=`echo $diskpath | awk -F'/' '{print $(NF-1)}'`
-    echo diskidf=$diskidf
     ETCDCTL_API=3 /pace/diskinfo.py run getkey $diskpath | awk -F'/' '{print $(NF-1)}'
     /TopStor/logmsg.sh Difa1 error system $diskidf $hostnam
+    echo checking spare disk in the pool>> /root/zfspingtmp
     sparedisk=`echo "${zpool[@]}" | grep "AVAIL" | awk '{print $1}' | head -1`
-    echo sparedisk=$sparedisk
     sparedisk=`echo "${zpool[@]}" | grep "AVAIL" | awk '{print $1}' | head -1`
-    if [ ! -z $sparedisk ]; then
+    if [ ! -z $sparedisk  ]; then
       diskids=`ETCDCTL_API=3 /pace/diskinfo.py run getkey $sparedisk | awk -F'/' '{print $(NF-1)}'`
      echo diskids=$diskids
      /TopStor/logmsg.sh Dist2 info system $diskidf $diskids $hostnam
      echo /sbin/zpool offline $pool $faildisk 2>/dev//null
      /sbin/zpool offline $pool $faildisk 2>/dev/null
+     echo replacing offline/faulty with spare in the pool>> /root/zfspingtmp
      echo /sbin/zpool replace $pool $faildisk $sparedisk $hostnam 2>/dev/null
      /sbin/zpool replace $pool $faildisk $sparedisk 2>/dev/null
-     echo is repalced ?
      /TopStor/logmsg.sh Disu2 info system $diskidf $diskidf $hostnam
      /TopStor/logmsg.sh Dist3 info system $diskidf $hostnam
+     echo detaching OFFLINE disk with spare in the pool>> /root/zfspingtmp
      /sbin/zpool detach $pool $faildisk &>/dev/null
      /TopStor/logmsg.sh Disu3 info system $diskidf $hostnam
-     ETCDCTL_API=3 /pace/etcddel.py run disk
-     ETCDCTL_API=3 /pace/putzpool.py run/$myhost --prefix 2>/dev/null
+    else
+     echo no spare disk >> /root/zfspingtmp
+     echo detaching OFFLINE disk with spare in the pool>> /root/zfspingtmp
+     /sbin/zpool detach $pool $faildisk &>/dev/null
+     /TopStor/logmsg.sh Disu3 info system $diskidf $hostnam
     fi
+    ETCDCTL_API=3 /pace/etcddel.py run disk
+    ETCDCTL_API=3 /pace/putzpool.py run/$myhost --prefix 2>/dev/null
     diskstatus=`echo $diskpath | awk -F'/' '{OFS=FS;$NF=""; print}' `'status'
     diskfs=`ETCDCTL_API=3 /pace/diskinfo.py run getvalue $diskstatus `
     echo $diskfs | grep ONLINE
@@ -272,8 +285,8 @@ then
   fi
  done
  echo after long operations due to a faulty disk is inside a pool>> /root/zfspingtmp
- ETCDCTL_API=3 /pace/etcddel.py run/$myhost --prefix
- ETCDCTL_API=3 /pace/putzpool.py run/$myhost --prefix 2>/dev/null
+ ETCDCTL_API=3 /pace/etcddel.py run disk
+ ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
  zpool1=`/sbin/zpool status 2>/dev/null | md5sum | awk '{print $1}'`
  ETCDCTL_API=3 /pace/etcdput.py checks/$myhost/zpool $zpool1 
  lsscsi=`lsscsi -i --size | md5sum | awk '{print $1}'`

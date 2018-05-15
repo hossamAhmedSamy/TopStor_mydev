@@ -3,6 +3,7 @@ cd /pace
 ps -ef | grep zfsping.sh | grep -v tty | grep -v grep
 if [ $? -eq 0 ];
 then
+ rm -rf /pacedata/forzfsping 2>/dev/null
  exit
 fi
 touch /pacedata/forzfsping
@@ -67,6 +68,7 @@ then
  ETCDCTL_API=3 ./runningetcdnodes.py $myip 2>/dev/null
  ETCDCTL_API=3 ./etcddel.py run disk 2>/dev/null 
  ETCDCTL_API=3 ./etcddel.py known --prefix 2>/dev/null 
+ ETCDCTL_API=3 ./etcddel.py possbile --prefix 2>/dev/null 
  rm -rf /var/lib/iscsi/nodes/* 2>/dev/null
  echo startiscsiwatchdog >>/root/tmp2
  /pace/iscsiwatchdog.sh 2>/dev/null
@@ -84,6 +86,7 @@ then
  ETCDCTL_API=3 ./etcdput.py leader$myhost $myip 2>/dev/null
  ETCDCTL_API=3 ./etcdput.py clusterip $clusterip 2>/dev/null
  ETCDCTL_API=3 ./etcddel.py known --prefix 2>/dev/null
+ ETCDCTL_API=3 ./etcddel.py possible --prefix 2>/dev/null
  echo deleted knowns and added leader >>/root/tmp2
 else
  echo found other host as primary.. checking if it shares same host name>>/root/tmp2
@@ -143,11 +146,12 @@ echo i all zpool exported >>/root/tmp2
 #  sh listingtargets.sh
   echo freshcluster=$freshcluster so zpool importing >>/root/tmp2
   zpool import -a 2>/dev/null
+  ETCDCTL_API=3 ./etcddel.py run disk 2>/dev/null 
   ETCDCTL_API=3 ./putzpool.py 2>/dev/null
   echo ran putzpool >>/root/tmp2
  fi
  touch /var/www/html/des20/Data/Getstatspid
 fi
 #zpool export -a
-rm -rf /pacedata/startzfs 2>/dev/null
-
+sleep 10
+rm -rf /pacedata/forzfsping 2>/dev/null
