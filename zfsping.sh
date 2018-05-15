@@ -202,6 +202,8 @@ then
     diskid=`python3.6 diskinfo.py /pacedata/disklist.txt $spare`
     /TopStor/logmsg.sh Diwa4 warning system $diskid $hostnam
     /sbin/zpool remove $pool $spare 2>/dev/null;
+    ETCDCTL_API=3 /pace/etcddel.py run disk
+    ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
     if [ $? -eq 0 ]; then
      /TopStor/logmsg.sh Disu4 info system $diskid $hostnam 
      cachestate=1
@@ -239,6 +241,8 @@ then
      echo replacing offline/faulty with spare in the pool>> /root/zfspingtmp
      echo /sbin/zpool replace $pool $faildisk $sparedisk $hostnam 2>/dev/null
      /sbin/zpool replace $pool $faildisk $sparedisk 2>/dev/null
+     ETCDCTL_API=3 /pace/etcddel.py run disk
+     ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
      /TopStor/logmsg.sh Disu2 info system $diskidf $diskidf $hostnam
      /TopStor/logmsg.sh Dist3 info system $diskidf $hostnam
      echo detaching OFFLINE disk with spare in the pool>> /root/zfspingtmp
@@ -248,6 +252,8 @@ then
      echo no spare disk >> /root/zfspingtmp
      echo detaching OFFLINE disk with spare in the pool>> /root/zfspingtmp
      /sbin/zpool detach $pool $faildisk &>/dev/null
+     ETCDCTL_API=3 /pace/etcddel.py run disk
+     ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
      /TopStor/logmsg.sh Disu3 info system $diskidf $hostnam
     fi
     ETCDCTL_API=3 /pace/etcddel.py run disk
@@ -265,6 +271,8 @@ then
    if [ $? -eq 0 ]; then
     faildisk=`/sbin/zpool status $pool 2>/dev/null | grep "was /dev" | awk -F'-id/' '{print $2}' | awk -F'-part' '{print $1}'`;
     /sbin/zpool detach $pool $faildisk &>/dev/null;
+    ETCDCTL_API=3 /pace/etcddel.py run disk
+    ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
     #/sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool;
     cachestate=1;
    fi 
@@ -272,6 +280,8 @@ then
    if [ $? -eq 0 ]; then
     faildisk=`/sbin/zpool status $pool 2>/dev/null| grep "was /dev/s" | awk -F'was ' '{print $2}'`;
     /sbin/zpool detach $pool $faildisk &>/dev/null;
+    ETCDCTL_API=3 /pace/etcddel.py run disk
+    ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
     #/sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool ;
     cachestate=1;
    fi 
@@ -279,17 +289,12 @@ then
    if [ $? -eq 0 ]; then
     faildisk=`/sbin/zpool status $pool 2>/dev/null| grep UNAVAIL | awk '{print $1}'`;
     /sbin/zpool detach $pool $faildisk &>/dev/null;
+    ETCDCTL_API=3 /pace/etcddel.py run disk
+    ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
     #/sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool;
     cachestate=1;
    fi 
   fi
  done
  echo after long operations due to a faulty disk is inside a pool>> /root/zfspingtmp
- ETCDCTL_API=3 /pace/etcddel.py run disk
- ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
- zpool1=`/sbin/zpool status 2>/dev/null | md5sum | awk '{print $1}'`
- ETCDCTL_API=3 /pace/etcdput.py checks/$myhost/zpool $zpool1 
- lsscsi=`lsscsi -i --size | md5sum | awk '{print $1}'`
- ETCDCTL_API=3 /pace/etcdput.py checks/$myhost/lsscsi $lsscsi 
- echo after registering the new changes in etcd>> /root/zfspingtmp
 fi

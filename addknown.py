@@ -22,7 +22,8 @@ if possible != ['']:
   subprocess.run(cmdline,stdout=subprocess.PIPE)
   cmdline=['./iscsiwatchdog.sh','2>/dev/null']
   subprocess.run(cmdline,stdout=subprocess.PIPE)
-  print(result)
+  cmdline=['./putzpool.py','2>/dev/null']
+  subprocess.run(cmdline,stdout=subprocess.PIPE)
 else:
  print('possible is empty')
 cmdline=['./etcdget.py','known','--prefix']
