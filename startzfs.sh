@@ -1,13 +1,5 @@
 #!/bin/sh
 cd /pace
-ps -ef | grep zfsping.sh | grep -v tty | grep -v grep
-if [ $? -eq 0 ];
-then
- rm -rf /pacedata/forzfsping 2>/dev/null
- exit
-fi
-touch /pacedata/forzfsping
-touch /pacedata/startzfs
 echo starting startzfs > /root/tmp2
 iscsimapping='/pacedata/iscsimapping';
 runningpools='/pacedata/pools/runningpools';

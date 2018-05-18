@@ -26,6 +26,8 @@ if possible != ['']:
   subprocess.run(cmdline,stdout=subprocess.PIPE)
   cmdline=['./putzpool.py','2>/dev/null']
   subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline=['/bin/sleep','10']
+  subprocess.run(cmdline,stdout=subprocess.PIPE)
 else:
  print('possible is empty')
 cmdline=['./etcdget.py','known','--prefix']
@@ -43,10 +45,14 @@ if known != ['']:
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    cmdline=['/pace/etcddel.py','known/'+str(kn[0])]
    subprocess.run(cmdline,stdout=subprocess.PIPE)
+   cmdline=['/bin/sleep','10']
+   subprocess.run(cmdline,stdout=subprocess.PIPE)
   elif (mtuple(heart[0])[1] not in str(kn[1])):
    cmdline=['/pace/hostlost.sh',str(kn[0])]
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    cmdline=['/pace/etcddel.py','known/'+str(kn[0])]
+   subprocess.run(cmdline,stdout=subprocess.PIPE)
+   cmdline=['/bin/sleep','10']
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    
  

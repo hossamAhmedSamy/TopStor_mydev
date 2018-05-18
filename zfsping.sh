@@ -1,14 +1,22 @@
 #!/usr/bin/sh
 cd /pace
+echo $$ > /var/run/zfsping.pid
 export ETCDCTL_API=3
 cd /pace
-if [ -f /pacedata/forzfsping ];
-then
- touch /pacedata/forstartzfs
-echo cannot run now > /root/zfspingtmp
- exit
-fi
-echo start zfsping > /root/zfspingtmp
+rm -rf /pacedata/startzfsping 2>/dev/null
+while [ ! -f /pacedata/startzfsping ];
+do
+ sleep 1;
+ echo cannot run now >> /root/zfspingtmp
+done
+echo startzfs run >> /root/zfspingtmp
+/pace/startzfs.sh
+sleep 5
+date=`date `
+echo starting in $date >> /root/zfspingtmp
+while true;
+do
+sleep 5
 needlocal=0
 myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{print $2 }'`
 myhost=`hostname -s`
@@ -102,19 +110,19 @@ then
   systemctl stop etcd 2>/dev/null
   systemctl start etcd 2>/dev/null
   echo done and exit >> /root/zfspingtmp
-  exit
+  continue 
 fi
 echo $needlocal | grep 2 &>/dev/null
 if [ $? -eq 0 ];
 then
   echo I am already local etcd .. I am exiting now\(temporary\)  >> /root/zfspingtmp
- exit
+ continue
 fi
 echo checking if still in the start: initcron is still running  >> /root/zfspingtmp
 if [ -f /pacedata/forzfsping ];
 then
 echo Yes. so I have to exit >> /root/zfspingtmp
- exit
+ continue
 fi
  echo No. so checking  I am primary >> /root/zfspingtmp
 echo $runningcluster | grep 1 &>/dev/null
@@ -149,7 +157,7 @@ echo $runningcluster,Yes I am a primary so will collect the scsi config for etcd
    if [ $? -ne 0 ];
    then
     echo no new change either in scsi nor in a zpool..exiting>> /root/zfspingtmp
-    exit
+    continue
    fi
     echo no new changes either in scsi nor in a zpool. but zpool degraded>> /root/zfspingtmp
    
@@ -298,3 +306,4 @@ then
  done
  echo after long operations due to a faulty disk is inside a pool>> /root/zfspingtmp
 fi
+done
