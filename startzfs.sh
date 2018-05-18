@@ -91,6 +91,10 @@ else
   systemctl stop etcd 2>/dev/null
   systemctl start etcd 2>/dev/null
   ETCDCTL_API=3 ./etcdputlocal.py $myip 'local/'$myhost $myip
+  echo sync leader with local database >>/root/tmp2
+  ETCDCTL_API=3 ./etcdsync.py $myip primary 2>/dev/null
+  ETCDCTL_API=3 ./etcddellocal.py $myip known --prefix 2>/dev/null
+  ETCDCTL_API=3 ./etcdsync.py $myip known 2>/dev/null
   echo etcd started as local >>/root/tmp2
   rm -rf /var/lib/iscsi/nodes/* 2>/dev/null
   echo starting iscsiwaatchdog >>/root/tmp2
