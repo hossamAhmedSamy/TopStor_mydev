@@ -6,6 +6,7 @@ hosts=[]
 names=[]
 port='2379'
 cluster=''
+thisip=sys.argv[2]
 if sys.argv[1] == 'extra':
  etcfile=open('/pacedata/etcdnodes.txt')
  for line in etcfile:
@@ -18,7 +19,7 @@ if sys.argv[1] == 'extra':
   if 'this' in line:
    token=item[0]
    thisname=item[1]
-   thisip=item[2]
+   #thisip=item[2]
  etcfile.close()
 if sys.argv[1]=='new':
  token='token-01'
@@ -26,7 +27,7 @@ if sys.argv[1]=='new':
  x=socket.getaddrinfo(thisname,None,socket.AF_INET, socket.SOCK_DGRAM,\
     socket.IPPROTO_IP, socket.AI_CANONNAME)
  z=[y for y in x if '127.0.0.1' not in str(y)]
- thisip=z[-1][-1][0]
+ #thisip=z[-1][-1][0]
  cluster=thisname+'=http://'+thisip+':2380'
 if sys.argv[1]=='local':
  port='2378'
@@ -35,7 +36,7 @@ if sys.argv[1]=='local':
  x=socket.getaddrinfo(thisname,None,socket.AF_INET, socket.SOCK_DGRAM,\
     socket.IPPROTO_IP, socket.AI_CANONNAME)
  z=[y for y in x if '127.0.0.1' not in str(y)]
- thisip=z[-1][-1][0]
+ #thisip=z[-1][-1][0]
  cluster=thisname+'=http://'+thisip+':2380'
 
 

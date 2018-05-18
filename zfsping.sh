@@ -54,7 +54,7 @@ else
   systemctl stop etcd 2>/dev/null
   clusterip=`cat /pacedata/clusterip`
   echo starting primary etcd with clsuterip=$clusterip >> /root/zfspingtmp
-  ETCDCTL_API=3 ./etccluster.py 'new' 2>/dev/null
+  ETCDCTL_API=3 ./etccluster.py 'new' $myip 2>/dev/null
   chmod +r /etc/etcd/etcd.conf.yml
   systemctl daemon-reload 2>/dev/null
   systemctl start etcd 2>/dev/null
@@ -104,7 +104,7 @@ echo $needlocal | grep 1 &>/dev/null
 if [ $? -eq 0 ];
 then
   echo start the local etcd >> /root/zfspingtmp
-  ETCDCTL_API=3 ./etccluster.py 'local' 2>/dev/null
+  ETCDCTL_API=3 ./etccluster.py 'local' $myip 2>/dev/null
   chmod +r /etc/etcd/etcd.conf.yml
   systemctl daemon-reload
   systemctl stop etcd 2>/dev/null

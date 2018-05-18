@@ -8,6 +8,7 @@ enpdev='enp0s8'
 myhost=`hostname -s`
 myip=`/sbin/pcs resource show CC | grep Attributes | awk '{print $2}' | awk -F'=' '{print $2}'`
  ccnic=`/sbin/pcs resource show CC | grep nic\= | awk -F'nic=' '{print $2}' | awk '{print $1}'`
+/sbin/pcs resource delete --force clusterip 2>/dev/null
 if [ ! -f /pacedata/clusterip ];
 then
  echo $clusterip > /pacedata/clusterip
@@ -26,16 +27,9 @@ if [ $? -ne 0 ];
 then
   /sbin/pcs resource delete --force clusterip 2>/dev/null
 fi
- echo checking nodesearch>>/root/tmp2
-if [ ! -f /pacedata/nodesearch.txt ];
-then
  echo starting nodesearch>>/root/tmp2
  result=`ETCDCTL_API=3 ./nodesearch.py $myip 2>/dev/null`
  echo finish nodesearch>>/root/tmp2
- echo $result > /pacedata/nodesearch.txt
-else
- result=`cat /pacedata/nodesearch.txt`
-fi 
 freshcluster=0
 echo $result | grep nothing 
 if [ $? -eq 0 ];
@@ -43,7 +37,7 @@ then
  echo no node is found so making me as primary>>/root/tmp2
  rm -rf /pacedata/running*
  freshcluster=1
- ETCDCTL_API=3 ./etccluster.py 'new' 2>/dev/null
+ ETCDCTL_API=3 ./etccluster.py 'new' $myip 2>/dev/null
  chmod +r /etc/etcd/etcd.conf.yml 2>/dev/null
  echo starginetcd >>/root/tmp2
  systemctl daemon-reload 2>/dev/null
@@ -89,7 +83,7 @@ else
   ETCDCTL_API=3 ./etcdget.py clusterip 2>/dev/null > /pacedata/clusterip
   /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
   echo starting etcd as local >>/root/tmp2
-  ETCDCTL_API=3 ./etccluster.py 'local' 2>/dev/null
+  ETCDCTL_API=3 ./etccluster.py 'local' $myip 2>/dev/null
   chmod +r /etc/etcd/etcd.conf.yml 2>/dev/null
   systemctl daemon-reload 2>/dev/null
   systemctl stop etcd 2>/dev/null
