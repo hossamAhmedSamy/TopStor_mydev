@@ -7,7 +7,7 @@ rm -rf /pacedata/startzfsping 2>/dev/null
 while [ ! -f /pacedata/startzfsping ];
 do
  sleep 1;
- echo cannot run now >> /root/zfspingtmp
+ echo cannot run now > /root/zfspingtmp
 done
 echo startzfs run >> /root/zfspingtmp
 /pace/startzfs.sh
@@ -255,11 +255,13 @@ then
      /TopStor/logmsg.sh Dist3 info system $diskidf $hostnam
      echo detaching OFFLINE disk with spare in the pool>> /root/zfspingtmp
      /sbin/zpool detach $pool $faildisk &>/dev/null
+     /sbin/zpool remove $pool $faildisk &>/dev/null
      /TopStor/logmsg.sh Disu3 info system $diskidf $hostnam
     else
      echo no spare disk >> /root/zfspingtmp
-     echo detaching OFFLINE disk with spare in the pool>> /root/zfspingtmp
+     echo detaching OFFLINE disk without spare in the pool>> /root/zfspingtmp
      /sbin/zpool detach $pool $faildisk &>/dev/null
+     /sbin/zpool remove $pool $faildisk &>/dev/null
      ETCDCTL_API=3 /pace/etcddel.py run disk &>/dev/null
      ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
      /TopStor/logmsg.sh Disu3 info system $diskidf $hostnam
@@ -279,6 +281,7 @@ then
    if [ $? -eq 0 ]; then
     faildisk=`/sbin/zpool status $pool 2>/dev/null | grep "was /dev" | awk -F'-id/' '{print $2}' | awk -F'-part' '{print $1}'`;
     /sbin/zpool detach $pool $faildisk &>/dev/null;
+    /sbin/zpool remove $pool $faildisk &>/dev/null;
     ETCDCTL_API=3 /pace/etcddel.py run disk
     ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
     #/sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool;
@@ -288,6 +291,7 @@ then
    if [ $? -eq 0 ]; then
     faildisk=`/sbin/zpool status $pool 2>/dev/null| grep "was /dev/s" | awk -F'was ' '{print $2}'`;
     /sbin/zpool detach $pool $faildisk &>/dev/null;
+    /sbin/zpool remove $pool $faildisk &>/dev/null;
     ETCDCTL_API=3 /pace/etcddel.py run disk
     ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
     #/sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool ;
@@ -297,6 +301,7 @@ then
    if [ $? -eq 0 ]; then
     faildisk=`/sbin/zpool status $pool 2>/dev/null| grep UNAVAIL | awk '{print $1}'`;
     /sbin/zpool detach $pool $faildisk &>/dev/null;
+    /sbin/zpool remove $pool $faildisk &>/dev/null;
     ETCDCTL_API=3 /pace/etcddel.py run disk
     ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
     #/sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool;
