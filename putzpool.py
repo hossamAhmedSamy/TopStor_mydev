@@ -6,6 +6,8 @@ import socket
 
 myhostorg=socket.gethostname()
 myhost='run/'+myhostorg
+cmdline=['/pace/etcddel.py','run/','--prefix']
+subprocess.run(cmdline,stdout=subprocess.PIPE)
 with open('/etc/passwd') as f:
  for fline in f:
   if 'TopStor' in fline:
@@ -33,7 +35,7 @@ try:
  zpool=str(result.stdout)[2:][:-3].split('\\n')
  z=[]
  if zpool==['']:
-  cmdline=['/pace/etcddel.py',myhost+'/pool','--prefix']
+  cmdline=['/pace/etcddel.py','run/'+myhost+'/pool','--prefix']
   subprocess.run(cmdline,stdout=subprocess.PIPE)
   zpool=[':nopool',':nopool',':nopool','nopool','nopool','nopool','nopool','nopool']
  else:
@@ -138,7 +140,7 @@ for cc in lsscsi:
   c=cc.split()
   if len(c[6]) < 3 or c[6] not in str(z):
    diskc=lsscsi.index(cc)
-   cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/uuid',c[6]]
+   cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/uuid','scsi-'+c[6]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
    cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/fromhost',c[3]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
