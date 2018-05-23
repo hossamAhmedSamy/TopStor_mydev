@@ -43,5 +43,6 @@ echo $datenow $timenow info $userreq Unlin1010@@@$username $dtn >> $glog
 fi;
 oldlog=`cat $logging | sed 's/]//g' `; newlog=$oldlog,$logthis]; echo $newlog > $logging;
 ETCDCTL_API=3 /pace/etcddel.py run/$myhost/user/$username
+ETCDCTL_API=3 /pace/putzpool.py
 fi
 rm txt/${0:2}$userreq.txt

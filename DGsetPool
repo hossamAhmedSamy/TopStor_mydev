@@ -331,5 +331,4 @@ then
 fi
 rm txt/${0:2}$userreq.txt
 sed -i "/p${nextpool}/c\\" $runningpools
-ETCDCTL_API=3 /pace/etcddel.py run disk 
 ETCDCTL_API=3 /pace/putzpool.py

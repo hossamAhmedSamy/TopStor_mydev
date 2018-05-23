@@ -31,6 +31,5 @@ else
  /TopStor/logmsg.sh Snap1036 info $userreq $FileS
 fi;
 ./GetPoolperiodlist
-ETCDCTL_API=3 /pace/etcddel.py run/$hostnam --prefix
 ETCDCTL_API=3 /pace/putzpool.py
 fi

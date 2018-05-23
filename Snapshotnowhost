@@ -15,5 +15,4 @@ echo $pDG | grep $pp
 if [ $? -ne 0 ]; then exit; fi
   res=`./Snapshotnow $@`
 # /TopStor/logmsg.sh Snap1045 error $userreq $newsnap 
-ETCDCTL_API=3 /pace/etcddel.py run/$myhost --prefix
 ETCDCTL_API=3 /pace/putzpool.py

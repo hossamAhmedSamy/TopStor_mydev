@@ -25,6 +25,5 @@ if [[ $err -ge  4  ]]; then
 else 
  /TopStor/logmsg.sh Snap1042 info $userreq $snaprol
 fi;
-ETCDCTL_API=3 /pace/etcddel.py run/$myhost --prefix
 ETCDCTL_API=3 /pace/putzpool.py
 fi

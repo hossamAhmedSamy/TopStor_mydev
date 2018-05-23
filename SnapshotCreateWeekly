@@ -53,6 +53,5 @@ echo $datenow $timenow info $userreq Snap1033@@@Weekly.$hr.$min.$every.$keep/$ho
 fi;
 oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging;
 ./GetPoolperiodlist 
-ETCDCTL_API=3 /pace/etcddel.py run/$hostnam --prefix
 ETCDCTL_API=3 /pace/putzpool.py
 fi

@@ -50,5 +50,4 @@ dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
  fi;
 fi
   echo $hostnam
-  ETCDCTL_API=3 /pace/etcddel.py run/$hostnam --prefix
   ETCDCTL_API=3 /pace/putzpool.py

@@ -19,5 +19,4 @@ else
 fi;
 rm txt/${0:2}$userreq.txt
 oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging;
-ETCDCTL_API=3 /pace/etcddel.py run/$myhost --prefix
 ETCDCTL_API=3 /pace/putzpool.py
