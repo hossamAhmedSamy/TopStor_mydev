@@ -52,7 +52,6 @@ then
  done
  echo started etcd as primary>>/root/tmp2
  ETCDCTL_API=3 ./runningetcdnodes.py $myip 2>/dev/null
- ETCDCTL_API=3 ./etcddel.py run disk 2>/dev/null 
  ETCDCTL_API=3 ./etcddel.py known --prefix 2>/dev/null 
  ETCDCTL_API=3 ./etcddel.py possbile --prefix 2>/dev/null 
  rm -rf /var/lib/iscsi/nodes/* 2>/dev/null
@@ -138,7 +137,6 @@ echo i all zpool exported >>/root/tmp2
 #  sh listingtargets.sh
   echo freshcluster=$freshcluster so zpool importing >>/root/tmp2
   zpool import -a 2>/dev/null
-  ETCDCTL_API=3 ./etcddel.py run disk 2>/dev/null 
   ETCDCTL_API=3 ./putzpool.py 2>/dev/null
   echo ran putzpool >>/root/tmp2
  fi

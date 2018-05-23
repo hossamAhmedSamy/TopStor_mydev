@@ -26,8 +26,6 @@ do
  fi
 done
 echo udpating database >> /root/hostlosttmp
-ETCDCTL_API=3 /pace/etcddel.py run $thehost 
-ETCDCTL_API=3 /pace/etcddel.py run disk 
 ETCDCTL_API=3 /pace/putzpool.py 
 
 exit
