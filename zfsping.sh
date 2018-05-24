@@ -96,6 +96,7 @@ else
    ETCDCTL_API=3 ./changeetcd.py 2>/dev/null
    ETCDCTL_API=3 ./receivelog.py 2>/dev/null
    ETCDCTL_API=3 ./broadcastlog.py 2>/dev/null
+   echo finish running tasks task:boradcast, log..etc >> /root/zfspingtmp
   fi
  fi 
 fi

@@ -18,9 +18,10 @@ then
  sh /pace/addtargetdisks.sh
  if [ $islocal -eq 0 ];
  then
+  echo putzpool to leader >> /root/zfspingtmp
   ETCDCTL_API=3 /pace/putzpool.py 
  else
-  echo $myip $myhost $islocal
+  echo putzpool local $myip $myhost $islocal >> /root/zfspingtmp
   ETCDCTL_API=3 /pace/putzpoollocal.py $myip $myhost
  fi
 fi
