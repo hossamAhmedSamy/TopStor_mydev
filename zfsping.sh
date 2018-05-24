@@ -109,6 +109,12 @@ then
   systemctl daemon-reload
   systemctl stop etcd 2>/dev/null
   systemctl start etcd 2>/dev/null
+  ETCDCTL_API=3 ./etcdsync.py $myip primary 2>/dev/null
+  ETCDCTL_API=3 ./etcddellocal.py $myip known --prefix 2>/dev/null
+  ETCDCTL_API=3 ./etcddellocal.py $myip localrun --prefix 2>/dev/null
+  ETCDCTL_API=3 ./etcddellocal.py $myip run --prefix 2>/dev/null
+  ETCDCTL_API=3 ./etcdsync.py $myip known 2>/dev/null
+  ETCDCTL_API=3 ./etcdsync.py $myip localrun 2>/dev/null
   echo done and exit >> /root/zfspingtmp
   continue 
 fi
@@ -116,9 +122,11 @@ echo $needlocal | grep 2 &>/dev/null
 if [ $? -eq 0 ];
 then
   echo I am already local etcd .. I am exiting now\(temporary\)  >> /root/zfspingtmp
+ /pace/iscsiwatchdog.sh $myip $myhost
+ sleep 4
  continue
 fi
-echo checking if still in the start: initcron is still running  >> /root/zfspingtmp
+echo checking if still in the start initcron is still running  >> /root/zfspingtmp
 if [ -f /pacedata/forzfsping ];
 then
 echo Yes. so I have to exit >> /root/zfspingtmp
@@ -128,7 +136,8 @@ fi
 echo $runningcluster | grep 1 &>/dev/null
 if [ $? -eq 0 ];
 then
-echo $runningcluster,Yes I am a primary so will collect the scsi config for etcd >> /root/zfspingtmp
+echo Yes I am a primary so will collect the scsi config for etcd  >> /root/zfspingtmp
+ /pace/iscsiwatchdog.sh 2>/dev/null 
  lsscsi=`lsscsi -i --size | md5sum | awk '{print $1}'`
  lsscsiold=`ETCDCTL_API=3 /pace/etcdget.py checks/$myhost/lsscsi `
  echo $lsscsi | grep $lsscsiold

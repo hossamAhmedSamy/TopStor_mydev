@@ -1,4 +1,13 @@
 #!/bin/sh
+if [ "$#" -eq 0 ];
+then
+ islocal=0
+else
+ islocal=1
+ myip=`echo $@ | awk '{print $2}'`
+ myhost=`echo $@ | awk '{print $3}'`
+fi
+
 systemctl status etcd &>/dev/null
 if [ $? -eq 0 ];
 then
@@ -7,5 +16,10 @@ then
  sh /pace/iscsirefresh.sh
  sh /pace/listingtargets.sh
  sh /pace/addtargetdisks.sh
- ETCDCTL_API=3 /pace/putzpool.py
+ if [ $islocal -eq 0 ];
+ then
+  ETCDCTL_API=3 /pace/putzpool.py 
+ else
+  ETCDCTL_API=3 /pace/putzpoollocal.py $myip $myhost
+ fi
 fi
