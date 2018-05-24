@@ -4,8 +4,8 @@ then
  islocal=0
 else
  islocal=1
- myip=`echo $@ | awk '{print $2}'`
- myhost=`echo $@ | awk '{print $3}'`
+ myip=`echo $@ | awk '{print $1}'`
+ myhost=`echo $@ | awk '{print $2}'`
 fi
 
 systemctl status etcd &>/dev/null
@@ -20,6 +20,7 @@ then
  then
   ETCDCTL_API=3 /pace/putzpool.py 
  else
+  echo $myip $myhost $islocal
   ETCDCTL_API=3 /pace/putzpoollocal.py $myip $myhost
  fi
 fi

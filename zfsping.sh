@@ -121,9 +121,9 @@ fi
 echo $needlocal | grep 2 &>/dev/null
 if [ $? -eq 0 ];
 then
-  echo I am already local etcd .. I am exiting now\(temporary\)  >> /root/zfspingtmp
+  echo I am already local etcd running iscsirefresh on $myip $myhost  >> /root/zfspingtmp
  /pace/iscsiwatchdog.sh $myip $myhost
- sleep 4
+  echo .. I am exiting now\(temporary\)  >> /root/zfspingtmp
  continue
 fi
 echo checking if still in the start initcron is still running  >> /root/zfspingtmp
