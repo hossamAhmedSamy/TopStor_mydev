@@ -1,37 +1,41 @@
 #!/bin/python3.6
-import traceback
+import traceback, sys
 import subprocess
 from ast import literal_eval as mtuple
 import socket
-msg='start new putzpool \n'
+
+myip=sys.argv[1]
+myhostorg=sys.argv[2]
+msg='start new putzpoollocal \n'
 with open('/root/putzpooltmp','w') as f:
  f.write(str(msg)+"\n")
-myhostorg=socket.gethostname()
 myhost='run/'+myhostorg
+localmyhost='localrun/'+myhostorg
 #cmdline=['/bin/sleep','2']
 #subprocess.run(cmdline,stdout=subprocess.PIPE)
-msg='deleting old putzpool \n'
+msg='deleting old putzpools '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
-cmdline=['/pace/etcddel.py','run','stub']
+cmdline=['/pace/etcddel.py','local'+myhost,'stub']
 subprocess.run(cmdline,stdout=subprocess.PIPE)
-cmdline=['/pace/etcddel.py','run/','--prefix']
+cmdline=['/pace/etcddellocal.py',myip, myhost,'stub']
 subprocess.run(cmdline,stdout=subprocess.PIPE)
-msg='deleted old putzpool then sleep 4 secs \n'
-with open('/root/putzpooltmp','a') as f:
- f.write(str(msg)+"\n")
-cmdline=['sleep','4']
+cmdline=['/pace/etcddel.py','local'+myhost,'--prefix']
 subprocess.run(cmdline,stdout=subprocess.PIPE)
-msg='adding users \n'
+cmdline=['/pace/etcddellocal.py',myip, myhost,'--prefix']
+subprocess.run(cmdline,stdout=subprocess.PIPE)
+msg='adding users '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
 with open('/etc/passwd') as f:
  for fline in f:
   if 'TopStor' in fline:
    y=fline.split(":")
-   cmdline=['/pace/etcdput.py',myhost+'/user/'+y[0],y[2]]
+   cmdline=['/pace/etcdput.py','local'+myhost+'/user/'+y[0],y[2]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-msg='getting lsscsi and filtering it \n'
+   cmdline=['/pace/etcdputlocal.py',myip, myhost+'/user/'+y[0],y[2]]
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+msg='getting lsscsi and filtering it '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
 cmdline=['lsscsi','-i','--size']
@@ -47,7 +51,7 @@ for x in pscsi:
     else:
      lsscsi.remove(x)
 ata=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' not in x]
-msg='getting zpool status \n'
+msg='getting zpool status '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
 cmdline=['/sbin/zpool','status']
@@ -57,6 +61,7 @@ try:
  with open('/root/putzpooltmp','a') as f:
   f.write(str(zpool))
  z=[]
+ zoth=[]
  if zpool==['']:
   msg='no pools \n'
   with open('/root/putzpooltmp','a') as f:
@@ -64,7 +69,7 @@ try:
   zpool=[':nopool',':nopool',':nopool','nopool','nopool','nopool','nopool','nopool']
  else:
   poolname=zpool[0].split(':')[1].replace(' ','')
-  msg='found pool '+poolname+'\n'
+  msg='found pool '+poolname
   with open('/root/putzpooltmp','a') as f:
    f.write(str(msg)+"\n")
   z.append((myhost+'/pool/'+poolname+'/name',poolname))
@@ -187,7 +192,9 @@ try:
    msg='adding z in the etcd'+str(c)
    with open('/root/putzpooltmp','a') as f:
     f.write(str(msg)+"\n")
-   cmdline=['/pace/etcdput.py',c[0],c[1]]
+   cmdline=['/pace/etcdput.py','local'+c[0],c[1]]
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   cmdline=['/pace/etcdputlocal.py',myip,c[0],c[1]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 
  msg='checking crontab'
@@ -202,7 +209,9 @@ try:
   msg='adding crons into etcd'+str(y)
   with open('/root/putzpooltmp','a') as f:
    f.write(str(msg)+"\n")
-  cmdline=['/pace/etcdput.py',myhost+'/pool/'+poolname+'/snapperiod/'+y[-1],y[-2].split('.')[0]+'/'+y[-3].split('/')[-1]+'/'+y[-2].split('.')[1]+'/'+y[-2].split('.')[2]+'/'+y[-2].split('.')[3]+'/'+y[-2].split('.')[4]+'/'+y[0].replace('/','::')+'/'+y[1].replace('/','::')+'/'+y[2].replace('/','::')+'/'+y[3].replace('/','::')+'/'+y[4].replace('/','::')]
+  cmdline=['/pace/etcdput.py','local'+myhost+'/pool/'+poolname+'/snapperiod/'+y[-1],y[-2].split('.')[0]+'/'+y[-3].split('/')[-1]+'/'+y[-2].split('.')[1]+'/'+y[-2].split('.')[2]+'/'+y[-2].split('.')[3]+'/'+y[-2].split('.')[4]+'/'+y[0].replace('/','::')+'/'+y[1].replace('/','::')+'/'+y[2].replace('/','::')+'/'+y[3].replace('/','::')+'/'+y[4].replace('/','::')]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline=['/pace/etcdputlocal.py',myip, myhost+'/pool/'+poolname+'/snapperiod/'+y[-1],y[-2].split('.')[0]+'/'+y[-3].split('/')[-1]+'/'+y[-2].split('.')[1]+'/'+y[-2].split('.')[2]+'/'+y[-2].split('.')[3]+'/'+y[-2].split('.')[4]+'/'+y[0].replace('/','::')+'/'+y[1].replace('/','::')+'/'+y[2].replace('/','::')+'/'+y[3].replace('/','::')+'/'+y[4].replace('/','::')]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 
  
@@ -226,28 +235,40 @@ for cc in lsscsi:
    msg='adding free disk to etcd'+str(diskc)
    with open('/root/putzpooltmp','a') as f:
     f.write(str(msg)+"\n")
-   cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/uuid','scsi-'+c[6]]
+   cmdline=['/pace/etcdput.py','local'+myhost+'/free/disk/'+str(diskc)+'/uuid','scsi-'+c[6]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-   cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/fromhost',c[3]]
+   cmdline=['/pace/etcdputlocal.py',myip,myhost+'/free/disk/'+str(diskc)+'/uuid','scsi-'+c[6]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-   cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/size',c[7]]
+   cmdline=['/pace/etcdput.py','local'+myhost+'/free/disk/'+str(diskc)+'/fromhost',c[3]]
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   cmdline=['/pace/etcdputlocal.py',myip, myhost+'/free/disk/'+str(diskc)+'/fromhost',c[3]]
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   cmdline=['/pace/etcdput.py','local'+myhost+'/free/disk/'+str(diskc)+'/size',c[7]]
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   cmdline=['/pace/etcdputlocal.py',myip,myhost+'/free/disk/'+str(diskc)+'/size',c[7]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
    status='AVAIL'
    if c[6]=='-':
     status='FAULT'
-   cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/status',status]
+   cmdline=['/pace/etcdput.py','local'+myhost+'/free/disk/'+str(diskc)+'/status',status]
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   cmdline=['/pace/etcdputlocal.py',myip, myhost+'/free/disk/'+str(diskc)+'/status',status]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 
 msg='adding stub'
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
-cmdline=['/pace/etcdput.py',myhost+'/stub/stub/stub/stub','stub']
+cmdline=['/pace/etcdput.py','local'+myhost+'/stub/stub/stub/stub','stub']
+result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+cmdline=['/pace/etcdputlocal.py',myip,myhost+'/stub/stub/stub/stub','stub']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 cmdline=['/pace/verdef.sh']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 vers=str(result.stdout)[2:][:-3]
 curver=vers.split()[0]
-cmdline=['/pace/etcdput.py',myhost+'/hostfw/'+curver,vers.replace(" ","/")]
+cmdline=['/pace/etcdput.py','local'+myhost+'/hostfw/'+curver,vers.replace(" ","/")]
+result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+cmdline=['/pace/etcdputlocal.py',myip,myhost+'/hostfw/'+curver,vers.replace(" ","/")]
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 msg='exiting after verdef and stub'
 with open('/root/putzpooltmp','a') as f:
