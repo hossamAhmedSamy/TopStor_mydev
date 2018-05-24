@@ -5,6 +5,7 @@ mkdir /tmp2 &>/dev/null
 chown apache /tmp2 &>/dev/null
 mkfifo -m 660 /tmp2/msgfile 2>/dev/null
 export REMOTE=Topstor
+export ETCDCTL_API=3
 #chgrp root /tmp/msgfile; 
 chown apache /tmp2/msgfile; 
 echo $$ > /var/run/topstor.pid
