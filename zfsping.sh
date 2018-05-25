@@ -34,7 +34,7 @@ then
  then
   echo no leader although I am primary node >> /root/zfspingtmp
   ETCDCTL_API=3 ./runningetcdnodes.py $myip 2>/dev/null
-  ETCDCTL_API=3 ./etcdput.py leader$myhost $myip 2>/dev/null
+  ETCDCTL_API=3 ./etcdput.py leader/$myhost $myip 2>/dev/null
  fi
  echo adding known from list of possbiles >> /root/zfspingtmp
  ETCDCTL_API=3 ./addknown.py 2>/dev/null
