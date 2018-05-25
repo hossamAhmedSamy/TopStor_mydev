@@ -68,6 +68,7 @@ then
  /sbin/pcs resource enable clusterip 2>/dev/null
  /sbin/pcs resource debug-start clusterip 2>/dev/null
  echo startedclusterip >>/root/tmp2
+ ETCDCTL_API=3 ./etcddel.py leader --prefix 2>/dev/null
  ETCDCTL_API=3 ./etcdput.py leader/$myhost $myip 2>/dev/null
  ETCDCTL_API=3 ./etcdput.py primary/name $myhost 2>/dev/null
  ETCDCTL_API=3 ./etcdput.py primary/address $myip 2>/dev/null
