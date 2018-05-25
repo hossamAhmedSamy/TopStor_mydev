@@ -14,17 +14,23 @@ mod=0
 msg='getting lsscsi '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
-cmdline=['lsblk','-Sn']
-result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-lsblk=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
+cmdline=['/pace/etcdget.py','known','--prefix']
+known=str(subprocess.run(cmdline,stdout=subprocess.PIPE).stdout)
+cmdline=['/pace/etcdget.py','possible','--prefix']
+possible=str(subprocess.run(cmdline,stdout=subprocess.PIPE).stdout)
 cmdline=['lsscsi','-i','--size']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 lsscsi=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
-if len(lsscsi) != len(lsblk):
- msg='found old disk inside database..so re-putzpool '
- with open('/root/putzpooltmp','a') as f:
-  f.write(str(msg)+"\n")
- mod=1;
+for cc in lsscsi:
+ c=cc.split()
+ print('disk',c[5].split('/')[2])
+ if (str(c[3][5:]) not in known+myhost) and (str([3][5:]) not in possible):
+  msg='found disk '+cc[3][5:]+' from an unknown/down host'
+  with open('/root/putzpooltmp','a') as f:
+   f.write(str(msg)+"\n")
+#  with open('/sys/block/'+c[5].split('/')[2]+'/device/delete','w') as f:
+#   f.write("1")
+  mod=1
 mlsscsi=hashlib.md5()
 mlsscsi.update(str(lsscsi).encode('utf-8'))
 mlsscsi=mlsscsi.hexdigest()
@@ -212,6 +218,7 @@ try:
     msg='looping on lsscsi to add to get every diskc '
     with open('/root/putzpooltmp','a') as f:
      f.write(str(msg)+"\n")
+    print('hi',lsscsi)
     for l in lsscsi:
      ll=l.split()
      if ll[6] in c.split()[1] and len(ll[6]) > 3:
@@ -232,7 +239,7 @@ try:
       msg='breaking the lsscsi loop as diskc is found '
       with open('/root/putzpooltmp','a') as f:
        f.write(str(msg)+"\n")
-      break;
+      break
     msg='recording disk as the diskc '+str(diskc)
     with open('/root/putzpooltmp','a') as f:
      f.write(str(msg)+"\n")
@@ -284,7 +291,7 @@ for cc in lsscsi:
    msg='found free disk'+str(c[6])
    with open('/root/putzpooltmp','a') as f:
     f.write(str(msg)+"\n")
-   if str(cc[3][5:]) not in known:
+   if str(c[3][5:]) not in known+myhost:
     msg='but host '+cc[3][5:]+' is not know yet'
     with open('/root/putzpooltmp','a') as f:
      f.write(str(msg)+"\n")

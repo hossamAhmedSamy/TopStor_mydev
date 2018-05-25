@@ -10,7 +10,7 @@ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 clients=str(result.stdout).replace('known/','')[2:][:-3].split('\\n')
 cmdline=['/pace/etcdget.py','leader','--prefix']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-clients+=str(result.stdout).replace('leader','')[2:][:-3].split('\\n')
+clients+=str(result.stdout).replace('leader/','')[2:][:-3].split('\\n')
 client=[]
 for c in clients:
  try:
