@@ -1,16 +1,79 @@
 #!/bin/python3.6
-import traceback
+import traceback, hashlib
 import subprocess
 from ast import literal_eval as mtuple
 import socket
-msg='start new putzpool \n'
+
+
+msg='start new putzpool '
 with open('/root/putzpooltmp','w') as f:
  f.write(str(msg)+"\n")
 myhostorg=socket.gethostname()
 myhost='run/'+myhostorg
+mod=0
+msg='getting lsscsi '
+with open('/root/putzpooltmp','a') as f:
+ f.write(str(msg)+"\n")
+cmdline=['lsblk','-Sn']
+result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+lsblk=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
+cmdline=['lsscsi','-i','--size']
+result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+lsscsi=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
+if len(lsscsi) != len(lsblk):
+ msg='found old disk inside database..so re-putzpool '
+ with open('/root/putzpooltmp','a') as f:
+  f.write(str(msg)+"\n")
+ mod=1;
+mlsscsi=hashlib.md5()
+mlsscsi.update(str(lsscsi).encode('utf-8'))
+mlsscsi=mlsscsi.hexdigest()
+cmdline=['/pace/etcdget.py','md'+myhost+'/lsscsi']
+modlsscsi=str(subprocess.run(cmdline,stdout=subprocess.PIPE).stdout)
+if mlsscsi not in modlsscsi:
+ mod=1
+ msg='lsscsi changed '
+ with open('/root/putzpooltmp','a') as f:
+  f.write(str(msg)+"\n")
+msg='getting zpool status \n'
+with open('/root/putzpooltmp','a') as f:
+ f.write(str(msg)+"\n")
+cmdline=['/sbin/zpool','status']
+zpoolres=subprocess.run(cmdline,stdout=subprocess.PIPE)
+mzpool=hashlib.md5()
+mzpool.update(str(zpoolres.stdout).encode('utf-8'))
+mzpool=mzpool.hexdigest()
+cmdline=['/pace/etcdget.py','md'+myhost+'/zpool']
+modzpool=str(subprocess.run(cmdline,stdout=subprocess.PIPE).stdout)
+if mzpool not in modzpool:
+ mod=1
+ msg='zpool changed '
+ with open('/root/putzpooltmp','a') as f:
+  f.write(str(msg)+"\n")
+
+msg='getting users '
+with open('/root/putzpooltmp','a') as f:
+ f.write(str(msg)+"\n")
+with open('/etc/passwd','r') as f:
+ userf=f.read().replace('\n','')
+muser=hashlib.md5()
+muser.update(str(userf).encode('utf-8'))
+muser=muser.hexdigest()
+cmdline=['/pace/etcdget.py','md'+myhost+'/userhash']
+moduser=str(subprocess.run(cmdline,stdout=subprocess.PIPE).stdout)
+if muser not in moduser:
+ mod=1
+ msg='user changed '
+ with open('/root/putzpooltmp','a') as f:
+  f.write(str(msg)+"\n")
+if mod==0:
+ msg='nothing changed exiting '
+ with open('/root/putzpooltmp','a') as f:
+  f.write(str(msg)+"\n")
+ exit() 
 #cmdline=['/bin/sleep','2']
 #subprocess.run(cmdline,stdout=subprocess.PIPE)
-msg='deleting old putzpool \n'
+msg='deleting old putzpool '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
 cmdline=['/pace/etcddel.py','run','stub']
@@ -22,7 +85,7 @@ with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
 cmdline=['sleep','4']
 subprocess.run(cmdline,stdout=subprocess.PIPE)
-msg='adding users \n'
+msg='adding users '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
 with open('/etc/passwd') as f:
@@ -31,12 +94,9 @@ with open('/etc/passwd') as f:
    y=fline.split(":")
    cmdline=['/pace/etcdput.py',myhost+'/user/'+y[0],y[2]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-msg='getting lsscsi and filtering it \n'
+msg='filtering lsscsi '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
-cmdline=['lsscsi','-i','--size']
-result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-lsscsi=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
 pscsi=lsscsi
 for x in pscsi:
  for y in pscsi:
@@ -216,12 +276,27 @@ diskc=0
 msg='looping lsscsi again for free disks'
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
+cmdline=['/pace/etcdget.py','known','--prefix']
+known=str(subprocess.run(cmdline,stdout=subprocess.PIPE))
 for cc in lsscsi:
   c=cc.split()
   if len(c[6]) < 3 or c[6] not in str(z):
    msg='found free disk'+str(c[6])
    with open('/root/putzpooltmp','a') as f:
     f.write(str(msg)+"\n")
+   if str(cc[3][5:]) not in known:
+    msg='but host '+cc[3][5:]+' is not know yet'
+    with open('/root/putzpooltmp','a') as f:
+     f.write(str(msg)+"\n")
+    continue 
+   if '-' in str(c[7]):
+# echo 1 > /sys/block/$l/device/delete
+    msg='but this disk is old and not really running'
+    with open('/root/putzpooltmp','a') as f:
+     f.write(str(msg)+"\n")
+    with open('/sys/block/'+c[5].split('/')[2]+'/device/delete','w') as f:
+     f.write("1")
+    continue 
    diskc=lsscsi.index(cc)
    msg='adding free disk to etcd'+str(diskc)
    with open('/root/putzpooltmp','a') as f:
@@ -252,3 +327,9 @@ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 msg='exiting after verdef and stub'
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
+cmdline=['/pace/etcdput.py','md'+myhost+'/lsscsi',mlsscsi]
+subprocess.run(cmdline,stdout=subprocess.PIPE)
+cmdline=['/pace/etcdput.py','md'+myhost+'/zpool',mzpool]
+subprocess.run(cmdline,stdout=subprocess.PIPE)
+cmdline=['/pace/etcdput.py','md'+myhost+'/userhash',muser]
+subprocess.run(cmdline,stdout=subprocess.PIPE)
