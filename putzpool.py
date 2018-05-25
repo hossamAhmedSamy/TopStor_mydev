@@ -21,6 +21,7 @@ known=str(subprocess.run(cmdline,stdout=subprocess.PIPE).stdout)
 cmdline=['lsscsi','-i','--size']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 lsscsi=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
+ata=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' not in x]
 mlsscsi=hashlib.md5()
 mlsscsi.update(str(lsscsi).encode('utf-8'))
 mlsscsi=mlsscsi.hexdigest()
@@ -102,7 +103,6 @@ for x in pscsi:
      lsscsi.remove(y)
     else:
      lsscsi.remove(x)
-ata=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' not in x]
 msg='getting zpool status \n'
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
@@ -208,7 +208,6 @@ try:
     msg='looping on lsscsi to add to get every diskc '
     with open('/root/putzpooltmp','a') as f:
      f.write(str(msg)+"\n")
-    print('hi',lsscsi)
     for l in lsscsi:
      ll=l.split()
      if ll[6] in c.split()[1] and len(ll[6]) > 3:
