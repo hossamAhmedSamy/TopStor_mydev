@@ -110,12 +110,14 @@ then
   systemctl daemon-reload
   systemctl stop etcd 2>/dev/null
   systemctl start etcd 2>/dev/null
-  ETCDCTL_API=3 ./etcdsync.py $myip primary 2>/dev/null
+  ETCDCTL_API=3 ./etcdsync.py $myip primary primary 2>/dev/null
   ETCDCTL_API=3 ./etcddellocal.py $myip known --prefix 2>/dev/null
   ETCDCTL_API=3 ./etcddellocal.py $myip localrun --prefix 2>/dev/null
   ETCDCTL_API=3 ./etcddellocal.py $myip run --prefix 2>/dev/null
-  ETCDCTL_API=3 ./etcdsync.py $myip known 2>/dev/null
-  ETCDCTL_API=3 ./etcdsync.py $myip localrun 2>/dev/null
+  ETCDCTL_API=3 ./etcdsync.py $myip known known 2>/dev/null
+  ETCDCTL_API=3 ./etcdsync.py $myip localrun localrun 2>/dev/null
+  ETCDCTL_API=3 ./etcdsync.py $myip leader known 2>/dev/null
+  ETCDCTL_API=3 ./etcddel.py known/$myhost --prefix 2>/dev/null
   echo done and exit >> /root/zfspingtmp
   continue 
 fi

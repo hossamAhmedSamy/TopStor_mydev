@@ -16,21 +16,11 @@ with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
 cmdline=['/pace/etcdget.py','known','--prefix']
 known=str(subprocess.run(cmdline,stdout=subprocess.PIPE).stdout)
-cmdline=['/pace/etcdget.py','possible','--prefix']
-possible=str(subprocess.run(cmdline,stdout=subprocess.PIPE).stdout)
+#cmdline=['/pace/etcdget.py','possible','--prefix']
+#possible=str(subprocess.run(cmdline,stdout=subprocess.PIPE).stdout)
 cmdline=['lsscsi','-i','--size']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 lsscsi=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
-for cc in lsscsi:
- c=cc.split()
- print('disk',c[5].split('/')[2])
- if (str(c[3][5:]) not in known+myhost) and (str([3][5:]) not in possible):
-  msg='found disk '+cc[3][5:]+' from an unknown/down host'
-  with open('/root/putzpooltmp','a') as f:
-   f.write(str(msg)+"\n")
-#  with open('/sys/block/'+c[5].split('/')[2]+'/device/delete','w') as f:
-#   f.write("1")
-  mod=1
 mlsscsi=hashlib.md5()
 mlsscsi.update(str(lsscsi).encode('utf-8'))
 mlsscsi=mlsscsi.hexdigest()
@@ -283,8 +273,6 @@ diskc=0
 msg='looping lsscsi again for free disks'
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
-cmdline=['/pace/etcdget.py','known','--prefix']
-known=str(subprocess.run(cmdline,stdout=subprocess.PIPE))
 for cc in lsscsi:
   c=cc.split()
   if len(c[6]) < 3 or c[6] not in str(z):
