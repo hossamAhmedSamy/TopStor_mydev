@@ -34,6 +34,7 @@ then
  then
   echo no leader although I am primary node >> /root/zfspingtmp
   ETCDCTL_API=3 ./runningetcdnodes.py $myip 2>/dev/null
+  ETCDCTL_API=3 ./etcddel.py leader 2>/dev/null
   ETCDCTL_API=3 ./etcdput.py leader/$myhost $myip 2>/dev/null
  fi
  echo adding known from list of possbiles >> /root/zfspingtmp
@@ -63,6 +64,7 @@ else
   pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24 2>/dev/null
   echo adding me as a leader >> /root/zfspingtmp
   ETCDCTL_API=3 ./runningetcdnodes.py $myip 2>/dev/null
+  ETCDCTL_API=3 ./etcddel.py leader 2>/dev/null
   ETCDCTL_API=3 ./etcdput.py leader/$myhost $myip 2>/dev/null
   echo importing all pools >> /root/zfspingtmp
   /sbin/zpool import -a &>/dev/null
