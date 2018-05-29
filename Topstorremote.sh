@@ -15,37 +15,6 @@ ClearExit() {
 }
 trap ClearExit HUP
 #./ProxySVC.sh &
-while true; do
-{
-egrep -E "Dual|receiv|send" $partners 
-if [ $? -eq 0 ]; then
- echo hi
- hosts=(`egrep -E "Dual|receiv|send" $partners | awk '{print $1}'`)
- for host in "${hosts[@]}"; do
-  sshost=`echo $host | awk '{print $1}'`
-   echo sshost=$sshost
-  ping -w 1 $sshost &>/dev/null
-  if [ $? -eq 0 ]; then
-   hostnam=`ssh root@$sshost cat /TopStordata/hostname`
-   scp $sshost:/pacedata/iscsitargets /TopStordata/partner_${sshost}_targets
-   partnsers=(`cat /TopStordata/partner_${sshost}_targets | awk '{print $2}'`);
-   echo ${partners[@]} | while read -r verhost; do
-     /TopStor/Partnerprep $verhost &>/dev/null
-   done
-   echo hostnam=$hostnam
-   cat $partners | grep "$hostnam"
-   if [ $? -ne 0 ]; then
-    hostline=`cat $partners | grep "$sshost"`
-    hostupd=${hostline}' '$hostnam' '$partnerhost
-    echo $hostupd
-    hostless=(` cat $partners | grep -v $sshost`)
-    echo "${hostless[@]}" > $partners
-    echo $hostupd >> $partners
-   fi
-  fi
- done
-fi
-sleep 20
-}
-done;
+myip=`pcs resource show CC | grep Attrib | awk '{print $2}' | awk -F'=' '{print $2}'`
+/bin/python3.6 topstorrecvreq.py $myip
 echo it is dead >/TopStor/txt/statusremote.txt
