@@ -15,6 +15,7 @@ ClearExit() {
 }
 trap ClearExit HUP
 #./ProxySVC.sh &
+myhost=`hostname -s `
 myip=`pcs resource show CC | grep Attrib | awk '{print $2}' | awk -F'=' '{print $2}'`
-ETCDCTL_API=3 /bin/python3.6 topstorrecvreq.py $myip
+ETCDCTL_API=3 /bin/python3.6 topstorrecvreq.py $myip 
 echo it is dead >/TopStor/txt/statusremote.txt
