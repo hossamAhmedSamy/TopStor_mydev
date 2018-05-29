@@ -27,8 +27,8 @@ def do(body,myhost):
    print(str(z))
   host=get('known/'+r["host"])
   with open('/root/recv','a') as f:
-   f.write('sender ip is  : '+host[0]+'\n')
-  if len(host[0]) > 3:
+   f.write('sender ip is  : '+str(host[0])+'\n')
+  if len(str(host[0])) > 3:
    msg={'host': myhost, 'req': str(z)}
    with open('/root/recv','a') as f:
     f.write('preparing \n')
@@ -39,7 +39,7 @@ def do(body,myhost):
    with open('/root/recv','a') as f:
     f.write('it is not known sender... ignoring \n')
    
-  send(host, str(msg), 'recvreply', myhost)
+  send(host[0], str(msg), 'recvreply', str(myhost))
  print(z)  
 # if r["req"]=='user':
 if __name__=='__main__':
