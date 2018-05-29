@@ -119,7 +119,7 @@ then
   ETCDCTL_API=3 ./etcdsync.py $myip known known 2>/dev/null
   ETCDCTL_API=3 ./etcdsync.py $myip localrun localrun 2>/dev/null
   ETCDCTL_API=3 ./etcdsync.py $myip leader known 2>/dev/null
-  ETCDCTL_API=3 ./etcddel.py known/$myhost --prefix 2>/dev/null
+#  ETCDCTL_API=3 ./etcddellocal.py $myip known/$myhost --prefix 2>/dev/null
   echo done and exit >> /root/zfspingtmp
   continue 
 fi
