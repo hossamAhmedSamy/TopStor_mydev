@@ -1,6 +1,7 @@
 #!/usr/bin/sh
 cd /pace
 echo $$ > /var/run/zfsping.pid
+isknown=0
 export ETCDCTL_API=3
 systemctl restart target
 cd /pace
@@ -93,11 +94,22 @@ else
   then
    echo I am not a known adding me as possible >> /root/zfspingtmp
    ETCDCTL_API=3 ./etcdput.py possible$myhost $myip 2>/dev/null
+   isknown=0
   else
    echo I am known so running all needed etcd task:boradcast, log..etc >> /root/zfspingtmp
    ETCDCTL_API=3 ./changeetcd.py 2>/dev/null
    ETCDCTL_API=3 ./receivelog.py 2>/dev/null
    ETCDCTL_API=3 ./broadcastlog.py 2>/dev/null
+   echo $isknown | grep 0 
+   if [ $? -eq 0 ];
+   then
+    echo running sendhost.py $leaderip 'user' 'recvreq' $myhost >>/root/tmp2
+    leaderall=`ETCDCTL_API=3 ./etcdget.py leader --prefix `
+    leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+    leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
+    /pace/sendhost.py $leaderip 'user' 'recvreq' $myhost
+    isknown=1;
+   fi
    echo finish running tasks task:boradcast, log..etc >> /root/zfspingtmp
   fi
  fi 
