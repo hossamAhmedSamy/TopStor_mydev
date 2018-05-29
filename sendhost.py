@@ -8,6 +8,7 @@ def sendhost(host, req, que, frmhst, port=5672):
  param=pika.ConnectionParameters(host, port, '/', creds)
  conn=pika.BlockingConnection(param)
  chann=conn.channel()
+ chann.basic_publish(exchange='',routing_key=que, body=str(msg))
  try: 
   chann.basic_publish(exchange='',routing_key=que, body=str(msg))
   return 0

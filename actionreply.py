@@ -3,8 +3,8 @@ from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 def do(body):
  z=[]
- with open('/root/recvreply','w') as f:
-  f.write(str(body))
+ with open('/root/recv','a') as f:
+  f.write('Recevied a reply:'+str(body))
  exit()
  r=mtuple((body[2:][:-1]))
 # print("receved from",r["host"],' request for: ',r["req"])
