@@ -4,7 +4,8 @@ import actionreq
 
 
 def callback(ch, method, properties, body):
- actionreq.do(str(body))
+ actionreq.do(str(body), sys.argv[1])
+ 
 
 
 myip=sys.argv[1]
