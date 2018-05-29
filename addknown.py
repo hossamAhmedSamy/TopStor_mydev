@@ -18,6 +18,10 @@ if possible != ['']:
   print('result=',result)
   cmdline=['etcdctl','--endpoints='+endpoints,'put','known/'+mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline=['/sbin/rabbitmqctl','add_user','rabb_'+mtuple(x)[0].split('possible')[1],'YousefNadody']
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline=['/sbin/rabbitmqctl','set_permissions','-p','/','rabb_'+mtuple(x)[0].split('possible')[1],'".*"','".*"','".*"']
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   cmdline=['/TopStor/logmsg.sh','Partst01','info','system', mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   
@@ -62,6 +66,8 @@ if known != ['']:
    cmdline=['/pace/etcddel.py','known/'+str(kn[0])]
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    cmdline=['/pace/etcddel.py','localrun/'+str(kn[0])]
+   subprocess.run(cmdline,stdout=subprocess.PIPE)
+   cmdline=['/sbin/rabbitmqctl','delete_user','rabb_'+mtuple(x)[0].split('possible')[1],'YousefNadody']
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    cmdline=['/bin/sleep','10']
    subprocess.run(cmdline,stdout=subprocess.PIPE)
