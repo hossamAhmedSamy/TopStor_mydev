@@ -6,7 +6,7 @@ import socket
 
 
 msg='start new putzpool '
-with open('/root/putzpooltmp','w') as f:
+with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
 myhostorg=socket.gethostname()
 myhost='run/'+myhostorg
@@ -51,8 +51,11 @@ if mzpool not in modzpool:
 msg='getting users '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
+userf=''
 with open('/etc/passwd','r') as f:
- userf=f.read().replace('\n','')
+ line=f.readline()
+ if 'TopStor' in line:
+  userf+=line
 muser=hashlib.md5()
 muser.update(str(userf).encode('utf-8'))
 muser=muser.hexdigest()
@@ -103,13 +106,11 @@ for x in pscsi:
      lsscsi.remove(y)
     else:
      lsscsi.remove(x)
-msg='getting zpool status \n'
+msg='processing zpool results \n'
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
-cmdline=['/sbin/zpool','status']
-result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 try:
- zpool=str(result.stdout)[2:][:-3].split('\\n')
+ zpool=str(zpoolres.stdout)[2:][:-3].split('\\n')
  with open('/root/putzpooltmp','a') as f:
   f.write(str(zpool))
  z=[]
@@ -267,7 +268,7 @@ except Exception as e:
  msg='severe exception'+str(traceback.print_exc())
  with open('/root/putzpooltmp','a') as f:
   f.write(str(msg)+"\n")
- pass  
+ exit() 
 diskc=0
 msg='looping lsscsi again for free disks'
 with open('/root/putzpooltmp','a') as f:
