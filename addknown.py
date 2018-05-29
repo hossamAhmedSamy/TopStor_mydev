@@ -20,7 +20,7 @@ if possible != ['']:
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   cmdline=['/sbin/rabbitmqctl','add_user','rabb_'+mtuple(x)[0].split('possible')[1],'YousefNadody']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  cmdline=['/sbin/rabbitmqctl','set_permissions','-p','/','rabb_'+mtuple(x)[0].split('possible')[1],'".*"','".*"','".*"']
+  cmdline=['/sbin/rabbitmqctl','set_permissions','-p','/','rabb_'+mtuple(x)[0].split('possible')[1],'.*','.*','.*']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   cmdline=['/TopStor/logmsg.sh','Partst01','info','system', mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
