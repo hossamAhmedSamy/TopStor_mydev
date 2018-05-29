@@ -11,17 +11,5 @@ ClearExit() {
 }
 trap ClearExit HUP
 #./ProxySVC.sh &
-while true; do
-{
-#nc -l 2235 --ssl-cert /TopStor/key/TopStor.crt --ssl-key /TopStor/key/TopStor.key  > /tmp/msgrack
-hosts=(`cat /TopStordata/partners.txt /pacedata/iscsitargets | egrep -E "Dual|receiver" | awk '{print $1}' | sort -u`)
-for host in "${hosts[@]}"; do
- sshost=`echo $host | awk '{print $1}'`
- ps -ef | grep "$sshost" | grep  root\@ | grep master  &>/dev/null
- if [ $? -ne 0 ]; then
-  ssh -t -t -o ControlPath=~/.ssh/master-$sshost -o ControlMaster=auto -o ControlPersist=600000000000000 root@$sshost ""   & 
- fi
-done
- sleep 5
-}
-done;
+myip=`pcs resource show CC | grep Attrib | awk '{print $2}' | awk -F'=' '{print $2}'`
+/bin/python3.6 topstorrecvreply.py $myip
