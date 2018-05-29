@@ -4,12 +4,13 @@ from etcdget import etcdget as get
 from sendhost import sendhost as send
 def do(body,myhost):
  z=[]
+ msg={}
  r=mtuple(body[2:][:-1])
  print(r)
 # print("receved from",r["host"],' request for: ',r["req"])
 # mylist=get('run',r["req"])
  with open('/root/recv','w') as f:
-  f.write('I got a message from '+r["host"]+' : '+r["req"])
+  f.write('I got a message from '+r["host"]+' : '+r["req"]+'\n')
  if r["req"]=='user':
   with open('/etc/passwd') as f:
    revf=f.readlines()
@@ -18,17 +19,27 @@ def do(body,myhost):
      l=line.split(':')
      ll=line.split('TopStor')[1].split(':/')[0]
      z.append((l[0],l[2],ll)) 
+     with open('/root/recv','a') as f:
+      f.write('found user '+l[0]+'\n')
   if r["host"] =='localhost':
+   with open('/root/recv','a') as f:
+    f.write('request was from localhost\n')
    print(str(z))
   host=get('known/'+r["host"])
   with open('/root/recv','a') as f:
-   f.write('sender ip is  : '+str(host[0]))
-  if len(host) > 3:
-   msg=str({'host': myhost, 'req': str(z)})
+   f.write('sender ip is  : '+host[0]+'\n')
+  if len(host[0]) > 3:
+   msg={'host': myhost, 'req': str(z)}
    with open('/root/recv','a') as f:
-    f.write('I am ('+myhost+') sending to'+r["host"]+' : ')
-    f.write(msg)
-  send(myhost, msg, 'recvreply', myhost)
+    f.write('preparing \n')
+   with open('/root/recv','a') as f:
+    f.write('I am ('+myhost+') sending to '+r["host"]+' : \n')
+    f.write(str(msg)+'\n')
+  else:
+   with open('/root/recv','a') as f:
+    f.write('it is not known sender... ignoring \n')
+   
+  send(host, str(msg), 'recvreply', myhost)
  print(z)  
 # if r["req"]=='user':
 if __name__=='__main__':
@@ -36,14 +47,3 @@ if __name__=='__main__':
  msg=str({'host': 'localhost', 'req': sys.argv[1]})
  do('b"'+msg+'"',sys.argv[2]) 
  exit()
- z=[]
- mylist=get('run',sys.argv[1])
- if sys.argv[1]=='user':
-  with open('/etc/passwd') as f:
-   revf=f.readlines()
-   for line in revf:
-    if 'TopStor' in line:
-     l=line.split(':')
-     ll=line.split('TopStor')[1].split(':/')[0]
-     z.append((l[0],l[2],ll)) 
- print(z)  
