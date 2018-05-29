@@ -116,8 +116,6 @@ else
   ETCDCTL_API=3 ./etcdsync.py $myip run/$leader/user users 2>/dev/null
   systemctl start topstorremote
   systemctl start topstorremoteack
-  echo running sendhost.py $leaderip 'user' 'recvreq' $myhost >>/root/tmp2
-  /pace/sendhost.py $leaderip 'user' 'recvreq' $myhost
   echo etcd started as local >>/root/tmp2
   rm -rf /var/lib/iscsi/nodes/* 2>/dev/null
   echo starting iscsiwaatchdog >>/root/tmp2
