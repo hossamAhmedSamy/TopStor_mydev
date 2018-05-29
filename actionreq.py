@@ -2,11 +2,14 @@
 from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 from sendhost import sendhost as send
-def do(body):
+def do(body,myhost):
  z=[]
- r=mtuple((body[2:][:-1]), myhost)
+ r=mtuple(body[2:][:-1])
+ print(r)
 # print("receved from",r["host"],' request for: ',r["req"])
 # mylist=get('run',r["req"])
+ with open('/root/recv','w') as f:
+  f.write('I got a message from '+r["host"]+' : '+r["req"])
  if r["req"]=='user':
   with open('/etc/passwd') as f:
    revf=f.readlines()
@@ -15,14 +18,17 @@ def do(body):
      l=line.split(':')
      ll=line.split('TopStor')[1].split(':/')[0]
      z.append((l[0],l[2],ll)) 
-     if r["host"] =='localhost':
-      print(str(z))
-      return(str(z)) 
-     host=get('known/'+r["host"])
-     if len(host) > 3:
-      msg=str({'host': myhost, 'req': str(z)})
-      send(myhost, msg, 'recvreply', myhost)
-      return(str(z)) 
+  if r["host"] =='localhost':
+   print(str(z))
+  host=get('known/'+r["host"])
+  with open('/root/recv','a') as f:
+   f.write('sender ip is  : '+str(host[0]))
+  if len(host) > 3:
+   msg=str({'host': myhost, 'req': str(z)})
+   with open('/root/recv','a') as f:
+    f.write('I am ('+myhost+') sending to'+r["host"]+' : ')
+    f.write(msg)
+  send(myhost, msg, 'recvreply', myhost)
  print(z)  
 # if r["req"]=='user':
 if __name__=='__main__':

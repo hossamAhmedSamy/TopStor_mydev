@@ -4,6 +4,7 @@ import actionreq
 
 
 def callback(ch, method, properties, body):
+ print(body)
  actionreq.do(str(body), sys.argv[1])
  
 
