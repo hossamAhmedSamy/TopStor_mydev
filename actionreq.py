@@ -29,7 +29,7 @@ def do(body,myhost):
   with open('/root/recv','a') as f:
    f.write('sender ip is  : '+str(host[0])+'\n')
   if len(str(host[0])) > 3:
-   msg={'host': myhost, 'req': str(z)}
+   msg={'req': r["req"], 'reply':z}
    with open('/root/recv','a') as f:
     f.write('preparing \n')
    with open('/root/recv','a') as f:
