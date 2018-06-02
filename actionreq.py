@@ -35,11 +35,11 @@ def do(body,myhost):
    with open('/root/recv','a') as f:
     f.write('I am ('+myhost+') sending to '+r["host"]+' : \n')
     f.write(str(msg)+'\n')
+   send(host[0], str(msg), 'recvreply', str(myhost))
   else:
    with open('/root/recv','a') as f:
     f.write('it is not known sender... ignoring \n')
-   
-  send(host[0], str(msg), 'recvreply', str(myhost))
+    exit()
  print(z)  
 # if r["req"]=='user':
 if __name__=='__main__':
