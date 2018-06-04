@@ -1,4 +1,5 @@
 #!/bin/python3.6
+import codecs
 from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 import subprocess
@@ -35,6 +36,17 @@ def do(body):
   cmdline='/TopStor/logmsg.sh Unlin1006 info system'
   cmdline=cmdline.split()
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+########## if user ######################
+ elif r["req"]=='cifs':
+  with open('/root/recv','a') as f:
+   f.write('preparing cifs:'+str(r["reply"][0])+'\n')
+  cifsconf=codecs.decode(r["reply"][0],'hex')
+  cifsconf=cifsconf.decode('utf-8')
+  with open('/root/recv','a') as f:
+   f.write('cifs conf: '+cifsconf+'\n')
+  with open('/etc/samba/smb.conf','w') as f:
+   f.write(cifsconf)
+  
 
 
 if __name__=='__main__':
