@@ -1,4 +1,5 @@
 #!/bin/python3.6
+import codecs
 from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 from sendhost import sendhost as send
@@ -11,6 +12,14 @@ def do(body,myhost):
 # mylist=get('run',r["req"])
  with open('/root/recv','w') as f:
   f.write('I got a message from '+r["host"]+' : '+r["req"]+'\n')
+ host=get('known/'+r["host"])
+ with open('/root/recv','a') as f:
+  f.write('sender ip is  : '+str(host[0])+'\n')
+ if len(str(host[0])) < 4:
+  with open('/root/recv','a') as f:
+   f.write('it is not known sender... ignoring \n')
+   r["req"]='uknown_host:'+r["host"]
+############## received "user" request #################
  if r["req"]=='user':
   with open('/etc/passwd') as f:
    revf=f.readlines()
@@ -25,10 +34,7 @@ def do(body,myhost):
    with open('/root/recv','a') as f:
     f.write('request was from localhost\n')
    print(str(z))
-  host=get('known/'+r["host"])
-  with open('/root/recv','a') as f:
-   f.write('sender ip is  : '+str(host[0])+'\n')
-  if len(str(host[0])) > 3:
+  else:
    msg={'req': r["req"], 'reply':z}
    with open('/root/recv','a') as f:
     f.write('preparing \n')
@@ -36,11 +42,25 @@ def do(body,myhost):
     f.write('I am ('+myhost+') sending to '+r["host"]+' : \n')
     f.write(str(msg)+'\n')
    send(host[0], str(msg), 'recvreply', str(myhost))
-  else:
-   with open('/root/recv','a') as f:
-    f.write('it is not known sender... ignoring \n')
-    exit()
- print(z)  
+############# CIFS data #####################
+ elif r["req"]=='cifs':
+  with open('/root/recv','a') as f:
+   f.write('preparing cifs data \n')
+  with open('/etc/samba/smb.conf') as f:
+   cifsconf=f.read()
+  cifsconf=cifsconf.encode()
+  bcifs=codecs.encode(cifsconf,'hex')
+  z.append(bcifs)
+  msg={'req': r["req"], 'reply':z}
+  send(host[0],str(msg), 'recvreply',str(myhost))
+############## uknown request ###############
+ else:
+  with open('/root/recv','a') as f:
+   f.write('uknown request:  \n')
+   f.write(r["req"]+' \n')
+  
+
+
 # if r["req"]=='user':
 if __name__=='__main__':
  import sys
