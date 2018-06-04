@@ -10,28 +10,33 @@ def do(body):
  r=mtuple(t["req"])
  with open('/root/recv','a') as f:
    f.write('Request details:'+r['req']+'\n')
+########## if user ######################
  if r["req"]=='user':
-  userlist=''
+  cmdline='/TopStor/logmsg.sh Unlin1005 info system'
+  cmdline=cmdline.split()
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   with open('/etc/passwd') as f:
-   userlist=f.read()
+   revf=f.readlines()
+   for line in revf:
+    if 'TopStor' in line:
+     l=line.split(':')
+     with open('/root/recv','a') as f:
+      f.write('syncing user: '+l[0]+'\n')
+     cmdline=['/TopStor/UnixDelUser_sync',l[0], 'system']
+     result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   with open('/root/recv','a') as f:
-   f.write('userlist:'+str(userlist)+'\n')
+   f.write('Syncing users:\n')
   for x in r["reply"]:
-   if x[0] not in userlist:
-    cmdline=['/TopStor/UnixAddUser_sync',x[0],x[2],x[1]]
-    with open('/root/recv','a') as f:
-     f.write('adding user '+str(cmdline)+'\n')
-    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-   elif x[2] not in userlist:
-    cmdline=['/TopStor/UnixChangePass_sync',x[2],x[0]]
-    with open('/root/recv','a') as f:
-     f.write('changing password of user '+str(cmdline)+'\n')
-    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-   else:
-    with open('/root/recv','a') as f:
-     f.write('no user change is found ')
-  
-# if r["req"]=='user':
+   cmdline=['/TopStor/UnixAddUser_sync',x[0],x[2],x[1]]
+   with open('/root/recv','a') as f:
+    f.write('adding user '+str(cmdline)+'\n')
+   cmdline=['/TopStor/UnixAddUser_sync',x[0],x[2],x[1]]
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline='/TopStor/logmsg.sh Unlin1006 info system'
+  cmdline=cmdline.split()
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+
+
 if __name__=='__main__':
  import sys
  msg=str({'host': 'localhost', 'req': sys.argv[1]})
