@@ -238,16 +238,16 @@ then
    echo $ids | grep ${spare:8} &>/dev/null
    if [ $? -ne 0 ]; then
     diskid=`python3.6 diskinfo.py /pacedata/disklist.txt $spare`
-    /TopStor/logmsg.sh Diwa4 warning system $diskid $hostnam
+    /TopStor/logmsg.sh Diwa4 warning system $spare $pool
     /sbin/zpool remove $pool $spare 2>/dev/null;
     ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
     if [ $? -eq 0 ]; then
-     /TopStor/logmsg.sh Disu4 info system $diskid $hostnam 
+     /TopStor/logmsg.sh Disu4 info system $spare 
      cachestate=1
     else 
-     /TopStor/logmsg.sh Dist5 info system $diskid  $hostnam
+     /TopStor/logmsg.sh Dist5 info system $spare
      /sbin/zpool offline $pool $spare 2>/dev/null
-     /TopStor/logmsg.sh Disu5 info system $diskid $hostnam 
+     /TopStor/logmsg.sh Disu5 info system $spare 
     fi
    fi
   done 
