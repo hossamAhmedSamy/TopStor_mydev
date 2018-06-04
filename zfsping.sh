@@ -108,6 +108,8 @@ else
     leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
     leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
     /pace/sendhost.py $leaderip 'user' 'recvreq' $myhost
+    sleep 1
+    /pace/sendhost.py $leaderip 'cifs' 'recvreq' $myhost
     ETCDCTL_API=3 /pace/etcddel.py md --prefix
     isknown=1;
    fi
