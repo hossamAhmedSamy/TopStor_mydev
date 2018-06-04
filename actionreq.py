@@ -11,6 +11,14 @@ def do(body,myhost):
 # mylist=get('run',r["req"])
  with open('/root/recv','w') as f:
   f.write('I got a message from '+r["host"]+' : '+r["req"]+'\n')
+ host=get('known/'+r["host"])
+ with open('/root/recv','a') as f:
+  f.write('sender ip is  : '+str(host[0])+'\n')
+ if len(str(host[0])) > 3:
+  with open('/root/recv','a') as f:
+   f.write('it is not known sender... ignoring \n')
+  exit()
+############## received "user" request #################
  if r["req"]=='user':
   with open('/etc/passwd') as f:
    revf=f.readlines()
@@ -25,10 +33,7 @@ def do(body,myhost):
    with open('/root/recv','a') as f:
     f.write('request was from localhost\n')
    print(str(z))
-  host=get('known/'+r["host"])
-  with open('/root/recv','a') as f:
-   f.write('sender ip is  : '+str(host[0])+'\n')
-  if len(str(host[0])) > 3:
+  else:
    msg={'req': r["req"], 'reply':z}
    with open('/root/recv','a') as f:
     f.write('preparing \n')
@@ -36,11 +41,6 @@ def do(body,myhost):
     f.write('I am ('+myhost+') sending to '+r["host"]+' : \n')
     f.write(str(msg)+'\n')
    send(host[0], str(msg), 'recvreply', str(myhost))
-  else:
-   with open('/root/recv','a') as f:
-    f.write('it is not known sender... ignoring \n')
-    exit()
- print(z)  
 # if r["req"]=='user':
 if __name__=='__main__':
  import sys
