@@ -1,4 +1,5 @@
 #!/bin/python3.6
+import codecs
 from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 from sendhost import sendhost as send
@@ -14,10 +15,10 @@ def do(body,myhost):
  host=get('known/'+r["host"])
  with open('/root/recv','a') as f:
   f.write('sender ip is  : '+str(host[0])+'\n')
- if len(str(host[0])) > 3:
+ if len(str(host[0])) < 4:
   with open('/root/recv','a') as f:
    f.write('it is not known sender... ignoring \n')
-  exit()
+   r["req"]='uknown_host:'+r["host"]
 ############## received "user" request #################
  if r["req"]=='user':
   with open('/etc/passwd') as f:
@@ -41,6 +42,25 @@ def do(body,myhost):
     f.write('I am ('+myhost+') sending to '+r["host"]+' : \n')
     f.write(str(msg)+'\n')
    send(host[0], str(msg), 'recvreply', str(myhost))
+############# CIFS data #####################
+ elif r["req"]=='cifs':
+  with open('/root/recv','a') as f:
+   f.write('preparing cifs data \n')
+  with open('/etc/samba/smb.conf') as f:
+   cifsconf=f.read()
+  cifsconf=cifsconf.encode()
+  bcifs=codecs.encode(cifsconf,'hex')
+  z.append(bcifs)
+  msg={'req': r["req"], 'reply':z}
+  send(host[0],str(msg), 'recvreply',str(myhost))
+############## uknown request ###############
+ else:
+  with open('/root/recv','a') as f:
+   f.write('uknown request:  \n')
+   f.write(r["req"]+' \n')
+  
+
+
 # if r["req"]=='user':
 if __name__=='__main__':
  import sys
