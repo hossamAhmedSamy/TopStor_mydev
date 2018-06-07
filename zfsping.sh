@@ -101,7 +101,6 @@ else
   then
    echo I am not a known adding me as possible >> /root/zfspingtmp
    ETCDCTL_API=3 ./etcdput.py possible$myhost $myip 2>/dev/null
-   /TopStor/logmsg.sh Partst02 info system $myhost
    isknown=0
   else
    echo I am known so running all needed etcd task:boradcast, log..etc >> /root/zfspingtmp
@@ -119,9 +118,18 @@ else
     sleep 1
     /pace/sendhost.py $leaderip 'cifs' 'recvreq' $myhost
     ETCDCTL_API=3 /pace/etcddel.py md --prefix
-    sleep 5
-    /TopStor/logmsg.sh Partsu02 info system $myhost
-    isknown=1;
+   fi
+   if [[ $isknown -le 10 ]];
+   then
+    isknown=$((isknown+1))
+   fi
+   echo $isknown | grep 3
+   if [ $? -eq 0 ];
+   then
+    ETCDCTL_API=3 /pace/etcddel.py md --prefix
+    /TopStor/logmsg.sh Partsu04 info system $myhost $myip
+    msg="{'req': 'msg', 'reply': ['/TopStor/logmsg.sh','Partsu04','info','system','$myhost','$myip']}"
+    /pace/sendhost.py $leaderip "$msg" 'recvreply' $myhost
    fi
    echo finish running tasks task:boradcast, log..etc >> /root/zfspingtmp
   fi

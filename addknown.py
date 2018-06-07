@@ -29,14 +29,14 @@ if possible != ['']:
   subprocess.run(cmdline,stdout=subprocess.PIPE)
   cmdline=['/pace/iscsiwatchdog.sh','2>/dev/null']
   subprocess.run(cmdline,stdout=subprocess.PIPE)
-  cmdline=['/bin/sleep','5']
-  subprocess.run(cmdline,stdout=subprocess.PIPE)
-  cmdline=['/pace/iscsiwatchdog.sh','2>/dev/null']
-  subprocess.run(cmdline,stdout=subprocess.PIPE)
-  cmdline=['/bin/sleep','5']
-  subprocess.run(cmdline,stdout=subprocess.PIPE)
-  cmdline=['/TopStor/logmsg.sh','Partsu01','info','system', mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
-  subprocess.run(cmdline,stdout=subprocess.PIPE)
+#  cmdline=['/bin/sleep','5']
+#  subprocess.run(cmdline,stdout=subprocess.PIPE)
+#  cmdline=['/pace/iscsiwatchdog.sh','2>/dev/null']
+#  subprocess.run(cmdline,stdout=subprocess.PIPE)
+#  cmdline=['/bin/sleep','5']
+#  subprocess.run(cmdline,stdout=subprocess.PIPE)
+#  cmdline=['/TopStor/logmsg.sh','Partsu01','info','system', mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
+#  subprocess.run(cmdline,stdout=subprocess.PIPE)
 else:
  print('possible is empty')
 cmdline=['/pace/etcdget.py','known','--prefix']

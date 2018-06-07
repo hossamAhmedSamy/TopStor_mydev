@@ -88,6 +88,12 @@ else
  cat /pacedata/runningetcdnodes.txt | grep $myhost &>/dev/null
  if [ $? -ne 0 ];
  then
+  leaderall=`ETCDCTL_API=3 ./etcdget.py leader --prefix `
+  leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+  leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
+  /TopStor/logmsg.sh Partst04 info system $myhost $myip
+  msg="{'req': 'msg', 'reply': ['/TopStor/logmsg.sh','Partst04','info','system','$myhost','$myip']}"
+  /pace/sendhost.py $leaderip "$msg" 'recvreply' $myhost
  echo getting clusterip from another leader >>/root/tmp2
   ETCDCTL_API=3 ./etcdget.py clusterip 2>/dev/null > /pacedata/clusterip
   /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
@@ -107,9 +113,6 @@ else
   ETCDCTL_API=3 ./etcdsync.py $myip localrun localrun 2>/dev/null
   ETCDCTL_API=3 ./etcdsync.py $myip leader known 2>/dev/null
   ETCDCTL_API=3 ./etcddel.py known/$myhost --prefix 2>/dev/null
-  leaderall=`ETCDCTL_API=3 ./etcdget.py leader --prefix `
-  leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-  leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
   /sbin/rabbitmqctl add_user rabb_$leader YousefNadody 2>/dev/null
   /sbin/rabbitmqctl set_permissions -p / rabb_$leader ".*" ".*" ".*" 2>/dev/null
 #  /sbin/rabbitmqctl set_user_tags rabb_ administrator
