@@ -46,7 +46,13 @@ def do(body):
    f.write('cifs conf: '+cifsconf+'\n')
   with open('/etc/samba/smb.conf','w') as f:
    f.write(cifsconf)
-  
+########## if msg ###############
+ elif r["req"]=='msg':  
+  with open('/root/recv','a') as f:
+   f.write('received msg from parnter :'+str(r["reply"])+'\n')
+   f.write('type of message :'+str(type(r["reply"]))+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+ 
 
 
 if __name__=='__main__':
