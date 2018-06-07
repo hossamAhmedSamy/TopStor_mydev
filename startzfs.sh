@@ -54,6 +54,7 @@ then
   echo starting etcd=$?
  done
  echo started etcd as primary>>/root/tmp2
+ /TopStor/logmsg.sh Partst03 info system $myhost $myip
  ETCDCTL_API=3 ./runningetcdnodes.py $myip 2>/dev/null
  ETCDCTL_API=3 ./etcddel.py known --prefix 2>/dev/null 
  ETCDCTL_API=3 ./etcddel.py possbile --prefix 2>/dev/null 

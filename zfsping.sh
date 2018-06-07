@@ -2,6 +2,7 @@
 cd /pace
 echo $$ > /var/run/zfsping.pid
 isknown=0
+isprimary=0
 export ETCDCTL_API=3
 systemctl restart target
 cd /pace
@@ -28,6 +29,12 @@ netstat -ant | grep 2379 | grep LISTEN &>/dev/null
 if [ $? -eq 0 ]; 
 then
  echo I am primary etcd >> /root/zfspingtmp
+ isprimary=$((isprimary+1))
+ echo $isprimary | grep 3
+ if [ $? -eq 0 ];
+ then
+  /TopStor/logmsg.sh Partsu03 info system $myhost $myip
+ fi
  runningcluster=1
 # leader='"'`ETCDCTL_API=3 ./etcdget.py leader --prefix 2>/dev/null`'"'
  leader=`ETCDCTL_API=3 ./etcdget.py leader --prefix 2>/dev/null`
@@ -94,6 +101,7 @@ else
   then
    echo I am not a known adding me as possible >> /root/zfspingtmp
    ETCDCTL_API=3 ./etcdput.py possible$myhost $myip 2>/dev/null
+   /TopStor/logmsg.sh Partst02 info system $myhost
    isknown=0
   else
    echo I am known so running all needed etcd task:boradcast, log..etc >> /root/zfspingtmp
@@ -111,6 +119,8 @@ else
     sleep 1
     /pace/sendhost.py $leaderip 'cifs' 'recvreq' $myhost
     ETCDCTL_API=3 /pace/etcddel.py md --prefix
+    sleep 5
+    /TopStor/logmsg.sh Partsu02 info system $myhost
     isknown=1;
    fi
    echo finish running tasks task:boradcast, log..etc >> /root/zfspingtmp
