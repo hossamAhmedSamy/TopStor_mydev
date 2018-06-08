@@ -88,4 +88,4 @@ fi
 fi
 fi
 echo ready ;
-ETCDCTL_API=3 /pace/putzpool.py
+ETCDCTL_API=3 /pace/etcddel.py md --prefix

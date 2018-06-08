@@ -1,18 +1,60 @@
 #!/bin/python3.6
+import codecs
 from ast import literal_eval as mtuple
 from etcdget import etcdget as get
+import subprocess
 def do(body):
  z=[]
+ with open('/root/recv','w') as f:
+  f.write('Recevied a reply:'+body[2:][:-1]+'\n')
+ t=mtuple(body[2:][:-1].replace("\\'","'"))
+ r=mtuple(t["req"])
  with open('/root/recv','a') as f:
-  f.write('Recevied a reply:'+str(body))
- r=mtuple((body[2:][:-1]))
-# print("receved from",r["host"],' request for: ',r["req"])
-# mylist=get('run',r["req"])
+   f.write('Request details:'+r['req']+'\n')
+########## if user ######################
  if r["req"]=='user':
+  cmdline='/TopStor/logmsg.sh Unlin1005 info system'
+  cmdline=cmdline.split()
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  with open('/etc/passwd') as f:
+   revf=f.readlines()
+   for line in revf:
+    if 'TopStor' in line:
+     l=line.split(':')
+     with open('/root/recv','a') as f:
+      f.write('syncing user: '+l[0]+'\n')
+     cmdline=['/TopStor/UnixDelUser_sync',l[0], 'system']
+     result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   with open('/root/recv','a') as f:
-   f.write('User list in reply:'+str(r["reply"]))
- print(z)  
-# if r["req"]=='user':
+   f.write('Syncing users:\n')
+  for x in r["reply"]:
+   cmdline=['/TopStor/UnixAddUser_sync',x[0],x[2],x[1]]
+   with open('/root/recv','a') as f:
+    f.write('adding user '+str(cmdline)+'\n')
+   cmdline=['/TopStor/UnixAddUser_sync',x[0],x[2],x[1]]
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline='/TopStor/logmsg.sh Unlin1006 info system'
+  cmdline=cmdline.split()
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+########## if user ######################
+ elif r["req"]=='cifs':
+  with open('/root/recv','a') as f:
+   f.write('preparing cifs:'+str(r["reply"][0])+'\n')
+  cifsconf=codecs.decode(r["reply"][0],'hex')
+  cifsconf=cifsconf.decode('utf-8')
+  with open('/root/recv','a') as f:
+   f.write('cifs conf: '+cifsconf+'\n')
+  with open('/etc/samba/smb.conf','w') as f:
+   f.write(cifsconf)
+########## if msg ###############
+ elif r["req"]=='msg':  
+  with open('/root/recv','a') as f:
+   f.write('received msg from parnter :'+str(r["reply"])+'\n')
+   f.write('type of message :'+str(type(r["reply"]))+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+ 
+
+
 if __name__=='__main__':
  import sys
  msg=str({'host': 'localhost', 'req': sys.argv[1]})
