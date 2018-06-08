@@ -3,6 +3,8 @@ cd /pace
 echo $$ > /var/run/zfsping.pid
 isknown=0
 isprimary=0
+date=`date`
+echo $date >> /root/zfspingstart
 export ETCDCTL_API=3
 systemctl restart target
 cd /pace
@@ -118,6 +120,7 @@ else
     sleep 1
     /pace/sendhost.py $leaderip 'cifs' 'recvreq' $myhost
     ETCDCTL_API=3 /pace/etcddel.py md --prefix
+    isknown=$((isknown+1))
    fi
    if [[ $isknown -le 10 ]];
    then
