@@ -33,7 +33,7 @@ grep GATEWAY /etc/sysconfig/network-scripts/ifcf* | awk -F: '{print $1}' | sort 
 #sed -e "s/HOSTNAME/$hostn/g" -e "s/IPADD/$hostip/g" -e "s/ROUTE/$hostrout/g" rc.conf > txt/rc.conf
 #sed -ri  "s/(https:\/\/)[^=]*$/\1$hostip\//g" /etc/httpd/conf.d/sshhttp.conf 
 sed -e "s/HOSTY/$hostip/g" /TopStor/sshhttp.conf > /etc/httpd/conf.d/sshhttp.conf
-CC=`pcs resource | grep IPaddr2 | awk '{print $1}'`
+CC=`pcs resource | grep IPaddr2 | awk '{print $1}' | grep -v cluster`
 echo CCis $CC
 oldip=`pcs resource show $CC | grep Attrib | awk '{print $2}' | awk -F'=' '{print $2}'`
 oldsubnet=`pcs resource show $CC | grep Attrib | awk '{print $4}' | awk -F'=' '{print $2}'`
