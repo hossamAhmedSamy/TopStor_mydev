@@ -3,6 +3,7 @@ cd /pace
 echo $$ > /var/run/zfsping.pid
 isknown=0
 isprimary=0
+primtostd=4
 date=`date`
 echo $date >> /root/zfspingstart
 export ETCDCTL_API=3
@@ -34,6 +35,16 @@ then
  if [[ $isprimary -le 10 ]];
  then
    isprimary=$((isprimary+1))
+ fi
+ if [[ $primtostd -le 10 ]];
+ then
+  primtostd=$((primtostd+1))
+ fi
+ echo $primtostd | grep 3
+ if [ $? -eq 0 ];
+ then
+  /TopStor/logmsg.sh Partsu05 info system $myhost
+  primtostd=$((primtostd+1))
  fi
  echo $isprimary | grep 3
  if [ $? -eq 0 ];
@@ -67,6 +78,12 @@ else
  if [ $? -eq 0 ];
  then
   echo leader is dead.. stopping local etcd >> /root/zfspingtmp
+  ETCDCTL_API=3 ./etcdgetlocal.py $myip known --prefix | wc -l | grep 1
+  if [ $? -eq 0 ];
+  then
+   /TopStor/logmsg.sh Partst05 info system $myhost
+   primtostd=0;
+  fi
   systemctl stop etcd 2>/dev/null
   clusterip=`cat /pacedata/clusterip`
   echo starting primary etcd with clsuterip=$clusterip >> /root/zfspingtmp
