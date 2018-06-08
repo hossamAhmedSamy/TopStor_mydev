@@ -124,6 +124,7 @@ else
     sleep 1
     /pace/sendhost.py $leaderip 'cifs' 'recvreq' $myhost
     ETCDCTL_API=3 /pace/etcddel.py md --prefix
+    isknown=$((isknown+1))
    fi
    if [[ $isknown -le 10 ]];
    then
