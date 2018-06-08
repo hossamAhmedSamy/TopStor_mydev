@@ -3,6 +3,8 @@ cd /pace
 echo $$ > /var/run/zfsping.pid
 isknown=0
 isprimary=0
+date=`date`
+echo $date >> /root/zfspingstart
 export ETCDCTL_API=3
 systemctl restart target
 cd /pace
@@ -29,11 +31,15 @@ netstat -ant | grep 2379 | grep LISTEN &>/dev/null
 if [ $? -eq 0 ]; 
 then
  echo I am primary etcd >> /root/zfspingtmp
- isprimary=$((isprimary+1))
+ if [[ $isprimary -le 10 ]];
+ then
+   isprimary=$((isprimary+1))
+ fi
  echo $isprimary | grep 3
  if [ $? -eq 0 ];
  then
   /TopStor/logmsg.sh Partsu03 info system $myhost $myip
+  isprimary=$((isprimary+1))
  fi
  runningcluster=1
 # leader='"'`ETCDCTL_API=3 ./etcdget.py leader --prefix 2>/dev/null`'"'

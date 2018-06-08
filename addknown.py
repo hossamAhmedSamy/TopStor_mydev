@@ -22,8 +22,8 @@ if possible != ['']:
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   cmdline=['/sbin/rabbitmqctl','set_permissions','-p','/','rabb_'+mtuple(x)[0].split('possible')[1],'.*','.*','.*']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  cmdline=['/TopStor/logmsg.sh','Partst01','info','system', mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+#  cmdline=['/TopStor/logmsg.sh','Partst01','info','system', mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
+#  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   
   cmdline=['/pace/etcdput.py','change/'+mtuple(x)[0]+'/booted',mtuple(x)[1]]
   subprocess.run(cmdline,stdout=subprocess.PIPE)
