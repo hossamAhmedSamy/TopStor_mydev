@@ -64,12 +64,12 @@ then
  fi
  echo adding known from list of possbiles >> /root/zfspingtmp
  ETCDCTL_API=3 ./addknown.py 2>/dev/null
- echo checking confirmed >> /root/zfspingtmp
- ETCDCTL_API=3 ./allconfirmed.py 2>/dev/null
- echo broadcasting log >> /root/zfspingtmp
- ETCDCTL_API=3 ./broadcastlog.py 2>/dev/null
- echo receiving log >> /root/zfspingtmp
- ETCDCTL_API=3 ./receivelog.py 2>/dev/null
+# echo checking confirmed >> /root/zfspingtmp
+# ETCDCTL_API=3 ./allconfirmed.py 2>/dev/null
+# echo broadcasting log >> /root/zfspingtmp
+# ETCDCTL_API=3 ./broadcastlog.py 2>/dev/null
+# echo receiving log >> /root/zfspingtmp
+# ETCDCTL_API=3 ./receivelog.py 2>/dev/null
  echo after checking logs and broadcasts..etc >> /root/zfspingtmp
 else
  echo I am not a primary etcd.. heartbeating leader >> /root/zfspingtmp
@@ -127,9 +127,9 @@ else
    isknown=0
   else
    echo I am known so running all needed etcd task:boradcast, log..etc >> /root/zfspingtmp
-   ETCDCTL_API=3 ./changeetcd.py 2>/dev/null
-   ETCDCTL_API=3 ./receivelog.py 2>/dev/null
-   ETCDCTL_API=3 ./broadcastlog.py 2>/dev/null
+#   ETCDCTL_API=3 ./changeetcd.py 2>/dev/null
+#   ETCDCTL_API=3 ./receivelog.py 2>/dev/null
+#   ETCDCTL_API=3 ./broadcastlog.py 2>/dev/null
    echo $isknown | grep 0 
    if [ $? -eq 0 ];
    then

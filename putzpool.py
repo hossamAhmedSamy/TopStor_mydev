@@ -80,6 +80,8 @@ cmdline=['/pace/etcddel.py','run','stub']
 subprocess.run(cmdline,stdout=subprocess.PIPE)
 cmdline=['/pace/etcddel.py','run/','--prefix']
 subprocess.run(cmdline,stdout=subprocess.PIPE)
+cmdline=['/pace/etcddel.py','md','--prefix']
+subprocess.run(cmdline,stdout=subprocess.PIPE)
 msg='deleted old putzpool then sleep 4 secs \n'
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
@@ -216,7 +218,9 @@ try:
       msg='found diskc '+str(diskc)
       with open('/root/putzpooltmp','a') as f:
        f.write(str(msg)+"\n")
-      if ll[3].split('-')[0] not in str(ata) or ll[7]=='-':
+      if (myhostorg in str(ll) and ll[3].split('-')[0] not in str(ata)) or ll[7]=='-':
+       with open('/root/putzpooltmp','a') as f:
+        f.write('ll[3]spl(-)[0]'+ll[3].split('-')[0]+'\n str(ata): '+str(ata)+"\n"+'all ll'+str(ll)+'\n')
        status='FAULT'
        msg='status of disk is FAULT'
        with open('/root/putzpooltmp','a') as f:
