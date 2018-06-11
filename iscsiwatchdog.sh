@@ -6,6 +6,7 @@ else
  islocal=1
  myip=`echo $@ | awk '{print $1}'`
  myhost=`echo $@ | awk '{print $2}'`
+ leader=`echo $@ | awk '{print $3}'`
 fi
 
 systemctl status etcd &>/dev/null
@@ -22,6 +23,6 @@ then
   ETCDCTL_API=3 /pace/putzpool.py 
  else
   echo putzpool local $myip $myhost $islocal >> /root/zfspingtmp
-  ETCDCTL_API=3 /pace/putzpoollocal.py $myip $myhost
+  ETCDCTL_API=3 /pace/putzpoollocal.py $myip $myhosti $leader
  fi
 fi

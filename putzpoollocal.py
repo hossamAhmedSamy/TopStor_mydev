@@ -6,6 +6,7 @@ import socket
 
 myip=sys.argv[1]
 myhostorg=sys.argv[2]
+leader=sys.argv[3]
 msg='start new putzpoollocal \n'
 with open('/root/putzpooltmp','w') as f:
  f.write(str(msg)+"\n")
@@ -16,6 +17,8 @@ localmyhost='localrun/'+myhostorg
 msg='deleting old putzpools '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
+cmdline=['/pace/etcdget.py','run/'+leader,'--prefix']
+runningzres=subprocess.run(cmdline,stdout=subprocess.PIPE)
 cmdline=['/pace/etcddel.py','local'+myhost,'stub']
 subprocess.run(cmdline,stdout=subprocess.PIPE)
 cmdline=['/pace/etcddellocal.py',myip, myhost,'stub']
@@ -227,7 +230,7 @@ with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
 for cc in lsscsi:
   c=cc.split()
-  if len(c[6]) < 3 or c[6] not in str(z):
+  if len(c[6]) < 3 or c[6] not in str(z) or c[6] not in str(runningzres):
    msg='found free disk'+str(c[6])
    with open('/root/putzpooltmp','a') as f:
     f.write(str(msg)+"\n")

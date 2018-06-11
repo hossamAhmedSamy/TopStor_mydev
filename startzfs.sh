@@ -123,7 +123,7 @@ else
   echo etcd started as local >>/root/tmp2
   rm -rf /var/lib/iscsi/nodes/* 2>/dev/null
   echo starting iscsiwaatchdog >>/root/tmp2
-  /pace/iscsiwatchdog.sh $myip $myhost 2>/dev/null
+  /pace/iscsiwatchdog.sh $myip $myhost $leader 2>/dev/null
   echo started iscsiwaatchdog >>/root/tmp2
 #  pcs resource disable clusterip
  fi

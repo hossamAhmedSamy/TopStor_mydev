@@ -4,7 +4,7 @@ import subprocess
 from ast import literal_eval as mtuple
 import socket
 
-
+exit()
 msg='start new putzpool '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
@@ -79,6 +79,8 @@ with open('/root/putzpooltmp','a') as f:
 cmdline=['/pace/etcddel.py','run','stub']
 subprocess.run(cmdline,stdout=subprocess.PIPE)
 cmdline=['/pace/etcddel.py','run/','--prefix']
+subprocess.run(cmdline,stdout=subprocess.PIPE)
+cmdline=['/pace/etcddel.py','md','--prefix']
 subprocess.run(cmdline,stdout=subprocess.PIPE)
 msg='deleted old putzpool then sleep 4 secs \n'
 with open('/root/putzpooltmp','a') as f:

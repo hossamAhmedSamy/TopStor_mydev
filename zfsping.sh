@@ -64,12 +64,12 @@ then
  fi
  echo adding known from list of possbiles >> /root/zfspingtmp
  ETCDCTL_API=3 ./addknown.py 2>/dev/null
- echo checking confirmed >> /root/zfspingtmp
- ETCDCTL_API=3 ./allconfirmed.py 2>/dev/null
- echo broadcasting log >> /root/zfspingtmp
- ETCDCTL_API=3 ./broadcastlog.py 2>/dev/null
- echo receiving log >> /root/zfspingtmp
- ETCDCTL_API=3 ./receivelog.py 2>/dev/null
+# echo checking confirmed >> /root/zfspingtmp
+# ETCDCTL_API=3 ./allconfirmed.py 2>/dev/null
+# echo broadcasting log >> /root/zfspingtmp
+# ETCDCTL_API=3 ./broadcastlog.py 2>/dev/null
+# echo receiving log >> /root/zfspingtmp
+# ETCDCTL_API=3 ./receivelog.py 2>/dev/null
  echo after checking logs and broadcasts..etc >> /root/zfspingtmp
 else
  echo I am not a primary etcd.. heartbeating leader >> /root/zfspingtmp
@@ -127,9 +127,9 @@ else
    isknown=0
   else
    echo I am known so running all needed etcd task:boradcast, log..etc >> /root/zfspingtmp
-   ETCDCTL_API=3 ./changeetcd.py 2>/dev/null
-   ETCDCTL_API=3 ./receivelog.py 2>/dev/null
-   ETCDCTL_API=3 ./broadcastlog.py 2>/dev/null
+#   ETCDCTL_API=3 ./changeetcd.py 2>/dev/null
+#   ETCDCTL_API=3 ./receivelog.py 2>/dev/null
+#   ETCDCTL_API=3 ./broadcastlog.py 2>/dev/null
    echo $isknown | grep 0 
    if [ $? -eq 0 ];
    then
@@ -169,6 +169,9 @@ then
   systemctl daemon-reload
   systemctl stop etcd 2>/dev/null
   systemctl start etcd 2>/dev/null
+  leaderall=`ETCDCTL_API=3 ./etcdget.py leader --prefix `
+  leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+  leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
   ETCDCTL_API=3 ./etcdsync.py $myip primary primary 2>/dev/null
   ETCDCTL_API=3 ./etcddellocal.py $myip known --prefix 2>/dev/null
   ETCDCTL_API=3 ./etcddellocal.py $myip localrun --prefix 2>/dev/null
@@ -184,7 +187,7 @@ echo $needlocal | grep 2 &>/dev/null
 if [ $? -eq 0 ];
 then
   echo I am already local etcd running iscsirefresh on $myip $myhost  >> /root/zfspingtmp
- /pace/iscsiwatchdog.sh $myip $myhost
+ /pace/iscsiwatchdog.sh $myip $myhost $leader
   echo .. I am exiting now\(temporary\)  >> /root/zfspingtmp
  continue
 fi
