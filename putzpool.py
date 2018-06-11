@@ -2,9 +2,9 @@
 import traceback, hashlib
 import subprocess
 from ast import literal_eval as mtuple
+from etcddel import etcddel as etcddel
+from etcdput import etcdput as put 
 import socket
-
-
 msg='start new putzpool '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
@@ -61,7 +61,7 @@ muser.update(str(userf).encode('utf-8'))
 muser=muser.hexdigest()
 cmdline=['/pace/etcdget.py','md'+myhost+'/userhash']
 moduser=str(subprocess.run(cmdline,stdout=subprocess.PIPE).stdout)
-if muser not in moduser:
+if muser not in moduser or '-1' in moduser:
  mod=1
  msg='user changed '
  with open('/root/putzpooltmp','a') as f:
@@ -71,22 +71,19 @@ if mod==0:
  with open('/root/putzpooltmp','a') as f:
   f.write(str(msg)+"\n")
  exit() 
-#cmdline=['/bin/sleep','2']
-#subprocess.run(cmdline,stdout=subprocess.PIPE)
 msg='deleting old putzpool '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
-cmdline=['/pace/etcddel.py','run','stub']
-subprocess.run(cmdline,stdout=subprocess.PIPE)
-cmdline=['/pace/etcddel.py','run/','--prefix']
-subprocess.run(cmdline,stdout=subprocess.PIPE)
-cmdline=['/pace/etcddel.py','md','--prefix']
-subprocess.run(cmdline,stdout=subprocess.PIPE)
-msg='deleted old putzpool then sleep 4 secs \n'
-with open('/root/putzpooltmp','a') as f:
- f.write(str(msg)+"\n")
-cmdline=['sleep','4']
-subprocess.run(cmdline,stdout=subprocess.PIPE)
+#cmdline=['/pace/etcddel.py','run','stub']
+#subprocess.run(cmdline,stdout=subprocess.PIPE)
+etcddel('run','stub')
+etcddel('run/','--prefix')
+etcddel('md','--prefix')
+msg='deleted old putzpool \n'
+#with open('/root/putzpooltmp','a') as f:
+# f.write(str(msg)+"\n")
+#cmdline=['sleep','4']
+#subprocess.run(cmdline,stdout=subprocess.PIPE)
 msg='adding users '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
@@ -94,8 +91,7 @@ with open('/etc/passwd') as f:
  for fline in f:
   if 'TopStor' in fline:
    y=fline.split(":")
-   cmdline=['/pace/etcdput.py',myhost+'/user/'+y[0],y[2]]
-   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   put(myhost+'/user/'+y[0],y[2])
 msg='filtering lsscsi '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
@@ -243,14 +239,11 @@ try:
     z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/disk/'+str(diskc)+'/status',status))
   if count==0 and diskc > 0:
    z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/type',raid))
-   
-  for c in z:
-   msg='adding z in the etcd'+str(c)
+   msg='adding z in the etcd'
    with open('/root/putzpooltmp','a') as f:
     f.write(str(msg)+"\n")
-   cmdline=['/pace/etcdput.py',c[0],c[1]]
-   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-
+  for c in z:
+   put(c[0],c[1])
  msg='checking crontab'
  with open('/root/putzpooltmp','a') as f:
   f.write(str(msg)+"\n")
@@ -258,15 +251,12 @@ try:
  crons=subprocess.run(cmdline,stdout=subprocess.PIPE)
  autosnap=[x for x in str(crons.stdout)[2:][:-3].split('\\n') if 'Snapshotnowhost' in x]
  h=[]
+ msg='adding crons into etcd'+str(autosnap)
+ with open('/root/putzpooltmp','a') as f:
+  f.write(str(msg)+"\n")
  for x in autosnap:
   y=x.split()
-  msg='adding crons into etcd'+str(y)
-  with open('/root/putzpooltmp','a') as f:
-   f.write(str(msg)+"\n")
-  cmdline=['/pace/etcdput.py',myhost+'/pool/'+poolname+'/snapperiod/'+y[-1],y[-2].split('.')[0]+'/'+y[-3].split('/')[-1]+'/'+y[-2].split('.')[1]+'/'+y[-2].split('.')[2]+'/'+y[-2].split('.')[3]+'/'+y[-2].split('.')[4]+'/'+y[0].replace('/','::')+'/'+y[1].replace('/','::')+'/'+y[2].replace('/','::')+'/'+y[3].replace('/','::')+'/'+y[4].replace('/','::')]
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-
- 
+  put(myhost+'/pool/'+poolname+'/snapperiod/'+y[-1],y[-2].split('.')[0]+'/'+y[-3].split('/')[-1]+'/'+y[-2].split('.')[1]+'/'+y[-2].split('.')[2]+'/'+y[-2].split('.')[3]+'/'+y[-2].split('.')[4]+'/'+y[0].replace('/','::')+'/'+y[1].replace('/','::')+'/'+y[2].replace('/','::')+'/'+y[3].replace('/','::')+'/'+y[4].replace('/','::'))
 except Exception as e:
  traceback.print_exc()
  msg='severe exception'+str(traceback.print_exc())
@@ -300,35 +290,27 @@ for cc in lsscsi:
    msg='adding free disk to etcd'+str(diskc)
    with open('/root/putzpooltmp','a') as f:
     f.write(str(msg)+"\n")
-   cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/uuid','scsi-'+c[6]]
-   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-   cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/fromhost',c[3]]
-   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-   cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/size',c[7]]
-   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   
+   put(myhost+'/free/disk/'+str(diskc)+'/uuid','scsi-'+c[6])
+   put(myhost+'/free/disk/'+str(diskc)+'/fromhost',c[3])
+   put(myhost+'/free/disk/'+str(diskc)+'/size',c[7])
    status='AVAIL'
    if c[6]=='-':
     status='FAULT'
-   cmdline=['/pace/etcdput.py',myhost+'/free/disk/'+str(diskc)+'/status',status]
-   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   put(myhost+'/free/disk/'+str(diskc)+'/status',status)
 
 msg='adding stub'
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
-cmdline=['/pace/etcdput.py',myhost+'/stub/stub/stub/stub','stub']
-result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+put(myhost+'/stub/stub/stub/stub','stub')
 cmdline=['/pace/verdef.sh']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 vers=str(result.stdout)[2:][:-3]
 curver=vers.split()[0]
-cmdline=['/pace/etcdput.py',myhost+'/hostfw/'+curver,vers.replace(" ","/")]
-result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+put(myhost+'/hostfw/'+curver,vers.replace(" ","/"))
 msg='exiting after verdef and stub'
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
-cmdline=['/pace/etcdput.py','md'+myhost+'/lsscsi',mlsscsi]
-subprocess.run(cmdline,stdout=subprocess.PIPE)
-cmdline=['/pace/etcdput.py','md'+myhost+'/zpool',mzpool]
-subprocess.run(cmdline,stdout=subprocess.PIPE)
-cmdline=['/pace/etcdput.py','md'+myhost+'/userhash',muser]
-subprocess.run(cmdline,stdout=subprocess.PIPE)
+put('md'+myhost+'/lsscsi',mlsscsi)
+put('md'+myhost+'/zpool',mzpool)
+put('md'+myhost+'/userhash',muser)

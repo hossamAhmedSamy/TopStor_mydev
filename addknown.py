@@ -1,6 +1,7 @@
 #!/bin/python3.6
 import subprocess,sys
 from ast import literal_eval as mtuple
+from etcddel import etcddel as etcddel
 import json
 endpoints=''
 data=json.load(open('/pacedata/runningetcdnodes.txt'))
@@ -54,22 +55,14 @@ if known != ['']:
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    cmdline=['/pace/hostlost.sh',str(kn[0])]
    subprocess.run(cmdline,stdout=subprocess.PIPE)
-   cmdline=['/pace/etcddel.py','known/'+str(kn[0])]
-   subprocess.run(cmdline,stdout=subprocess.PIPE)
-   cmdline=['/pace/etcddel.py','localrun/'+str(kn[0])]
-   subprocess.run(cmdline,stdout=subprocess.PIPE)
-   cmdline=['/bin/sleep','10']
-   subprocess.run(cmdline,stdout=subprocess.PIPE)
+   etcddel('known/'+str(kn[0]))
+   etcddel('localrun/'+str(kn[0]))
   elif (mtuple(heart[0])[1] not in str(kn[1])):
    cmdline=['/pace/hostlost.sh',str(kn[0])]
    subprocess.run(cmdline,stdout=subprocess.PIPE)
-   cmdline=['/pace/etcddel.py','known/'+str(kn[0])]
-   subprocess.run(cmdline,stdout=subprocess.PIPE)
-   cmdline=['/pace/etcddel.py','localrun/'+str(kn[0])]
-   subprocess.run(cmdline,stdout=subprocess.PIPE)
+   etcddel('known/'+str(kn[0]))
+   etcddel('localrun/'+str(kn[0]))
    cmdline=['/sbin/rabbitmqctl','delete_user','rabb_'+mtuple(x)[0].split('possible')[1],'YousefNadody']
-   subprocess.run(cmdline,stdout=subprocess.PIPE)
-   cmdline=['/bin/sleep','10']
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    
  

@@ -274,6 +274,7 @@ then
  ids=`lsblk -Sn -o serial`
  for pool in "${pools[@]}"; do
  echo checking if a fualty disk is part of a pool>> /root/zfspingtmp
+ ETCDCTL_API=3 /pace/missinginpool.py
  spares=(`/sbin/zpool status $pool 2>/dev/null | grep scsi | grep -v OFFLINE | grep -v ONLINE | awk '{print $1}'`)  
   for spare in "${spares[@]}"; do
    echo disk $spare is faulty >> /root/zfspingtmp
