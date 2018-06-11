@@ -169,5 +169,5 @@ echo i all zpool exported >>/root/tmp2
  touch /var/www/html/des20/Data/Getstatspid
 fi
 #zpool export -a
-sleep 10
+sleep 2
 rm -rf /pacedata/forzfsping 2>/dev/null
