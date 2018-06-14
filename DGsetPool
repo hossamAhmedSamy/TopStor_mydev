@@ -86,7 +86,7 @@ then
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
   nextpool=`ETCDCTL_API=3 /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   echo /sbin/zpool add -f ${nextpool} cache ${disk1} 
-  /sbin/zpool add -f p${nextpool} cache ${disk1} 
+  /sbin/zpool add -f ${nextpool} cache ${disk1} 
   if [ $? -eq 0 ]; then
    /TopStor/logmsg.sh DGsu10 info $userreq $diskn1 
   else 
