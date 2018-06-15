@@ -14,5 +14,5 @@ pp=`/sbin/zpool list -H | awk '{ print $1 }' | head -1`
 echo $pDG | grep $pp
 if [ $? -ne 0 ]; then exit; fi
   res=`./Snapshotnow $@`
-# /TopStor/logmsg.sh Snap1045 error $userreq $newsnap 
+# ETCDCTL_API=3 /TopStor/logmsg.py Snap1045 error $userreq $newsnap 
 ETCDCTL_API=3 /pace/putzpool.py

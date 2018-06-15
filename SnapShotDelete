@@ -19,35 +19,15 @@ privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
- datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
- logdata='Deleting_Snapshot:'$hostnam/$snapdel;
- logthis=`./jsonthis3.sh Date $datenow time $timenow msg info user $userreq data $logdata code Snap1022@@@$hostnam/$snapdel`;
- echo Snap1022@$datenow@$timenow@$hostnam/$snapdel > ${logging}2
-dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
- echo $datenow $timenow info $userreq Snap1022@@@$hostnam/$snapdel $dtn>> $glog
- oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging;
- echo Snap1000:$hostnam/$snapdel > $web;
+ ETCDCTL_API=3 /TopStor/logmsg.py Snap1022 info $userreq $hostnam/$snapdel
  /sbin/zfs destroy $snapdel 2> $txtres
  err=`wc -c  $txtres | awk '{print $1}'`;
  datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
  if [[ $err -ge  4  ]]; then
- 	echo Snap1001:$hostnam/$snapdel > $web;
- 	cat $txtres > ${web}internal;
- 	logdata='Failed_Deleting_Snapshot:'$snapdel;
- 	logthis=`./jsonthis3.sh Date $datenow time $timenow msg error user $userreq data $logdata code Snap1023@@@$hostnam/$snapdel`;
-  echo Snap1023@$datenow@$timenow@$hostnam/$snapdel > ${logging}2
-dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
- echo $datenow $timenow error $userreq Snap1023@@@$hostnam/$snapdel $dtn>> $glog
-  oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging;
+  ETCDCTL_API=3 /TopStor/logmsg.py Snap1023 error $userreq $hostnam/$snapdel
  else 
-	 echo Snap1002:$hostnam/$snapdel > $web; 
-	logdata='Success_Deleting_Snapshot:'$hostnam/$snapdel;
-	logthis=`./jsonthis3.sh Date $datenow time $timenow msg info user $userreq data $logdata code Snap1025@@@$hostnam/$snapdel`;
-  echo Snap1025@$datenow@$timenow@$hostnam/$snapdel > ${logging}2
-dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
- echo $datenow $timenow info $userreq Snap1025@@@$hostnam/$snapdel $dtn>> $glog
- oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging;
+  ETCDCTL_API=3 /TopStor/logmsg.py Snap1025 info $userreq $hostnam/$snapdel
  fi;
 fi
   echo $hostnam
-  ETCDCTL_API=3 /pace/putzpool.py
+  ETCDCTL_API=3 /pace/etcddel.py md --prefix

@@ -11,14 +11,7 @@ privilege="Proxy";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
-echo Replica1024:$licensename > $web;
-datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
-logdata='adding_Proxy_License:'$licensename;
-logthis=`./jsonthis3.sh Date $datenow time $timenow msg info user $userreq data $logdata code Replica1053@@@$licensename`;
-echo Replica1053@$datenow@$timenow@$licensename > ${logging}2
-dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
-echo $datenow $timenow info $userreq Replica1053@@@$licensename $dtn>> $glog
-oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging
+ ETCDCTL_API=3 /TopStor/logmsg.py Replica1053 info $userreq $licensename
 isthere=`cat $proxy `
 istheren=` echo $isthere | wc -c `
 istheren=$((istheren+0));
@@ -35,13 +28,6 @@ echo $result >$webproxy
 resdate=`date +%s`;
 res=` ./jsonthis3.sh updated $resdate`;
 echo $res > $resweb;
-echo Replica1025:$licensename:$proxyname > $web;
-datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
-logdata='success_adding_Proxy_license:'$licensename;
-logthis=`./jsonthis3.sh Date $datenow time $timenow msg info user $userreq data $logdata code Replica1054@@@$licensename@$proxyname`;
-echo Replica1054@$datenow@$timenow@$licensename@$proxyname > ${logging}2
-dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
-echo $datenow $timenow info $userreq Replica1054@@@$licensename@$proxyname $dtn>> $glog
-oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging
+ ETCDCTL_API=3 /TopStor/logmsg.py Replica1054 info $userreq $licensename $proxyname
 fi
 fi

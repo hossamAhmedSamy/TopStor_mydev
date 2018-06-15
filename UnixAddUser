@@ -14,13 +14,7 @@ privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
-datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
-logdata='adding_user:'$username;
-logthis=`./jsonthis3.sh Date $datenow time $timenow msg info user $userreq data $logdata code Unlin1018@@@$username`;
-dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
-echo $datenow $timenow info $userreq Unlin1018@@@$username $dtn>> $glog
-echo Unlin1018@$datenow@$timenow@$username > ${logging}2
-oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging
+ ETCDCTL_API=3 /TopStor/logmsg.py Unlin1018 info $userreq $username
 pas=`echo $userpass | openssl enc -e -base64 -aes-256-ctr -nopad -nosalt -k '#skMe22'$username`
 useradd -c"TopStor"$pas -b /p$myhost -m -p $userpass -s /usr/sbin/nologin $username 2> $txtres
 ln -s /p$myhost/$username /home/$username
@@ -30,28 +24,14 @@ chmod o-rwx /p$myhost/$username -R
 #chown $username /Data/Common/$username;
 err=`wc -c  $txtres | awk '{print $1}'`;
 if [[ $err -ge  4  ]]; then
-	echo Unlin1019:$username> $web;
-	cat $txtres > ${web}internal;
-	errdata='1002:faile_adding_user:'$username;
-	datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
-	logthis=`./jsonthis3.sh Date $datenow time $timenow msg error user $userreq data $errdata code Unlin1020@@@$username`
-echo Unlin1020@$datenow@$timenow@$username > ${logging}2
-dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
-echo $datenow $timenow error $userreq Unlin1020@@@$username $dtn>> $glog
+ ETCDCTL_API=3 /TopStor/logmsg.py Unlin1020 error $userreq $username
 else 
 # openssl rsautl -encrypt -inkey key/public_key.pem -pubin -in <( echo $userpass) -out key/$username;  
  echo $userpass > key/${username}fixed
  gpg -u "QuickStor" -r"QuickStor" key/${username}fixed
  chmod 400 key/${username}fixed.gpg;
  rm -rf key/${username}fixed
- echo Unlin1021:$username > $web; 
- datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
- logdata='1004:success_adding_user:'$username;
- logthis=`./jsonthis3.sh Date $datenow time $timenow msg info user $userreq data "$logdata" code Unlin1022@@@$username`;
-dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
-echo $datenow $timenow info $userreq Unlin1022@@@$username $dtn>> $glog
-echo Unlin1022@$datenow@$timenow@$username > ${logging}2
+ ETCDCTL_API=3 /TopStor/logmsg.py Unlin1022 info $userreq $username
 fi 
-oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging
-ETCDCTL_API=3 /pace/putzpool.py
+ETCDCTL_API=3 /pace/etcddel.py md --prefix
 fi

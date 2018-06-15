@@ -1,5 +1,5 @@
 #!/bin/python3.6
-import codecs
+import codecs, logmsg
 from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 import subprocess
@@ -13,7 +13,7 @@ def do(body):
    f.write('Request details:'+r['req']+'\n')
 ########## if user ######################
  if r["req"]=='user':
-  cmdline='/TopStor/logmsg.sh Unlin1005 info system'
+  logmsg.sendlog('Unlin1005', 'info', 'system')
   cmdline=cmdline.split()
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   with open('/etc/passwd') as f:
@@ -33,9 +33,7 @@ def do(body):
     f.write('adding user '+str(cmdline)+'\n')
    cmdline=['/TopStor/UnixAddUser_sync',x[0],x[2],x[1]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  cmdline='/TopStor/logmsg.sh Unlin1006 info system'
-  cmdline=cmdline.split()
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  logmsg.sendlog('Unlin1006', 'info', 'system')
 ########## if user ######################
  elif r["req"]=='cifs':
   with open('/root/recv','a') as f:

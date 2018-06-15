@@ -25,29 +25,12 @@ ip1=` echo $domcontip | awk -F. '{print $1}'`;
 ip2=` echo $domcontip | awk -F. '{print $2}'`;
 ip3=` echo $domcontip | awk -F. '{print $3}'`;
 ip4=` echo $domcontip | awk -F. '{print $4}'`;
-echo Domain1000:$domain > $web;
-datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
-logdata='Domain_change:'$domain;
-logthis=`./jsonthis3.sh Date $datenow time $timenow msg info data $logdata user $userreq code Domain1003@@@$domain`;
-echo Domain1003@$datenow@$timenow@$domain > ${logging}2 
-dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
-echo $datenow $timenow info $userreq Domain1003@@@$domain $dtn>> $glog
-oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging;
+ETCDCTL_API=3 /TopStor/logmsg.py Domain1003 info $userreq $domain
 hostn=`hostname -s`;
 cat $runningpools | grep $hostn
 if [ $? -ne 0 ]; then
  echo pls configure storage first.;
-	echo Domain1014:$domain > $web;
-	cat $txtres  > ${web}internal;
-	logdata='failed_joining_domain:'$domain;
-        code='Domain1004@@@'$domain
- echo Domain1015@$datenow@$timenow@$domain > ${logging}2 
-dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
- echo $datenow $timenow error $userreq Domain1015@@@$domain $dtn>> $glog
-	datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
-	logthis=`./jsonthis3.sh Date $datenow time $timenow msg info data $logdata user $userreq code $code`;
-	oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging;
- 
+ ETCDCTL_API=3 /TopStor/logmsg.py Domain1015 error $userreq $domain
  exit;
 fi
 poolis=`cat $runningpools | grep $hostn | awk '{print $2}'`
@@ -75,23 +58,11 @@ realm leave $doms;
 echo here
 realm discover $doms   &>/dev/null
 if [ $? -ne 0  ]; then
-	echo Domain1101:$domain > $web;
-	cat $txtres  > ${web}internal;
-	logdata='Domain:'$domain'is_not_found';
-        code='Domain1104@@@'$domain
-echo Domain1104@$datenow@$timenow@$domain > ${logging}2 
-dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
-echo $datenow $timenow error $userreq Domain1104@@@$domain $dtn>> $glog
+ ETCDCTL_API=3 /TopStor/logmsg.py Domain1104 error $userreq $domain
 else
  realm join $doms  2> $txtres ;
  if [ $? -ne 0  ]; then
-	echo Domain1001:$domain > $web;
-	cat $txtres  > ${web}internal;
-	logdata='failed_joining_domain:'$domain;
-        code='Domain1004@@@'$domain
- echo Domain1004@$datenow@$timenow@$domain > ${logging}2 
-dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
- echo $datenow $timenow error $userreq Domain1004@@@$domain $dtn>> $glog
+  ETCDCTL_API=3 /TopStor/logmsg.py Domain1004 error $userreq $domain
  else 
   realm permit --all
   rm -rf /etc/samba/smb.conf &>/dev/null
@@ -100,17 +71,7 @@ dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
   systemctl restart smb
   sed -i "/fallback/c\fallback_homedir = \/$poolis\/\%u\@\%d" /etc/sssd/sssd.conf
   systemctl restart sssd
-#  mkdir /$poolis/common
-#  chmod 777 /$poolis/common
-  echo Domain1002:$domain > $web; 
-  logdata='success_changing_domain:'$domain;
-  code='Domain1005@@@'$domain
-  echo Domain1005@$datenow@$timenow@$domain > ${logging}2 
-dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
-  echo $datenow $timenow info $userreq Domain1005@@@$domain $dtn>> $glog
+  ETCDCTL_API=3 /TopStor/logmsg.py Domain1005 info $userreq $domain
  fi;
 fi;
-datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
-logthis=`./jsonthis3.sh Date $datenow time $timenow msg info data $logdata user $userreq code $code`;
-oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging;
 fi

@@ -17,13 +17,13 @@ privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
-/TopStor/logmsg.sh Snap1040 info $userreq $snaprol
+ETCDCTL_API=3 /TopStor/logmsg.py Snap1040 info $userreq $snaprol
 /sbin/zfs rollback -r  $snaprol  2> $txtres;
 err=`wc -c  $txtres | awk '{print $1}'`;
 if [[ $err -ge  4  ]]; then
- /TopStor/logmsg.sh Snap1041 error $userreq $snaprol
+ ETCDCTL_API=3 /TopStor/logmsg.py Snap1041 error $userreq $snaprol
 else 
- /TopStor/logmsg.sh Snap1042 info $userreq $snaprol
+ ETCDCTL_API=3 /TopStor/logmsg.py Snap1042 info $userreq $snaprol
 fi;
 ETCDCTL_API=3 /pace/putzpool.py
 fi
