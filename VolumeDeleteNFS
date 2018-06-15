@@ -1,5 +1,6 @@
 #!/usr/local/bin/zsh
 cd /TopStor
+export ETCDCTL_API=3
 web='/var/www/html/des20/Data/CIFSstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStor.log';
@@ -20,17 +21,17 @@ privilege=$pro;
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
-ETCDCTL_API=3 /TopStor/logmsg.py NFS1000 info $userreq $hostnam/$DG/$volname
+ /TopStor/logmsg.py NFS1000 info $userreq $hostnam/$DG/$volname
 ssh $sshost " cd /TopStor &&
 /sbin/zfs destroy -r $DG/$volname" &> $txtres;
 if [ $? -ne 0  ]; then
  dtn=`date +%s -d $dt`;
- ETCDCTL_API=3 /TopStor/logmsg.py NFS1001 error $userreq $hostnam/$DG/$volname
+  /TopStor/logmsg.py NFS1001 error $userreq $hostnam/$DG/$volname
 else 
  ./delblock.sh start${volname}_only stop${volname}_only /etc/exports  ;
  systemctl restart nfs-server
- ETCDCTL_API=3 /TopStor/logmsg.py NFS1002 info $userreq $hostnam/$DG/$volname
+  /TopStor/logmsg.py NFS1002 info $userreq $hostnam/$DG/$volname
 fi;
 ./GetPoolVollist
 fi
-ETCDCTL_API=3 /pace/etcddel.py md --prefix
+ /pace/etcddel.py md --prefix

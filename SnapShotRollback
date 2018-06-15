@@ -1,4 +1,5 @@
 #!/bin/sh
+export ETCDCTL_API=3
 cd /TopStor/
 myhost=`hostname -s`
 web='/var/www/html/des20/Data/Snapsstatus.log';
@@ -17,13 +18,13 @@ privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
-ETCDCTL_API=3 /TopStor/logmsg.py Snap1040 info $userreq $snaprol
+ /TopStor/logmsg.py Snap1040 info $userreq $snaprol
 /sbin/zfs rollback -r  $snaprol  2> $txtres;
 err=`wc -c  $txtres | awk '{print $1}'`;
 if [[ $err -ge  4  ]]; then
- ETCDCTL_API=3 /TopStor/logmsg.py Snap1041 error $userreq $snaprol
+  /TopStor/logmsg.py Snap1041 error $userreq $snaprol
 else 
- ETCDCTL_API=3 /TopStor/logmsg.py Snap1042 info $userreq $snaprol
+  /TopStor/logmsg.py Snap1042 info $userreq $snaprol
 fi;
-ETCDCTL_API=3 /pace/putzpool.py
+ /pace/putzpool.py
 fi

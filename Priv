@@ -1,4 +1,5 @@
 #!/bin/sh
+export ETCDCTL_API=3
 cd /TopStor
 echo $@ > /root/tmp
 privilege="User_Priv";
@@ -14,7 +15,7 @@ currentpriv='/TopStordata/userpriv.txt';
 resweb='/var/www/html/des20/Data/userprivdate.txt';
 logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStor.log';
-ETCDCTL_API=3 /TopStor/logmsg.py Priv1002 info $userreq $user
+ /TopStor/logmsg.py Priv1002 info $userreq $user
 touch $currentpriv
 cat $currentpriv | grep -v "$user" > $currentpriv.tmp  2>/dev/null
 mv $currentpriv.tmp $currentpriv
@@ -26,8 +27,8 @@ while read -r line ; do
 done < $currentpriv
 result=`echo $result | rev | cut -c 2- | rev`];
 echo $result > $userpriv;
-ETCDCTL_API=3 /TopStor/Priv.py $@ 
-ETCDCTL_API=3 /TopStor/logmsg.py Priv1003 info $userreq $user
+ /TopStor/Priv.py $@ 
+ /TopStor/logmsg.py Priv1003 info $userreq $user
 resdate=`date +%s`;
 res=`./jsonthis3.sh updated $resdate`;
 echo $res > $resweb ;

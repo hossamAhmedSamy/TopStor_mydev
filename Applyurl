@@ -1,4 +1,5 @@
 #!/bin/sh
+export ETCDCTL_API=3
 echo $@  > /root/applyurl
 cd /TopStor
 TopStor='/TopStor'
@@ -25,7 +26,7 @@ then
   echo thefile=$thefile
   cd $TopStor
   ./GenPatch $thefile admin
-  ETCDCTL_API=3 /pace/etcddel.py md --prefix
-  ETCDCTL_API=3 /TopStor/logmsg.py Upfe1010 info $userreq
+   /pace/etcddel.py md --prefix
+   /TopStor/logmsg.py Upfe1010 info $userreq
  fi
 fi

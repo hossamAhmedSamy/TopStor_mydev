@@ -1,4 +1,5 @@
 #!/usr/local/bin/zsh
+export ETCDCTL_API=3
 webpartner='/var/www/html/des20/Data/Partnerslist.txt';
 resweb='/var/www/html/des20/Data/Partnerslist.txtupdated'
 web='/var/www/html/des20/Data/Partnersstatus.log';
@@ -15,11 +16,11 @@ privilege="Replication";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
- ETCDCTL_API=3 /TopStor/logmsg.py Partner1007 info $userreq $Partnername
+  /TopStor/logmsg.py Partner1007 info $userreq $Partnername
 isthere=`cat $partners | grep "$Partnername $type" | wc -c `
 isthere=$((isthere+0));
 if [[ $isthere -ge 2 ]]; then
- ETCDCTL_API=3 /TopStor/logmsg.py Partner1008 warning $userreq $Partnername
+  /TopStor/logmsg.py Partner1008 warning $userreq $Partnername
 else
 partnerlist=`cat $partners `;
 istherpartners=` echo $partnerlist | wc -c`;
@@ -48,6 +49,6 @@ echo $result >$webpartner;
 resdate=`date +%s`;
 res=` ./jsonthis3.sh updated $resdate`;
 echo $res > $resweb;
- ETCDCTL_API=3 /TopStor/logmsg.py Partner1009 info $userreq $Partnername $newtype
+  /TopStor/logmsg.py Partner1009 info $userreq $Partnername $newtype
 fi
 fi

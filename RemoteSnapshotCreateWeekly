@@ -1,4 +1,5 @@
 #!/usr/local/bin/zsh
+export ETCDCTL_API=3
 cd /TopStor
 web='/var/www/html/des20/Data/Replicatestatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log';
@@ -24,15 +25,15 @@ privilege="Replication";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
- ETCDCTL_API=3 /TopStor/logmsg.py Replica1030 info $userreq
+  /TopStor/logmsg.py Replica1030 info $userreq
 crontab -l > $cronthis
 stamp=`date +%s`
 echo $min  $hr "*" "*" $every  /TopStor/pump.sh RemoteSnapshotnowOnce $sshost $hostnam $DG/$FileS Weekly.$keep.$hr.$min.$every $partner ${txtres}.$stamp  >> $cronthis
 crontab $cronthis 2>> $txtres
 if [ $? -ne 0 ]; then
- ETCDCTL_API=3 /TopStor/logmsg.py Replica1031 error $userreq
+  /TopStor/logmsg.py Replica1031 error $userreq
 else 
- ETCDCTL_API=3 /TopStor/logmsg.py Replica1032 info $userreq Weekly.$hr.$min.$every.$keep $partner $hostnam/$DG/$FileS
+  /TopStor/logmsg.py Replica1032 info $userreq Weekly.$hr.$min.$every.$keep $partner $hostnam/$DG/$FileS
 fi;
 ./RemoteGetPoolperiodlist 
 fi

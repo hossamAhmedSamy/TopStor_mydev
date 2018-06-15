@@ -1,4 +1,5 @@
 #!/usr/local/bin/zsh
+export ETCDCTL_API=3
 cd /TopStor
 web='/var/www/html/des20/Data/currentinfo2.log2';
 logging='/var/www/html/des20/Data/currentinfo2.log'
@@ -33,12 +34,12 @@ echo keeppluszero=$keep >> $cronout
 timenow=`date`;
 userreq='system';
 if (( $countsnap >  $keep )); then 
- ETCDCTL_API=3 /TopStor/logmsg.py Snap1022 info $userreq $hostnam $oldsnap
+  /TopStor/logmsg.py Snap1022 info $userreq $hostnam $oldsnap
  /sbin/zfs destroy $oldsnap &>${txtres}$stamp
  if [ $? -ne  0  ]; then
-  ETCDCTL_API=3 /TopStor/logmsg.py Snap1023 error $userreq $hostnam $oldsnap
+   /TopStor/logmsg.py Snap1023 error $userreq $hostnam $oldsnap
  else
-  ETCDCTL_API=3 /TopStor/logmsg.py Snap1024 info $userreq $hostnam $oldsnap
+   /TopStor/logmsg.py Snap1024 info $userreq $hostnam $oldsnap
 
  fi
 fi
@@ -46,14 +47,14 @@ newsnap2=`echo $oper2.$stamp`;
 echo newsnap2=$newsnap2 >> $cronout
 newsnap=`echo $oper1@$newsnap2 | awk -F'/' '{print $2"/"$3}'`;
 echo newsnap=$newsnap >> $cronout
-ETCDCTL_API=3 /TopStor/logmsg.py Snap1026 info $userreq $hostnam $newsnap
+ /TopStor/logmsg.py Snap1026 info $userreq $hostnam $newsnap
 /sbin/zfs snapshot $newsnap &> ${txtres}$stamp
 echo snapshotresult : >> $cronout
 cat ${txtres}$stamp >> $cronout 
 echo filenameis=${txtres}$stamp >> $cronout
 err=`wc -c  ${txtres}$stamp | awk '{print $1}'`;
 if [[ $err -ge  4  ]]; then 
-  ETCDCTL_API=3 /TopStor/logmsg.py Snap1028 error $userreq $hostnam $newsnap
+   /TopStor/logmsg.py Snap1028 error $userreq $hostnam $newsnap
 else 
-  ETCDCTL_API=3 /TopStor/logmsg.py Snap1030 info $userreq $hostnam $newsnap
+   /TopStor/logmsg.py Snap1030 info $userreq $hostnam $newsnap
 fi

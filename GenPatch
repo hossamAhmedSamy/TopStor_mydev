@@ -1,4 +1,5 @@
 #!/usr/local/bin/zsh
+export ETCDCTL_API=3
 #cd /root/scripts
 echo $@ > ~/tmp
 TopStor='TopStor'
@@ -28,11 +29,11 @@ then
  gpg --batch --passphrase YousefNadody -d  $webfile/$newfw > ${newd}/${newfw}.tar.gz
  if [ $? -ne 0 ]; then 
   cd /$TopStor
-  ETCDCTL_API=3 /TopStor/logmsg.py Upnv1010 error $userreq
+   /TopStor/logmsg.py Upnv1010 error $userreq
   exit
  fi
   cd /$TopStor
-  ETCDCTL_API=3 /TopStor/logmsg.py Upsa1010 info $userreq $currentfw $realfw
+   /TopStor/logmsg.py Upsa1010 info $userreq $currentfw $realfw
  echo newfw=$newfw
  cd $newd
  tar -xvzf ${newfw}.tar.gz
@@ -55,9 +56,9 @@ then
   cd /$web
   git commit -am "changing to new fw" && git checkout $newfw
   cd /$TopStor
-  ETCDCTL_API=3 /TopStor/logmsg.py Upsu1010 info $userreq $currentfw $realfw
+   /TopStor/logmsg.py Upsu1010 info $userreq $currentfw $realfw
  else
-  ETCDCTL_API=3 /TopStor/logmsg.py Upfa1010 error $userreq $currentfw $realfw
+   /TopStor/logmsg.py Upfa1010 error $userreq $currentfw $realfw
  fi
  # rm -rf $newd
 fi

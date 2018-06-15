@@ -1,4 +1,5 @@
 #!/bin/sh
+export ETCDCTL_API=3
 echo $@  > /root/applyfw
 cd /TopStor
 TopStor='/TopStor'
@@ -14,13 +15,13 @@ privilege="Uploadch";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
- ETCDCTL_API=3 /TopStor/logmsg.py Upsa1010 info $userreq $currentfw $realfw
+  /TopStor/logmsg.py Upsa1010 info $userreq $currentfw $realfw
  cd $web
  git commit -am"changing to $realfw" ; git checkout $realfw
  cd $pace
  git commit -am"changing to $realfw" ; git checkout $realfw
  cd $TopStor 
  git commit -am"changing to $realfw" ; git checkout $realfw
- ETCDCTL_API=3 /pace/etcddel.py md --prefix
- ETCDCTL_API=3 /TopStor/logmsg.py Upsu1010 info $userreq $currentfw $realfw
+  /pace/etcddel.py md --prefix
+  /TopStor/logmsg.py Upsu1010 info $userreq $currentfw $realfw
 fi

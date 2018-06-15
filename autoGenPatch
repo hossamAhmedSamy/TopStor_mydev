@@ -1,4 +1,5 @@
 #!/usr/local/bin/zsh
+export ETCDCTL_API=3
 #cd /root/scripts
 cd /TopStor
 TopStor='TopStor'
@@ -19,7 +20,7 @@ wget ftp://ftp.quickstor.net/download/current/ --user=anonymous@quickstor.net
 if [ ! -f index.html ];
  then 
  cd /TopStor
-  ETCDCTL_API=3 /TopStor/logmsg.py Upcr1010 warning $userreq
+   /TopStor/logmsg.py Upcr1010 warning $userreq
  exit
 fi
 realfw=`cat index.html | grep qsfw | awk -F'current/' '{print $2}' | awk -F'.qsfw' '{print $1}'`
@@ -29,13 +30,13 @@ cd /TopStor
 echo $newfw | grep $currentfw
 if [ $? -eq 0 ]; 
 then
-  ETCDCTL_API=3 /TopStor/logmsg.py Upnu1010 info $userreq
+   /TopStor/logmsg.py Upnu1010 info $userreq
 else
-  ETCDCTL_API=3 /TopStor/logmsg.py Updo1010 info $userreqi $realfw
+   /TopStor/logmsg.py Updo1010 info $userreqi $realfw
  cd $webfile
 # wget ftp://10.11.11.124/pub/current/${newfw}.qsfw
  wget ftp://ftp.quickstor.net/download/current/${newfw}.qsfw --user=anonymous@quickstor.net
  cd /TopStor
-  ETCDCTL_API=3 /TopStor/logmsg.py Upfd1010 info $userreqi $realfw
+   /TopStor/logmsg.py Upfd1010 info $userreqi $realfw
  ./GenPatch ${newfw}.qsfw system 
 fi

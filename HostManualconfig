@@ -1,4 +1,5 @@
 #!/usr/local/bin/zsh
+export ETCDCTL_API=3
 cd /TopStor/
 echo $@ > ~/tmp
 web='/var/www/html/des20/Data/HostManualconfigstatus.log';
@@ -18,7 +19,7 @@ privilege="Error";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]];
 then
- ETCDCTL_API=3 /TopStor/logmsg.py HostManual1002 info $userreq
+  /TopStor/logmsg.py HostManual1002 info $userreq
 chattr -i /etc/resolv.conf
 sed -i "/nameserver/c\nameserver $hostdns" /etc/resolv.conf
 chattr +i /etc/resolv.conf
@@ -43,6 +44,6 @@ echo $hostn > /TopStordata/hostname
 sed -i "/$hostname/s/\w*\$//" $runningpools
 sed -i "/$hostname/s/\$/$hostn/" $runningpools
 /pace/keysend.sh
- ETCDCTL_API=3 /TopStor/logmsg.py HostManual1003 info $userreq $hostn ${hostip}'/'${subnet} $hostrout $hostdns
+  /TopStor/logmsg.py HostManual1003 info $userreq $hostn ${hostip}'/'${subnet} $hostrout $hostdns
 fi
 /pace/keysend.sh

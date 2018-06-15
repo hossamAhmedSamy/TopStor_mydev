@@ -1,5 +1,6 @@
 #!/usr/local/bin/zsh
 cd /TopStor
+export ETCDCTL_API=3
 echo $@ > ~/tmp
 web='/var/www/html/des20/Data/CIFSstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log'
@@ -21,21 +22,21 @@ privilege=$pro;
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
- ETCDCTL_API=3 /TopStor/logmsg.py NFS1000 info $userreq $hostnam/$DG/$volname
+  /TopStor/logmsg.py NFS1000 info $userreq $hostnam/$DG/$volname
 ssh $sshost " cd /TopStor &&
 datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
  /sbin/zfs destroy -rf $DG/$volname"  &> $txtres
 if [ $? -ne 0  ]; then
 else 
- ETCDCTL_API=3 /TopStor/logmsg.py NFS1001 error $userreq $hostnam/$DG/$volname
+  /TopStor/logmsg.py NFS1001 error $userreq $hostnam/$DG/$volname
 cp /etc/samba/smb.conf /TopStordata/smb.confcurrent;
  rm /TopStordata/$volname.txt;
  ./delblock.sh start${volname}_only stop${volname}_only /TopStordata/smb.confcurrent  ;
  ./delblock.sh start${volname}_only stop${volname}_only /TopStordata/CIFSshares.txt  ;
  cp /TopStordata/smb.confcurrent /etc/samba/smb.conf;
  systemctl restart smb
- ETCDCTL_API=3 /TopStor/logmsg.py NFS1002 info  $userreq $hostnam/$DG/$volname
+  /TopStor/logmsg.py NFS1002 info  $userreq $hostnam/$DG/$volname
 fi;
 ./GetPoolVollist
 fi
-ETCDCTL_API=3 /pace/etcddel.py md --prefix
+ /pace/etcddel.py md --prefix

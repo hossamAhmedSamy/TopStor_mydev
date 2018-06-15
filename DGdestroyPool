@@ -1,4 +1,5 @@
 #!/usr/bin/sh
+export ETCDCTL_API=3
 cd /TopStor/
 echo $@ > /root/tmp
 web="/var/www/html/des20/Data/DGstatus.log";
@@ -10,19 +11,19 @@ privilege="DISK_Groups";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
- ETCDCTL_API=3 /TopStor/logmsg.py DGst5 info $userreq $pool
+  /TopStor/logmsg.py DGst5 info $userreq $pool
  zpool destroy -f $pool &>/dev/null 
  if [ $? -ne 0 ]; then
-  ETCDCTL_API=3 /TopStor/logmsg.py DGfa5 error $userreq $pool
+   /TopStor/logmsg.py DGfa5 error $userreq $pool
  else
   crontab -l | grep -v Snap > /TopStordata/cronfile
   crontab -r 
   crontab /TopStordata/cronfile
 
   echo > /etc/exports
-  ETCDCTL_API=3 /TopStor/logmsg.py DGsu5 info $userreq $pool
+   /TopStor/logmsg.py DGsu5 info $userreq $pool
  fi 
  rm txt/${0:2}$userreq.txt
 fi
 sed -i "/p${nextpool}/c\\" $runningpools
-ETCDCTL_API=3 /pace/putzpool.py
+ /pace/putzpool.py

@@ -1,4 +1,5 @@
 #!/usr/local/bin/zsh
+export ETCDCTL_API=3
 cd /TopStor/
 web='/var/www/html/des20/Data/Snapsstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log'
@@ -19,13 +20,13 @@ privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
- ETCDCTL_API=3 /TopStor/logmsg.py Snap1026 info $userreq $hostnam/$DG/$FileS@$name 
+  /TopStor/logmsg.py Snap1026 info $userreq $hostnam/$DG/$FileS@$name 
 /TopStor/SnapshotnowOnce $sshost $hostnam $DG/$FileS $name. > $txtres
 if [ $? -ne 0  ]]; then
- ETCDCTL_API=3 /TopStor/logmsg.py Snap1028 error $userreq $hostnam/$DG/$FileS@$name 
+  /TopStor/logmsg.py Snap1028 error $userreq $hostnam/$DG/$FileS@$name 
 else 
- ETCDCTL_API=3 /TopStor/logmsg.py Snap1030 info $userreq $hostnam/$DG/$FileS@$name 
-ETCDCTL_API=3 /pace/etcddel.py md --prefix
+  /TopStor/logmsg.py Snap1030 info $userreq $hostnam/$DG/$FileS@$name 
+ /pace/etcddel.py md --prefix
 fi;
 fi
 

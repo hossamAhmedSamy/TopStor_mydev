@@ -1,4 +1,5 @@
 #!/bin/sh
+export ETCDCTL_API=3
 web='/var/www/html/des20/Data/Usersstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log';
 resweb='/var/www/html/des20/Data/userpass.txtupdated';
@@ -12,7 +13,7 @@ pas=`echo $@ | awk '{print $1}'`;
 userpass=`echo $pas | openssl enc -d -base64 -aes-256-ctr -nopad -nosalt -k '#skMe22'$username`;
 username=`echo $@ | awk '{print $2}'`;
 userreq='system';
-ETCDCTL_API=3 /TopStor/logmsg.py Unlin1012 info $userreq $username
+ /TopStor/logmsg.py Unlin1012 info $userreq $username
 usermod  -p $userpass $username 2> $txtres
 echo $username | grep -w admin
 if [ $? -eq 0 ];
@@ -26,7 +27,7 @@ cat $txtres >> $passchange
 cat $txtres 
 err=`wc -c  $txtres | awk '{print $1}'`;
 if [[ $err -ge  4  ]]; then
- ETCDCTL_API=3 /TopStor/logmsg.py Unlin1013 error $userreq $username
+  /TopStor/logmsg.py Unlin1013 error $userreq $username
 else 
 # openssl rsautl -encrypt -inkey key/public_key.pem -pubin -in <( echo $userpass) -out key/$username;  
  echo $userpass > key/${username}fixed
@@ -38,7 +39,7 @@ else
   rm -rf factory/${username}fixed.gpg
   cp key/${username}fixed.gpg factory/;
  fi
- ETCDCTL_API=3 /TopStor/logmsg.py Unlin1015 info $userreq $username
+  /TopStor/logmsg.py Unlin1015 info $userreq $username
 fi 
 resdate=`date +%s`;
 resjson=`./jsonthis3.sh updated $resdate`;

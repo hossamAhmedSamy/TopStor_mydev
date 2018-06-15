@@ -1,4 +1,5 @@
 #!/usr/local/bin/zsh
+export ETCDCTL_API=3
 cd /TopStor
 web='/var/www/html/des20/Data/Snapsstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log'
@@ -18,7 +19,7 @@ privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
-ETCDCTL_API=3 /TopStor/logmsg.py Snap1034 info $userreq $FileS
+ /TopStor/logmsg.py Snap1034 info $userreq $FileS
 stamp=`date +%s`;
 crontab -l > $cronthis
 echo "*"/$every "*" "*" "*" "*"  /TopStor/Snapshotnowhost $hostnam/$DG/$FileS Minutely.$keep.$every.na.na $stamp 2> txt/err.txt >> $cronthis
@@ -26,10 +27,10 @@ crontab $cronthis 2>> $txtres
 err=`wc -c  $txtres | awk '{print $1}'`;
 datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
 if [[ $err -ge  4  ]]; then
- ETCDCTL_API=3 /TopStor/logmsg.py Snap1035 error $userreq $FileS
+  /TopStor/logmsg.py Snap1035 error $userreq $FileS
 else 
- ETCDCTL_API=3 /TopStor/logmsg.py Snap1036 info $userreq $FileS
+  /TopStor/logmsg.py Snap1036 info $userreq $FileS
 fi;
 ./GetPoolperiodlist
-ETCDCTL_API=3 /pace/putzpool.py
+ /pace/putzpool.py
 fi
