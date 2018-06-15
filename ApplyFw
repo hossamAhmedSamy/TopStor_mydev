@@ -14,26 +14,13 @@ privilege="Uploadch";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
- datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
- logdata='Start upgrading from version '$currentfw' to version '$realfw;
- logthis=`./jsonthis3.sh Date $datenow time $timenow msg info user $userreq data $logdata code Upsa1010@@@$currentfw@$realfw`;
- echo Upsa1010@$datenow@$timenow@$currentfw@$realfw > ${logging}2;
- dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
- echo $datenow $timenow info $userreq  Upsa1010@@@$currentfw@$realfw $dtn>> $glog
- oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging;
-
+ ETCDCTL_API=3 /TopStor/logmsg.py Upsa1010 info $userreq $currentfw $realfw
  cd $web
  git commit -am"changing to $realfw" ; git checkout $realfw
  cd $pace
  git commit -am"changing to $realfw" ; git checkout $realfw
  cd $TopStor 
  git commit -am"changing to $realfw" ; git checkout $realfw
- ETCDCTL_API=3 /pace/putzpool.py
- datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
- logdata='Success upgrading from version '$currentfw' to version '$realfw;
- logthis=`./jsonthis3.sh Date $datenow time $timenow msg info user $userreq data $logdata code Upsu1010@@@$currentfw@$realfw`;
- echo Upsu1010@$datenow@$timenow@$currentfw@$realfw > ${logging}2;
- dt=${datenow}'T'${timenow}; dtn=`date +%s -d $dt`;
- echo $datenow $timenow info $userreq  Upsu1010@@@$currentfw@$realfw $dtn>> $glog
- oldlog=`cat $logging | sed 's/]//g'`; newlog=$oldlog,$logthis]; echo $newlog > $logging;
+ ETCDCTL_API=3 /pace/etcddel.py md --prefix
+ ETCDCTL_API=3 /TopStor/logmsg.py Upsu1010 info $userreq $currentfw $realfw
 fi

@@ -18,7 +18,7 @@ privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
-/TopStor/logmsg.sh Snap1034 info $userreq $FileS
+ETCDCTL_API=3 /TopStor/logmsg.py Snap1034 info $userreq $FileS
 stamp=`date +%s`;
 crontab -l > $cronthis
 echo "*"/$every "*" "*" "*" "*"  /TopStor/Snapshotnowhost $hostnam/$DG/$FileS Minutely.$keep.$every.na.na $stamp 2> txt/err.txt >> $cronthis
@@ -26,9 +26,9 @@ crontab $cronthis 2>> $txtres
 err=`wc -c  $txtres | awk '{print $1}'`;
 datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
 if [[ $err -ge  4  ]]; then
- /TopStor/logmsg.sh Snap1035 error $userreq $FileS
+ ETCDCTL_API=3 /TopStor/logmsg.py Snap1035 error $userreq $FileS
 else 
- /TopStor/logmsg.sh Snap1036 info $userreq $FileS
+ ETCDCTL_API=3 /TopStor/logmsg.py Snap1036 info $userreq $FileS
 fi;
 ./GetPoolperiodlist
 ETCDCTL_API=3 /pace/putzpool.py

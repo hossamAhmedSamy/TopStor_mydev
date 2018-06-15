@@ -47,12 +47,12 @@ then
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-  /TopStor/logmsg.sh DGst20 info $userreq p${nextpool} $diskns .
+  ETCDCTL_API=3 /TopStor/logmsg.py DGst20 info $userreq p${nextpool} $diskns .
   /sbin/zpool add -f p${nextpool} mirror ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-   /TopStor/logmsg.sh DGsu20 info $userreq p${nextpool} $diskns .
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu20 info $userreq p${nextpool} $diskns .
   else
-   /TopStor/logmsg.sh DGsu20 error $userreq p${nextpool} $diskns .
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu20 error $userreq p${nextpool} $diskns .
   fi
  fi 
  if [[ $raid == "attachmirror" ]]; then
@@ -61,71 +61,71 @@ then
   disk2=`ls /dev/disk/by-id/ | grep -v part | grep $disk2`
   diskn2=` echo $@ | awk '{print $6}'`;
   grpn=` echo $@ | awk '{print $7}'`;
-  /TopStor/logmsg.sh DGst7 info $userreq $diskn2 $grpn
+  ETCDCTL_API=3 /TopStor/logmsg.py DGst7 info $userreq $diskn2 $grpn
   /sbin/zpool labelclear /dev/disk/by-id/${disk2};
   echo /sbin/zpool attach -f p${nextpool} ${disk1} ${disk2} > /root/tmp
   /sbin/zpool attach -f ${nextpool} ${disk1} ${disk2}
   if [ $? -ne 0 ]; then
-   /TopStor/logmsg.sh DGfa7 error $userreq $diskn2 $grpn
+   ETCDCTL_API=3 /TopStor/logmsg.py DGfa7 error $userreq $diskn2 $grpn
   else
-   /TopStor/logmsg.sh DGsu7 info $userreq $diskn2 $grpn
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu7 info $userreq $diskn2 $grpn
   fi
  fi
  if [[ $raid == "delspecial" ]]; then
-  /TopStor/logmsg.sh DGst9 info $userreq $diskn1 
+  ETCDCTL_API=3 /TopStor/logmsg.py DGst9 info $userreq $diskn1 
   nextpool=`ETCDCTL_API=3 /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   /sbin/zpool remove  ${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-   /TopStor/logmsg.sh DGsu9 info $userreq $diskn1 
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu9 info $userreq $diskn1 
   else 
-    /TopStor/logmsg.sh DGfa9 error $userreq $diskn1 
+    ETCDCTL_API=3 /TopStor/logmsg.py DGfa9 error $userreq $diskn1 
   fi
  fi 
  if [[ $raid == "addcache" ]]; then
-  /TopStor/logmsg.sh DGst10 info $userreq $diskn1 
+  ETCDCTL_API=3 /TopStor/logmsg.py DGst10 info $userreq $diskn1 
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
   nextpool=`ETCDCTL_API=3 /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   echo /sbin/zpool add -f ${nextpool} cache ${disk1} 
   /sbin/zpool add -f ${nextpool} cache ${disk1} 
   if [ $? -eq 0 ]; then
-   /TopStor/logmsg.sh DGsu10 info $userreq $diskn1 
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu10 info $userreq $diskn1 
   else 
-   /TopStor/logmsg.sh DGfa10 error $userreq $diskn1 
+   ETCDCTL_API=3 /TopStor/logmsg.py DGfa10 error $userreq $diskn1 
   fi
  fi 
  if [[ $raid == "addlog" ]]; then
-  /TopStor/logmsg.sh DGst11 info $userreq $diskn1 
+  ETCDCTL_API=3 /TopStor/logmsg.py DGst11 info $userreq $diskn1 
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
   nextpool=`ETCDCTL_API=3 /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   /sbin/zpool add -f ${nextpool} log ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-   /TopStor/logmsg.sh DGsu11 info $userreq $diskn1 
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu11 info $userreq $diskn1 
   else 
-   /TopStor/logmsg.sh DGfa11 error $userreq $diskn1 
+   ETCDCTL_API=3 /TopStor/logmsg.py DGfa11 error $userreq $diskn1 
   fi
  fi 
  if [[ $raid == "addspare" ]]; then
   #diskn=`grep -nr $disk1 $iscsimapping | awk -F':' '{print $1}'`
-  /TopStor/logmsg.sh DGst8 info $userreq $diskn1 
+  ETCDCTL_API=3 /TopStor/logmsg.py DGst8 info $userreq $diskn1 
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
   nextpool=`ETCDCTL_API=3 /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
 
   /sbin/zpool add -f ${nextpool} spare ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-   /TopStor/logmsg.sh DGsu8 info $userreq $diskn1 
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu8 info $userreq $diskn1 
   else 
-   /TopStor/logmsg.sh DGfa8 error $userreq $diskn1 
+   ETCDCTL_API=3 /TopStor/logmsg.py DGfa8 error $userreq $diskn1 
   fi
  fi 
  if [[ $raid == "Single" ]]; then
-  /TopStor/logmsg.sh DG1st6 info $userreq ${nextpool} $diskn1
+  ETCDCTL_API=3 /TopStor/logmsg.py DG1st6 info $userreq ${nextpool} $diskn1
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
   nextpool=$myhost;
   /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -ne 0 ]; then
-   /TopStor/logmsg.sh DG1fa6 error $userreq ${nextpool} $diskn1 
+   ETCDCTL_API=3 /TopStor/logmsg.py DG1fa6 error $userreq ${nextpool} $diskn1 
   else 
-   /TopStor/logmsg.sh DG1su6 info $userreq ${nextpool} $diskn1 
+   ETCDCTL_API=3 /TopStor/logmsg.py DG1su6 info $userreq ${nextpool} $diskn1 
   fi
  fi 
  if [[ $raid == "addparity3" ]]; then
@@ -143,13 +143,13 @@ then
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-  /TopStor/logmsg.sh DGst12 info $userreq p${nextpool} $diskns
+  ETCDCTL_API=3 /TopStor/logmsg.py DGst12 info $userreq p${nextpool} $diskns
   nextpool=`ETCDCTL_API=3 /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   /sbin/zpool add -f  ${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-   /TopStor/logmsg.sh DGsu12 info $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu12 info $userreq p${nextpool} $diskns
   else
-   /TopStor/logmsg.sh DGfa12 error $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGfa12 error $userreq p${nextpool} $diskns
   fi
  fi 
  if [[ $raid == "parity3" ]]; then
@@ -167,13 +167,13 @@ then
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-  /TopStor/logmsg.sh DGst13 info $userreq p${nextpool} $diskns
+  ETCDCTL_API=3 /TopStor/logmsg.py DGst13 info $userreq p${nextpool} $diskns
   nextpool=$myhost;
   /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-   /TopStor/logmsg.sh DGsu13 info $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu13 info $userreq p${nextpool} $diskns
   else
-   /TopStor/logmsg.sh DGfa13 info $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGfa13 info $userreq p${nextpool} $diskns
   fi
  fi  
  if [[ $raid == "addparity2" ]]; then
@@ -191,13 +191,13 @@ then
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-  /TopStor/logmsg.sh DGst14 info $userreq p${nextpool} $diskns
+  ETCDCTL_API=3 /TopStor/logmsg.py DGst14 info $userreq p${nextpool} $diskns
   nextpool=`ETCDCTL_API=3 /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   /sbin/zpool add -f ${nextpool} raidz2 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-   /TopStor/logmsg.sh DGsu14 info $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu14 info $userreq p${nextpool} $diskns
   else
-   /TopStor/logmsg.sh DGfa14 error $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGfa14 error $userreq p${nextpool} $diskns
   fi
  fi  
  if [[ $raid == "parity2" ]]; then
@@ -215,13 +215,13 @@ then
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-  /TopStor/logmsg.sh DGst15 info $userreq p${nextpool} $diskns
+  ETCDCTL_API=3 /TopStor/logmsg.py DGst15 info $userreq p${nextpool} $diskns
   nextpool=$myhost;
   /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz2 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-   /TopStor/logmsg.sh DGsu15 info $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu15 info $userreq p${nextpool} $diskns
   else
-   /TopStor/logmsg.sh DGfa15 info $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGfa15 info $userreq p${nextpool} $diskns
   fi
  fi 
  if [[ $raid == "addparity" ]]; then
@@ -239,13 +239,13 @@ then
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-  /TopStor/logmsg.sh DGst16 info $userreq p${nextpool} $diskns
+  ETCDCTL_API=3 /TopStor/logmsg.py DGst16 info $userreq p${nextpool} $diskns
   nextpool=`ETCDCTL_API=3 /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   /sbin/zpool add -f ${nextpool} raidz1 ${disk1} 
   if [ $? -eq 0 ]; then
-   /TopStor/logmsg.sh DGsu16 info $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu16 info $userreq p${nextpool} $diskns
   else
-   /TopStor/logmsg.sh DGfa16 info $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGfa16 info $userreq p${nextpool} $diskns
   fi
  fi 
  if [[ $raid == "parity" ]]; then
@@ -263,13 +263,13 @@ then
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-  /TopStor/logmsg.sh DGst17 info $userreq p${nextpool} $diskns
+  ETCDCTL_API=3 /TopStor/logmsg.py DGst17 info $userreq p${nextpool} $diskns
   nextpool=$myhost;
   /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz1 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-   /TopStor/logmsg.sh DGsu17 info $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu17 info $userreq p${nextpool} $diskns
   else
-   /TopStor/logmsg.sh DGfa17 error $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGfa17 error $userreq p${nextpool} $diskns
   fi
  fi 
  if [[ $raid == "add" ]]; then
@@ -287,13 +287,13 @@ then
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-  /TopStor/logmsg.sh DGst18 info $userreq p${nextpool} $diskns
+  ETCDCTL_API=3 /TopStor/logmsg.py DGst18 info $userreq p${nextpool} $diskns
   nextpool=`ETCDCTL_API=3 /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   /sbin/zpool add  -f ${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-   /TopStor/logmsg.sh DGsu18 info $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu18 info $userreq p${nextpool} $diskns
   else
-   /TopStor/logmsg.sh DGfa18 info $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGfa18 info $userreq p${nextpool} $diskns
   fi
  fi 
  if [[ $raid == "stripeset" ]]; then
@@ -311,13 +311,13 @@ then
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-  /TopStor/logmsg.sh DGst21 info $userreq p${nextpool} $diskns
+  ETCDCTL_API=3 /TopStor/logmsg.py DGst21 info $userreq p${nextpool} $diskns
   nextpool=$myhost;
   /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-   /TopStor/logmsg.sh DGsu21 info $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu21 info $userreq p${nextpool} $diskns
   else
-   /TopStor/logmsg.sh DGfa21 error $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGfa21 error $userreq p${nextpool} $diskns
   fi
  fi 
  if [[ $raid == "mirror" ]]; then
@@ -335,13 +335,13 @@ then
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-  /TopStor/logmsg.sh DGst19 info $userreq p${nextpool} $diskns
+  ETCDCTL_API=3 /TopStor/logmsg.py DGst19 info $userreq p${nextpool} $diskns
   nextpool=$myhost;
   /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} mirror ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-   /TopStor/logmsg.sh DGsu19 info $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGsu19 info $userreq p${nextpool} $diskns
   else
-   /TopStor/logmsg.sh DGfa19  error $userreq p${nextpool} $diskns
+   ETCDCTL_API=3 /TopStor/logmsg.py DGfa19  error $userreq p${nextpool} $diskns
   fi
  fi 
 fi
