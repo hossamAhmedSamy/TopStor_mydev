@@ -1,5 +1,5 @@
 #!/usr/bin/sh
-logging='/var/www/html/des20/Data/currentinfo3.log'
+logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStorglobal.log'
 dt=` echo $@ | awk '{print $1}'`;
 tm=` echo $@ | awk '{print $2}'`;
