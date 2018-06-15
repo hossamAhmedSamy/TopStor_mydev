@@ -1,5 +1,5 @@
 #!/bin/python3.6
-import subprocess,sys
+import subprocess,sys, logmsg
 from ast import literal_eval as mtuple
 from etcddel import etcddel as etcddel
 import json
@@ -23,8 +23,6 @@ if possible != ['']:
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   cmdline=['/sbin/rabbitmqctl','set_permissions','-p','/','rabb_'+mtuple(x)[0].split('possible')[1],'.*','.*','.*']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-#  cmdline=['/TopStor/logmsg.sh','Partst01','info','system', mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
-#  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   
   cmdline=['/pace/etcdput.py','change/'+mtuple(x)[0]+'/booted',mtuple(x)[1]]
   subprocess.run(cmdline,stdout=subprocess.PIPE)
@@ -35,8 +33,6 @@ if possible != ['']:
 #  cmdline=['/pace/iscsiwatchdog.sh','2>/dev/null']
 #  subprocess.run(cmdline,stdout=subprocess.PIPE)
 #  cmdline=['/bin/sleep','5']
-#  subprocess.run(cmdline,stdout=subprocess.PIPE)
-#  cmdline=['/TopStor/logmsg.sh','Partsu01','info','system', mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
 #  subprocess.run(cmdline,stdout=subprocess.PIPE)
 else:
  print('possible is empty')
@@ -51,8 +47,7 @@ if known != ['']:
   heartres=subprocess.run(cmdline,stdout=subprocess.PIPE)
   heart=str(heartres.stdout)[2:][:-3].split('\\n')
   if(heart == ['-1']):
-   cmdline=['/TopStor/logmsg.sh','Partst02','warning','system', str(kn[0])]
-   subprocess.run(cmdline,stdout=subprocess.PIPE)
+   logmsg.sendlog('Partst02','warning','system', str(kn[0]))
    cmdline=['/pace/hostlost.sh',str(kn[0])]
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    etcddel('known/'+str(kn[0]))

@@ -54,7 +54,7 @@ then
   echo starting etcd=$?
  done
  echo started etcd as primary>>/root/tmp2
- /TopStor/logmsg.sh Partst03 info system $myhost $myip
+ ETCDCTL_API=3 /TopStor/logmsg.py Partst03 info system $myhost $myip
  ETCDCTL_API=3 ./runningetcdnodes.py $myip 2>/dev/null
  ETCDCTL_API=3 ./etcddel.py known --prefix 2>/dev/null 
  ETCDCTL_API=3 ./etcddel.py possbile --prefix 2>/dev/null 
@@ -91,8 +91,8 @@ else
   leaderall=`ETCDCTL_API=3 ./etcdget.py leader --prefix `
   leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
   leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
-  /TopStor/logmsg.sh Partst04 info system $myhost $myip
-  msg="{'req': 'msg', 'reply': ['/TopStor/logmsg.sh','Partst04','info','system','$myhost','$myip']}"
+  ETCDCTL_API=3 /TopStor/logmsg.py Partst04 info system $myhost $myip
+  msg="{'req': 'msg', 'reply': ['ETCDCTL_API=3 /TopStor/logmsg.py','Partst04','info','system','$myhost','$myip']}"
   /pace/sendhost.py $leaderip "$msg" 'recvreply' $myhost
  echo getting clusterip from another leader >>/root/tmp2
   ETCDCTL_API=3 ./etcdget.py clusterip 2>/dev/null > /pacedata/clusterip

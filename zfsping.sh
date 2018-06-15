@@ -43,13 +43,13 @@ then
  echo $primtostd | grep 3
  if [ $? -eq 0 ];
  then
-  /TopStor/logmsg.sh Partsu05 info system $myhost
+  ETCDCTL_API=3 /TopStor/logmsg.py Partsu05 info system $myhost
   primtostd=$((primtostd+1))
  fi
  echo $isprimary | grep 3
  if [ $? -eq 0 ];
  then
-  /TopStor/logmsg.sh Partsu03 info system $myhost $myip
+  ETCDCTL_API=3 /TopStor/logmsg.py Partsu03 info system $myhost $myip
   isprimary=$((isprimary+1))
  fi
  runningcluster=1
@@ -81,7 +81,7 @@ else
   ETCDCTL_API=3 ./etcdgetlocal.py $myip known --prefix | wc -l | grep 1
   if [ $? -eq 0 ];
   then
-   /TopStor/logmsg.sh Partst05 info system $myhost
+   ETCDCTL_API=3 /TopStor/logmsg.py Partst05 info system $myhost
    primtostd=0;
   fi
   systemctl stop etcd 2>/dev/null
@@ -151,8 +151,8 @@ else
    if [ $? -eq 0 ];
    then
     ETCDCTL_API=3 /pace/etcddel.py md --prefix
-    /TopStor/logmsg.sh Partsu04 info system $myhost $myip
-    msg="{'req': 'msg', 'reply': ['/TopStor/logmsg.sh','Partsu04','info','system','$myhost','$myip']}"
+    ETCDCTL_API=3 /TopStor/logmsg.py Partsu04 info system $myhost $myip
+    msg="{'req': 'msg', 'reply': ['ETCDCTL_API=3 /TopStor/logmsg.py','Partsu04','info','system','$myhost','$myip']}"
     /pace/sendhost.py $leaderip "$msg" 'recvreply' $myhost
    fi
    echo finish running tasks task:boradcast, log..etc >> /root/zfspingtmp
@@ -284,16 +284,16 @@ then
    echo $ids | grep ${spare:8} &>/dev/null
    if [ $? -ne 0 ]; then
     diskid=`python3.6 diskinfo.py /pacedata/disklist.txt $spare`
-    /TopStor/logmsg.sh Diwa4 warning system $spare $pool
+    ETCDCTL_API=3 /TopStor/logmsg.py Diwa4 warning system $spare $pool
     /sbin/zpool remove $pool $spare 2>/dev/null;
     ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
     if [ $? -eq 0 ]; then
-     /TopStor/logmsg.sh Disu4 info system $spare 
+     ETCDCTL_API=3 /TopStor/logmsg.py Disu4 info system $spare 
      cachestate=1
     else 
-     /TopStor/logmsg.sh Dist5 info system $spare
+     ETCDCTL_API=3 /TopStor/logmsg.py Dist5 info system $spare
      /sbin/zpool offline $pool $spare 2>/dev/null
-     /TopStor/logmsg.sh Disu5 info system $spare 
+     ETCDCTL_API=3 /TopStor/logmsg.py Disu5 info system $spare 
     fi
    fi
   done 
@@ -311,32 +311,32 @@ then
     diskpath=`ETCDCTL_API=3 /pace/diskinfo.py run getkey $faildisk `
     diskidf=`echo $diskpath | awk -F'/' '{print $(NF-1)}'`
     ETCDCTL_API=3 /pace/diskinfo.py run getkey $diskpath | awk -F'/' '{print $(NF-1)}'
-    /TopStor/logmsg.sh Difa1 error system $diskidf $hostnam
+    ETCDCTL_API=3 /TopStor/logmsg.py Difa1 error system $diskidf $hostnam
     echo checking spare disk in the pool>> /root/zfspingtmp
     sparedisk=`echo "${zpool[@]}" | grep "AVAIL" | awk '{print $1}' | head -1 2>/dev/null`
     if [ ! -z $sparedisk  ]; then
       diskids=`ETCDCTL_API=3 /pace/diskinfo.py run getkey $sparedisk | awk -F'/' '{print $(NF-1)}'`
      echo diskids=$diskids
-     /TopStor/logmsg.sh Dist2 info system $diskidf $diskids $hostnam
+     ETCDCTL_API=3 /TopStor/logmsg.py Dist2 info system $diskidf $diskids $hostnam
      echo /sbin/zpool offline $pool $faildisk 2>/dev//null
      /sbin/zpool offline $pool $faildisk 2>/dev/null
      echo replacing offline/faulty with spare in the pool>> /root/zfspingtmp
      echo /sbin/zpool replace $pool $faildisk $sparedisk $hostnam 2>/dev/null
      /sbin/zpool replace $pool $faildisk $sparedisk 2>/dev/null
      ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
-     /TopStor/logmsg.sh Disu2 info system $diskidf $diskidf $hostnam
-     /TopStor/logmsg.sh Dist3 info system $diskidf $hostnam
+     ETCDCTL_API=3 /TopStor/logmsg.py Disu2 info system $diskidf $diskidf $hostnam
+     ETCDCTL_API=3 /TopStor/logmsg.py Dist3 info system $diskidf $hostnam
      echo detaching OFFLINE disk with spare in the pool>> /root/zfspingtmp
      /sbin/zpool detach $pool $faildisk &>/dev/null
      /sbin/zpool remove $pool $faildisk &>/dev/null
-     /TopStor/logmsg.sh Disu3 info system $diskidf $hostnam
+     ETCDCTL_API=3 /TopStor/logmsg.py Disu3 info system $diskidf $hostnam
     else
      echo no spare disk >> /root/zfspingtmp
      echo detaching OFFLINE disk without spare in the pool>> /root/zfspingtmp
      /sbin/zpool detach $pool $faildisk &>/dev/null
      /sbin/zpool remove $pool $faildisk &>/dev/null
      ETCDCTL_API=3 /pace/putzpool.py 2>/dev/null
-     /TopStor/logmsg.sh Disu3 info system $diskidf $hostnam
+     ETCDCTL_API=3 /TopStor/logmsg.py Disu3 info system $diskidf $hostnam
     fi
     ETCDCTL_API=3 /pace/putzpool.py run/$myhost --prefix 2>/dev/null
     diskstatus=`echo $diskpath | awk -F'/' '{OFS=FS;$NF=""; print}' `'status'
