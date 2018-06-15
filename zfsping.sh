@@ -153,7 +153,7 @@ else
    then
      /pace/etcddel.py md --prefix
      /TopStor/logmsg.py Partsu04 info system $myhost $myip
-    msg="{'req': 'msg', 'reply': [' /TopStor/logmsg.py','Partsu04','info','system','$myhost','$myip']}"
+    msg="{'req': 'msg', 'reply': ['/TopStor/logmsg.py','Partsu04','info','system','$myhost','$myip']}"
     /pace/sendhost.py $leaderip "$msg" 'recvreply' $myhost
    fi
    echo finish running tasks task:boradcast, log..etc >> /root/zfspingtmp
