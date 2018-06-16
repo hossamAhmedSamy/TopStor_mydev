@@ -50,6 +50,7 @@ then
  echo $isprimary | grep 3
  if [ $? -eq 0 ];
  then
+   echo for $isprimary sending info Partsu03 booted with ip >> /root/zfspingtmp
    /TopStor/logmsg.py Partsu03 info system $myhost $myip
   isprimary=$((isprimary+1))
  fi
