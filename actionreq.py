@@ -53,6 +53,17 @@ def do(body,myhost):
   z.append(bcifs)
   msg={'req': r["req"], 'reply':z}
   send(host[0],str(msg), 'recvreply',str(myhost))
+############# logall data #####################
+ elif r["req"]=='logall':
+  with open('/root/recv','a') as f:
+   f.write('preparing logfile \n')
+  with open('/var/www/html/des20/Data/TopStorglobal.log') as f:
+   conf=f.read()
+  conf=conf.encode()
+  bconf=codecs.encode(conf,'hex')
+  z.append(bconf)
+  msg={'req': r["req"], 'reply':z}
+  send(host[0],str(msg), 'recvreply',str(myhost))
 ############## uknown request ###############
  else:
   with open('/root/recv','a') as f:
