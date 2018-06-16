@@ -32,7 +32,7 @@ def do(body):
    cmdline=['/TopStor/UnixAddUser_sync',x[0],x[2],x[1]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   logmsg.sendlog('Unlin1006', 'info', 'system')
-########## if user ######################
+########## if cifs ######################
  elif r["req"]=='cifs':
   with open('/root/recv','a') as f:
    f.write('preparing cifs:'+str(r["reply"][0])+'\n')
@@ -42,6 +42,16 @@ def do(body):
    f.write('cifs conf: '+cifsconf+'\n')
   with open('/etc/samba/smb.conf','w') as f:
    f.write(cifsconf)
+########## if logall ######################
+ elif r["req"]=='logall':
+  with open('/root/recv','a') as f:
+   f.write('preparing logs:\n')
+  conf=codecs.decode(r["reply"][0],'hex')
+  conf=conf.decode('utf-8')
+  with open('/root/recv','a') as f:
+   f.write('logs: '+conf+'\n')
+  with open('/var/www/html/des20/Data/TopStorglobal.log','w') as f:
+   f.write(conf)
 ########## if msg ###############
  elif r["req"]=='msg':  
   with open('/root/recv','a') as f:
