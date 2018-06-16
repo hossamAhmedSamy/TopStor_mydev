@@ -52,9 +52,10 @@ if known != ['']:
    logmsg.sendlog('Partst02','warning','system', str(kn[0]))
    cmdline=['/pace/hostlost.sh',str(kn[0])]
    subprocess.run(cmdline,stdout=subprocess.PIPE)
-   etcddel('known/'+str(kn[0]))
    etcddel('localrun/'+str(kn[0]))
   elif (mtuple(heart[0])[1] not in str(kn[1])):
+   etcddel('known/'+str(kn[0]))
+   logmsg.sendlog('Partst02','warning','system', str(kn[0]))
    cmdline=['/pace/hostlost.sh',str(kn[0])]
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    etcddel('localrun/'+str(kn[0]))
