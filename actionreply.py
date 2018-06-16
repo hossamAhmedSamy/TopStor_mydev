@@ -14,8 +14,6 @@ def do(body):
 ########## if user ######################
  if r["req"]=='user':
   logmsg.sendlog('Unlin1005', 'info', 'system')
-  cmdline=cmdline.split()
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   with open('/etc/passwd') as f:
    revf=f.readlines()
    for line in revf:
