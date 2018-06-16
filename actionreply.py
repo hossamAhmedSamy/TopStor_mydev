@@ -34,6 +34,7 @@ def do(body):
   logmsg.sendlog('Unlin1006', 'info', 'system')
 ########## if cifs ######################
  elif r["req"]=='cifs':
+  logmsg.sendlog('Actst1000', 'info', 'system')
   with open('/root/recv','a') as f:
    f.write('preparing cifs:'+str(r["reply"][0])+'\n')
   cifsconf=codecs.decode(r["reply"][0],'hex')
@@ -42,8 +43,10 @@ def do(body):
    f.write('cifs conf: '+cifsconf+'\n')
   with open('/etc/samba/smb.conf','w') as f:
    f.write(cifsconf)
+  logmsg.sendlog('Actsu1000', 'info', 'system')
 ########## if logall ######################
  elif r["req"]=='logall':
+  logmsg.sendlog('Actst1001', 'info', 'system')
   with open('/root/recv','a') as f:
    f.write('preparing logs:\n')
   conf=codecs.decode(r["reply"][0],'hex')
@@ -52,6 +55,7 @@ def do(body):
    f.write('logs: '+conf+'\n')
   with open('/var/www/html/des20/Data/TopStorglobal.log','w') as f:
    f.write(conf)
+  logmsg.sendlog('Actsu1001', 'info', 'system')
 ########## if msg ###############
  elif r["req"]=='msg':  
   with open('/root/recv','a') as f:
