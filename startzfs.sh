@@ -93,8 +93,8 @@ else
   leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
   leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
    /TopStor/logmsg.py Partst04 info system $myhost $myip
-  msg="{'req': 'msg', 'reply': [' /TopStor/logmsg.py','Partst04','info','system','$myhost','$myip']}"
-  /pace/sendhost.py $leaderip "$msg" 'recvreply' $myhost
+  #msg="{'req': 'msg', 'reply': ['/TopStor/logmsg.py','Partst04','info','system','$myhost','$myip']}"
+  #/pace/sendhost.py $leaderip "$msg" 'recvreply' $myhost
  echo getting clusterip from another leader >>/root/tmp2
    ./etcdget.py clusterip 2>/dev/null > /pacedata/clusterip
   /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null

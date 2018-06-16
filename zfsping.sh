@@ -125,14 +125,12 @@ else
   then
    echo I am not a known adding me as possible >> /root/zfspingtmp
     ./etcdput.py possible$myhost $myip 2>/dev/null
-   isknown=0
   else
    echo I am known so running all needed etcd task:boradcast, log..etc >> /root/zfspingtmp
 #    ./changeetcd.py 2>/dev/null
 #    ./receivelog.py 2>/dev/null
 #    ./broadcastlog.py 2>/dev/null
-   echo $isknown | grep 0 
-   if [ $? -eq 0 ];
+   if [ $isknown -eq 0 ];
    then
     echo running sendhost.py $leaderip 'user' 'recvreq' $myhost >>/root/tmp2
     leaderall=` ./etcdget.py leader --prefix `
@@ -153,8 +151,8 @@ else
    then
      /pace/etcddel.py md --prefix
      /TopStor/logmsg.py Partsu04 info system $myhost $myip
-    msg="{'req': 'msg', 'reply': [' /TopStor/logmsg.py','Partsu04','info','system','$myhost','$myip']}"
-    /pace/sendhost.py $leaderip "$msg" 'recvreply' $myhost
+   # msg="{'req': 'msg', 'reply': ['/TopStor/logmsg.py','Partsu04','info','system','$myhost','$myip']}"
+    #/pace/sendhost.py $leaderip "$msg" 'recvreply' $myhost
    fi
    echo finish running tasks task:boradcast, log..etc >> /root/zfspingtmp
   fi
