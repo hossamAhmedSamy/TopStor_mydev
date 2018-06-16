@@ -140,6 +140,7 @@ else
     /pace/sendhost.py $leaderip 'user' 'recvreq' $myhost
     sleep 1
     /pace/sendhost.py $leaderip 'cifs' 'recvreq' $myhost
+    /pace/sendhost.py $leaderip 'logall' 'recvreq' $myhost
      /pace/etcddel.py md --prefix
     isknown=$((isknown+1))
    fi
