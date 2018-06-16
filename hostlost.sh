@@ -8,7 +8,7 @@ echo "${disks[@]}"
 echo "${disks[@]}" > /root/losthost
 echo "${disks[@]}" | awk '{print $1}' | awk -F'/' '{print $NF}' | while read l;
 do
- echo 1 > /sys/block/$l/device/delete
+ echo 1 > /sys/block/$l/device/delete 2>/dev/null
 done
 zpool=`ETCDCTL_API=3 /pace/etcdget.py run --prefix | grep $myhost | grep disk | grep -v free` 
 pool=`ETCDCTL_API=3 /pace/etcdget.py run --prefix | grep $myhost | grep pool | grep name | awk -F'name' '{print $2}' | cut -c 5- | rev | cut -c 3- | rev` 

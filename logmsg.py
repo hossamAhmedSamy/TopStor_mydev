@@ -23,7 +23,7 @@ def sendlog(*args):
  print('leader',leaderip) 
  print('knowns',knowns) 
  msg={'req': 'msg2', 'reply':z}
- print('sending')
+ print('sending', leaderip, str(msg),'recevreply',myhost)
  sendhost(leaderip, str(msg),'recvreply',myhost)
  for k in knowninfo:
   sendhost(k[1], str(msg),'recvreply',myhost)

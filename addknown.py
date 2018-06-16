@@ -46,7 +46,9 @@ if known != ['']:
   cmdline=['/pace/etcdgetlocal.py',str(kn[1]),'local','--prefix','2>/dev/null']
   heartres=subprocess.run(cmdline,stdout=subprocess.PIPE)
   heart=str(heartres.stdout)[2:][:-3].split('\\n')
+  print('heartbeat=',heart)
   if(heart == ['-1']):
+   etcddel('known/'+str(kn[0]))
    logmsg.sendlog('Partst02','warning','system', str(kn[0]))
    cmdline=['/pace/hostlost.sh',str(kn[0])]
    subprocess.run(cmdline,stdout=subprocess.PIPE)
@@ -55,7 +57,6 @@ if known != ['']:
   elif (mtuple(heart[0])[1] not in str(kn[1])):
    cmdline=['/pace/hostlost.sh',str(kn[0])]
    subprocess.run(cmdline,stdout=subprocess.PIPE)
-   etcddel('known/'+str(kn[0]))
    etcddel('localrun/'+str(kn[0]))
    cmdline=['/sbin/rabbitmqctl','delete_user','rabb_'+mtuple(x)[0].split('possible')[1],'YousefNadody']
    subprocess.run(cmdline,stdout=subprocess.PIPE)
