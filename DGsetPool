@@ -16,7 +16,6 @@ diskn1=` echo $@ | awk '{print $5}'`;
 disk1=`ls /dev/disk/by-id/ | grep -v part | grep $disk1`
 msgraid="nothing";
 myhost=`hostname -s`
-nextpool=$myhost;
 privilege="DISK_Groups"
 contrun=`./privthis.sh $privilege $userreq`;
 declare -a params=(`echo $@`);
@@ -24,6 +23,9 @@ declare -a hostparam=();
 declare -a diskparam=();
 if [[ $contrun == 'true' ]];
 then
+ diskargs=${#params[@]};
+ diskargs=$((diskargs-1));
+ nextpool=${params[$diskargs]};
  msgraid=$raid
  if [[ $raid == "readcache" ]]; then msgraid="readcache"; fi;
  if [[ $raid == "readwritecache" ]]; then msgraid="readwritecache"; fi;
@@ -34,7 +36,6 @@ then
  noofdisks=`echo $disks | wc -w | awk '{print $1}'`;
  disksarr=(${disks});
  if [[ $raid == "addmirror" ]]; then
-  diskargs=${#params[@]};
   diskargs=$((diskargs-1));
   i=2
   disk1=" ";
@@ -44,16 +45,18 @@ then
    disk=`echo ${params[$i]} | awk -F':' '{print $1}'`
    diskn=`echo ${params[$i]} | awk -F':' '{print $2}'`
    disk=`ls /dev/disk/by-id/ | grep -v part | grep $disk`
+   echo /sbin/zpool labelclear /dev/disk/by-id/$disk;
    /sbin/zpool labelclear /dev/disk/by-id/$disk;
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
+    echo $disk1, $diskns, $p${nextpool}
    /TopStor/logmsg.py DGst20 info $userreq p${nextpool} $diskns .
   /sbin/zpool add -f p${nextpool} mirror ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
     /TopStor/logmsg.py DGsu20 info $userreq p${nextpool} $diskns .
   else
-    /TopStor/logmsg.py DGsu20 error $userreq p${nextpool} $diskns .
+    /TopStor/logmsg.py DGfa20 error $userreq p${nextpool} $diskns .
   fi
  fi 
  if [[ $raid == "attachmirror" ]]; then
@@ -348,4 +351,4 @@ then
 fi
 rm txt/${0:2}$userreq.txt
 sed -i "/p${nextpool}/c\\" $runningpools
- /pace/putzpool.py
+/pace/etcddel.py md --prefix
