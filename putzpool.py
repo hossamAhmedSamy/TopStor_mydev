@@ -164,10 +164,13 @@ try:
   msg='recording pool props '+poolname
   with open('/root/putzpooltmp','a') as f:
    f.write(str(msg)+"\n")
+  cmdline=['/sbin/zfs','list','-H']
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  zfslist=str(result.stdout)[2:][:-3].split('\\t')
   cmdline=['/sbin/zpool','list','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   zlist=str(result.stdout)[2:][:-3].split('\\t')
-  z.append((myhost+'/pool/'+poolname+'/size',zlist[1]))
+  z.append((myhost+'/pool/'+poolname+'/size',zfslist[2]))
   z.append((myhost+'/pool/'+poolname+'/alloc',zlist[2]))
   z.append((myhost+'/pool/'+poolname+'/empty',zlist[3]))
   z.append((myhost+'/pool/'+poolname+'/dedup',zlist[7]))
