@@ -6,6 +6,7 @@ isknown=0
 isprimary=0
 primtostd=4
 date=`date`
+enpdev='enp0s8'
 echo $date >> /root/zfspingstart
 export 
 systemctl restart target
