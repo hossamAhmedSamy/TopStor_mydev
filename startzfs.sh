@@ -73,6 +73,7 @@ then
  echo createdclusterip >>/root/tmp2
  /sbin/pcs resource enable clusterip 2>/dev/null
  /sbin/pcs resource debug-start clusterip 2>/dev/null
+ systemctl start smb
  echo startedclusterip >>/root/tmp2
   ./etcddel.py leader --prefix 2>/dev/null
   ./etcdput.py leader/$myhost $myip 2>/dev/null

@@ -96,6 +96,7 @@ else
   systemctl start etcd 2>/dev/null
    ./etcdput.py clusterip $clusterip 2>/dev/null
   pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24 2>/dev/null
+  systemctl restart smb 2>/dev/null
   echo adding me as a leader >> /root/zfspingtmp
    ./runningetcdnodes.py $myip 2>/dev/null
    ./etcddel.py leader 2>/dev/null
