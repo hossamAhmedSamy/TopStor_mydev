@@ -20,12 +20,17 @@ def etcdget(key, prefix=''):
    z.append((str(result.stdout).split(key)[1][2:][:-3]))
    print(str(result.stdout).split(key)[1][2:][:-3])
   else:
+   cmdline=['/bin/etcdctl','--endpoints='+endpoints,'get',key,'--prefix']
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
    mylist=str(result.stdout)[2:][:-3].split('\\n')
    zipped=zip(mylist[0::2],mylist[1::2])
    for x in zipped:
     if prefix in str(x):
      z.append(x)
      print(x)
+   if(len(z) == 0):
+     z.append(-1)
+     print('-1')
  except:
   z.append(-1)
   print('-1')

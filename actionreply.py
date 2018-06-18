@@ -68,6 +68,11 @@ def do(body):
    f.write('received msg2 from parnter :'+str(r["reply"])+'\n')
    f.write('type of message :'+str(type(r["reply"]))+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if DGsetPool ###############
+ elif r["req"]=='DGsetPool':  
+  with open('/root/recv','a') as f:
+   f.write('received DGsetPool from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
  
 
 

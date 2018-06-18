@@ -1,4 +1,5 @@
 #!/usr/local/bin/zsh
+export ETCDCTL_API=3
 cd /TopStor
 rm /tmp2/msgfile 2>/dev/null
 mkdir /tmp2 &>/dev/null
