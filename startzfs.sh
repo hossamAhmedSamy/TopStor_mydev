@@ -55,7 +55,8 @@ then
   echo starting etcd=$?
  done
  echo started etcd as primary>>/root/tmp2
-  /TopStor/logmsg.py Partst03 info system $myhost $myip
+ datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
+  /TopStor/logmsg2.sh $datenow $timenow $myhost Partst03 info system $myhost $myip
   ./runningetcdnodes.py $myip 2>/dev/null
   ./etcddel.py known --prefix 2>/dev/null 
   ./etcddel.py possbile --prefix 2>/dev/null 
