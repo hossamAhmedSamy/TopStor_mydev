@@ -25,6 +25,8 @@ else
   echo $clusterip > /pacedata/clusterip
  fi
 fi
+/sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
+/sbin/pcs resource delete --force clusterip 
 echo finish identify clusterip >> /root/tmp2
 systemctl status etcd &>/dev/null
 if [ $? -ne 0 ];
@@ -99,7 +101,9 @@ else
   #/pace/sendhost.py $leaderip "$msg" 'recvreply' $myhost
  echo getting clusterip from another leader >>/root/tmp2
    ./etcdget.py clusterip 2>/dev/null > /pacedata/clusterip
-  /sbin/pcs resource delete --force clusterip && /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
+  /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
+  /sbin/pcs resource delete --force clusterip 
+  /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
   echo starting etcd as local >>/root/tmp2
    ./etccluster.py 'local' $myip 2>/dev/null
   chmod +r /etc/etcd/etcd.conf.yml 2>/dev/null
