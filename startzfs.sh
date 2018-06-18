@@ -26,7 +26,7 @@ else
  fi
 fi
 /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
-/sbin/pcs resource delete --force clusterip 
+/sbin/pcs resource delete --force clusterip  2>/dev/null
 echo finish identify clusterip >> /root/tmp2
 systemctl status etcd &>/dev/null
 if [ $? -ne 0 ];

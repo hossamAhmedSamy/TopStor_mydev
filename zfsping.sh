@@ -102,7 +102,7 @@ else
    ./etcddel.py leader 2>/dev/null
    ./etcdput.py leader/$myhost $myip 2>/dev/null
   echo importing all pools >> /root/zfspingtmp
-  /sbin/zpool import -a &>/dev/null
+  /sbin/zpool import -am &>/dev/null
   echo running putzpool and nfs >> /root/zfspingtmp
    ./putzpool.py 2>/dev/null
   systemctl start nfs 2>/dev/null
@@ -289,7 +289,7 @@ then
     diskid=`python3.6 diskinfo.py /pacedata/disklist.txt $spare`
      /TopStor/logmsg.py Diwa4 warning system $spare $pool
     /sbin/zpool remove $pool $spare 2>/dev/null;
-     /pace/putzpool.py 2>/dev/null
+     /pace/etcddel.py  md --prefix 2>/dev/null
     if [ $? -eq 0 ]; then
       /TopStor/logmsg.py Disu4 info system $spare 
      cachestate=1
@@ -326,7 +326,7 @@ then
      echo replacing offline/faulty with spare in the pool>> /root/zfspingtmp
      echo /sbin/zpool replace $pool $faildisk $sparedisk $hostnam 2>/dev/null
      /sbin/zpool replace $pool $faildisk $sparedisk 2>/dev/null
-      /pace/putzpool.py 2>/dev/null
+      /pace/etcddel.py md --prefix 2>/dev/null
       /TopStor/logmsg.py Disu2 info system $diskidf $diskidf $hostnam
       /TopStor/logmsg.py Dist3 info system $diskidf $hostnam
      echo detaching OFFLINE disk with spare in the pool>> /root/zfspingtmp
@@ -338,16 +338,16 @@ then
      echo detaching OFFLINE disk without spare in the pool>> /root/zfspingtmp
      /sbin/zpool detach $pool $faildisk &>/dev/null
      /sbin/zpool remove $pool $faildisk &>/dev/null
-      /pace/putzpool.py 2>/dev/null
+      /pace/etcddel.py md --prefix 2>/dev/null
       /TopStor/logmsg.py Disu3 info system $diskidf $hostnam
     fi
-     /pace/putzpool.py run/$myhost --prefix 2>/dev/null
+     /pace/etcddel.py md --prefix 2>/dev/null
     diskstatus=`echo $diskpath | awk -F'/' '{OFS=FS;$NF=""; print}' `'status'
     diskfs=` /pace/diskinfo.py run getvalue $diskstatus `
     echo $diskfs | grep ONLINE
     if [ $? -eq 0 ];
     then
-      ./putzpool.py 2>/dev/null
+      /pace/etcddel.py md --prefix 2>/dev/null
     fi
    fi
    /sbin/zpool status $pool 2>/dev/null| grep "was /dev" &>/dev/null
@@ -355,7 +355,7 @@ then
     faildisk=`/sbin/zpool status $pool 2>/dev/null | grep "was /dev" | awk -F'-id/' '{print $2}' | awk -F'-part' '{print $1}'`;
     /sbin/zpool detach $pool $faildisk &>/dev/null;
     /sbin/zpool remove $pool $faildisk &>/dev/null;
-     /pace/putzpool.py 2>/dev/null
+     /pace/etcddel.py md --prefix 2>/dev/null
     #/sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool;
     cachestate=1;
    fi 
@@ -364,7 +364,7 @@ then
     faildisk=`/sbin/zpool status $pool 2>/dev/null| grep "was /dev/s" | awk -F'was ' '{print $2}'`;
     /sbin/zpool detach $pool $faildisk &>/dev/null;
     /sbin/zpool remove $pool $faildisk &>/dev/null;
-     /pace/putzpool.py 2>/dev/null
+     /pace/etcddel.py md --prefix 2>/dev/null
     #/sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool ;
     cachestate=1;
    fi 
@@ -373,7 +373,7 @@ then
     faildisk=`/sbin/zpool status $pool 2>/dev/null| grep UNAVAIL | awk '{print $1}'`;
     /sbin/zpool detach $pool $faildisk &>/dev/null;
     /sbin/zpool remove $pool $faildisk &>/dev/null;
-     /pace/putzpool.py 2>/dev/null
+     /pace/etcddel.py md --prefix 2>/dev/null
     #/sbin/zpool set cachefile=/pacedata/pools/${pool}.cache $pool;
     cachestate=1;
    fi 
