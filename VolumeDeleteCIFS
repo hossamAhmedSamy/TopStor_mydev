@@ -24,19 +24,17 @@ if [[ $contrun == 'true' ]]
 then
   /TopStor/logmsg.py NFS1000 info $userreq $hostnam/$DG/$volname
 ssh $sshost " cd /TopStor &&
-datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
  /sbin/zfs destroy -rf $DG/$volname"  &> $txtres
 if [ $? -ne 0  ]; then
-else 
   /TopStor/logmsg.py NFS1001 error $userreq $hostnam/$DG/$volname
+  exit
+fi
 cp /etc/samba/smb.conf /TopStordata/smb.confcurrent;
  rm /TopStordata/$volname.txt;
  ./delblock.sh start${volname}_only stop${volname}_only /TopStordata/smb.confcurrent  ;
  ./delblock.sh start${volname}_only stop${volname}_only /TopStordata/CIFSshares.txt  ;
  cp /TopStordata/smb.confcurrent /etc/samba/smb.conf;
  systemctl restart smb
-  /TopStor/logmsg.py NFS1002 info  $userreq $hostnam/$DG/$volname
-fi;
-./GetPoolVollist
-fi
  /pace/etcddel.py md --prefix
+  /TopStor/logmsg.py NFS1002 info  $userreq $hostnam/$DG/$volname
+fi

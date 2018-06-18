@@ -54,7 +54,7 @@ then
  systemctl stop smb 
  systemctl start smb  
 #datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
+ /pace/etcddel.py md --prefix
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
  echo ready ;
- /pace/etcddel.py md --prefix
 fi
