@@ -6,7 +6,7 @@ from etcddel import etcddel as etcddel
 from etcdput import etcdput as put 
 import socket
 msg='start new putzpool '
-with open('/root/putzpooltmp','a') as f:
+with open('/root/putzpooltmp','w') as f:
  f.write(str(msg)+"\n")
 myhostorg=socket.gethostname()
 myhost='run/'+myhostorg
