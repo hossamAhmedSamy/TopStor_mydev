@@ -1,5 +1,5 @@
 #!/bin/sh
-if [ "$#" -eq 0 ];
+if [[ "$#" -eq 0 ]];
 then
  islocal=0
 else
@@ -17,12 +17,15 @@ then
  sh /pace/iscsirefresh.sh
  sh /pace/listingtargets.sh
  sh /pace/addtargetdisks.sh
- if [ $islocal -eq 0 ];
+ echo start >> /root/iscsiwatch
+ if [[ $islocal -eq 0 ]];
  then
   echo putzpool to leader >> /root/zfspingtmp
+  echo putzpool to leader hi="$#" >> /root/iscsiwatch
   ETCDCTL_API=3 /pace/putzpool.py 
  else
   echo putzpool local $myip $myhost $islocal >> /root/zfspingtmp
+  echo putzpool local $myip $myhost $islocal >> /root/iscsiwatch
   ETCDCTL_API=3 /pace/putzpoollocal.py $myip $myhosti $leader
  fi
 fi
