@@ -17,7 +17,7 @@ do
  echo cannot run now > /root/zfspingtmp
 done
 echo startzfs run >> /root/zfspingtmp
-#/pace/startzfs.sh
+/pace/startzfs.sh
 #sleep 5
 date=`date `
 echo starting in $date >> /root/zfspingtmp
