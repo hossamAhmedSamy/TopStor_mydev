@@ -8,7 +8,6 @@ primtostd=4
 date=`date`
 enpdev='enp0s8'
 echo $date >> /root/zfspingstart
-export 
 systemctl restart target
 cd /pace
 rm -rf /pacedata/startzfsping 2>/dev/null
@@ -18,8 +17,8 @@ do
  echo cannot run now > /root/zfspingtmp
 done
 echo startzfs run >> /root/zfspingtmp
-/pace/startzfs.sh
-sleep 5
+#/pace/startzfs.sh
+#sleep 5
 date=`date `
 echo starting in $date >> /root/zfspingtmp
 while true;
@@ -51,7 +50,7 @@ do
   then
    echo for $isprimary sending info Partsu03 booted with ip >> /root/zfspingtmp
    /TopStor/logmsg.py Partsu03 info system $myhost $myip
-   isprimary=$((isprimary+1))
+  # isprimary=$((isprimary+1))
   fi
   runningcluster=1
 # leader='"'` ./etcdget.py leader --prefix 2>/dev/null`'"'
@@ -369,8 +368,7 @@ do
      /pace/etcddel.py md --prefix 2>/dev/null
     cachestate=1;
    fi 
-  fi
- done
- echo after long operations due to a faulty disk is inside a pool>> /root/zfspingtmp
-fi
+  done
+  echo after long operations due to a faulty disk is inside a pool>> /root/zfspingtmp
+ fi
 done
