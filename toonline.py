@@ -27,6 +27,7 @@ def toonline(*args):
  print('status=',status)
  if len(faulty) > 0:
   for sta in status:
+   dinsta=[x for x in notfree if '/raid/'+str(sta) in str(x)]
    print('compare=',str(faulty), str(sta))
    fau=[x for x in faulty if str(x[0]) == str(sta) ]
    print('fau=',fau)
@@ -43,12 +44,13 @@ def toonline(*args):
    cmdline='/sbin/zpool detach '+x[3]+' '+x[0]
    subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
    print(cmdline)
-   cmdline='/sbin/zpool labelclear /dev/disk/by-id/'+x[1]
-   subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
-   print(cmdline)
-   cmdline='/sbin/zpool attach -f '+x[3]+' '+x[1]+' '+x[2]
-   subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
-   print(cmdline)
+   if len(dinsta)< 2:
+    cmdline='/sbin/zpool labelclear /dev/disk/by-id/'+x[1]
+    subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
+    print(cmdline)
+    cmdline='/sbin/zpool attach -f '+x[3]+' '+x[1]+' '+x[2]
+    subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
+    print(cmdline)
    print('###############')
  if len(free) < 1:
   return
