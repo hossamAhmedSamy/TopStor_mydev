@@ -34,6 +34,8 @@ def send(*args):
   z.append(arg)
  msg={'req': 'DGsetPool', 'reply':z}
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
+ with open('/root/DGsetpool','a') as f:
+  f.write('myhost='+ownerip[0][1]+' '+str(msg)+' recvreply '+myhost+'\n')
  return 1
 
 if __name__=='__main__':
