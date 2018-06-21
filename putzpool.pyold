@@ -183,7 +183,6 @@ try:
   diskc=0
   tmpc=6
 ########### recroding raids and disks for every pool ##########
-  raidc=0  
   for c in zpool[7:-1]:
    if c.replace(' ','')=='':
     continue
@@ -202,16 +201,13 @@ try:
     print(str(count),raid,raidstat)
     diskc=0
    else:
-    isstripe=len(c.split('scsi')[0])
     msg='recording pool as stripe '
     with open('/root/putzpooltmp','a') as f:
      f.write(str(msg)+"\n")
-    if isstripe < 6:
+    if count==0:
      count+=1
-     raid='stripe'
-     z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/type','stripe-'+str(raidc)))
+     z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/type','stripe'))
      raidstat=zpool[1].split(':')[1].replace(' ','')
-     raidc+=1
      z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/status',raidstat))
     msg='looping on lsscsi to add to get every diskc '
     with open('/root/putzpooltmp','a') as f:
