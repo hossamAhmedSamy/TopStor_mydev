@@ -208,7 +208,7 @@ try:
     msg='recording pool as stripe '
     with open('/root/putzpooltmp','a') as f:
      f.write(str(msg)+"\n")
-    if isstripe < 6:
+    if isstripe < 4:
      count+=1
      raid='stripe'
      z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/type','stripe-'+str(raidc)))
