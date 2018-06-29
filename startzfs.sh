@@ -157,7 +157,7 @@ fi
 if [ $secdiff -ne 0 ]; then
  echo runningpools $seclastreboot > $runningpools
 echo starting keysend >>/root/tmp2
- ./keysend.sh &>/dev/null
+ ./keysend.sh $myip &>/dev/null
 # pcs resource create IPinit ocf:heartbeat:IPaddr2 nic="$ccnic" ip="10.11.11.254" cidr_netmask=24 op monitor on-fail=restart 2>/dev/null
 # pcs resource debug-start IPinit 2>/dev/null
  rm -rf /TopStor/key/adminfixed.gpg && cp /TopStor/factory/factoryadmin /TopStor/key/adminfixed.gpg
