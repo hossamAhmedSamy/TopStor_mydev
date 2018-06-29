@@ -11,5 +11,5 @@ ClearExit() {
 }
 trap ClearExit HUP
 #./ProxySVC.sh &
-myip=`pcs resource show CC | grep Attrib | awk '{print $2}' | awk -F'=' '{print $2}'`
+myip=`/sbin/pcs resource show $CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 ETCDCTL_API=3 /bin/python3.6 topstorrecvreply.py $myip

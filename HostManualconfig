@@ -27,9 +27,6 @@ chattr +i /etc/resolv.conf
 grep GATEWAY /etc/sysconfig/network-scripts/ifcf* | awk -F: '{print $1}' | sort -u | xargs sed -i "/GATEWAYc\GATEWAY\=$hostrout"  2>/dev/null
 #sed -e "s/HOSTNAME/$hostn/g" -e "s/IPADD/$hostip/g" -e "s/ROUTE/$hostrout/g" rc.conf > txt/rc.conf
 #sed -ri  "s/(https:\/\/)[^=]*$/\1$hostip\//g" /etc/httpd/conf.d/sshhttp.conf 
-echo running keysend >> /root/Host
-/pace/keysend.sh $hostip
-echo finish keysend >> /root/Host
 sed -e "s/HOSTY/$hostip/g" /TopStor/sshhttp.conf > /etc/httpd/conf.d/sshhttp.conf
 echo getting pcs >> /root/Host
 CC=`/sbin/pcs resource | grep IPaddr2 | awk '{print $1}' | grep -v cluster`
@@ -57,6 +54,9 @@ sed -i "/$hostname/s/\w*\$//" $runningpools
 sed -i "/$hostname/s/\$/$hostn/" $runningpools
 echo sed $hostname for $hostn on $runningpools >> /root/Host
   /TopStor/logmsg.py HostManual1003 info $userreq $hostn ${hostip}'/'${subnet} $hostrout $hostdns
+echo running keysend >> /root/Host
+/pace/keysend.sh $hostip
+echo finish keysend >> /root/Host
 /sbin/reboot
 
 echo logging all is good >> /root/Host
