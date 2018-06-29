@@ -43,12 +43,13 @@ echo running pcs on ip=$oldip >> /root/Host
 /sbin/pcs resource update $CC ip=$hostip
 echo updated CC on $hostip >> /root/Host
 /sbin/pcs resource update $CC cidr_netmask=$subnet
+reboot
 echo updated CC on $subnet >> /root/Host
-/sbin/pcs resource restart $CC
+#/sbin/pcs resource restart $CC
 #/sbin/pcs resource debug-stop $CC
 #/sbin/pcs resource debug-start $CC
 echo restarted $subnet >> /root/Host
-/sbin/ip addr del ${oldip}/$oldsubnet dev $dev
+#/sbin/ip addr del ${oldip}/$oldsubnet dev $dev
 echo deleted $oldip on $oldsubnet for $dev >> /root/Host
 oldhostn=`cat /TopStordata/hostname`
 echo $hostn > /TopStordata/hostname
@@ -56,7 +57,8 @@ echo $hostn > /TopStordata/hostname
 sed -i "/$hostname/s/\w*\$//" $runningpools
 sed -i "/$hostname/s/\$/$hostn/" $runningpools
 echo sed $hostname for $hostn on $runningpools >> /root/Host
-echo run keysend
   /TopStor/logmsg.py HostManual1003 info $userreq $hostn ${hostip}'/'${subnet} $hostrout $hostdns
+/sbin/reboot
+
 echo logging all is good >> /root/Host
 fi
