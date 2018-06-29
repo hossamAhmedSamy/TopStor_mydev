@@ -43,7 +43,6 @@ echo running pcs on ip=$oldip >> /root/Host
 /sbin/pcs resource update $CC ip=$hostip
 echo updated CC on $hostip >> /root/Host
 /sbin/pcs resource update $CC cidr_netmask=$subnet
-reboot
 echo updated CC on $subnet >> /root/Host
 #/sbin/pcs resource restart $CC
 #/sbin/pcs resource debug-stop $CC
