@@ -5,6 +5,8 @@ from ast import literal_eval as mtuple
 from etcddel import etcddel as etcddel
 from etcdput import etcdput as put 
 import socket
+count=-1
+diskc=0
 msg='start new putzpool '
 with open('/root/putzpooltmp','a') as f:
  f.write(str(msg)+"\n")
@@ -239,32 +241,32 @@ try:
     z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/disk/'+str(diskc)+'/fromhost',fromhost))
     z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/disk/'+str(diskc)+'/size',size))
     z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/disk/'+str(diskc)+'/status',status))
-  for l in lsscsi:
+ for l in lsscsi:
+  ll=l.split()
+  if ll[6] not in str(zpool):
+   diskc=lsscsi.index(l)
+   msg='found free disk '+str(diskc)+' '+l[6]
+   with open('/root/putzpooltmp','a') as f:
+    f.write(str(msg)+"\n")
+   status='free'
    ll=l.split()
-   if ll[6] not in str(zpool):
-    diskc=lsscsi.index(l)
-    msg='found free disk '+str(diskc)+' '+l[6]
-    with open('/root/putzpooltmp','a') as f:
-     f.write(str(msg)+"\n")
-    status='free'
-    ll=l.split()
-    uuid='scsi-'+ll[6]
-    msg='adding free disk to etcd'+str(diskc)+' '+ll[6]
-    with open('/root/putzpooltmp','a') as f:
-     f.write(str(msg)+"\n")
-    if ll[6]=='-':
-     status='FAULT'
-    put(myhost+'/free/disk/'+str(diskc)+'/uuid',uuid)
-    put(myhost+'/free/disk/'+str(diskc)+'/fromhost',ll[3])
-    put(myhost+'/free/disk/'+str(diskc)+'/size',ll[7])
-    put(myhost+'/free/disk/'+str(diskc)+'/status',status)
-  if count==0 and diskc > 0:
-   z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/type',raid))
-  msg='adding z in the etcd'
-  with open('/root/putzpooltmp','a') as f:
-   f.write(str(msg)+"\n")
-  for c in z:
-   put(c[0],c[1])
+   uuid='scsi-'+ll[6]
+   msg='adding free disk to etcd'+str(diskc)+' '+ll[6]
+   with open('/root/putzpooltmp','a') as f:
+    f.write(str(msg)+"\n")
+   if ll[6]=='-':
+    status='FAULT'
+   put(myhost+'/free/disk/'+str(diskc)+'/uuid',uuid)
+   put(myhost+'/free/disk/'+str(diskc)+'/fromhost',ll[3])
+   put(myhost+'/free/disk/'+str(diskc)+'/size',ll[7])
+   put(myhost+'/free/disk/'+str(diskc)+'/status',status)
+ if count==0 and diskc > 0:
+  z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/type',raid))
+ msg='adding z in the etcd'
+ with open('/root/putzpooltmp','a') as f:
+  f.write(str(msg)+"\n")
+ for c in z:
+  put(c[0],c[1])
  msg='checking crontab'
  with open('/root/putzpooltmp','a') as f:
   f.write(str(msg)+"\n")
