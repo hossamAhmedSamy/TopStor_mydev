@@ -37,7 +37,9 @@ echo CCis $CC
 oldip=`/sbin/pcs resource show $CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 oldsubnet=`/sbin/pcs resource show $CC | grep Attrib | awk -F'cidr_netmask=' '{print $2}' | awk '{print $1}'`
 dev=`/sbin/pcs resource show $CC | grep Attrib | awk -F'nic=' '{print $2}' | awk '{print $1}'`
-echo running pcs on $dev $oldsubnet $oldip >> /root/Host
+echo running pcs on dev=$dev >> /root/Host
+echo running pcs on subnet=$oldsubnet >> /root/Host
+echo running pcs on ip=$oldip >> /root/Host
 /sbin/pcs resource update $CC ip=$hostip
 echo updated CC on $hostip >> /root/Host
 /sbin/pcs resource update $CC cidr_netmask=$subnet
