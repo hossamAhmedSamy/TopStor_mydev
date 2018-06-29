@@ -19,6 +19,7 @@ privilege="Error";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]];
 then
+echo running logmsg > /root/Host
   /TopStor/logmsg.py HostManual1002 info $userreq
 chattr -i /etc/resolv.conf
 sed -i "/nameserver/c\nameserver $hostdns" /etc/resolv.conf
@@ -26,24 +27,34 @@ chattr +i /etc/resolv.conf
 grep GATEWAY /etc/sysconfig/network-scripts/ifcf* | awk -F: '{print $1}' | sort -u | xargs sed -i "/GATEWAYc\GATEWAY\=$hostrout"  2>/dev/null
 #sed -e "s/HOSTNAME/$hostn/g" -e "s/IPADD/$hostip/g" -e "s/ROUTE/$hostrout/g" rc.conf > txt/rc.conf
 #sed -ri  "s/(https:\/\/)[^=]*$/\1$hostip\//g" /etc/httpd/conf.d/sshhttp.conf 
+echo running keysend >> /root/Host
+/pace/keysend.sh $hostip
+echo finish keysend >> /root/Host
 sed -e "s/HOSTY/$hostip/g" /TopStor/sshhttp.conf > /etc/httpd/conf.d/sshhttp.conf
-CC=`pcs resource | grep IPaddr2 | awk '{print $1}' | grep -v cluster`
+echo getting pcs >> /root/Host
+CC=`/sbin/pcs resource | grep IPaddr2 | awk '{print $1}' | grep -v cluster`
 echo CCis $CC
-oldip=`pcs resource show $CC | grep Attrib | awk '{print $2}' | awk -F'=' '{print $2}'`
-oldsubnet=`pcs resource show $CC | grep Attrib | awk '{print $4}' | awk -F'=' '{print $2}'`
-dev=`pcs resource show $CC | grep Attrib | awk '{print $3}' | awk -F'=' '{print $2}'`
-pcs resource update $CC ip=$hostip
-pcs resource update $CC cidr_netmask=$subnet
-pcs resource debug-stop $CC
-pcs resource debug-start $CC
+oldip=`/sbin/pcs resource show $CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+oldsubnet=`/sbin/pcs resource show $CC | grep Attrib | awk -F'cidr_netmask=' '{print $2}' | awk '{print $1}'`
+dev=`/sbin/pcs resource show $CC | grep Attrib | awk -F'nic=' '{print $2}' | awk '{print $1}'`
+echo running pcs on $dev $oldsubnet $oldip >> /root/Host
+/sbin/pcs resource update $CC ip=$hostip
+echo updated CC on $hostip >> /root/Host
+/sbin/pcs resource update $CC cidr_netmask=$subnet
+echo updated CC on $subnet >> /root/Host
+/sbin/pcs resource restart $CC
+#/sbin/pcs resource debug-stop $CC
+#/sbin/pcs resource debug-start $CC
+echo restarted $subnet >> /root/Host
 /sbin/ip addr del ${oldip}/$oldsubnet dev $dev
+echo deleted $oldip on $oldsubnet for $dev >> /root/Host
 oldhostn=`cat /TopStordata/hostname`
-/pace/keysend.sh
 echo $hostn > /TopStordata/hostname
 #sed -i "s/$oldhostn/$hostn/g" $runningpools
 sed -i "/$hostname/s/\w*\$//" $runningpools
 sed -i "/$hostname/s/\$/$hostn/" $runningpools
-/pace/keysend.sh
+echo sed $hostname for $hostn on $runningpools >> /root/Host
+echo run keysend
   /TopStor/logmsg.py HostManual1003 info $userreq $hostn ${hostip}'/'${subnet} $hostrout $hostdns
+echo logging all is good >> /root/Host
 fi
-/pace/keysend.sh
