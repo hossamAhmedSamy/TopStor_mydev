@@ -5,9 +5,12 @@ myhost=socket.gethostname()
 cmdline='/sbin/zpool status'
 result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
 y=str(result)[2:][:-3].replace('\\t','').split('\\n')
-with open("tmp") as f:
- y=f.read()
-y=y.split('\n')
+#with open("tmp") as f:
+# y=f.read()
+#y=y.split('\n')
+with open("zfslist.txt") as f:
+ zfslist=f.read()
+zfslist2=zfslist.split('\n')
 cmdline='/bin/lsscsi -is'
 result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
 lsscsi=[x for x in str(result)[2:][:-3].replace('\\t','').split('\\n') if 'LIO' in x ]
@@ -23,6 +26,7 @@ for a in y:
  b=a.split()
  if "pdhc" in a and  'pool' not in a:
   raidlist=[]
+  volumelist=[]
   zdict={}
   cmdline=['/sbin/zfs','list','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
@@ -33,8 +37,19 @@ for a in y:
   cmdline=['/sbin/zfs','get','compressratio','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   zlist2=str(result.stdout)[2:][:-3].split('\\t')
-  zdict={ 'name':b[0], 'status':b[1], 'size':zfslist[2], 'alloc': zlist[2], 'empty': zlist[3], 'dedup': zlist[7], 'compressratio': zlist2[2], 'raidlist': raidlist }
+  zdict={ 'name':b[0], 'status':b[1], 'size':zfslist[2], 'alloc': zlist[2], 'empty': zlist[3], 'dedup': zlist[7], 'compressratio': zlist2[2], 'raidlist': raidlist ,'volumes':volumelist}
   zpool.append(zdict)
+  for vol in zfslist2:
+   if b[0]+'/' in vol and '@' not in vol and b[0] in vol:
+    volume=vol.split()
+    snaplist=[]
+    zdict={'name':volume[0], 'pool': b[0], 'host':myhost, 'snapshots':snaplist}
+    volumelist.append(zdict)
+   elif '@' in vol and b[0] in vol:
+    snapshot=vol.split()
+    zdict={'name':snapshot[0], 'volume':volume[0], 'pool': b[0], 'host':myhost}
+    snaplist.append(zdict)
+    
  elif any(raid in a for raid in raidtypes):
   spaces=len(a.split(a.split()[0])[0])
   disklist=[]
@@ -84,3 +99,4 @@ if len(freepool) > 0:
   disklist.append(zdict)
 print(zpool)
 put('hosts/'+myhost+'/current',str(zpool))
+#put('hosts/dhcp31481/current',str(zpool))
