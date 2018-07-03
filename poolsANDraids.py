@@ -1,6 +1,7 @@
 #!/bin/python3.6
-import subprocess
+import subprocess, socket
 from etcdput import etcdput as put
+myhost=socket.gethostname()
 cmdline='/sbin/zpool status'
 result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
 y=str(result)[2:][:-3].replace('\\t','').split('\\n')
@@ -15,6 +16,9 @@ raidtypes=['mirror','raidz','stripe']
 raid2=['log','cache','spare']
 zpool=[]
 stripecount=0
+spaces=-2
+raidlist=[]
+disklist=[]
 for a in y:
  b=a.split()
  if "pdhc" in a and  'pool' not in a:
@@ -45,19 +49,19 @@ for a in y:
    diskid='-1'
    host='-1'
    size='-1' 
-   if  len(a.split('scsi')[0]) < (spaces+2) or len(raidlist) < 1 :
+   if  len(a.split('scsi')[0]) < (spaces+2) or (len(raidlist) < 1 and len(zpool)> 0):
     print(spaces,len(a.split('scsi')[0]))
     disklist=[]
     zdict={ 'name':'stripe-'+str(stripecount), 'status':'NA','disklist':disklist }
     raidlist.append(zdict)
     stripecount+=1
-    
    for lss in lsscsi:
     z=lss.split()
     if z[6] in b[0]:
      diskid=lsscsi.index(lss)
      host=z[3].split('-')[1]
      size=z[7]
+     print('diskid',diskid,z[6],b[0])
      freepool.remove(lss)
      break
    zdict={'name':b[0], 'status':b[1],'id': str(diskid), 'host':host, 'size':size}
@@ -76,7 +80,7 @@ if len(freepool) > 0:
   diskid=lsscsi.index(lss)
   host=z[3].split('-')[1]
   size=z[7]
-  zdict={'name':z[6], 'status':'free','id': str(diskid), 'host':host, 'size':size}
+  zdict={'name':'scsi-'+z[6], 'status':'free','id': str(diskid), 'host':host, 'size':size}
   disklist.append(zdict)
 print(zpool)
-put('myhost/current',str(zpool))
+put('hosts/'+myhost+'/current',str(zpool))
