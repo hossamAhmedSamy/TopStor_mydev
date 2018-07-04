@@ -28,7 +28,7 @@ for a in y:
   raidlist=[]
   volumelist=[]
   zdict={}
-  cmdline=['/sbin/zfs','list','-H']
+  cmdline=['/sbin/zfs','list','-t','snapshot,filesystem','-o','name,creation,used,quota,usedbysnapshots,refcompressratio,prot:kind','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   zfslist=str(result.stdout)[2:][:-3].split('\\t')
   cmdline=['/sbin/zpool','list','-H']
@@ -37,17 +37,19 @@ for a in y:
   cmdline=['/sbin/zfs','get','compressratio','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   zlist2=str(result.stdout)[2:][:-3].split('\\t')
-  zdict={ 'name':b[0], 'status':b[1], 'size':zfslist[2], 'alloc': zlist[2], 'empty': zlist[3], 'dedup': zlist[7], 'compressratio': zlist2[2], 'raidlist': raidlist ,'volumes':volumelist}
+  zdict={ 'name':b[0], 'status':b[1], 'size':str(zfslist[2]), 'alloc': str(zlist[2]), 'empty': zlist[3], 'dedup': zlist[7], 'compressratio': zlist2[2], 'raidlist': raidlist ,'volumes':volumelist}
   zpool.append(zdict)
   for vol in zfslist2:
    if b[0]+'/' in vol and '@' not in vol and b[0] in vol:
     volume=vol.split()
+    volname=volume[0].split('/')[1]
     snaplist=[]
-    zdict={'name':volume[0], 'pool': b[0], 'host':myhost, 'snapshots':snaplist}
+    zdict={'fullname':volume[0],'name':volname, 'pool': b[0], 'host':myhost, 'creation':' '.join(volume[1:4]+volume[5:6]),'time':volume[4], 'used':volume[6], 'quota':volume[7], 'usedbysnapshots':volume[8], 'refcompressratio':volume[9], 'prot':volume[10],'snapshots':snaplist}
     volumelist.append(zdict)
    elif '@' in vol and b[0] in vol:
     snapshot=vol.split()
-    zdict={'name':snapshot[0], 'volume':volume[0], 'pool': b[0], 'host':myhost}
+    snapname=snapshot[0].split('@')[1]
+    zdict={'fullname':snapshot[0],'name':snapname, 'volume':volname, 'pool': b[0], 'host':myhost, 'creation':' '.join(snapshot[1:4]+volume[5:6]), 'time':snapshot[4], 'used':snapshot[6], 'quota':snapshot[7], 'usedbysnapshots':snapshot[8], 'refcompressratio':snapshot[9], 'prot':snapshot[10]}
     snaplist.append(zdict)
     
  elif any(raid in a for raid in raidtypes):
@@ -85,7 +87,7 @@ for a in y:
    zdict={'name':'na','status':a}
 if len(freepool) > 0:
  raidlist=[]
- zdict={ 'name':'free', 'status':'free', 'size':'0', 'alloc': '0', 'empty': '0', 'dedup': '0', 'compressratio': '0', 'raidlist': raidlist }
+ zdict={ 'name':'free', 'status':'free', 'size':'0', 'alloc': '0', 'empty': '0', 'dedup': '0', 'compressratio': '0', 'raidlist': raidlist, 'volumes':[]}
  zpool.append(zdict)
  disklist=[]
  zdict={ 'name':'free', 'status':'free','disklist':disklist }
