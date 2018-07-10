@@ -12,8 +12,8 @@ name=`echo $@ | awk '{print $2}'`;
 pDG=`echo $@ | awk '{print $1}'`;
 quota=`echo $@ | awk '{print $3}'`;
 userreq=` echo $@ | awk '{print $4}'`;
-DG=`echo $pDG | awk -F_ '{print $2}'`;
-hostnam=`echo $pDG | awk -F_ '{print $1}'`;
+DG=`echo $pDG `;
+hostnam=`echo $pDG`;
 #sshost=`cat $runningpools | grep $hostnam | awk '{print $1}'`;
 sshost=`echo $pDG | awk -F_ '{print $1}'`;
 

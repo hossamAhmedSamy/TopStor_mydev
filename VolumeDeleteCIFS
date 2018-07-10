@@ -11,20 +11,18 @@ volname=`echo $@ | awk '{print $2}'`;
 pDG=`echo $@ | awk '{print $1}'`;
 pro=`echo $@ | awk '{print $3}'`;
 userreq=` echo $@ | awk '{print $4}'`;
-DG=`echo $pDG | awk -F_ '{print $2}'`;
-hostnam=`echo $pDG | awk -F_ '{print $1}'`;
-sshost=`echo $pDG | awk -F_ '{print $1}'`;
-#sshost=`cat $runningpools | grep $hostnam | awk '{print $1}'`;
+DG=`echo $pDG `;
+hostnam=`echo $pDG `;
 txtres='/TopStordata/'`basename $0`$userreq
 rm -rf $txtres &>/dev/null
-echo CIFS1005:$hostnam/$DG/$volname > $web;
+echo CIFS1005:$hostnam/$volname > $web;
 privilege=$pro;
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
-  /TopStor/logmsg.py NFS1000 info $userreq $hostnam/$DG/$volname
-ssh $sshost " cd /TopStor &&
- /sbin/zfs destroy -rf $DG/$volname"  &> $txtres
+  /TopStor/logmsg.py NFS1000 info $userreq $hostnam/$volname
+cd /TopStor
+/sbin/zfs destroy -rf $volname  &> $txtres
 if [ $? -ne 0  ]; then
   /TopStor/logmsg.py NFS1001 error $userreq $hostnam/$DG/$volname
   exit

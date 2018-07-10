@@ -5,21 +5,23 @@ from etcdget import etcdget as get
 from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost
-def send(*args):
+def send(*bargs):
+ if(len(bargs) < 3):
+  args=bargs[0].split()
+ else:
+  args=bargs
  print(args)
  print(args[0])
  pool=args[0]
- pool=str(pool).split()[0].split('_')[1]
+ pool=str(pool)
  z=[]
- with open('/root/DGsetpool','w') as f:
+ with open('/root/VolumeCreate','w') as f:
   f.write('pool='+pool+'\n')
- owners=get('run',pool)
- owners=[x for x in owners if 'name' in str(x) ]
- owner=owners[0][0].split('/')[1]
- with open('/root/DGsetpool','a') as f:
+ owner=args[-1]
+ with open('/root/VolumeCreate','a') as f:
   f.write('owner='+owner+'\n')
  myhost=hostname()
- with open('/root/DGsetpool','a') as f:
+ with open('/root/VolumeCreate','a') as f:
   f.write('myhost='+myhost+'\n')
  ownerip=get('leader',owner)
  if ownerip[0]== -1:
@@ -27,10 +29,10 @@ def send(*args):
   if ownerip[0]== -1:
    return 3
  z=['/TopStor/pump.sh','VolumeCreateCIFS']
- for arg in args:
+ for arg in args[:-1]:
   z.append(arg)
- msg={'req': 'DGsetPool', 'reply':z}
- with open('/root/DGsetpool','a') as f:
+ msg={'req': 'VolumeCreate', 'reply':z}
+ with open('/root/VolumeCreate','a') as f:
   f.write('myhost='+ownerip[0][1]+' '+myhost+' '+str(z)+'\n')
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
  return 1

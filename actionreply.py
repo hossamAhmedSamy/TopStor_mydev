@@ -73,6 +73,16 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received DGsetPool from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if VolumeCreate ###############
+ elif r["req"]=='VolumeCreate':  
+  with open('/root/recv','a') as f:
+   f.write('received VolumeCreate from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if VolumeDelete ##############
+ elif r["req"]=='VolumeDelete':  
+  with open('/root/recv','a') as f:
+   f.write('received VolumeCreate from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
  
 
 
