@@ -1,304 +1,105 @@
 #!/bin/python3.6
-import traceback, hashlib
-import subprocess
-from ast import literal_eval as mtuple
-from etcddel import etcddel as etcddel
-from etcdput import etcdput as put 
-import socket
-count=-1
-diskc=0
-msg='start new putzpool '
-with open('/root/putzpooltmp','a') as f:
- f.write(str(msg)+"\n")
-myhostorg=socket.gethostname()
-myhost='run/'+myhostorg
-mod=0
-msg='getting lsscsi '
-with open('/root/putzpooltmp','a') as f:
- f.write(str(msg)+"\n")
-cmdline=['/pace/etcdget.py','known','--prefix']
-known=str(subprocess.run(cmdline,stdout=subprocess.PIPE).stdout)
-#cmdline=['/pace/etcdget.py','possible','--prefix']
-#possible=str(subprocess.run(cmdline,stdout=subprocess.PIPE).stdout)
-cmdline=['lsscsi','-i','--size']
-result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-lsscsi=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' in x]
-ata=[x for x in str(result.stdout)[2:][:-3].split('\\n') if 'LIO' not in x]
-mlsscsi=hashlib.md5()
-mlsscsi.update(str(lsscsi).encode('utf-8'))
-mlsscsi=mlsscsi.hexdigest()
-cmdline=['/pace/etcdget.py','md'+myhost+'/lsscsi']
-modlsscsi=str(subprocess.run(cmdline,stdout=subprocess.PIPE).stdout)
-if mlsscsi not in modlsscsi:
- mod=1
- msg='lsscsi changed '
- with open('/root/putzpooltmp','a') as f:
-  f.write(str(msg)+"\n")
-msg='getting zpool status \n'
-with open('/root/putzpooltmp','a') as f:
- f.write(str(msg)+"\n")
-cmdline=['/sbin/zpool','status']
-zpoolres=subprocess.run(cmdline,stdout=subprocess.PIPE)
-mzpool=hashlib.md5()
-mzpool.update(str(zpoolres.stdout).encode('utf-8'))
-mzpool=mzpool.hexdigest()
-cmdline=['/pace/etcdget.py','md'+myhost+'/zpool']
-modzpool=str(subprocess.run(cmdline,stdout=subprocess.PIPE).stdout)
-if mzpool not in modzpool:
- mod=1
- msg='zpool changed '
- with open('/root/putzpooltmp','a') as f:
-  f.write(str(msg)+"\n")
-
-msg='getting users '
-with open('/root/putzpooltmp','a') as f:
- f.write(str(msg)+"\n")
-userf=''
-with open('/etc/passwd','r') as f:
- line=f.readline()
- if 'TopStor' in line:
-  userf+=line
-muser=hashlib.md5()
-muser.update(str(userf).encode('utf-8'))
-muser=muser.hexdigest()
-cmdline=['/pace/etcdget.py','md'+myhost+'/userhash']
-moduser=str(subprocess.run(cmdline,stdout=subprocess.PIPE).stdout)
-if muser not in moduser or '-1' in moduser:
- mod=1
- msg='user changed '
- with open('/root/putzpooltmp','a') as f:
-  f.write(str(msg)+"\n")
-if mod==0:
- msg='nothing changed exiting '
- with open('/root/putzpooltmp','a') as f:
-  f.write(str(msg)+"\n")
- exit() 
-msg='deleting old putzpool '
-with open('/root/putzpooltmp','a') as f:
- f.write(str(msg)+"\n")
-#cmdline=['/pace/etcddel.py','run','stub']
-#subprocess.run(cmdline,stdout=subprocess.PIPE)
-etcddel('run','stub')
-etcddel('run','--prefix')
-etcddel('md','--prefix')
-msg='deleted old putzpool \n'
-#with open('/root/putzpooltmp','a') as f:
-# f.write(str(msg)+"\n")
-#cmdline=['sleep','4']
-#subprocess.run(cmdline,stdout=subprocess.PIPE)
-msg='adding users '
-with open('/root/putzpooltmp','a') as f:
- f.write(str(msg)+"\n")
-with open('/etc/passwd') as f:
- for fline in f:
-  if 'TopStor' in fline:
-   y=fline.split(":")
-   put(myhost+'/user/'+y[0],y[2])
-msg='filtering lsscsi '
-with open('/root/putzpooltmp','a') as f:
- f.write(str(msg)+"\n")
-pscsi=lsscsi
-for x in pscsi:
- for y in pscsi:
-  if (x != y):
-   if(x.split()[3] == y.split()[3]):
-    if (len(x.split()[6]) > 3):
-     lsscsi.remove(y)
-    else:
-     lsscsi.remove(x)
-msg='processing zpool results \n'
-with open('/root/putzpooltmp','a') as f:
- f.write(str(msg)+"\n")
-try:
- zpool=str(zpoolres.stdout)[2:][:-3].split('\\n')
- with open('/root/putzpooltmp','a') as f:
-  f.write(str(zpool))
- z=[]
- if zpool==['']:
-  msg='no pools \n'
-  with open('/root/putzpooltmp','a') as f:
-   f.write(str(msg)+"\n")
-  zpool=[':nopool',':nopool',':nopool','nopool','nopool','nopool','nopool','nopool']
- else:
-  poolname=zpool[0].split(':')[1].replace(' ','')
-  msg='found pool '+poolname+'\n'
-  with open('/root/putzpooltmp','a') as f:
-   f.write(str(msg)+"\n")
-  z.append((myhost+'/pool/'+poolname+'/name',poolname))
-  z.append((myhost+'/pool/'+poolname+'/state',zpool[1].split(':')[1].replace(' ','')))
-  z.append((myhost+'/pool/'+poolname+'/scan',zpool[2].split(':')[1]))
-  msg='pool appended z status and now listing'
-  with open('/root/putzpooltmp','a') as f:
-   f.write(str(msg)+"\n")
+import subprocess, socket
+from etcdput import etcdput as put
+myhost=socket.gethostname()
+cmdline='/sbin/zpool status'
+result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+y=str(result)[2:][:-3].replace('\\t','').split('\\n')
+#with open("tmp") as f:
+# y=f.read()
+#y=y.split('\n')
+#with open("zfslist.txt") as f:
+# zfslist=f.read()
+#zfslist2=zfslist.split('\n')
+cmdline='/bin/lsscsi -is'
+result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+lsscsi=[x for x in str(result)[2:][:-3].replace('\\t','').split('\\n') if 'LIO' in x ]
+freepool=[x for x in str(result)[2:][:-3].replace('\\t','').split('\\n') if 'LIO' in x ]
+raidtypes=['mirror','raidz','stripe']
+raid2=['log','cache','spare']
+zpool=[]
+stripecount=0
+spaces=-2
+raidlist=[]
+disklist=[]
+for a in y:
+ b=a.split()
+ if "pdhc" in a and  'pool' not in a:
+  raidlist=[]
+  volumelist=[]
+  zdict={}
   cmdline=['/sbin/zfs','list','-t','snapshot,filesystem','-o','name,creation,used,quota,usedbysnapshots,refcompressratio,prot:kind','-H']
-  vollist=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  vollist=[x.split('\\t') for x in str(vollist.stdout)[2:][:-3].split('\\n')]
-  snap=[]
-  for y in vollist:
-   try:
-    msg='looping on vollist to record its snapshots'
-    with open('/root/putzpooltmp','a') as f:
-      f.write(str(msg)+"\n")
-    names=y[0].split('/')
-    snap=y[0].split('@')[1]
-    thisvol='/pool/'+names[0]+'/vol/'+names[1].split('@')[0]+'/snapshot/'+names[1].split('@')[1]
-    thisvolvalue=y[1]+'/'+y[2]+'/'+y[5]
-    print(thisvol, thisvolvalue)
-    print('is a snapshot')
-   except:
-    try:
-     msg='this vol has no snaps'
-     with open('/root/putzpooltmp','a') as f:
-      f.write(str(msg)+"\n")
-     names=y[0].split('/')
-     thisvol='/pool/'+names[0]+'/vol/'+names[1]+'/'+y[6]
-     thisvolvalue=y[3]+'/'+y[2]+'/'+y[4]+'/'+y[5]
-     print('is a vol')
-    except:
-     msg='no volume found'
-     with open('/root/putzpooltmp','a') as f:
-      f.write(str(msg)+"\n")
-     continue 
-     #thisvol='/pool/'
-     #thisvolvalue=y[3]+'/'+y[2]+'/'+y[4]+'/'+y[5]
-     #print('is a pool')
-   z.append((myhost+thisvol,thisvolvalue))
-  msg='recording pool props '+poolname
-  with open('/root/putzpooltmp','a') as f:
-   f.write(str(msg)+"\n")
-  cmdline=['/sbin/zfs','list','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  zfslist=str(result.stdout)[2:][:-3].split('\\t')
+  zfslist=str(result.stdout)[2:][:-3].replace('\\t',' ').split('\\n')
   cmdline=['/sbin/zpool','list','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   zlist=str(result.stdout)[2:][:-3].split('\\t')
-  z.append((myhost+'/pool/'+poolname+'/size',zfslist[2]))
-  z.append((myhost+'/pool/'+poolname+'/alloc',zlist[2]))
-  z.append((myhost+'/pool/'+poolname+'/empty',zlist[3]))
-  z.append((myhost+'/pool/'+poolname+'/dedup',zlist[7]))
   cmdline=['/sbin/zfs','get','compressratio','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  zlist=str(result.stdout)[2:][:-3].split('\\t')
-  z.append((myhost+'/pool/'+poolname+'/compressratio',zlist[2]))
-  raid='stripe'
-  count=0
-  diskc=0
-  tmpc=6
-########### recroding raids and disks for every pool ##########
-  raidc=0  
-  for c in zpool[7:-1]:
-   if c.replace(' ','')=='':
-    continue
-   if 'scsi' not in c:
-    count+=1
-    cc=c.split()
-    cc.append(cc[0].replace('\\t','').replace('\\',''))
-    cc.append('ONLINE/AVAIL')
-    raid=cc[1]
-    raidstat=cc[2]
-    msg='recording pool raidtype '+raid
-    with open('/root/putzpooltmp','a') as f:
-     f.write(str(msg)+"\n")
-    z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/type',raid))
-    z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/status',raidstat))
-    print(str(count),raid,raidstat)
-    diskc=0
-   else:
-    isstripe=len(c.split('scsi')[0])
-    msg='recording pool as stripe '
-    with open('/root/putzpooltmp','a') as f:
-     f.write(str(msg)+"\n")
-    if isstripe < 4:
-     count+=1
-     raid='stripe'
-     z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/type','stripe-'+str(raidc)))
-     raidstat=zpool[1].split(':')[1].replace(' ','')
-     raidc+=1
-     z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/status',raidstat))
-    msg='looping on lsscsi to add to get every diskc '
-    with open('/root/putzpooltmp','a') as f:
-     f.write(str(msg)+"\n")
-    print('in c=',c.split()[1].split('-')[1])
-    if c.split()[1].split('-')[1] not in str(lsscsi):
-     msg='found diskc in zpool and is not in lsscsi'+str(diskc)
-     with open('/root/putzpooltmp','a') as f:
-      f.write(str(msg)+"\n")
-     diskc=-1
-     fromhost='nohost'
-     size='-'
-     status=c.split()[2]
-    else:
-     msg='found diskc in zpool and lsscsi'+str(diskc)
-     with open('/root/putzpooltmp','a') as f:
-      f.write(str(msg)+"\n")
-     diskc=[i for i, x in enumerate(lsscsi) if c.split()[1].split('-')[1] in x ]
-     diskc=diskc[0] 
-     ll=lsscsi[diskc].split()
-     fromhost=ll[3]
-     size=ll[7]
-     status=c.split()[2]
-    z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/disk/'+str(diskc)+'/uuid',c.split()[1]))
-    z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/disk/'+str(diskc)+'/fromhost',fromhost))
-    z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/disk/'+str(diskc)+'/size',size))
-    z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/disk/'+str(diskc)+'/status',status))
- for l in lsscsi:
-  ll=l.split()
-  if ll[6] not in str(zpool):
-   diskc=lsscsi.index(l)
-   msg='found free disk '+str(diskc)+' '+l[6]
-   with open('/root/putzpooltmp','a') as f:
-    f.write(str(msg)+"\n")
-   status='free'
-   ll=l.split()
-   uuid='scsi-'+ll[6]
-   msg='adding free disk to etcd'+str(diskc)+' '+ll[6]
-   with open('/root/putzpooltmp','a') as f:
-    f.write(str(msg)+"\n")
-   if ll[6]=='-':
-    status='FAULT'
-   put(myhost+'/free/disk/'+str(diskc)+'/uuid',uuid)
-   put(myhost+'/free/disk/'+str(diskc)+'/fromhost',ll[3])
-   put(myhost+'/free/disk/'+str(diskc)+'/size',ll[7])
-   put(myhost+'/free/disk/'+str(diskc)+'/status',status)
- if count==0 and diskc > 0:
-  z.append((myhost+'/pool/'+poolname+'/raid/'+str(count)+'/type',raid))
- msg='adding z in the etcd'
- with open('/root/putzpooltmp','a') as f:
-  f.write(str(msg)+"\n")
- for c in z:
-  put(c[0],c[1])
- msg='checking crontab'
- with open('/root/putzpooltmp','a') as f:
-  f.write(str(msg)+"\n")
- cmdline=['crontab','-l']
- crons=subprocess.run(cmdline,stdout=subprocess.PIPE)
- autosnap=[x for x in str(crons.stdout)[2:][:-3].split('\\n') if 'Snapshotnowhost' in x]
- h=[]
- msg='adding crons into etcd'+str(autosnap)
- with open('/root/putzpooltmp','a') as f:
-  f.write(str(msg)+"\n")
- for x in autosnap:
-  y=x.split()
-  put(myhost+'/pool/'+poolname+'/snapperiod/'+y[-1],y[-2].split('.')[0]+'/'+y[-3].split('/')[-1]+'/'+y[-2].split('.')[1]+'/'+y[-2].split('.')[2]+'/'+y[-2].split('.')[3]+'/'+y[-2].split('.')[4]+'/'+y[0].replace('/','::')+'/'+y[1].replace('/','::')+'/'+y[2].replace('/','::')+'/'+y[3].replace('/','::')+'/'+y[4].replace('/','::'))
-except Exception as e:
- traceback.print_exc()
- msg='severe exception'+str(traceback.print_exc())
- with open('/root/putzpooltmp','a') as f:
-  f.write(str(msg)+"\n")
- exit() 
-
-msg='adding stub'
-with open('/root/putzpooltmp','a') as f:
- f.write(str(msg)+"\n")
-put(myhost+'/stub/stub/stub/stub','stub')
-cmdline=['/pace/verdef.sh']
-result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-vers=str(result.stdout)[2:][:-3]
-curver=vers.split()[0]
-put(myhost+'/hostfw/'+curver,vers.replace(" ","/"))
-msg='exiting after verdef and stub'
-with open('/root/putzpooltmp','a') as f:
- f.write(str(msg)+"\n")
-put('md'+myhost+'/lsscsi',mlsscsi)
-put('md'+myhost+'/zpool',mzpool)
-put('md'+myhost+'/userhash',muser)
+  zlist2=str(result.stdout)[2:][:-3].split('\\t')
+  zdict={ 'name':b[0], 'status':b[1], 'size':str(zlist[1]), 'alloc': str(zlist[2]), 'empty': zlist[3], 'dedup': zlist[7], 'compressratio': zlist2[2], 'raidlist': raidlist ,'volumes':volumelist}
+  zpool.append(zdict)
+ # for vol in zfslist2:
+  for vol in zfslist:
+   if b[0]+'/' in vol and '@' not in vol and b[0] in vol:
+    volume=vol.split()
+    volname=volume[0].split('/')[1]
+    snaplist=[]
+    zdict={'fullname':volume[0],'name':volname, 'pool': b[0], 'host':myhost, 'creation':' '.join(volume[1:4]+volume[5:6]),'time':volume[4], 'used':volume[6], 'quota':volume[7], 'usedbysnapshots':volume[8], 'refcompressratio':volume[9], 'prot':volume[10],'snapshots':snaplist}
+    volumelist.append(zdict)
+   elif '@' in vol and b[0] in vol:
+    snapshot=vol.split()
+    snapname=snapshot[0].split('@')[1]
+    zdict={'fullname':snapshot[0],'name':snapname, 'volume':volname, 'pool': b[0], 'host':myhost, 'creation':' '.join(snapshot[1:4]+volume[5:6]), 'time':snapshot[4], 'used':snapshot[6], 'quota':snapshot[7], 'usedbysnapshots':snapshot[8], 'refcompressratio':snapshot[9], 'prot':snapshot[10]}
+    snaplist.append(zdict)
+    
+ elif any(raid in a for raid in raidtypes):
+  spaces=len(a.split(a.split()[0])[0])
+  disklist=[]
+  zdict={ 'name':b[0], 'status':b[1],'disklist':disklist }
+  raidlist.append(zdict)
+ elif any(raid in a for raid in raid2):
+  spaces=len(a.split(a.split()[0])[0])
+  disklist=[]
+  zdict={ 'name':b[0], 'status':'NA','disklist':disklist }
+  raidlist.append(zdict)
+ elif 'scsi' in a:
+   diskid='-1'
+   host='-1'
+   size='-1' 
+   if  len(a.split('scsi')[0]) < (spaces+2) or (len(raidlist) < 1 and len(zpool)> 0):
+    print(spaces,len(a.split('scsi')[0]))
+    disklist=[]
+    zdict={ 'name':'stripe-'+str(stripecount), 'status':'NA','disklist':disklist }
+    raidlist.append(zdict)
+    stripecount+=1
+   for lss in lsscsi:
+    z=lss.split()
+    if z[6] in b[0]:
+     diskid=lsscsi.index(lss)
+     host=z[3].split('-')[1]
+     size=z[7]
+     print('diskid',diskid,z[6],b[0])
+     freepool.remove(lss)
+     break
+   zdict={'name':b[0], 'status':b[1],'id': str(diskid), 'host':host, 'size':size}
+   disklist.append(zdict)
+ else:
+   zdict={'name':'na','status':a}
+if len(freepool) > 0:
+ raidlist=[]
+ zdict={ 'name':'free', 'status':'free', 'size':'0', 'alloc': '0', 'empty': '0', 'dedup': '0', 'compressratio': '0', 'raidlist': raidlist, 'volumes':[]}
+ zpool.append(zdict)
+ disklist=[]
+ zdict={ 'name':'free', 'status':'free','disklist':disklist }
+ raidlist.append(zdict)
+ for lss in freepool:
+  z=lss.split()
+  diskid=lsscsi.index(lss)
+  host=z[3].split('-')[1]
+  size=z[7]
+  zdict={'name':'scsi-'+z[6], 'status':'free','id': str(diskid), 'host':host, 'size':size}
+  disklist.append(zdict)
+print(zpool)
+put('hosts/'+myhost+'/current',str(zpool))
+#put('hosts/dhcp31481/current',str(zpool))

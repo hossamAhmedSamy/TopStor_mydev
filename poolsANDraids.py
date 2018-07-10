@@ -8,9 +8,9 @@ y=str(result)[2:][:-3].replace('\\t','').split('\\n')
 #with open("tmp") as f:
 # y=f.read()
 #y=y.split('\n')
-with open("zfslist.txt") as f:
- zfslist=f.read()
-zfslist2=zfslist.split('\n')
+#with open("zfslist.txt") as f:
+# zfslist=f.read()
+#zfslist2=zfslist.split('\n')
 cmdline='/bin/lsscsi -is'
 result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
 lsscsi=[x for x in str(result)[2:][:-3].replace('\\t','').split('\\n') if 'LIO' in x ]
@@ -39,7 +39,8 @@ for a in y:
   zlist2=str(result.stdout)[2:][:-3].split('\\t')
   zdict={ 'name':b[0], 'status':b[1], 'size':str(zfslist[2]), 'alloc': str(zlist[2]), 'empty': zlist[3], 'dedup': zlist[7], 'compressratio': zlist2[2], 'raidlist': raidlist ,'volumes':volumelist}
   zpool.append(zdict)
-  for vol in zfslist2:
+ # for vol in zfslist2:
+  for vol in zfslist:
    if b[0]+'/' in vol and '@' not in vol and b[0] in vol:
     volume=vol.split()
     volname=volume[0].split('/')[1]
