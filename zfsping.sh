@@ -140,7 +140,7 @@ do
      sleep 1
      /pace/sendhost.py $leaderip 'cifs' 'recvreq' $myhost
      /pace/sendhost.py $leaderip 'logall' 'recvreq' $myhost
-     /pace/etcddel.py md --prefix
+     /pace/putzpool.py
      isknown=$((isknown+1))
     fi
     if [[ $isknown -le 10 ]];
@@ -149,8 +149,9 @@ do
     fi
     if [[ $isknown -eq 3 ]];
     then
-     /pace/etcddel.py md --prefix
+     /pace/putzpool.py
      /TopStor/logmsg.py Partsu04 info system $myhost $myip
+
    # msg="{'req': 'msg', 'reply': ['/TopStor/logmsg.py','Partsu04','info','system','$myhost','$myip']}"
     #/pace/sendhost.py $leaderip "$msg" 'recvreply' $myhost
     fi
@@ -319,7 +320,7 @@ do
       echo replacing offline/faulty with spare in the pool>> /root/zfspingtmp
       echo /sbin/zpool replace $pool $faildisk $sparedisk $hostnam 2>/dev/null
       /sbin/zpool replace $pool $faildisk $sparedisk 2>/dev/null
-      /pace/etcddel.py md --prefix 2>/dev/null
+      /pace/putzpool.py 2>/dev/null
       /TopStor/logmsg.py Disu2 info system $diskidf $diskidf $hostnam
       /TopStor/logmsg.py Dist3 info system $diskidf $hostnam
       echo detaching OFFLINE disk with spare in the pool>> /root/zfspingtmp
@@ -331,16 +332,16 @@ do
       echo detaching OFFLINE disk without spare in the pool>> /root/zfspingtmp
      # /sbin/zpool detach $pool $faildisk &>/dev/null
      # /sbin/zpool remove $pool $faildisk &>/dev/null
-      /pace/etcddel.py md --prefix 2>/dev/null
+      /pace/putzpool.py  2>/dev/null
       /TopStor/logmsg.py Disu3 info system $diskidf $hostnam
      fi
-     /pace/etcddel.py md --prefix 2>/dev/null
+     /pace/putzpool.py 2>/dev/null
      diskstatus=`echo $diskpath | awk -F'/' '{OFS=FS;$NF=""; print}' `'status'
      diskfs=` /pace/diskinfo.py run getvalue $diskstatus `
      echo $diskfs | grep ONLINE
      if [ $? -eq 0 ];
      then
-      /pace/etcddel.py md --prefix 2>/dev/null
+      /pace/putzpool.py --prefix 2>/dev/null
      fi
     fi
    fi
@@ -349,7 +350,7 @@ do
     faildisk=`/sbin/zpool status $pool 2>/dev/null | grep "was /dev" | awk -F'-id/' '{print $2}' | awk -F'-part' '{print $1}'`;
    # /sbin/zpool detach $pool $faildisk &>/dev/null;
    # /sbin/zpool remove $pool $faildisk &>/dev/null;
-     /pace/etcddel.py md --prefix 2>/dev/null
+     /pace/putzpool.py 2>/dev/null
     cachestate=1;
    fi 
    /sbin/zpool status $pool 2>/dev/null| grep "was /dev/s" ;
@@ -357,7 +358,7 @@ do
     faildisk=`/sbin/zpool status $pool 2>/dev/null| grep "was /dev/s" | awk -F'was ' '{print $2}'`;
     #/sbin/zpool detach $pool $faildisk &>/dev/null;
     #/sbin/zpool remove $pool $faildisk &>/dev/null;
-     /pace/etcddel.py md --prefix 2>/dev/null
+     /pace/putzpool.py 2>/dev/null
     cachestate=1;
    fi 
    /sbin/zpool status $pool 2>/dev/null| grep UNAVAIL &>/dev/null
@@ -365,7 +366,7 @@ do
     faildisk=`/sbin/zpool status $pool 2>/dev/null| grep UNAVAIL | awk '{print $1}'`;
     #/sbin/zpool detach $pool $faildisk &>/dev/null;
     #/sbin/zpool remove $pool $faildisk &>/dev/null;
-     /pace/etcddel.py md --prefix 2>/dev/null
+     /pace/putzpool.py --prefix 2>/dev/null
     cachestate=1;
    fi 
   done
