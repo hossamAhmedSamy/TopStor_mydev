@@ -22,6 +22,6 @@ then
  git commit -am"changing to $realfw" ; git checkout $realfw
  cd $TopStor 
  git commit -am"changing to $realfw" ; git checkout $realfw
-  /pace/etcddel.py md --prefix
+  /pace/putzpool.py 
   /TopStor/logmsg.py Upsu1010 info $userreq $currentfw $realfw
 fi

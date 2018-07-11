@@ -24,6 +24,6 @@ if [[ $err -ge 3 ]]; then
 else
   /TopStor/logmsg.py Unlin1010 info $userreq $username
 fi;
- /pace/etcddel.py md --prefix
+ /pace/putzpool.py 
 fi
 rm txt/${0:2}$userreq.txt

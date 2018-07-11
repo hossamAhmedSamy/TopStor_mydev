@@ -45,7 +45,7 @@ if [[ $err -ge  4  ]]; then
 else 
   /TopStor/logmsg.py NFS1006 info $userreq $name
 fi;
- /pace/etcddel.py md --prefix
+ /pace/putzpool.py 
 fi
 fi
 fi

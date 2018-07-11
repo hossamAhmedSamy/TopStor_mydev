@@ -34,5 +34,5 @@ else
  rm -rf key/${username}fixed
   /TopStor/logmsg.py Unlin1022 info $userreq $username
 fi 
- /pace/etcddel.py md --prefix
+ /pace/putzpool.py 
 fi

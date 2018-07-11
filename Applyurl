@@ -26,7 +26,7 @@ then
   echo thefile=$thefile
   cd $TopStor
   ./GenPatch $thefile admin
-   /pace/etcddel.py md --prefix
+   /pace/putzpool.py 
    /TopStor/logmsg.py Upfe1010 info $userreq
  fi
 fi

@@ -31,4 +31,4 @@ then
  fi;
 fi
   echo $hostnam
-   /pace/etcddel.py md --prefix
+   /pace/putzpool.py 

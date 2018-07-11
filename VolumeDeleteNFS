@@ -34,4 +34,4 @@ else
 fi;
 ./GetPoolVollist
 fi
- /pace/etcddel.py md --prefix
+ /pace/putzpool.py 

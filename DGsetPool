@@ -352,4 +352,4 @@ then
 fi
 rm txt/${0:2}$userreq.txt
 sed -i "/p${nextpool}/c\\" $runningpools
-/pace/etcddel.py md --prefix
+/pace/putzpool.py 

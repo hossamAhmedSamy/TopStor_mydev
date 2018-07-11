@@ -33,6 +33,6 @@ cp /etc/samba/smb.conf /TopStordata/smb.confcurrent;
  ./delblock.sh start${volname}_only stop${volname}_only /TopStordata/CIFSshares.txt  ;
  cp /TopStordata/smb.confcurrent /etc/samba/smb.conf;
  systemctl restart smb
- /pace/etcddel.py md --prefix
+ /pace/putzpool.py 
   /TopStor/logmsg.py NFS1002 info  $userreq $hostnam/$DG/$volname
 fi

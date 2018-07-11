@@ -35,5 +35,5 @@ else
 
 fi;
 ./GetPoolperiodlist 
- /pace/etcddel.py md --prefix
+ /pace/putzpool.py 
 fi

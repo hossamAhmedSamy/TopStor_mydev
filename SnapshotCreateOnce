@@ -27,7 +27,7 @@ if [ $? -ne 0  ]]; then
   /TopStor/logmsg.py Snap1028 error $userreq $hostnam/$DG/$FileS@$name 
 else 
   /TopStor/logmsg.py Snap1030 info $userreq $hostnam/$DG/$FileS@$name 
- /pace/etcddel.py md --prefix
+ /pace/putzpool.py 
 fi;
 fi
 
