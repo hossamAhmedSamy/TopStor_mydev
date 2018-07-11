@@ -1,4 +1,5 @@
 #!/bin/sh
+echo $@ >/root/tmp
 cd /TopStor
 export ETCDCTL_API=3
 web='/var/www/html/des20/Data/NFSstatus.log';
@@ -10,44 +11,39 @@ pDG=`echo $@ | awk '{print $1}'`;
 quota=`echo $@ | awk '{print $3}'`;
 userreq=` echo $@ | awk '{print $4}'`;
 DG=`echo $pDG | awk -F_ '{print $2}'`;
-hostnam=`echo $pDG | awk -F_ '{print $1}'`;
+hostnam=`echo $pDG'{print $1}'`;
 txtres='/TopStordata'`basename $0`'.txt'
 rm -rf $txtres 2>/dev.null
-sshost=`echo $pDG | awk -F_ '{print $1}'`;
 #sshost=`cat $runningpools | grep $hostnam | awk '{print $1}'`;
-echo CIFS1001:$hostnam/$DG/$name > $web;
 privilege="CIFS";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
-oldname=` ssh $sshost /sbin/zfs list | grep -w "$name" `;
+oldname=` /sbin/zfs list | grep -w "$name" `;
 if [ $? -eq 0 ];
 then
-  /TopStor/logmsg.py NFS1003 warning  $userreq $hostnam/$DG/$name
+  /TopStor/logmsg.py NFS1003 warning  $userreq $name
 else
-  /TopStor/logmsg.py NFS1004 info  $userreq $hostnam/$DG/$name
-g=`ssh $sshost cat /etc/exports | grep ${name}_only | wc -c`; 
+  /TopStor/logmsg.py NFS1004 info  $userreq $name
+g=`cat /etc/exports | grep ${name}_only | wc -c`; 
 if [[ $g -ge 4 ]];
 then
-  /TopStor/logmsg.py NFS1003 warning  $userreq $hostnam/$DG/$name
+  /TopStor/logmsg.py NFS1003 warning  $userreq $name
 else
-ssh $sshost " cd /TopStor &&
- /sbin/zfs create -o overlay=on -o acltype=posixacl -o aclinherit=passthrough -o xattr=sa -o atime=off -o redundant_metadata=most -o quota=$quota -o dedup=on -o compression=lz4  $DG/$name 2> $txtres &&
- /sbin/zfs set prot:kind=NFS $DG/$name &&
- chmod 777 /$DG/$name &&
- echo \# start${name}_only >> /etc/exports &&
- echo /$DG/$name \*\(rw,sync,insecure,no_root_squash,no_all_squash\) >> /etc/exports &&
+ cd /TopStor
+ /sbin/zfs create -o overlay=on -o acltype=posixacl -o aclinherit=passthrough -o xattr=sa -o atime=off -o redundant_metadata=most -o quota=$quota -o dedup=on -o compression=lz4  $DG/$name 2> $txtres
+ /sbin/zfs set prot:kind=NFS $DG/$name 
+ chmod 777 /$DG/$name
+ echo \# start${name}_only >> /etc/exports
+ echo /$DG/$name \*\(rw,sync,insecure,no_root_squash,no_all_squash\) >> /etc/exports 
  echo  \# stop${name}_only >> /etc/exports
-"
-scp $sshost:$txtres $txtres
- ssh $sshost systemctl restart nfs-server  > /dev/null 2>> $txtres
+ systemctl restart nfs-server  > /dev/null 2>> $txtres
  cat $txtres | grep -v such >> $txtres 
-datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
 err=`wc -c  $txtres | awk '{print $1}'`;
 if [[ $err -ge  4  ]]; then
-  /TopStor/logmsg.py NFS1005 error  $userreq $hostnam/$DG/$name
+  /TopStor/logmsg.py NFS1005 error  $userreq $name
 else 
-  /TopStor/logmsg.py NFS1006 info $userreq $hostnam/$DG/$name
+  /TopStor/logmsg.py NFS1006 info $userreq $name
 fi;
  /pace/etcddel.py md --prefix
 fi
