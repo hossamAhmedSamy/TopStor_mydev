@@ -2,6 +2,7 @@
 cd /pace
 export ETCDCTL_API=3
 echo $$ > /var/run/zfsping.pid
+failddisks=''
 isknown=0
 isprimary=0
 primtostd=4
@@ -308,7 +309,12 @@ do
      diskpath=` /pace/diskinfo.py run getkey $faildisk `
      diskidf=`echo $diskpath | awk -F'/' '{print $(NF-1)}'`
      /pace/diskinfo.py run getkey $diskpath | awk -F'/' '{print $(NF-1)}'
-     /TopStor/logmsg.py Difa1 error system $diskidf $hostnam
+     echo $failddisks | grep $faildisk
+     if [ $? -ne 0 ];
+     then
+      /TopStor/logmsg.py Difa1 error system $diskidf $hostnam
+     fi
+     failddisks=$failddisks' '$faildisk
      echo checking spare disk in the pool>> /root/zfspingtmp
      sparedisk=`echo "${zpool[@]}" | grep "AVAIL" | awk '{print $1}' | head -1 2>/dev/null`
      if [ ! -z $sparedisk  ]; then
@@ -329,11 +335,11 @@ do
       /TopStor/logmsg.py Disu3 info system $diskidf $hostnam
      else
       echo no spare disk >> /root/zfspingtmp
-      echo detaching OFFLINE disk without spare in the pool>> /root/zfspingtmp
+     # echo detaching OFFLINE disk without spare in the pool>> /root/zfspingtmp
      # /sbin/zpool detach $pool $faildisk &>/dev/null
      # /sbin/zpool remove $pool $faildisk &>/dev/null
-      /pace/putzpool.py  2>/dev/null
-      /TopStor/logmsg.py Disu3 info system $diskidf $hostnam
+     # /pace/putzpool.py  2>/dev/null
+     # /TopStor/logmsg.py Disu3 info system $diskidf $hostnam
      fi
      /pace/putzpool.py 2>/dev/null
      diskstatus=`echo $diskpath | awk -F'/' '{OFS=FS;$NF=""; print}' `'status'
@@ -343,6 +349,8 @@ do
      then
       /pace/putzpool.py --prefix 2>/dev/null
      fi
+    else
+     failddisks=''
     fi
    fi
    /sbin/zpool status $pool 2>/dev/null| grep "was /dev" &>/dev/null
