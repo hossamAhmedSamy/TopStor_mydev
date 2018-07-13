@@ -88,7 +88,7 @@ for a in y:
    zdict={'name':'na','status':a}
 if len(freepool) > 0:
  raidlist=[]
- zdict={ 'name':'free', 'status':'free', 'size':'0', 'alloc': '0', 'empty': '0', 'dedup': '0', 'compressratio': '0', 'raidlist': raidlist, 'volumes':[]}
+ zdict={ 'name':'pree', 'status':'pree', 'size':'0', 'alloc': '0', 'empty': '0', 'dedup': '0', 'compressratio': '0', 'raidlist': raidlist, 'volumes':[]}
  zpool.append(zdict)
  disklist=[]
  zdict={ 'name':'free', 'status':'free','disklist':disklist }
