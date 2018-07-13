@@ -5,7 +5,11 @@ from etcdget import etcdget as get
 from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost
-def send(*args):
+def send(*bargs):
+ if(len(bargs) < 3):
+  args=bargs[0].split()
+ else:
+  args=bargs
  pool=args[0]
  pool=str(pool).split()[-1]
  with open('/root/DGsetpool','w') as f:
@@ -13,12 +17,7 @@ def send(*args):
  z=[]
  with open('/root/DGsetpool','a') as f:
   f.write('pool='+pool+'\n')
- if 'nopool' not in pool:
-  owners=get('run',pool)
-  owners=[x for x in owners if 'name' in str(x) ]
-  owner=owners[0][0].split('/')[1]
- else:
-   owner=args[0].split()[2]
+ owner=args[-1]
  with open('/root/DGsetpool','a') as f:
   f.write('owner='+owner+'\n')
  myhost=hostname()
@@ -30,7 +29,7 @@ def send(*args):
   if ownerip[0]== -1:
    return 3
  z=['/TopStor/pump.sh','DGsetPool']
- for arg in args:
+ for arg in args[:-1]:
   z.append(arg)
  msg={'req': 'DGsetPool', 'reply':z}
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)

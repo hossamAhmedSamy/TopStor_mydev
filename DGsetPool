@@ -60,7 +60,6 @@ then
   fi
  fi 
  if [[ $raid == "attachmirror" ]]; then
-  nextpool=` /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   disk2=` echo $@ | awk '{print $5}'`;
   disk2=`ls /dev/disk/by-id/ | grep -v part | grep $disk2`
   diskn2=` echo $@ | awk '{print $6}'`;
@@ -77,7 +76,6 @@ then
  fi
  if [[ $raid == "delspecial" ]]; then
    /TopStor/logmsg.py DGst9 info $userreq $diskn1 
-  nextpool=` /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   /sbin/zpool remove  ${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
     /TopStor/logmsg.py DGsu9 info $userreq $diskn1 
@@ -88,7 +86,6 @@ then
  if [[ $raid == "addcache" ]]; then
    /TopStor/logmsg.py DGst10 info $userreq $diskn1 
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
-  nextpool=` /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   echo /sbin/zpool add -f ${nextpool} cache ${disk1} 
   /sbin/zpool add -f ${nextpool} cache ${disk1} 
   if [ $? -eq 0 ]; then
@@ -100,7 +97,6 @@ then
  if [[ $raid == "addlog" ]]; then
    /TopStor/logmsg.py DGst11 info $userreq $diskn1 
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
-  nextpool=` /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   /sbin/zpool add -f ${nextpool} log ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
     /TopStor/logmsg.py DGsu11 info $userreq $diskn1 
@@ -112,7 +108,6 @@ then
   #diskn=`grep -nr $disk1 $iscsimapping | awk -F':' '{print $1}'`
    /TopStor/logmsg.py DGst8 info $userreq $diskn1 
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
-  nextpool=` /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   echo /sbin/zpool add -f ${nextpool} spare ${disk1}
 
   /sbin/zpool add -f ${nextpool} spare ${disk1}
@@ -149,7 +144,6 @@ then
    diskns=${diskns}$diskn","
   done;
    /TopStor/logmsg.py DGst12 info $userreq p${nextpool} $diskns
-  nextpool=` /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   /sbin/zpool add -f  ${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
     /TopStor/logmsg.py DGsu12 info $userreq p${nextpool} $diskns
@@ -245,7 +239,6 @@ then
    diskns=${diskns}$diskn","
   done;
    /TopStor/logmsg.py DGst16 info $userreq p${nextpool} $diskns
-  nextpool=` /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   /sbin/zpool add -f ${nextpool} raidz1 ${disk1} 
   if [ $? -eq 0 ]; then
     /TopStor/logmsg.py DGsu16 info $userreq p${nextpool} $diskns
@@ -292,13 +285,12 @@ then
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-   /TopStor/logmsg.py DGst18 info $userreq p${nextpool} $diskns
-  nextpool=` /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
+   /TopStor/logmsg.py DGst18 info $userreq ${nextpool} $diskns
   /sbin/zpool add  -f ${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-    /TopStor/logmsg.py DGsu18 info $userreq p${nextpool} $diskns
+    /TopStor/logmsg.py DGsu18 info $userreq ${nextpool} $diskns
   else
-    /TopStor/logmsg.py DGfa18 info $userreq p${nextpool} $diskns
+    /TopStor/logmsg.py DGfa18 info $userreq ${nextpool} $diskns
   fi
  fi 
  if [[ $raid == "stripeset" ]]; then
