@@ -13,7 +13,7 @@ host=` echo $@ | awk '{print $3}'`;
 hostnam=` echo $@ | awk '{print $3}'`;
 disk1=` echo $@ | awk '{print $4}'`;
 diskn1=` echo $@ | awk '{print $5}'`;
-disk1=`ls /dev/disk/by-id/ | grep -v part | grep $disk1`
+#disk1=`ls /dev/disk/by-id/ | grep -v part | grep $disk1`
 msgraid="nothing";
 myhost=`hostname -s`
 privilege="DISK_Groups"
@@ -60,18 +60,17 @@ then
   fi
  fi 
  if [[ $raid == "attachmirror" ]]; then
-  disk2=` echo $@ | awk '{print $5}'`;
-  disk2=`ls /dev/disk/by-id/ | grep -v part | grep $disk2`
-  diskn2=` echo $@ | awk '{print $6}'`;
-  grpn=` echo $@ | awk '{print $7}'`;
-   /TopStor/logmsg.py DGst7 info $userreq $diskn2 $grpn
+  disk2=` echo $@ | awk '{print $6}'`;
+  #disk2=`ls /dev/disk/by-id/ | grep -v part | grep $disk2`
+  diskn2=` echo $@ | awk '{print $7}'`;
+  /TopStor/logmsg.py DGst7 info $userreq $diskn2 $grpn
   /sbin/zpool labelclear /dev/disk/by-id/${disk2};
   echo /sbin/zpool attach -f p${nextpool} ${disk1} ${disk2} > /root/tmp
   /sbin/zpool attach -f ${nextpool} ${disk1} ${disk2}
   if [ $? -ne 0 ]; then
-    /TopStor/logmsg.py DGfa7 error $userreq $diskn2 $grpn
+    /TopStor/logmsg.py DGfa7 error $userreq $diskn2 stripe
   else
-    /TopStor/logmsg.py DGsu7 info $userreq $diskn2 $grpn
+    /TopStor/logmsg.py DGsu7 info $userreq $diskn2 stripe 
   fi
  fi
  if [[ $raid == "delspecial" ]]; then
