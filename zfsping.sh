@@ -65,13 +65,6 @@ do
   fi
   echo adding known from list of possbiles >> /root/zfspingtmp
   ./addknown.py 2>/dev/null
-# echo checking confirmed >> /root/zfspingtmp
-#  ./allconfirmed.py 2>/dev/null
-# echo broadcasting log >> /root/zfspingtmp
-#  ./broadcastlog.py 2>/dev/null
-# echo receiving log >> /root/zfspingtmp
-#  ./receivelog.py 2>/dev/null
-  echo after checking logs and broadcasts..etc >> /root/zfspingtmp
  else
   echo I am not a primary etcd.. heartbeating leader >> /root/zfspingtmp
   leaderall=` ./etcdget.py leader --prefix 2>&1`
@@ -199,6 +192,8 @@ do
  echo No. so checking  I am primary >> /root/zfspingtmp
  if [[ $runningcluster -eq 1 ]];
  then
+  echo Yes I am primary so will check for known hosts >> /root/zfspingtmp
+  ./addknown.py 2>/dev/null
   echo Yes I am a primary so will collect the scsi config for etcd  >> /root/zfspingtmp
   /pace/iscsiwatchdog.sh 2>/dev/null 
   lsscsi=`lsscsi -i --size | md5sum | awk '{print $1}'`
