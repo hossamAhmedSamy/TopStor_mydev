@@ -26,6 +26,7 @@ do
  fi
 done
 echo udpating database >> /root/hostlosttmp
+#ETCDCTL_API=3 ./zpooltoimport.py
 ETCDCTL_API=3 /pace/etcddel.py hosts/$thehost  --prefix
 ETCDCTL_API=3 /pace/putzpool.py 
 
