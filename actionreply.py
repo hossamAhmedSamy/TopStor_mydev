@@ -83,6 +83,11 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received VolumeCreate from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if Zpool (import, direct command..etc) ##############
+ elif r["req"]=='Zpool':  
+  with open('/root/recv','a') as f:
+   f.write('received Zpool from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
  
 
 
