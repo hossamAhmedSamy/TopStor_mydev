@@ -28,10 +28,10 @@ for a in y:
   raidlist=[]
   volumelist=[]
   zdict={}
-  cmdline=['/sbin/zfs','list','-t','snapshot,filesystem','-o','name,creation,used,quota,usedbysnapshots,refcompressratio,prot:kind','-H']
+  cmdline=['/sbin/zfs','list','-t','snapshot,filesystem',b[0],'-o','name,creation,used,quota,usedbysnapshots,refcompressratio,prot:kind','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   zfslist=str(result.stdout)[2:][:-3].replace('\\t',' ').split('\\n')
-  cmdline=['/sbin/zpool','list','-H']
+  cmdline=['/sbin/zpool','list',b[0],'-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   zlist=str(result.stdout)[2:][:-3].split('\\t')
   cmdline=['/sbin/zfs','get','compressratio','-H']

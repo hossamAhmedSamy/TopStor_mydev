@@ -2,6 +2,7 @@
 from etcddel import etcddel as etcddel
 from etcdput import etcdput as put 
 from etcdget import etcdget as get
+from etcddel import etcddel as deli 
 import socket, sys, subprocess
 from sendhost import sendhost
 from ast import literal_eval as mtuple
@@ -22,6 +23,7 @@ def importpls(*args):
      ownerip=get('known',owner)
     if ownerip[0]== -1:
      return 3
+    deli('to',z['name']) 
     z=['/TopStor/pump.sh','Zpool','import','-f',z['name']]
     msg={'req': 'Zpool', 'reply':z}
     sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
