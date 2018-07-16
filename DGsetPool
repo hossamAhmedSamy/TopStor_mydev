@@ -65,7 +65,6 @@ then
   diskn2=` echo $@ | awk '{print $7}'`;
   /TopStor/logmsg.py DGst7 info $userreq $diskn2 $grpn
   /sbin/zpool labelclear /dev/disk/by-id/${disk2};
-  echo /sbin/zpool attach -f p${nextpool} ${disk1} ${disk2} > /root/tmp
   /sbin/zpool attach -f ${nextpool} ${disk1} ${disk2}
   if [ $? -ne 0 ]; then
     /TopStor/logmsg.py DGfa7 error $userreq $diskn2 stripe
@@ -176,7 +175,7 @@ then
  fi  
  if [[ $raid == "addparity2" ]]; then
   diskargs=${#params[@]};
-  diskargs=$((diskargs-1));
+  diskargs=$((diskargs-2));
   i=2
   disk1=" "
   diskns=""
@@ -184,13 +183,11 @@ then
    i=$((i+1));
    disk=`echo ${params[$i]} | awk -F':' '{print $1}'`
    diskn=`echo ${params[$i]} | awk -F':' '{print $2}'`
-   disk=`ls /dev/disk/by-id/ | grep -v part | grep $disk`
    /sbin/zpool labelclear /dev/disk/by-id/$disk;
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
    /TopStor/logmsg.py DGst14 info $userreq p${nextpool} $diskns
-  nextpool=` /pace/etcdget.py run/$myhost/pool --prefix | grep name | awk -F"', '" '{print $2}' | awk -F"'" '{print $1}'`
   /sbin/zpool add -f ${nextpool} raidz2 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
     /TopStor/logmsg.py DGsu14 info $userreq p${nextpool} $diskns
@@ -224,7 +221,7 @@ then
  fi 
  if [[ $raid == "addparity" ]]; then
   diskargs=${#params[@]};
-  diskargs=$((diskargs-1));
+  diskargs=$((diskargs-2));
   i=2
   disk1=" "
   diskns=""
@@ -232,7 +229,6 @@ then
    i=$((i+1));
    disk=`echo ${params[$i]} | awk -F':' '{print $1}'`
    diskn=`echo ${params[$i]} | awk -F':' '{print $2}'`
-   disk=`ls /dev/disk/by-id/ | grep -v part | grep $disk`
    /sbin/zpool labelclear /dev/disk/by-id/$disk;
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
@@ -247,26 +243,26 @@ then
  fi 
  if [[ $raid == "parity" ]]; then
   diskargs=${#params[@]};
-  diskargs=$((diskargs-1));
+  diskargs=$((diskargs-2));
   i=2
   disk1=" "
   diskns=""
+  nextpool=p$myhost$RANDOM;
   while [ $i -lt $diskargs ]; do
    i=$((i+1));
    disk=`echo ${params[$i]} | awk -F':' '{print $1}'`
    diskn=`echo ${params[$i]} | awk -F':' '{print $2}'`
-   disk=`ls /dev/disk/by-id/ | grep -v part | grep $disk`
    /sbin/zpool labelclear /dev/disk/by-id/$disk;
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-   /TopStor/logmsg.py DGst17 info $userreq p${nextpool} $diskns
-  nextpool=$myhost;
-  /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool}$RANDOM raidz1 ${disk1} 2>txt/${0:2}$userreq.txt
+   /TopStor/logmsg.py DGst17 info $userreq ${nextpool} $diskns
+  echo /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz1 ${disk1} >/root/tmp
+  /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz1 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-    /TopStor/logmsg.py DGsu17 info $userreq p${nextpool} $diskns
+    /TopStor/logmsg.py DGsu17 info $userreq ${nextpool} $diskns
   else
-    /TopStor/logmsg.py DGfa17 error $userreq p${nextpool} $diskns
+    /TopStor/logmsg.py DGfa17 error $userreq ${nextpool} $diskns
   fi
  fi 
  if [[ $raid == "add" ]]; then
