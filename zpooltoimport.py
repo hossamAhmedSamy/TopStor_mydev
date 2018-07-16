@@ -1,6 +1,7 @@
 #!/bin/python3.6
 import subprocess, socket
 from etcdput import etcdput as put
+import sys
 
 def zpooltoimport(*args):
  myhost=socket.gethostname()
@@ -26,7 +27,7 @@ def zpooltoimport(*args):
  disklist=[]
  for a in y:
   b=a.split()
-  if "pdhc" in a and  'pool' not in a:
+  if "pdhc" in a and  'pool' not in a and  'UNAVA' not in b[1]:
    raidlist=[]
    volumelist=[]
    zdict={}

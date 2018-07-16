@@ -85,6 +85,8 @@ then
   ./etcddel.py known --prefix 2>/dev/null
   ./etcddel.py possible --prefix 2>/dev/null
   ./etcddel.py localrun --prefix 2>/dev/null
+  ./etcddel.py to  --prefix 2>/dev/null
+  ./etcddel.py hosts  --prefix 2>/dev/null
  systemctl start topstorremote
  systemctl start topstorremoteack
  echo deleted knowns and added leader >>/root/tmp2
