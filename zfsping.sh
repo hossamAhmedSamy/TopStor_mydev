@@ -194,6 +194,7 @@ do
  then
   echo Yes I am primary so will check for known hosts >> /root/zfspingtmp
   ./addknown.py 2>/dev/null
+  ./selectimport.py
   echo Yes I am a primary so will collect the scsi config for etcd  >> /root/zfspingtmp
   /pace/iscsiwatchdog.sh 2>/dev/null 
   lsscsi=`lsscsi -i --size | md5sum | awk '{print $1}'`
