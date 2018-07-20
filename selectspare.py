@@ -25,8 +25,35 @@ def selectspare(*args):
    elif newraid['name'] == 'spares':
     spare=newraid['disklist'][0]['name']
     spareid=newraid['disklist'][0]['id']
-  if spare !='na' and faultdisk !='na'and ( 'cache' in faultraid or 'log' in faultraid ):
+  print(spare,faultdisk,faultraid)
+  if spare !='na' and faultdisk !='na'and 'logs' in faultraid :
    cmdline=['/sbin/zpool', 'remove', newpool['name'],faultdisk]
+   try:
+    subprocess.check_call(cmdline)
+    cmdline=['/sbin/zpool', 'remove', newpool['name'],spare]
+    subprocess.check_call(cmdline)
+    cmdline=['/sbin/zpool', 'add', newpool['name'],'log',spare]
+    try: 
+     subprocess.check_call(cmdline)
+     logmsg.sendlog('Disu2','info','system', faultdiskid,spareid,myhost)
+    except subprocess.CalledProcessError:
+     logmsg.sendlog('Difa2','info','system', 'attach'+faultdiskid,spareid,myhost)
+   except:
+        pass 
+  if spare !='na' and faultdisk !='na'and 'cache' in faultraid :
+   cmdline=['/sbin/zpool', 'remove', newpool['name'],faultdisk]
+   try:
+    subprocess.check_call(cmdline)
+    cmdline=['/sbin/zpool', 'remove', newpool['name'],spare]
+    subprocess.check_call(cmdline)
+    cmdline=['/sbin/zpool', 'add', newpool['name'],'cache',spare]
+    try: 
+     subprocess.check_call(cmdline)
+     logmsg.sendlog('Disu2','info','system', faultdiskid,spareid,myhost)
+    except subprocess.CalledProcessError:
+     logmsg.sendlog('Difa2','info','system', 'attach'+faultdiskid,spareid,myhost)
+   except:
+        pass 
   if spare !='na' and faultdisk !='na'and 'mirror' in faultraid:
    logmsg.sendlog('Dist2','info','system', faultdiskid,spareid,myhost)
    cmdline=['/sbin/zpool', 'replace', newpool['name'],faultdisk,spare]
