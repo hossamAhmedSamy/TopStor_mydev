@@ -121,6 +121,7 @@ do
     ./etcdput.py possible$myhost $myip 2>/dev/null
    else
     echo I am known so running all needed etcd task:boradcast, log..etc >> /root/zfspingtmp
+     /pace/putzpool.py
 #    ./changeetcd.py 2>/dev/null
 #    ./receivelog.py 2>/dev/null
 #    ./broadcastlog.py 2>/dev/null
