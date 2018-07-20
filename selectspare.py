@@ -54,7 +54,7 @@ def selectspare(*args):
      logmsg.sendlog('Difa2','info','system', 'attach'+faultdiskid,spareid,myhost)
    except:
         pass 
-  if spare !='na' and faultdisk !='na'and 'mirror' in faultraid:
+  elif spare !='na' and faultdisk !='na'and 'mirror' in faultraid:
    logmsg.sendlog('Dist2','info','system', faultdiskid,spareid,myhost)
    cmdline=['/sbin/zpool', 'replace', newpool['name'],faultdisk,spare]
    try:
@@ -67,6 +67,19 @@ def selectspare(*args):
      logmsg.sendlog('Difa2','info','system', 'attach'+faultdiskid,spareid,myhost)
    except:
         pass 
-
+  elif spare !='na' and faultdisk !='na':
+   logmsg.sendlog('Dist2','info','system', faultdiskid,spareid,myhost)
+   cmdline=['/sbin/zpool', 'replace', newpool['name'],faultdisk,spare]
+   try:
+    subprocess.check_call(cmdline)
+    cmdline=['/sbin/zpool', 'detach', newpool['name'],faultdisk]
+    try: 
+     subprocess.check_call(cmdline)
+     logmsg.sendlog('Disu2','info','system', faultdiskid,spareid,myhost)
+    except subprocess.CalledProcessError:
+     logmsg.sendlog('Difa2','info','system', 'attach'+faultdiskid,spareid,myhost)
+   except:
+        pass 
+  
 if __name__=='__main__':
  selectspare(*sys.argv[1:])
