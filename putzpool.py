@@ -39,7 +39,7 @@ for a in y:
   cmdline=['/sbin/zfs','get','compressratio','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   zlist2=str(result.stdout)[2:][:-3].split('\\t')
-  zdict={ 'name':b[0], 'status':b[1], 'size':str(zlist[1]), 'alloc': str(zlist[2]), 'empty': zlist[3], 'dedup': zlist[7], 'compressratio': zlist2[2], 'raidlist': raidlist ,'volumes':volumelist}
+  zdict={ 'name':b[0],'changeop':b[1], 'status':b[1], 'size':str(zlist[1]), 'alloc': str(zlist[2]), 'empty': zlist[3], 'dedup': zlist[7], 'compressratio': zlist2[2], 'raidlist': raidlist ,'volumes':volumelist}
   zpool.append(zdict)
  # for vol in zfslist2:
   for vol in zfslist:
@@ -58,12 +58,12 @@ for a in y:
  elif any(raid in a for raid in raidtypes):
   spaces=len(a.split(a.split()[0])[0])
   disklist=[]
-  rdict={ 'name':b[0], 'status':b[1],'disklist':disklist }
+  rdict={ 'name':b[0], 'changeop':b[1],'status':b[1],'disklist':disklist }
   raidlist.append(rdict)
  elif any(raid in a for raid in raid2):
   spaces=len(a.split(a.split()[0])[0])
   disklist=[]
-  rdict={ 'name':b[0], 'status':'NA','disklist':disklist }
+  rdict={ 'name':b[0], 'changeop':'NA','status':'NA','disklist':disklist }
   raidlist.append(rdict)
  elif 'scsi' in a:
    diskid='-1'
@@ -71,7 +71,7 @@ for a in y:
    size='-1' 
    if  len(a.split('scsi')[0]) < (spaces+2) or (len(raidlist) < 1 and len(zpool)> 0):
     disklist=[]
-    rdict={ 'name':'stripe-'+str(stripecount), 'status':'NA','disklist':disklist }
+    rdict={ 'name':'stripe-'+str(stripecount), 'changeop':'NA','status':'NA','disklist':disklist }
     raidlist.append(rdict)
     stripecount+=1
    for lss in lsscsi:
@@ -82,28 +82,29 @@ for a in y:
      size=z[7]
      freepool.remove(lss)
      break
+   changeop=b[1]
    if host=='-1':
     if zpool[len(zpool)-1]['status']=='ONLINE':
-     raidlist[len(raidlist)-1]['status']='Warning'
-     zpool[len(zpool)-1]['status']='Warning'
-    b[1]='Removed'
-   ddict={'name':b[0], 'status':b[1],'id': str(diskid), 'host':host, 'size':size}
+     raidlist[len(raidlist)-1]['changeop']='Warning'
+     zpool[len(zpool)-1]['changeop']='Warning'
+     changeop='Removed'
+   ddict={'name':b[0], 'changeop':changeop,'status':b[1],'id': str(diskid), 'host':host, 'size':size}
    disklist.append(ddict)
  else:
-   ddict={'name':'na','status':a}
+   ddict={'name':'na','changeop':a, 'status':a}
 if len(freepool) > 0:
  raidlist=[]
- zdict={ 'name':'pree', 'status':'pree', 'size':'0', 'alloc': '0', 'empty': '0', 'dedup': '0', 'compressratio': '0', 'raidlist': raidlist, 'volumes':[]}
+ zdict={ 'name':'pree','changeop':'pree', 'status':'pree', 'size':'0', 'alloc': '0', 'empty': '0', 'dedup': '0', 'compressratio': '0', 'raidlist': raidlist, 'volumes':[]}
  zpool.append(zdict)
  disklist=[]
- rdict={ 'name':'free', 'status':'free','disklist':disklist }
+ rdict={ 'name':'free', 'changeop':'free','status':'free','disklist':disklist }
  raidlist.append(rdict)
  for lss in freepool:
   z=lss.split()
   diskid=lsscsi.index(lss)
   host=z[3].split('-')[1]
   size=z[7]
-  ddict={'name':'scsi-'+z[6], 'status':'free','id': str(diskid), 'host':host, 'size':size}
+  ddict={'name':'scsi-'+z[6], 'changeop':'free','status':'free','id': str(diskid), 'host':host, 'size':size}
   disklist.append(ddict)
 print(zpool)
 put('hosts/'+myhost+'/current',str(zpool))

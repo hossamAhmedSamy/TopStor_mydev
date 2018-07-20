@@ -30,11 +30,12 @@ def changeop(*args):
  for oldpool in oldop:
   for newpool in newop:
    if oldpool['name']==newpool['name']:
-    if oldpool['status'] != newpool['status']:
+    if oldpool['status'] != newpool['status'] :
      if 'ONLI' in newpool['status']:
       logmsg.sendlog('Posu0','info','system', newpool['name'],newpool['status'])
      else:
       logmsg.sendlog('Powa1','warning','system', newpool['name'],newpool['status'])
+    if oldpool['changeop'] != newpool['status']:
      for oldraid in oldpool['raidlist']:
       for newraid in newpool['raidlist']:
        if oldraid['name']==newraid['name']:
@@ -43,20 +44,21 @@ def changeop(*args):
           logmsg.sendlog('Rasu0','info','system', newraid['name'], newraid['status'])
          else:
           logmsg.sendlog('Rawa1','warning','system', newraid['name'], newraid['status'])
-          for oldisk in oldraid['disklist']:
-           if oldisk['name'] not in str(newpool):
-            logmsg.sendlog('Diwa4','warning','system', oldisk['id'], oldpool['name'])
-            continue
-           for newdisk in newraid['disklist']:
-            if oldisk['name']==newdisk['name']:
-             if oldisk['status'] != newdisk['status']:
-              if 'ONLI' in newdisk['status']:
-               logmsg.sendlog('Disu0','info','system', newdisk['id'], newdisk['status'])
-              else:
-               logmsg.sendlog('Diwa1','warning','system', newdisk['id'], newdisk['status'])
-               cmdline='/sbin/zpool offline '+newpool['name']+' '+newdisk['name']
-               subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
-             break  
+        if oldraid['changeop'] != newraid['status']:
+         for oldisk in oldraid['disklist']:
+          if oldisk['name'] not in str(newpool):
+           logmsg.sendlog('Diwa4','warning','system', oldisk['id'], oldpool['name'])
+           continue
+          for newdisk in newraid['disklist']:
+           if oldisk['name']==newdisk['name']:
+            if oldisk['status'] != newdisk['status'] or oldisk['changeop'] != newdisk['status']: 
+             if 'ONLI' in newdisk['status']:
+              logmsg.sendlog('Disu0','info','system', newdisk['id'], newdisk['status'])
+             else:
+              logmsg.sendlog('Diwa1','warning','system', newdisk['id'], newdisk['status'])
+              cmdline='/sbin/zpool offline '+newpool['name']+' '+newdisk['name']
+              subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
+            break  
         break
     break
 
