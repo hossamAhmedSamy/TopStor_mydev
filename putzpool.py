@@ -28,6 +28,8 @@ for a in y:
   raidlist=[]
   volumelist=[]
   zdict={}
+  rdict={}
+  ddict={}
   cmdline=['/sbin/zfs','list','-t','snapshot,filesystem',b[0],'-o','name,creation,used,quota,usedbysnapshots,refcompressratio,prot:kind','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   zfslist=str(result.stdout)[2:][:-3].replace('\\t',' ').split('\\n')
@@ -45,33 +47,32 @@ for a in y:
     volume=vol.split()
     volname=volume[0].split('/')[1]
     snaplist=[]
-    zdict={'fullname':volume[0],'name':volname, 'pool': b[0], 'host':myhost, 'creation':' '.join(volume[1:4]+volume[5:6]),'time':volume[4], 'used':volume[6], 'quota':volume[7], 'usedbysnapshots':volume[8], 'refcompressratio':volume[9], 'prot':volume[10],'snapshots':snaplist}
-    volumelist.append(zdict)
+    vdict={'fullname':volume[0],'name':volname, 'pool': b[0], 'host':myhost, 'creation':' '.join(volume[1:4]+volume[5:6]),'time':volume[4], 'used':volume[6], 'quota':volume[7], 'usedbysnapshots':volume[8], 'refcompressratio':volume[9], 'prot':volume[10],'snapshots':snaplist}
+    volumelist.append(vdict)
    elif '@' in vol and b[0] in vol:
     snapshot=vol.split()
     snapname=snapshot[0].split('@')[1]
-    zdict={'fullname':snapshot[0],'name':snapname, 'volume':volname, 'pool': b[0], 'host':myhost, 'creation':' '.join(snapshot[1:4]+volume[5:6]), 'time':snapshot[4], 'used':snapshot[6], 'quota':snapshot[7], 'usedbysnapshots':snapshot[8], 'refcompressratio':snapshot[9], 'prot':snapshot[10]}
-    snaplist.append(zdict)
+    sdict={'fullname':snapshot[0],'name':snapname, 'volume':volname, 'pool': b[0], 'host':myhost, 'creation':' '.join(snapshot[1:4]+volume[5:6]), 'time':snapshot[4], 'used':snapshot[6], 'quota':snapshot[7], 'usedbysnapshots':snapshot[8], 'refcompressratio':snapshot[9], 'prot':snapshot[10]}
+    snaplist.append(sdict)
     
  elif any(raid in a for raid in raidtypes):
   spaces=len(a.split(a.split()[0])[0])
   disklist=[]
-  zdict={ 'name':b[0], 'status':b[1],'disklist':disklist }
-  raidlist.append(zdict)
+  rdict={ 'name':b[0], 'status':b[1],'disklist':disklist }
+  raidlist.append(rdict)
  elif any(raid in a for raid in raid2):
   spaces=len(a.split(a.split()[0])[0])
   disklist=[]
-  zdict={ 'name':b[0], 'status':'NA','disklist':disklist }
-  raidlist.append(zdict)
+  rdict={ 'name':b[0], 'status':'NA','disklist':disklist }
+  raidlist.append(rdict)
  elif 'scsi' in a:
    diskid='-1'
    host='-1'
    size='-1' 
    if  len(a.split('scsi')[0]) < (spaces+2) or (len(raidlist) < 1 and len(zpool)> 0):
-    print(spaces,len(a.split('scsi')[0]))
     disklist=[]
-    zdict={ 'name':'stripe-'+str(stripecount), 'status':'NA','disklist':disklist }
-    raidlist.append(zdict)
+    rdict={ 'name':'stripe-'+str(stripecount), 'status':'NA','disklist':disklist }
+    raidlist.append(rdict)
     stripecount+=1
    for lss in lsscsi:
     z=lss.split()
@@ -79,27 +80,31 @@ for a in y:
      diskid=lsscsi.index(lss)
      host=z[3].split('-')[1]
      size=z[7]
-     print('diskid',diskid,z[6],b[0])
      freepool.remove(lss)
      break
-   zdict={'name':b[0], 'status':b[1],'id': str(diskid), 'host':host, 'size':size}
-   disklist.append(zdict)
+   if host=='-1':
+    if zpool[len(zpool)-1]['status']=='ONLINE':
+     raidlist[len(raidlist)-1]['status']='Warning'
+     zpool[len(zpool)-1]['status']='Warning'
+    b[1]='Removed'
+   ddict={'name':b[0], 'status':b[1],'id': str(diskid), 'host':host, 'size':size}
+   disklist.append(ddict)
  else:
-   zdict={'name':'na','status':a}
+   ddict={'name':'na','status':a}
 if len(freepool) > 0:
  raidlist=[]
  zdict={ 'name':'pree', 'status':'pree', 'size':'0', 'alloc': '0', 'empty': '0', 'dedup': '0', 'compressratio': '0', 'raidlist': raidlist, 'volumes':[]}
  zpool.append(zdict)
  disklist=[]
- zdict={ 'name':'free', 'status':'free','disklist':disklist }
- raidlist.append(zdict)
+ rdict={ 'name':'free', 'status':'free','disklist':disklist }
+ raidlist.append(rdict)
  for lss in freepool:
   z=lss.split()
   diskid=lsscsi.index(lss)
   host=z[3].split('-')[1]
   size=z[7]
-  zdict={'name':'scsi-'+z[6], 'status':'free','id': str(diskid), 'host':host, 'size':size}
-  disklist.append(zdict)
+  ddict={'name':'scsi-'+z[6], 'status':'free','id': str(diskid), 'host':host, 'size':size}
+  disklist.append(ddict)
 print(zpool)
 put('hosts/'+myhost+'/current',str(zpool))
 #put('hosts/dhcp31481/current',str(zpool))

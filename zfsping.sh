@@ -51,16 +51,14 @@ do
   then
    echo for $isprimary sending info Partsu03 booted with ip >> /root/zfspingtmp
    /TopStor/logmsg.py Partsu03 info system $myhost $myip
-  # isprimary=$((isprimary+1))
   fi
   runningcluster=1
-# leader='"'` ./etcdget.py leader --prefix 2>/dev/null`'"'
   leaderall=` ./etcdget.py leader --prefix 2>/dev/null`
   if [[ -z $leaderall ]]; 
   then
    echo no leader although I am primary node >> /root/zfspingtmp
    ./runningetcdnodes.py $myip 2>/dev/null
-   ./etcddel.py leader 2>/dev/null
+   ./etcddel.py leader --prefix 2>/dev/null
    ./etcdput.py leader/$myhost $myip 2>/dev/null
   fi
   echo adding known from list of possbiles >> /root/zfspingtmp
@@ -111,7 +109,6 @@ do
     echo local etcd is already running>> /root/zfspingtmp
     needlocal=2
    fi
-#   ./etcdget.py clusterip 2>/dev/null > /pacedata/clusterip
    echo checking if I am known host >> /root/zfspingtmp
    known=` ./etcdget.py known --prefix 2>/dev/null`
    echo $known | grep $myhost  &>/dev/null
@@ -121,10 +118,6 @@ do
     ./etcdput.py possible$myhost $myip 2>/dev/null
    else
     echo I am known so running all needed etcd task:boradcast, log..etc >> /root/zfspingtmp
-     /pace/putzpool.py
-#    ./changeetcd.py 2>/dev/null
-#    ./receivelog.py 2>/dev/null
-#    ./broadcastlog.py 2>/dev/null
     if [[ $isknown -eq 0 ]];
     then
      echo running sendhost.py $leaderip 'user' 'recvreq' $myhost >>/root/tmp2
@@ -135,7 +128,6 @@ do
      sleep 1
      /pace/sendhost.py $leaderip 'cifs' 'recvreq' $myhost
      /pace/sendhost.py $leaderip 'logall' 'recvreq' $myhost
-     /pace/putzpool.py
      isknown=$((isknown+1))
     fi
     if [[ $isknown -le 10 ]];
@@ -144,16 +136,13 @@ do
     fi
     if [[ $isknown -eq 3 ]];
     then
-     /pace/putzpool.py
      /TopStor/logmsg.py Partsu04 info system $myhost $myip
-
-   # msg="{'req': 'msg', 'reply': ['/TopStor/logmsg.py','Partsu04','info','system','$myhost','$myip']}"
-    #/pace/sendhost.py $leaderip "$msg" 'recvreply' $myhost
     fi
     echo finish running tasks task:boradcast, log..etc >> /root/zfspingtmp
    fi
   fi 
  fi
+ /pace/putzpool.py
  echo checking if I need to run local etcd >> /root/zfspingtmp
  if [[ $needlocal -eq 1 ]];
  then
@@ -181,8 +170,6 @@ do
  then
   echo I am already local etcd running iscsirefresh on $myip $myhost  >> /root/zfspingtmp
   /pace/iscsiwatchdog.sh $myip $myhost $leader
-  echo .. I am exiting now\(temporary\)  >> /root/zfspingtmp
-  continue
  fi
  echo checking if still in the start initcron is still running  >> /root/zfspingtmp
  if [ -f /pacedata/forzfsping ];
@@ -196,185 +183,8 @@ do
   echo Yes I am primary so will check for known hosts >> /root/zfspingtmp
   ./addknown.py 2>/dev/null
   ./selectimport.py
-  echo Yes I am a primary so will collect the scsi config for etcd  >> /root/zfspingtmp
-  /pace/iscsiwatchdog.sh 2>/dev/null 
-  lsscsi=`lsscsi -i --size | md5sum | awk '{print $1}'`
-  lsscsiold=` /pace/etcdget.py checks/$myhost/lsscsi `
-  echo $lsscsi | grep $lsscsiold
-  if [ $? -eq 0 ];
-  then
-   echo collecting the zpool status too as long the scsi config stabilized >> /root/zfspingtmp
-   zpool=`/sbin/zpool status 2>/dev/null`
-   if [[ -z $zpool ]];
-   then
-    zpool='0'
-    echo no pools are found >> /root/zfspingtmp
-   fi
-   echo old zpool and new zpool status compare >> /root/zfspingtmp
-   zpool1=`echo $zpool | md5sum | awk '{print $1}'`
-   zpool1old=` /pace/etcdget.py checks/$myhost/zpool 2>/dev/null`
-   if [[ -z $zpool1old ]];
-   then
-    echo no pools are registered before>> /root/zfspingtmp
-    zpool1old='0'
-   fi
-   echo $zpool1 | grep $zpool1old &>/dev/null
-   if [ $? -eq 0 ];
-   then 
-    echo no new change either in scsi nor in a zpool>> /root/zfspingtmp
-    echo $zpool | grep -E "FAIL|OFFL|was " &>/dev/null
-    if [ $? -ne 0 ];
-    then
-     echo no new change either in scsi nor in a zpool..exiting>> /root/zfspingtmp
-     continue
-    fi
-    echo no new changes either in scsi nor in a zpool. but zpool degraded>> /root/zfspingtmp
-   
-   else
-    echo collecting new change in pool>> /root/zfspingtmp
-    /pace/etcdput.py checks/$myhost/zpool $zpool1
-   fi
-  else 
-   echo collecting new change in scsi>> /root/zfspingtmp
-   /pace/etcdput.py checks/$myhost/lsscsi $lsscsi 
-  fi
- fi
- hostnam=`cat /TopStordata/hostname`
- declare -a pools=(`/sbin/zpool list -H 2>/dev/null  | awk '{print $1}'`)
- declare -a idledisk=();
- declare -a hostdisk=();
- declare -a alldevdisk=();
- cd /pace
- echo checking if a disk is faulty >> /root/zfspingtmp
- fdisk -l 2>&1 | grep "cannot open"
- if [ $? -eq 0 ];
- then
-  echo a disk is found faulty >> /root/zfspingtmp
-  faileddisk=`fdisk -l 2>&1 | grep "cannot open" | awk '{print $4}' | awk -F':' '{print $1}' | awk -F'/' '{print $3}'`
-  echo "offline" > /sys/block/$faileddisk/device/state
-  echo "1" > /sys/block/$faileddisk/device/delete
-  echo removing the disk from system  and restarting target>> /root/zfspingtmp
-  sleep 2
-  systemctl restart target 2>/dev/null
- else
-  echo no faulty disk  checking if the target is running ok>> /root/zfspingtmp
-  targetcli ls &>/dev/null
-  if [ $? -ne 0 ];
-  then
-   echo target is not running good so restarting and saving configuration>> /root/zfspingtmp
-   systemctl restart target 2>/dev/null
-   targetcli saveconfig 2>/dev/null
-  fi
- fi
- if [ ! -z $pools ];
- then
-  echo going through pool health>> /root/zfspingtmp
-  ids=`lsblk -Sn -o serial`
-  for pool in "${pools[@]}"; do
-   echo checking if a fualty disk is part of a pool>> /root/zfspingtmp
-   /pace/missinginpool.py
-   spares=(`/sbin/zpool status $pool 2>/dev/null | grep scsi | grep -v OFFLINE | grep -v ONLINE | awk '{print $1}'`)  
-   for spare in "${spares[@]}"; do
-    echo disk $spare is faulty >> /root/zfspingtmp
-    echo $ids | grep ${spare:8} &>/dev/null
-    if [ $? -ne 0 ]; then
-     diskid=`python3.6 diskinfo.py /pacedata/disklist.txt $spare`
-     /TopStor/logmsg.py Diwa4 warning system $spare $pool
-    #/sbin/zpool remove $pool $spare 2>/dev/null;
-     /pace/etcddel.py  md --prefix 2>/dev/null
-    #if [ $? -eq 0 ]; then
-      /TopStor/logmsg.py Disu4 info system $spare 
-     cachestate=1
-    #else 
-      /TopStor/logmsg.py Dist5 info system $spare
-      /sbin/zpool offline $pool $spare 2>/dev/null
-      /TopStor/logmsg.py Disu5 info system $spare 
-   #  fi
-    fi
-   done 
-  done
-  for pool in "${pools[@]}"; do
-   echo checking if a offline disk in the pool>> /root/zfspingtmp
-   singledisk=`/sbin/zpool list -Hv $pool 2>/dev/null | wc -l`
-   zpool=`/sbin/zpool status $pool 2>/dev/null`
-   if [ $singledisk -gt 3 ]; then
-    echo "${zpool[@]}" | grep -E "FAULT|OFFLI" &>/dev/null
-    if [ $? -eq 0 ];
-    then
-     echo found FAULT/OFFLINE disk in the pool>> /root/zfspingtmp
-     faildisk=`echo "${zpool[@]}" | grep -E "FAULT|OFFLI" | awk '{print $1}'`
-     diskpath=` /pace/diskinfo.py run getkey $faildisk `
-     diskidf=`echo $diskpath | awk -F'/' '{print $(NF-1)}'`
-     /pace/diskinfo.py run getkey $diskpath | awk -F'/' '{print $(NF-1)}'
-     echo $failddisks | grep $faildisk
-     if [ $? -ne 0 ];
-     then
-      /TopStor/logmsg.py Difa1 error system $diskidf $hostnam
-     fi
-     failddisks=$failddisks' '$faildisk
-     echo checking spare disk in the pool>> /root/zfspingtmp
-     sparedisk=`echo "${zpool[@]}" | grep "AVAIL" | awk '{print $1}' | head -1 2>/dev/null`
-     if [ ! -z $sparedisk  ]; then
-      diskids=` /pace/diskinfo.py run getkey $sparedisk | awk -F'/' '{print $(NF-1)}'`
-      echo diskids=$diskids
-      /TopStor/logmsg.py Dist2 info system $diskidf $diskids $hostnam
-      echo /sbin/zpool offline $pool $faildisk 2>/dev//null
-      /sbin/zpool offline $pool $faildisk 2>/dev/null
-      echo replacing offline/faulty with spare in the pool>> /root/zfspingtmp
-      echo /sbin/zpool replace $pool $faildisk $sparedisk $hostnam 2>/dev/null
-      /sbin/zpool replace $pool $faildisk $sparedisk 2>/dev/null
-      /pace/putzpool.py 2>/dev/null
-      /TopStor/logmsg.py Disu2 info system $diskidf $diskidf $hostnam
-      /TopStor/logmsg.py Dist3 info system $diskidf $hostnam
-      echo detaching OFFLINE disk with spare in the pool>> /root/zfspingtmp
-      /sbin/zpool detach $pool $faildisk &>/dev/null
-      /sbin/zpool remove $pool $faildisk &>/dev/null
-      /TopStor/logmsg.py Disu3 info system $diskidf $hostnam
-     else
-      echo no spare disk >> /root/zfspingtmp
-     # echo detaching OFFLINE disk without spare in the pool>> /root/zfspingtmp
-     # /sbin/zpool detach $pool $faildisk &>/dev/null
-     # /sbin/zpool remove $pool $faildisk &>/dev/null
-     # /pace/putzpool.py  2>/dev/null
-     # /TopStor/logmsg.py Disu3 info system $diskidf $hostnam
-     fi
-     /pace/putzpool.py 2>/dev/null
-     diskstatus=`echo $diskpath | awk -F'/' '{OFS=FS;$NF=""; print}' `'status'
-     diskfs=` /pace/diskinfo.py run getvalue $diskstatus `
-     echo $diskfs | grep ONLINE
-     if [ $? -eq 0 ];
-     then
-      /pace/putzpool.py --prefix 2>/dev/null
-     fi
-    else
-     failddisks=''
-    fi
-   fi
-   /sbin/zpool status $pool 2>/dev/null| grep "was /dev" &>/dev/null
-   if [ $? -eq 0 ]; then
-    faildisk=`/sbin/zpool status $pool 2>/dev/null | grep "was /dev" | awk -F'-id/' '{print $2}' | awk -F'-part' '{print $1}'`;
-   # /sbin/zpool detach $pool $faildisk &>/dev/null;
-   # /sbin/zpool remove $pool $faildisk &>/dev/null;
-     /pace/putzpool.py 2>/dev/null
-    cachestate=1;
-   fi 
-   /sbin/zpool status $pool 2>/dev/null| grep "was /dev/s" ;
-   if [ $? -eq 0 ]; then
-    faildisk=`/sbin/zpool status $pool 2>/dev/null| grep "was /dev/s" | awk -F'was ' '{print $2}'`;
-    #/sbin/zpool detach $pool $faildisk &>/dev/null;
-    #/sbin/zpool remove $pool $faildisk &>/dev/null;
-     /pace/putzpool.py 2>/dev/null
-    cachestate=1;
-   fi 
-   /sbin/zpool status $pool 2>/dev/null| grep UNAVAIL &>/dev/null
-   if [ $? -eq 0 ]; then
-    faildisk=`/sbin/zpool status $pool 2>/dev/null| grep UNAVAIL | awk '{print $1}'`;
-    #/sbin/zpool detach $pool $faildisk &>/dev/null;
-    #/sbin/zpool remove $pool $faildisk &>/dev/null;
-     /pace/putzpool.py --prefix 2>/dev/null
-    cachestate=1;
-   fi 
-  done
-  echo after long operations due to a faulty disk is inside a pool>> /root/zfspingtmp
- fi
+ fi 
+ /pace/iscsiwatchdog.sh 2>/dev/null 
+  echo Collecting a change in system occured >> /root/zfspingtmp
+ /pace/changeop.py hosts/$myhost/current d
 done

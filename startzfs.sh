@@ -87,6 +87,7 @@ then
   ./etcddel.py localrun --prefix 2>/dev/null
   ./etcddel.py to  --prefix 2>/dev/null
   ./etcddel.py hosts  --prefix 2>/dev/null
+  ./etcddel.py oldhosts  --prefix 2>/dev/null
  systemctl start topstorremote
  systemctl start topstorremoteack
  echo deleted knowns and added leader >>/root/tmp2
@@ -120,6 +121,8 @@ else
    ./etcdsync.py $myip localrun localrun 2>/dev/null
    ./etcdsync.py $myip leader known 2>/dev/null
    ./etcddel.py known/$myhost --prefix 2>/dev/null
+   ./etcddel.py oldhosts/$myhost  --prefix 2>/dev/null
+   ./etcddel.py hosts/$myhost  --prefix 2>/dev/null
   /sbin/rabbitmqctl add_user rabb_$leader YousefNadody 2>/dev/null
   /sbin/rabbitmqctl set_permissions -p / rabb_$leader ".*" ".*" ".*" 2>/dev/null
 #  /sbin/rabbitmqctl set_user_tags rabb_ administrator
