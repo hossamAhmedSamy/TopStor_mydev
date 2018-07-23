@@ -1,7 +1,9 @@
 #!/bin/python3.6
 import subprocess, socket
 from etcdput import etcdput as put
+from etcddel import etcddel as dels 
 myhost=socket.gethostname()
+sitechange=0
 cmdline='/sbin/zpool status'
 result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
 y=str(result)[2:][:-3].replace('\\t','').split('\\n')
@@ -88,6 +90,7 @@ for a in y:
      raidlist[len(raidlist)-1]['changeop']='Warning'
      zpool[len(zpool)-1]['changeop']='Warning'
      changeop='Removed'
+     sitechange=1
    ddict={'name':b[0], 'changeop':changeop,'status':b[1],'id': str(diskid), 'host':host, 'size':size}
    disklist.append(ddict)
  else:
@@ -108,4 +111,6 @@ if len(freepool) > 0:
   disklist.append(ddict)
 print(zpool)
 put('hosts/'+myhost+'/current',str(zpool))
+if sitechange==1:
+ dels('oldhosts/'+myhost+'current')
 #put('hosts/dhcp31481/current',str(zpool))
