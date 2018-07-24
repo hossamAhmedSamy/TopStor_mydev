@@ -6,6 +6,21 @@ from etcdget import etcdget as get
 from etcdput import etcdput as put
 import logmsg
 disksvalue=[]
+ 
+def getall(*args):
+ if len(args) > 1:
+  alls=get(args[1]+'/lists/'+args[0])
+ else:
+  alls=get('lists/'+args[0])
+ if len(alls) > 0 and alls[0] != -1:
+  alls=mtuple(alls[0])
+  return alls
+ else:
+  return [-1]
+
+def putall(*args):
+ alls=getall(args[0])
+ put(args[1]+'/lists/'+args[0],str(alls))
 
 def mustattach(cmdline,disksvalue):
    print('################################################')
@@ -40,17 +55,18 @@ def norm(val):
    
   
 def selectspare(*args):
- myhost=socket.gethostname()
+ myhost=args[0]
  faultdiskid='empty'
  faultdisk='empty'
  faultraid=spare=spareid='empty'
+ runninghosts=[]
  faultraidall={}
- allop=get('hosts','--prefix')
- newop=get(args[0])
+ allop=get('hosts','current')
+ newop=get('hosts/'+args[0]+'current')
  newop=mtuple(newop[0])
  for newpool in newop:
   for newraid in newpool['raidlist']:
-   if newraid['name'] != 'spares' and newraid['name'] != 'free':
+   if newraid['name'] != 'free':
     for newdisk in newraid['disklist']:
      if 'stripe' in newraid['name'] and 'empty' in faultdisk:
       runninghosts=[x['host'] for x in newraid['disklist'] ]
@@ -60,7 +76,7 @@ def selectspare(*args):
       faultdiskid=newdisk['id']
       faultraid=newraid['name']
       break;
-     elif 'ONLI' not in newdisk['status'] and 'empty' in faultdisk:
+     elif (('ONLI' not in newdisk['status'] and 'AVAIL' not in newdisk['status'] )  or 'Removed' in newdisk['changeop']) and 'empty' in faultdisk:
       runninghosts=[x['host'] for x in newraid['disklist'] if x['name'] not in newdisk['name']]
       
       faultdiskhost=newdisk['host']
@@ -94,8 +110,16 @@ def selectspare(*args):
  sparevalue=max(disksvalue,key=lambda x:x[1])
  disksvalue=sorted(disksvalue,key=lambda x:x[1], reverse=True)
  spare=disksvalue[0][0]   
- print('spares',spare,faultdisk,faultraid)
- if spare !='empty' and faultdisk !='empty'and 'logs' in faultraid :
+ #print('spares',spare,faultdisk,faultraid)
+ if spare !='empty' and faultdisk !='empty'and 'spare' in faultraid :
+  logmsg.sendlog('Dist2','info','system', faultdiskid,spareid,myhost)
+  cmdline=['/sbin/zpool', 'remove', faultdiskpool,faultdisk]
+  try:
+   mustattach(cmdline,disksvalue)
+   logmsg.sendlog('Disu2','info','system', faultdiskid,spareid,myhost)
+  except subprocess.CalledProcessError:
+   logmsg.sendlog('Difa2','info','system', 'attach '+faultdiskid,spareid,myhost)
+ elif spare !='empty' and faultdisk !='empty'and 'logs' in faultraid :
   cmdline=['/sbin/zpool', 'remove', faultdiskpool,faultdisk]
   try:
    subprocess.check_call(cmdline)
@@ -126,7 +150,6 @@ def selectspare(*args):
  elif spare !='empty' and faultdisk !='empty'and 'stripe' in faultraid:
   logmsg.sendlog('Dist2','info','system', faultdiskid,spareid,myhost)
   cmdline=['/sbin/zpool', 'attach','-f', faultdiskpool,faultdisk]
-  print(cmdline,disksvalue)
   try: 
    mustattach(cmdline,disksvalue)
    logmsg.sendlog('Disu2','info','system', faultdiskid,spareid,myhost)
@@ -135,7 +158,7 @@ def selectspare(*args):
  elif spare !='empty' and faultdisk !='empty'and 'mirror' in faultraid:
   logmsg.sendlog('Dist2','info','system', faultdiskid,spareid,myhost)
   cmdline=['/sbin/zpool', 'detach', faultdiskpool,faultdisk]
-  subprocess.check_call(cmdline)
+  subprocess.run(cmdline,stdout=subprocess.PIPE)
  elif spare !='empty' and faultdisk !='empty':
   logmsg.sendlog('Dist2','info','system', faultdiskid,spareid,myhost)
   cmdline=['/sbin/zpool', 'replace', faultdiskpool,faultdisk]

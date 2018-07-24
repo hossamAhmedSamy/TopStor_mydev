@@ -4,27 +4,36 @@ import json
 from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 from etcdput import etcdput as put
+from selectspare import getall
+from selectspare import putall
 import logmsg
+def changeop2(*args):
+ alls=getall(args[0])
+ if type(alls) != dict :
+  return -1
+ if len(args) > 1:
+  if args[1] == 'old':
+   putall(args[0],'old')
+   return 1
+ oldlls=getall(args[0],'old')
+ if type(oldlls) != dict :
+  for disk in alls['defdisks']:
+   logmsg.sendlog('Diwa1','warning','system', disk['id'], disk['changeop'])
+   cmdline='/sbin/zpool offline '+disk['pool']+' '+disk['name']
+   subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
+  putall(args[0],'old')
+  return
+ changeddisks={k:alls[k] for k in alls if alls[k] != oldlls[k] and 'disk' in k} 
+ print(changeddisks)
+ 
 
 def changeop(*args):
+ return
  newop=get(args[0])
  newop=mtuple(newop[0])
  if args[1] == 'dub':
   put('old'+args[0],str(newop))
   return
- oldop=get('old'+args[0])
- if oldop[0]==-1:
-  for newpool in newop: 
-   if 'pree' not in newpool['name']:
-    for newraid in newpool['raidlist']:
-     for newdisk in newraid['disklist']:
-      if 'ONLI' not in newdisk['changeop']:
-       logmsg.sendlog('Diwa1','warning','system', newdisk['id'], newdisk['changeop'])
-       cmdline='/sbin/zpool offline '+newpool['name']+' '+newdisk['name']
-       subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
-  changeop(args[0],'dub')
-  return
- oldop=mtuple(oldop[0])
  print('#######################################')
  changeop(args[0],'dub')
  for oldpool in oldop:
@@ -52,7 +61,7 @@ def changeop(*args):
             continue
            for newdisk in newraid['disklist']:
             if oldisk['name']==newdisk['name']:
-             if oldisk['status'] != newdisk['status'] or oldisk['changeop'] != newdisk['status']: 
+             if oldisk['status'] != newdisk['status'] or newdisk['changeop'] != newdisk['status']: 
               if 'ONLI' in newdisk['status']:
                logmsg.sendlog('Disu0','info','system', newdisk['id'], newdisk['status'])
               else:
@@ -67,4 +76,4 @@ def changeop(*args):
  
 
 if __name__=='__main__':
- changeop(*sys.argv[1:])
+ changeop2(*sys.argv[1:])
