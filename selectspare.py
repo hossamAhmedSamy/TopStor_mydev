@@ -32,7 +32,6 @@ def putall(*args):
 def mustattach(cmdline,disksallowed,defdisk,myhost):
    print('################################################')
    if len(disksallowed) < 1 : 
-    raise ValueError('no way cannot attach')
     return 'na'
    print('helskdlskdkddlsldssd#######################')
    cmd=cmdline
@@ -71,15 +70,24 @@ def diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools):
    return
   raid=raids[0]
   raids.pop(0)
+  if raid['name']=='free':
+   return
+
   myhostpools=[pool['name'] for pool in pools if pool['host']==myhost ]
-  disksinraid=[(disk['name'],disk['host']) for disk in alldisks if disk['raid'] == raid['name'] and disk['pool'] == raid['pool'] and disk['pool'] in myhostpools]
+  disksinraid=[(disk['name'],disk['host']) for disk in alldisks if disk['raid'] == raid['name'] and disk['pool'] == raid['pool'] and disk['pool'] in myhostpools ]
   hcount=[]
   for host in hosts:
-   hcount.append((host,str(disksinraid).count(host),raid['name']))
-  print('print',hcount)
-  diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools)
+   hcount.append((host,str(disksinraid).count(host)))
+  maxx=max(hcount,key=lambda x: x[1])
+  nonblanced=[x for x in hcount if maxx[1]-1 > x[1]]
+  selectdisk=[]
+  if len(nonblanced) > 0:
+   selectdisk=[x for x in disksinraid if x[1]==maxx[0]]
+   diskinfo=[x for x in alldisks if x['name']==selectdisk[0][0]]
+   diskreplace(myhost,diskinfo,hosts,alldisks,replacelist,raids,pools)
+   return
+  diskreplace(myhost,[],hosts,alldisks,replacelist,raids,pools)
   return
-
  defdisk=defdisks[0]
  disksinraid=[disk for disk in alldisks if disk['raid']==defdisk['raid'] and disk['name'] != defdisk['name'] and 'ONLI' in disk['changeop']]
  runninghosts=[disk['host'] for disk in alldisks if disk['raid']==defdisk['raid'] and disk['name'] != defdisk['name'] and 'ONLI' in disk['changeop']]
@@ -95,7 +103,7 @@ def diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools):
    diskvalue=-100000
   if 'spare' in rep['raid']:
     diskvalue+=10
-  if rep['host'] not in hosts: 
+  if rep['host'] not in runninghosts: 
    diskvalue+=100
   disksvalues.append((rep,diskvalue)) 
  disksvalues=sorted(disksvalues,key=lambda x:x[1], reverse=True)
@@ -146,13 +154,12 @@ def diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools):
   except subprocess.CalledProcessError:
    pass 
  replacelist=[x for x in replacelist if x['name']!=ret]
- defdisks=defdisks.pop(0)   
- diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids)
+ defdisks.pop(0)
+ diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools)
  
   
 def selectspare(*args):
  myhost=args[0]
- print('hihi',myhost,)
  newop=getall(myhost)
  #allop=getall(myhost,'old')
  #diffop={k:newop[k] for k in allop if allop[k] != newop[k] and 'disk' in k}
