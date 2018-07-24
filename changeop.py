@@ -6,6 +6,7 @@ from etcdget import etcdget as get
 from etcdput import etcdput as put
 from selectspare import getall
 from selectspare import putall
+from selectspare import delall
 import logmsg
 def changeop2(*args):
  alls=getall(args[0])
@@ -24,7 +25,9 @@ def changeop2(*args):
   putall(args[0],'old')
   return
  changeddisks={k:alls[k] for k in alls if alls[k] != oldlls[k] and 'disk' in k} 
- print(changeddisks)
+ print('changed',len(changeddisks))
+ if len(changeddisks) > 0:
+  delall(args[0],'old')
  
 
 def changeop(*args):

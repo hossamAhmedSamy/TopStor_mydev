@@ -4,9 +4,16 @@ import json
 from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 from etcdput import etcdput as put
+from etcddel import etcddel as dels 
 import logmsg
 disksvalue=[]
- 
+
+def delall(*args):
+ if len(args) > 1:
+  dels(args[1]+'/lists/'+args[0])
+ else:
+  dels('lists/'+args[0])
+
 def getall(*args):
  if len(args) > 1:
   alls=get(args[1]+'/lists/'+args[0])
@@ -22,26 +29,28 @@ def putall(*args):
  alls=getall(args[0])
  put(args[1]+'/lists/'+args[0],str(alls))
 
-def mustattach(cmdline,disksvalue):
+def mustattach(cmdline,disksallowed,defdisk,myhost):
    print('################################################')
-   print(len(disksvalue))
-   print('disksvalue',disksvalue)
-   if len(disksvalue) < 1 : 
+   if len(disksallowed) < 1 : 
     raise ValueError('no way cannot attach')
-    return
+    return 'na'
    print('helskdlskdkddlsldssd#######################')
    cmd=cmdline
-   spare=disksvalue[0][0]
-   print(cmd,spare)
-   disksvalue.pop(0)
-   cmd.append(spare)
-   print(cmd)
+   spare=disksallowed[0][0]
+   if spare['pool']==defdisk['pool']:
+    cmdline=['/sbin/zpool', 'remove', defdisk['pool'],spare['name']]
+    subprocess.run(cmdline,stdout=subprocess.PIPE)
+   cmd.append(spare['name'])
+   logmsg.sendlog('Dist2','info','system', defdisk['id'],spare['id'],myhost)
    try: 
     subprocess.check_call(cmd)
-    return
+    logmsg.sendlog('Disu2','info','system', defdisk['id'],spare['id'],myhost)
+    return spare['name'] 
    except subprocess.CalledProcessError:
-    mustattach(cmdline[:-1],disksvalue) 
-    print('selected disk',spare)
+    logmsg.sendlog('Difa2','info','system', defdisk['id'],spare['id'],myhost)
+    disksallowed.pop(0)
+    ret=mustattach(cmdline[:-1],disksallowed,defdisk,myhost) 
+    return ret
  
 def norm(val):
  units={'B':1/1024**2,'K':1/1024, 'M': 1, 'G':1024 , 'T': 1024**2 }
@@ -52,121 +61,104 @@ def norm(val):
    return float(val[:-2])*float(units[val[-2]])
   else:
    return float(val[:-1])*float(units['B'])
-   
+
+
+def diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools):
+ if len(defdisks) < 1:
+  print('no more defective disks checking for non-red host raids')
+  if len(raids) < 1 :
+   print('no raids too') 
+   return
+  raid=raids[0]
+  raids.pop(0)
+  myhostpools=[pool['name'] for pool in pools if pool['host']==myhost ]
+  disksinraid=[(disk['name'],disk['host']) for disk in alldisks if disk['raid'] == raid['name'] and disk['pool'] == raid['pool'] and disk['pool'] in myhostpools]
+  hcount=[]
+  for host in hosts:
+   hcount.append((host,str(disksinraid).count(host),raid['name']))
+  print('print',hcount)
+  diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools)
+  return
+
+ defdisk=defdisks[0]
+ disksinraid=[disk for disk in alldisks if disk['raid']==defdisk['raid'] and disk['name'] != defdisk['name'] and 'ONLI' in disk['changeop']]
+ runninghosts=[disk['host'] for disk in alldisks if disk['raid']==defdisk['raid'] and disk['name'] != defdisk['name'] and 'ONLI' in disk['changeop']]
+ mindisk=min(disksinraid,key=lambda x:norm(x['size']))
+ disksvalues=[]
+ for  rep in replacelist:
+  diskvalue=0
+  if rep['size'] == mindisk['size'] :
+   diskvalue+=1
+  elif norm(rep['size']) > norm(mindisk['size']): 
+       diskvalue+=1-(norm(rep['size']) - norm(rep['size']))/norm(mindisk['size'])
+  else:
+   diskvalue=-100000
+  if 'spare' in rep['raid']:
+    diskvalue+=10
+  if rep['host'] not in hosts: 
+   diskvalue+=100
+  disksvalues.append((rep,diskvalue)) 
+ disksvalues=sorted(disksvalues,key=lambda x:x[1], reverse=True)
+ if 'spare' in defdisk['raid'] :
+  logmsg.sendlog('Dist3','info','system', defdisk['id'],defdisk['host'])
+  cmdline=['/sbin/zpool', 'remove', defdisk['pool'],defdisk['name']]
+  subprocess.run(cmdline,stdout=subprocess.PIPE)
+  ret=replacelist
+ elif 'logs' in defdisk['raid'] :
+  cmdline=['/sbin/zpool', 'remove', defdisk['pool'],defdisk['name']]
+  try:
+   subprocess.check_call(cmdline)
+   if spare['pool']==defdisk['pool']:
+    cmdline=['/sbin/zpool', 'remove', defdisk['pool'],spare['name']]
+    subprocess.run(cmdline,stdout=subprocess.PIPE)
+   cmdline=['/sbin/zpool', 'add', faultdiskpool,'log']
+   try: 
+    ret=mustattach(cmdline,disksvalues,defdisk,myhost)
+   except subprocess.CalledProcessError:
+    pass
+  except:
+   pass 
+ elif 'cache' in defdisk['raid'] :
+  cmdline=['/sbin/zpool', 'remove', defdisk['pool'],defdisk['name']]
+  try:
+   subprocess.check_call(cmdline)
+   cmdline=['/sbin/zpool', 'add', defdisk['pool'],'cache']
+   try: 
+    ret=mustattach(cmdline,disksvalues,defdisk,myhost)
+   except subprocess.CalledProcessError:
+    pass
+  except:
+   pass 
+ elif 'stripe' in defdisk['raid'] :
+  cmdline=['/sbin/zpool', 'attach','-f', defdisk['pool'],disks[0]['name']]
+  try: 
+   ret=mustattach(cmdline,disksvalues,defdisk,myhost)
+  except :
+    pass
+ elif 'mirror' in defdisk['name']:
+  cmdline=['/sbin/zpool', 'detach', defdisk['pool'],defdisk['name']]
+  subprocess.run(cmdline,stdout=subprocess.PIPE)
+  ret=replacelist
+ else:
+  cmdline=['/sbin/zpool', 'replace', defdisk['pool'],defdisk['name']]
+  try:
+   ret=mustattach(cmdline,disksvalues,defdisk,myhost)
+  except subprocess.CalledProcessError:
+   pass 
+ replacelist=[x for x in replacelist if x['name']!=ret]
+ defdisks=defdisks.pop(0)   
+ diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids)
+ 
   
 def selectspare(*args):
  myhost=args[0]
- faultdiskid='empty'
- faultdisk='empty'
- faultraid=spare=spareid='empty'
- runninghosts=[]
- faultraidall={}
- allop=get('hosts','current')
- newop=get('hosts/'+args[0]+'current')
- newop=mtuple(newop[0])
- for newpool in newop:
-  for newraid in newpool['raidlist']:
-   if newraid['name'] != 'free':
-    for newdisk in newraid['disklist']:
-     if 'stripe' in newraid['name'] and 'empty' in faultdisk:
-      runninghosts=[x['host'] for x in newraid['disklist'] ]
-      faultdiskhost=newdisk['host']
-      faultdiskpool=newpool['name']
-      faultdisk=newdisk['name']
-      faultdiskid=newdisk['id']
-      faultraid=newraid['name']
-      break;
-     elif (('ONLI' not in newdisk['status'] and 'AVAIL' not in newdisk['status'] )  or 'Removed' in newdisk['changeop']) and 'empty' in faultdisk:
-      runninghosts=[x['host'] for x in newraid['disklist'] if x['name'] not in newdisk['name']]
-      
-      faultdiskhost=newdisk['host']
-      faultdiskpool=newpool['name']
-      faultdisk=newdisk['name']
-      faultdiskid=newdisk['id']
-      faultraid=newraid['name']
-      break;
-#   elif newraid['name'] == 'spares':
-#    spare=newraid['disklist'][0]['name']
-#    spareid=newraid['disklist'][0]['id']
- disksvalue=[]
- for hostpools in allop:
-  pools=mtuple(hostpools[1])
-  for newpool in pools:
-   for newraid in newpool['raidlist']:
-    if ('spare' in newraid['name'] or 'free' in newraid['name']) and len(newraid['disklist']) > 0: 
-     mindisk=min(newraid['disklist'],key=lambda x:norm(x['size']))
-     for newdisk in newraid['disklist']:
-      diskvalue=0
-      if newdisk['size'] == mindisk['size'] :
-       diskvalue+=1
-      elif norm(newdisk['size']) > norm(mindisk['size']): 
-       diskvalue+=1-(norm(newdisk['size']) - norm(mindisk['size']))/norm(mindisk['size'])
-      if 'spare' in newraid['name']:
-       diskvalue+=10
-      if newdisk['host'] not in runninghosts: 
-       diskvalue+=100
-      disksvalue.append((newdisk['name'],diskvalue)) 
-   
- sparevalue=max(disksvalue,key=lambda x:x[1])
- disksvalue=sorted(disksvalue,key=lambda x:x[1], reverse=True)
- spare=disksvalue[0][0]   
- #print('spares',spare,faultdisk,faultraid)
- if spare !='empty' and faultdisk !='empty'and 'spare' in faultraid :
-  logmsg.sendlog('Dist2','info','system', faultdiskid,spareid,myhost)
-  cmdline=['/sbin/zpool', 'remove', faultdiskpool,faultdisk]
-  try:
-   mustattach(cmdline,disksvalue)
-   logmsg.sendlog('Disu2','info','system', faultdiskid,spareid,myhost)
-  except subprocess.CalledProcessError:
-   logmsg.sendlog('Difa2','info','system', 'attach '+faultdiskid,spareid,myhost)
- elif spare !='empty' and faultdisk !='empty'and 'logs' in faultraid :
-  cmdline=['/sbin/zpool', 'remove', faultdiskpool,faultdisk]
-  try:
-   subprocess.check_call(cmdline)
-   cmdline=['/sbin/zpool', 'remove', faultdiskpool,spare]
-   subprocess.check_call(cmdline)
-   cmdline=['/sbin/zpool', 'add', faultdiskpool,'log',spare]
-   try: 
-    subprocess.check_call(cmdline)
-    logmsg.sendlog('Disu2','info','system', faultdiskid,spareid,myhost)
-   except subprocess.CalledProcessError:
-    logmsg.sendlog('Difa2','info','system', 'attach '+faultdiskid,spareid,myhost)
-  except:
-   pass 
- elif spare !='empty' and faultdisk !='empty'and 'cache' in faultraid :
-  cmdline=['/sbin/zpool', 'remove', faultdiskpool,faultdisk]
-  try:
-   subprocess.check_call(cmdline)
-   cmdline=['/sbin/zpool', 'remove', faultdiskpool,spare]
-   subprocess.check_call(cmdline)
-   cmdline=['/sbin/zpool', 'add', faultdiskpool,'cache',spare]
-   try: 
-    subprocess.check_call(cmdline)
-    logmsg.sendlog('Disu2','info','system', faultdiskid,spareid,myhost)
-   except subprocess.CalledProcessError:
-    logmsg.sendlog('Difa2','info','system', 'attach '+faultdiskid,spareid,myhost)
-  except:
-       pass 
- elif spare !='empty' and faultdisk !='empty'and 'stripe' in faultraid:
-  logmsg.sendlog('Dist2','info','system', faultdiskid,spareid,myhost)
-  cmdline=['/sbin/zpool', 'attach','-f', faultdiskpool,faultdisk]
-  try: 
-   mustattach(cmdline,disksvalue)
-   logmsg.sendlog('Disu2','info','system', faultdiskid,spareid,myhost)
-  except :
-   logmsg.sendlog('Difa2','info','system', 'attach '+faultdiskid,spareid,myhost)
- elif spare !='empty' and faultdisk !='empty'and 'mirror' in faultraid:
-  logmsg.sendlog('Dist2','info','system', faultdiskid,spareid,myhost)
-  cmdline=['/sbin/zpool', 'detach', faultdiskpool,faultdisk]
-  subprocess.run(cmdline,stdout=subprocess.PIPE)
- elif spare !='empty' and faultdisk !='empty':
-  logmsg.sendlog('Dist2','info','system', faultdiskid,spareid,myhost)
-  cmdline=['/sbin/zpool', 'replace', faultdiskpool,faultdisk]
-  try:
-   mustattach(cmdline,disksvalue)
-   logmsg.sendlog('Disu2','info','system', faultdiskid,spareid,myhost)
-  except subprocess.CalledProcessError:
-   logmsg.sendlog('Difa2','info','system', 'attach '+faultdiskid,spareid,myhost)
+ print('hihi',myhost,)
+ newop=getall(myhost)
+ #allop=getall(myhost,'old')
+ #diffop={k:newop[k] for k in allop if allop[k] != newop[k] and 'disk' in k}
+ diskreplace(myhost,newop['defdisks'],newop['hosts'],newop['disks'],newop['freedisks']+newop['sparedisks'],newop['raids'],newop['pools'])
+ return
+ 
  
 if __name__=='__main__':
  selectspare(*sys.argv[1:])

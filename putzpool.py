@@ -49,7 +49,7 @@ for a in y:
   zlist2=str(result.stdout)[2:][:-3].split('\\t')
   zdict={ 'name':b[0],'changeop':b[1], 'status':b[1],'host':myhost, 'size':str(zlist[1]), 'alloc': str(zlist[2]), 'empty': zlist[3], 'dedup': zlist[7], 'compressratio': zlist2[2], 'raidlist': raidlist ,'volumes':volumelist}
   zpool.append(zdict)
-  lpools.append(zdict['name']) 
+  lpools.append(zdict) 
   for vol in zfslist:
    if b[0]+'/' in vol and '@' not in vol and b[0] in vol:
     volume=vol.split()
@@ -70,13 +70,13 @@ for a in y:
   disklist=[]
   rdict={ 'name':b[0], 'changeop':b[1],'status':b[1],'pool':zdict['name'],'host':myhost,'disklist':disklist }
   raidlist.append(rdict)
-  lraids.append(rdict['name'])
+  lraids.append(rdict)
  elif any(raid in a for raid in raid2):
   spaces=len(a.split(a.split()[0])[0])
   disklist=[]
   rdict={ 'name':b[0], 'changeop':'NA','status':'NA','pool':zdict['name'],'host':myhost,'disklist':disklist }
   raidlist.append(rdict)
-  lraids.append(rdict['name'])
+  lraids.append(rdict)
  elif 'scsi' in a:
    diskid='-1'
    host='-1'
@@ -85,7 +85,7 @@ for a in y:
     disklist=[]
     rdict={ 'name':'stripe-'+str(stripecount), 'pool':zdict['name'],'changeop':'NA','status':'NA','host':myhost,'disklist':disklist }
     raidlist.append(rdict)
-    lraids.append(rdict['name'])
+    lraids.append(rdict)
     stripecount+=1
    for lss in lsscsi:
     z=lss.split()
@@ -110,11 +110,11 @@ if len(freepool) > 0:
  raidlist=[]
  zdict={ 'name':'pree','changeop':'pree', 'status':'pree', 'host':myhost,'size':'0', 'alloc': '0', 'empty': '0', 'dedup': '0', 'compressratio': '0', 'raidlist': raidlist, 'volumes':[]}
  zpool.append(zdict)
- lpools.append(zdict['name'])
+ lpools.append(zdict)
  disklist=[]
  rdict={ 'name':'free', 'changeop':'free','status':'free','pool':'pree','host':myhost,'disklist':disklist }
  raidlist.append(rdict)
- lraids.append(rdict['name'])
+ lraids.append(rdict)
  for lss in freepool:
   z=lss.split()
   diskid=lsscsi.index(lss)
@@ -134,6 +134,3 @@ for disk in ldisks:
  elif disk['changeop'] != 'ONLINE': 
   ldefdisks.append(disk)
 put('lists/'+myhost,str(lists))
-if sitechange==1:
- dels('old',myhost)
-print(lists)
