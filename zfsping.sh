@@ -187,5 +187,6 @@ do
  /pace/iscsiwatchdog.sh 2>/dev/null 
  /pace/putzpool.py 2>/dev/null
   echo Collecting a change in system occured >> /root/zfspingtmp
- /pace/changeop.py hosts/$myhost/current d
+ #/pace/changeop.py hosts/$myhost/current d
+ /pace/changeop.py $myhost
 done
