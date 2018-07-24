@@ -51,6 +51,7 @@ do
   then
    echo for $isprimary sending info Partsu03 booted with ip >> /root/zfspingtmp
    /TopStor/logmsg.py Partsu03 info system $myhost $myip
+   /pace/etcdput.py ready/$myhost ok
   fi
   runningcluster=1
   leaderall=` ./etcdget.py leader --prefix 2>/dev/null`
@@ -137,6 +138,7 @@ do
     if [[ $isknown -eq 3 ]];
     then
      /TopStor/logmsg.py Partsu04 info system $myhost $myip
+     /pace/etcdput.py ready/$myhost ok
     fi
     echo finish running tasks task:boradcast, log..etc >> /root/zfspingtmp
    fi

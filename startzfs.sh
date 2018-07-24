@@ -62,6 +62,7 @@ then
   ./runningetcdnodes.py $myip 2>/dev/null
   ./etcddel.py known --prefix 2>/dev/null 
   ./etcddel.py possbile --prefix 2>/dev/null 
+  ./etcddel.py ready --prefix 2>/dev/null 
  rm -rf /var/lib/iscsi/nodes/* 2>/dev/null
  echo startiscsiwatchdog >>/root/tmp2
  /pace/iscsiwatchdog.sh 2>/dev/null

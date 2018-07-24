@@ -1,9 +1,11 @@
 #!/bin/python3.6
 import subprocess, socket
 from etcdput import etcdput as put
+from etcdget import etcdget as get 
 from etcddel import etcddel as dels 
 myhost=socket.gethostname()
 sitechange=0
+readyhosts=get('ready','--prefix')
 cmdline='/sbin/zpool status'
 result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
 y=str(result)[2:][:-3].replace('\\t','').split('\\n')
@@ -96,6 +98,9 @@ for a in y:
      size=z[7]
      freepool.remove(lss)
      break
+    #else:
+    # cmdline='/pace/hostlost.sh '+z[6]
+    # subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
    changeop=b[1]
    if host=='-1':
     print('hostfound',b[0],zpool[len(zpool)-1]['status'])
@@ -119,6 +124,8 @@ if len(freepool) > 0:
   z=lss.split()
   diskid=lsscsi.index(lss)
   host=z[3].split('-')[1]
+  if host not in str(readyhosts):
+   continue
   lhosts.add(host)
   size=z[7]
   ddict={'name':'scsi-'+z[6], 'changeop':'free','status':'free','raid':'free','pool':'pree','id': str(diskid), 'host':host, 'size':size}

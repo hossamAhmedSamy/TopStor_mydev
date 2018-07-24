@@ -51,6 +51,8 @@ if known != ['']:
   if(heart == ['-1']):
    etcddel('known/'+str(kn[0]))
    logmsg.sendlog('Partst02','warning','system', str(kn[0]))
+   etcddel('ready/'+str(kn[0]))
+   etcddel('old','--prefix')
    cmdline=['/pace/hostlost.sh',str(kn[0])]
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    etcddel('localrun/'+str(kn[0]))
