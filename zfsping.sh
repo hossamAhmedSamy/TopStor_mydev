@@ -52,6 +52,7 @@ do
    echo for $isprimary sending info Partsu03 booted with ip >> /root/zfspingtmp
    /TopStor/logmsg.py Partsu03 info system $myhost $myip
    /pace/etcdput.py ready/$myhost ok
+   /TopStor/zpooltoimport.py all 
   fi
   runningcluster=1
   leaderall=` ./etcdget.py leader --prefix 2>/dev/null`
