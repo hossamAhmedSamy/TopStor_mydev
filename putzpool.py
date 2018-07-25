@@ -40,7 +40,7 @@ for a in y:
   zdict={}
   rdict={}
   ddict={}
-  cmdline=['/sbin/zfs','list','-t','snapshot,filesystem',b[0],'-o','name,creation,used,quota,usedbysnapshots,refcompressratio,prot:kind','-H']
+  cmdline=['/sbin/zfs','list','-t','snapshot,filesystem',b[0],'-o','name,creation,used,quota,usedbysnapshots,refcompressratio,prot:kind,available','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   zfslist=str(result.stdout)[2:][:-3].replace('\\t',' ').split('\\n')
   cmdline=['/sbin/zpool','list',b[0],'-H']
@@ -49,7 +49,7 @@ for a in y:
   cmdline=['/sbin/zfs','get','compressratio','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   zlist2=str(result.stdout)[2:][:-3].split('\\t')
-  zdict={ 'name':b[0],'changeop':b[1], 'status':b[1],'host':myhost, 'size':str(zlist[1]), 'alloc': str(zlist[2]), 'empty': zlist[3], 'dedup': zlist[7], 'compressratio': zlist2[2], 'raidlist': raidlist ,'volumes':volumelist}
+  zdict={ 'name':b[0],'changeop':b[1], 'status':b[1],'host':myhost, 'used':str(zfslist[0].split()[6]),'available':str(zfslist[0].split()[11]), 'alloc': str(zlist[2]), 'empty': zlist[3], 'dedup': zlist[7], 'compressratio': zlist2[2], 'raidlist': raidlist ,'volumes':volumelist}
   zpool.append(zdict)
   lpools.append(zdict) 
   for vol in zfslist:
@@ -113,7 +113,7 @@ for a in y:
    ldisks.append(ddict)
 if len(freepool) > 0:
  raidlist=[]
- zdict={ 'name':'pree','changeop':'pree', 'status':'pree', 'host':myhost,'size':'0', 'alloc': '0', 'empty': '0', 'dedup': '0', 'compressratio': '0', 'raidlist': raidlist, 'volumes':[]}
+ zdict={ 'name':'pree','changeop':'pree', 'available':'0', 'status':'pree', 'host':myhost,'used':'0', 'alloc': '0', 'empty': '0', 'dedup': '0', 'compressratio': '0', 'raidlist': raidlist, 'volumes':[]}
  zpool.append(zdict)
  lpools.append(zdict)
  disklist=[]
