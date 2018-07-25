@@ -1,72 +1,34 @@
 #!/bin/python3.6
 import subprocess, socket
 from etcdput import etcdput as put
+from etcdget import etcdget as get 
+from os import listdir
+from selectspare import getall
 import sys
 
 def zpooltoimport(*args):
  myhost=socket.gethostname()
- with open('/root/zpool','w') as r:
-  r.write('hi all')
- cmdline='/sbin/zpool import'
- result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
- y=str(result)[2:][:-3].replace('\\t','').split('\\n')
- #with open("tmp") as f:
- # y=f.read()
- #y=y.split('\n')
- #with open("zfslist.txt") as f:
- # zfslist=f.read()
- #zfslist2=zfslist.split('\n')
- cmdline='/bin/lsscsi -is'
- result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
- lsscsi=[x for x in str(result)[2:][:-3].replace('\\t','').split('\\n') if 'LIO' in x ]
- freepool=[x for x in str(result)[2:][:-3].replace('\\t','').split('\\n') if 'LIO' in x ]
- raidtypes=['mirror','raidz','stripe']
- raid2=['log','cache','spare']
- zpool=[]
- stripecount=0
- spaces=-2
- raidlist=[]
- disklist=[]
- for a in y:
-  b=a.split()
-  if "pdhc" in a and  'pool' not in a and  'UNAVA' not in b[1]:
-   raidlist=[]
-   volumelist=[]
-   zdict={}
-   zdict={ 'name':b[0], 'status':b[1],  'raidlist': raidlist ,'volumes':volumelist}
-   zpool.append(zdict)
-  elif any(raid in a for raid in raidtypes):
-   spaces=len(a.split(a.split()[0])[0])
-   disklist=[]
-   zdict={ 'name':b[0], 'status':b[1],'disklist':disklist }
-   raidlist.append(zdict)
-  elif any(raid in a for raid in raid2):
-   spaces=len(a.split(a.split()[0])[0])
-   disklist=[]
-   zdict={ 'name':b[0], 'status':'NA','disklist':disklist }
-   raidlist.append(zdict)
-  elif 'scsi' in a:
-    diskid='-1'
-    host='-1'
-    size='-1' 
-    if  len(a.split('scsi')[0]) < (spaces+2) or (len(raidlist) < 1 and len(zpool)> 0):
-     disklist=[]
-     zdict={ 'name':'stripe-'+str(stripecount), 'status':'NA','disklist':disklist }
-     raidlist.append(zdict)
-     stripecount+=1
-    for lss in lsscsi:
-     z=lss.split()
-     if z[6] in b[0]:
-      diskid=lsscsi.index(lss)
-      host=z[3].split('-')[1]
-      size=z[7]
-      break
-    zdict={'name':b[0], 'status':b[1],'id': str(diskid), 'host':host, 'size':size}
-    disklist.append(zdict)
-  else:
-    zdict={'name':'na','status':a}
- put('toimport/'+myhost,str(zpool))
- #put('hosts/dhcp31481/current',str(zpool))
- return zpool 
+ runningpools=[]
+ readyhosts=get('ready','--prefix')
+ for ready in readyhosts:
+  ready=ready[0].replace('ready/','')
+  runningpools.append(getall(ready)['pools'])
+ pools=[f for f in listdir('/TopStordata/') if 'pdhcp' in f and f not in str(runningpools) and 'pree' not in f ]
+ mydisks=getall(myhost)['disks']
+ mydisks=[(x['name'],x['status'],x['changeop']) for x in mydisks if 'ONLINE' not in x['status']]
+ pooltoimport=[]
+ for pool in pools:
+  cmdline='/sbin/zpool import -c /TopStordata/'+pool
+  result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+  pooldisks=[x.split()[0] for x in str(result)[2:][:-3].replace('\\t','').split('\\n') if 'scsi' in x ]
+  count=0
+  for disk in pooldisks:
+   if disk in str(mydisks):
+    count+=1
+  pooltoimport.append((pool,len(pooldisks),count))
+ print(pooltoimport)
+ put('toimport/'+myhost,str(pooltoimport))
+ return pooltoimport 
+
 if __name__=='__main__':
  zpooltoimport(*sys.argv[1:])

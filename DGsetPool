@@ -120,7 +120,7 @@ then
    /TopStor/logmsg.py DG1st6 info $userreq ${nextpool} $diskn1
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
   nextpool=${myhost}$RANDOM;
-  /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
+  /sbin/zpool create -o cachefile=/Topstordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -ne 0 ]; then
     /TopStor/logmsg.py DG1fa6 error $userreq ${nextpool} $diskn1 
   else 
@@ -167,7 +167,7 @@ then
   done;
    /TopStor/logmsg.py DGst13 info $userreq p${nextpool} $diskns
   nextpool=${myhost}$RANDOM;
-  /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f ${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
+  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f ${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
     /TopStor/logmsg.py DGsu13 info $userreq p${nextpool} $diskns
   else
@@ -213,7 +213,7 @@ then
   done;
    /TopStor/logmsg.py DGst15 info $userreq p${nextpool} $diskns
   nextpool=${myhost}$RANDOM;
-  /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz2 ${disk1} 2>txt/${0:2}$userreq.txt
+  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz2 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
     /TopStor/logmsg.py DGsu15 info $userreq p${nextpool} $diskns
   else
@@ -258,8 +258,8 @@ then
    diskns=${diskns}$diskn","
   done;
    /TopStor/logmsg.py DGst17 info $userreq ${nextpool} $diskns
-  echo /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz1 ${disk1} >/root/tmp
-  /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz1 ${disk1} 2>txt/${0:2}$userreq.txt
+  echo /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on cachefile=/TopStordata/p${nextpool} -f p${nextpool} raidz1 ${disk1} >/root/tmp
+  /sbin/zpool create -o ashift=12 -o autoexpand=on -o cachefile=/TopStordata/p${nextpool} -o autoreplace=on -f p${nextpool} raidz1 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
     /TopStor/logmsg.py DGsu17 info $userreq p${nextpool} $diskns
   else
@@ -293,7 +293,7 @@ then
   done;
    /TopStor/logmsg.py DGst21 info $userreq p${nextpool} $diskns
   nextpool=${myhost}$RANDOM;
-  /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
+  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
     /TopStor/logmsg.py DGsu21 info $userreq p${nextpool} $diskns
   else
@@ -317,7 +317,7 @@ then
   done;
    /TopStor/logmsg.py DGst19 info $userreq p${nextpool} $diskns
   nextpool=${myhost}$RANDOM;
-  /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} mirror ${disk1} 2>txt/${0:2}$userreq.txt
+  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} mirror ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
     /TopStor/logmsg.py DGsu19 info $userreq p${nextpool} $diskns
   else
