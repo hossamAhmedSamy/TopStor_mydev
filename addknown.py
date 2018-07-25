@@ -40,7 +40,6 @@ else:
 cmdline=['/pace/etcdget.py','known','--prefix']
 knownres=subprocess.run(cmdline,stdout=subprocess.PIPE)
 known=str(knownres.stdout)[2:][:-3].replace('known/','').split('\\n')
-print('known=',known)
 if known != ['']:
  for kno in known:
   kn=mtuple(kno) 
