@@ -174,7 +174,7 @@ echo i all zpool exported >>/root/tmp2
 #  sh iscsirefresh.sh
 #  sh listingtargets.sh
   echo freshcluster=$freshcluster so zpool importing >>/root/tmp2
-  zpool import -a 2>/dev/null
+  #zpool import -a 2>/dev/null
    ./putzpool.py 2>/dev/null
   echo ran putzpool >>/root/tmp2
  else

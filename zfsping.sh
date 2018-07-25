@@ -92,7 +92,7 @@ do
    ./etcddel.py leader 2>/dev/null
    ./etcdput.py leader/$myhost $myip 2>/dev/null
    echo importing all pools >> /root/zfspingtmp
-   /sbin/zpool import -am &>/dev/null
+   #/sbin/zpool import -am &>/dev/null
    echo running putzpool and nfs >> /root/zfspingtmp
    ./putzpool.py 2>/dev/null
    systemctl start nfs 2>/dev/null
