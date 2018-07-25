@@ -96,7 +96,7 @@ def diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools,exclude,m
   dontuse=defdisk['host']
  disksinraid=[disk for disk in alldisks if disk['raid']==defdisk['raid'] and disk['name'] != defdisk['name'] and 'ONLI' in disk['changeop']]
  runninghosts=[disk['host'] for disk in alldisks if disk['raid']==defdisk['raid'] and disk['name'] != defdisk['name'] and 'ONLI' in disk['changeop'] and disk['host'] not in dontuse ]
- if '-1' in mindisksize:
+ if mindisksize < 0:
   mindisk=min(disksinraid,key=lambda x:norm(x['size']))
   mindisk=mindisk['size']
  else:
