@@ -49,6 +49,7 @@ if known != ['']:
   heart=str(heartres.stdout)[2:][:-3].split('\\n')
   print('heartbeat=',heart)
   if(heart == ['-1']):
+   print('the known ',str(kn[0]),' is gone')
    etcddel('known/'+str(kn[0]))
    logmsg.sendlog('Partst02','warning','system', str(kn[0]))
    etcddel('ready/'+str(kn[0]))
