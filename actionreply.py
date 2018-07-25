@@ -88,6 +88,11 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received Zpool from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if clear cache ##############
+ elif r["req"]=='ClearCache':  
+  with open('/root/recv','a') as f:
+   f.write('received ClearCache from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if broadcast ##############
  elif r["req"]=='broadcast':  
   with open('/root/recv','a') as f:
