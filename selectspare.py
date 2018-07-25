@@ -94,19 +94,22 @@ def diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools):
  mindisk=min(disksinraid,key=lambda x:norm(x['size']))
  disksvalues=[]
  for  rep in replacelist:
-  diskvalue=0
+  diskvalue=float(0)
   if rep['size'] == mindisk['size'] :
-   diskvalue+=1
+   diskvalue=diskvalue+1
   elif norm(rep['size']) > norm(mindisk['size']): 
-       diskvalue+=1-(norm(rep['size']) - norm(rep['size']))/norm(mindisk['size'])
+       diskvalue=diskvalue+float(1-(norm(rep['size']) - norm(mindisk['size']))/norm(mindisk['size']))
+       print('sizesfloat',float(1.0-(norm(rep['size']) - norm(mindisk['size']))/norm(mindisk['size'])))
+       print('sizes',diskvalue,norm(rep['size']),norm(mindisk['size']))
   else:
    diskvalue=-100000
   if 'spare' in rep['raid']:
-    diskvalue+=10
+    diskvalue=diskvalue+10
   if rep['host'] not in runninghosts: 
-   diskvalue+=100
+   diskvalue=diskvalue+100
   disksvalues.append((rep,diskvalue)) 
  disksvalues=sorted(disksvalues,key=lambda x:x[1], reverse=True)
+ print('print',disksvalues)
  if 'spare' in defdisk['raid'] :
   logmsg.sendlog('Dist3','info','system', defdisk['id'],defdisk['host'])
   cmdline=['/sbin/zpool', 'remove', defdisk['pool'],defdisk['name']]
@@ -148,7 +151,7 @@ def diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools):
   subprocess.run(cmdline,stdout=subprocess.PIPE)
   ret=replacelist
  else:
-  cmdline=['/sbin/zpool', 'replace', defdisk['pool'],defdisk['name']]
+  cmdline=['/sbin/zpool', 'replace', '-f',defdisk['pool'],defdisk['name']]
   try:
    ret=mustattach(cmdline,disksvalues,defdisk,myhost)
   except subprocess.CalledProcessError:

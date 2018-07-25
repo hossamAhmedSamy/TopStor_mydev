@@ -191,4 +191,5 @@ do
   echo Collecting a change in system occured >> /root/zfspingtmp
  #/pace/changeop.py hosts/$myhost/current d
  /pace/changeop.py $myhost
+ /pace/selectspare.py $myhost
 done
