@@ -8,6 +8,14 @@ from selectspare import getall
 from selectspare import putall
 from selectspare import delall
 import logmsg
+def forceoffline(*args):
+ alls=getall(args[0])
+ mypools=[x for x in alls['pools'] if 'pree' not in x['name'] ]  
+ for mypool in mypools:
+  if args[1] in str(mypool):
+   cmdline='/sbin/zpool offline '+mypool['name']+' '+args[1]
+   subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
+ return
 def changeop(*args):
  alls=getall(args[0])
  if type(alls) != dict :
@@ -32,4 +40,7 @@ def changeop(*args):
 
 
 if __name__=='__main__':
- changeop(*sys.argv[1:])
+ if len(sys.argv) > 2 and 'scsi' in sys.argv[2]:
+   forceoffline(*sys.argv[1:])
+ else: 
+   changeop(*sys.argv[1:])

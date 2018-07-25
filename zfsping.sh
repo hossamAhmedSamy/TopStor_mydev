@@ -184,7 +184,7 @@ do
  then
   echo Yes I am primary so will check for known hosts >> /root/zfspingtmp
   ./addknown.py 2>/dev/null
-  ./selectimport.py
+  ./selectimport.py $myhost
  fi 
  /pace/iscsiwatchdog.sh 2>/dev/null 
  /pace/putzpool.py 2>/dev/null

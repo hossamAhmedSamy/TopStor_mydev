@@ -13,7 +13,7 @@ def zpooltoimport(*args):
  for ready in readyhosts:
   ready=ready[0].replace('ready/','')
   runningpools.append(getall(ready)['pools'])
- pools=[f for f in listdir('/TopStordata/') if 'pdhcp' in f and f not in str(runningpools) ]
+ pools=[f for f in listdir('/TopStordata/') if 'pdhcp' in f and f not in str(runningpools) and 'pree' not in f ]
  mydisks=getall(myhost)['disks']
  mydisks=[(x['name'],x['status'],x['changeop']) for x in mydisks if 'ONLINE' not in x['status']]
  pooltoimport=[]

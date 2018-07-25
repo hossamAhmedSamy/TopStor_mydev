@@ -62,7 +62,7 @@ def norm(val):
    return float(val[:-1])*float(units['B'])
 
 
-def diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools,exclude):
+def diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools,exclude,mindisksize):
  if len(defdisks) < 1:
   print('no more defective disks checking for non-red host raids')
   if len(raids) < 1 :
@@ -74,7 +74,7 @@ def diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools,exclude):
    return
 
   myhostpools=[pool['name'] for pool in pools if pool['host']==myhost ]
-  disksinraid=[(disk['name'],disk['host']) for disk in alldisks if disk['raid'] == raid['name'] and disk['pool'] == raid['pool'] and disk['pool'] in myhostpools ]
+  disksinraid=[(disk['name'],disk['host'],disk['size']) for disk in alldisks if disk['raid'] == raid['name'] and disk['pool'] == raid['pool'] and disk['pool'] in myhostpools ]
   hcount=[]
   for host in hosts:
    hcount.append((host,str(disksinraid).count(host)))
@@ -84,9 +84,11 @@ def diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools,exclude):
   if len(nonblanced) > 0:
    selectdisk=[x for x in disksinraid if x[1]==maxx[0]]
    diskinfo=[x for x in alldisks if x['name']==selectdisk[0][0]]
-   diskreplace(myhost,diskinfo,hosts,alldisks,replacelist,raids,pools,'limithost')
+   mindisksize=min(disksinraid,key=lambda x:norm(x[2]))
+   mindisksize=mindisksize[2]
+   diskreplace(myhost,diskinfo,hosts,alldisks,replacelist,raids,pools,'limithost',mindisksize)
    return
-  diskreplace(myhost,[],hosts,alldisks,replacelist,raids,pools,exclude)
+  diskreplace(myhost,[],hosts,alldisks,replacelist,raids,pools,exclude,mindisksize)
   return
  defdisk=defdisks[0]
  dontuse=exclude
@@ -94,20 +96,21 @@ def diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools,exclude):
   dontuse=defdisk['host']
  disksinraid=[disk for disk in alldisks if disk['raid']==defdisk['raid'] and disk['name'] != defdisk['name'] and 'ONLI' in disk['changeop']]
  runninghosts=[disk['host'] for disk in alldisks if disk['raid']==defdisk['raid'] and disk['name'] != defdisk['name'] and 'ONLI' in disk['changeop'] and disk['host'] not in dontuse ]
- mindisk=min(disksinraid,key=lambda x:norm(x['size']))
- print('running',runninghosts)
+ if '-1' in mindisksize:
+  mindisk=min(disksinraid,key=lambda x:norm(x['size']))
+  mindisk=mindisk['size']
+ else:
+  mindisk=mindisksize
  disksvalues=[]
  for  rep in replacelist:
   diskvalue=float(0)
-  if rep['size'] == mindisk['size'] :
+  if norm(rep['size']) == norm(mindisk) :
    diskvalue=diskvalue+1
-  elif norm(rep['size']) > norm(mindisk['size']): 
-       diskvalue=diskvalue+float(1-(norm(rep['size']) - norm(mindisk['size']))/norm(mindisk['size']))
-       print('sizesfloat',float(1.0-(norm(rep['size']) - norm(mindisk['size']))/norm(mindisk['size'])))
-       print('sizes',diskvalue,norm(rep['size']),norm(mindisk['size']))
+  elif norm(rep['size']) > norm(mindisk): 
+       diskvalue=diskvalue+float(1-(norm(rep['size']) - norm(mindisk))/norm(mindisk))
   else:
    diskvalue=-100000
-  if rep['host'] in dontuse:
+  if dontuse in rep['host']:
    diskvalue=-100000
   if 'spare' in rep['raid']:
     diskvalue=diskvalue+10
@@ -115,7 +118,8 @@ def diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools,exclude):
    diskvalue=diskvalue+100
   disksvalues.append((rep,diskvalue)) 
  disksvalues=sorted(disksvalues,key=lambda x:x[1], reverse=True)
- print('print',disksvalues)
+ if disksvalues[0][1] < -10000:
+  return
  if 'spare' in defdisk['raid'] :
   logmsg.sendlog('Dist3','info','system', defdisk['id'],defdisk['host'])
   cmdline=['/sbin/zpool', 'remove', defdisk['pool'],defdisk['name']]
@@ -164,7 +168,7 @@ def diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools,exclude):
    pass 
  replacelist=[x for x in replacelist if x['name']!=ret]
  defdisks.pop(0)
- diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools,exclude)
+ diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools,exclude,mindisksize)
  
   
 def selectspare(*args):
@@ -174,7 +178,7 @@ def selectspare(*args):
   return
  #allop=getall(myhost,'old')
  #diffop={k:newop[k] for k in allop if allop[k] != newop[k] and 'disk' in k}
- diskreplace(myhost,newop['defdisks'],newop['hosts'],newop['disks'],newop['freedisks']+newop['sparedisks'],newop['raids'],newop['pools'],'allowall')
+ diskreplace(myhost,newop['defdisks'],newop['hosts'],newop['disks'],newop['freedisks']+newop['sparedisks'],newop['raids'],newop['pools'],'allowall',-1)
  return
  
  

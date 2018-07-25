@@ -10,20 +10,11 @@ echo "${disks[@]}" | awk '{print $1}' | awk -F'/' '{print $NF}' | while read l;
 do
  echo 1 > /sys/block/$l/device/delete 2>/dev/null
 done
-zpool=`ETCDCTL_API=3 /pace/etcdget.py run --prefix | grep $myhost | grep disk | grep -v free` 
-pool=`ETCDCTL_API=3 /pace/etcdget.py run --prefix | grep $myhost | grep pool | grep name | awk -F'name' '{print $2}' | cut -c 5- | rev | cut -c 3- | rev` 
-echo pool=$pool >/root/hostlosttmp
-echo zpool="${zpool[@]}" >> /root/hostlosttmp
-echo disks="$disks[@]}" >> /root/hostlosttmp
+echo disks="${disks[@]}" >> /root/hostlosttmp
 echo "${disks[@]}" | awk '{print $2}'  | while read l;
 do
  echo checking disk $l >> /root/hostlosttmp
- echo "${zpool[@]}" | grep $l
- if [ $? -eq 0 ];
- then
-   echo offlining disk $l in pool $pool >> /root/hostlosttmp
-  /sbin/zpool offline  $pool scsi-$l
- fi
+ ETCDCTL_API=3 /pace/changeop.py $myhost scsi-$l 
 done
 echo udpating database >> /root/hostlosttmp
 ETCDCTL_API=3 /pace/etcddel.py hosts/$thehost  --prefix
