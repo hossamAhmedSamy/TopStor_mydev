@@ -1,11 +1,14 @@
 #!/bin/python3.6
 import subprocess, socket
+from os import listdir
 from etcdput import etcdput as put
 from etcdget import etcdget as get 
 from etcddel import etcddel as dels 
+from os.path import getmtime
 myhost=socket.gethostname()
 sitechange=0
 readyhosts=get('ready','--prefix')
+knownpools=[f for f in listdir('/TopStordata/') if 'pdhcp' in f and 'pree' not in f ]
 cmdline='/sbin/zpool status'
 result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
 y=str(result)[2:][:-3].replace('\\t','').split('\\n')
@@ -49,7 +52,13 @@ for a in y:
   cmdline=['/sbin/zfs','get','compressratio','-H']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   zlist2=str(result.stdout)[2:][:-3].split('\\t')
-  zdict={ 'name':b[0],'changeop':b[1], 'status':b[1],'host':myhost, 'used':str(zfslist[0].split()[6]),'available':str(zfslist[0].split()[11]), 'alloc': str(zlist[2]), 'empty': zlist[3], 'dedup': zlist[7], 'compressratio': zlist2[2], 'raidlist': raidlist ,'volumes':volumelist}
+  if b[0] in knownpools:
+   cachetime=getmtime('/TopStordata/'+b[0])
+  else:
+   cmdline='/sbin/zpool set cachefile=/TopStordata/'+b[0]+' '+b[0]
+   subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
+   cachetime='notset'
+  zdict={ 'name':b[0],'changeop':b[1], 'status':b[1],'host':myhost, 'used':str(zfslist[0].split()[6]),'available':str(zfslist[0].split()[11]), 'alloc': str(zlist[2]), 'empty': zlist[3], 'dedup': zlist[7], 'compressratio': zlist2[2],'timestamp':str(cachetime), 'raidlist': raidlist ,'volumes':volumelist}
   zpool.append(zdict)
   lpools.append(zdict) 
   for vol in zfslist:
