@@ -11,6 +11,7 @@ enpdev='enp0s8'
 echo $date >> /root/zfspingstart
 systemctl restart target
 cd /pace
+rm -rf /pacedata/addiscsitargets 2>/dev/null
 rm -rf /pacedata/startzfsping 2>/dev/null
 while [ ! -f /pacedata/startzfsping ];
 do
@@ -52,7 +53,10 @@ do
    echo for $isprimary sending info Partsu03 booted with ip >> /root/zfspingtmp
    /TopStor/logmsg.py Partsu03 info system $myhost $myip
    /pace/etcdput.py ready/$myhost ok
+   /pace/putzpool.py
    /TopStor/zpooltoimport.py all 
+   sleep 3
+   touch /pacedata/addiscsitargets 
   fi
   runningcluster=1
   leaderall=` ./etcdget.py leader --prefix 2>/dev/null`
@@ -140,6 +144,8 @@ do
     then
      /TopStor/logmsg.py Partsu04 info system $myhost $myip
      /pace/etcdput.py ready/$myhost ok
+     sleep 3
+     touch /pacedata/addiscsitargets 
     fi
     echo finish running tasks task:boradcast, log..etc >> /root/zfspingtmp
    fi

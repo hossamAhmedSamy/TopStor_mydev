@@ -14,10 +14,16 @@ if [ $? -eq 0 ];
 then
 # systemctl restart target &>/dev/null
 # systemctl restart iscsi &>/dev/null
+ echo start >> /root/iscsiwatch
  sh /pace/iscsirefresh.sh
  sh /pace/listingtargets.sh
- sh /pace/addtargetdisks.sh
- echo start >> /root/iscsiwatch
+ if [ -f /pacedata/addiscsitargets ];
+ then
+  echo updating iscsitargets >> /root/iscsiwatch
+  sh /pace/addtargetdisks.sh
+ else
+  echo cannot add new iscsi targets at the moment >> /root/iscsiwatch
+ fi
  if [[ $islocal -eq 0 ]];
  then
   echo putzpool to leader >> /root/zfspingtmp

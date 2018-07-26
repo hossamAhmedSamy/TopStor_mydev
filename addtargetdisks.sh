@@ -1,6 +1,6 @@
 #!/bin/sh
 cd /pace
-myhost=`hostname`;
+myhost=`hostname -s`;
 #declare -a iscsitargets=(`cat /pacedata/iscsitargets | awk '{print $2}' `);
 declare -a iscsitargets=(`ETCDCTL_API=3 ./iscsiclients.py`);
 currentdisks=`targetcli ls /iscsi`
