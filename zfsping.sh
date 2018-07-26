@@ -57,6 +57,7 @@ do
    /TopStor/zpooltoimport.py all 
    sleep 3
    touch /pacedata/addiscsitargets 
+   /TopStor/logmsg.py Partsu03 info system $myhost $myip
   fi
   runningcluster=1
   leaderall=` ./etcdget.py leader --prefix 2>/dev/null`
@@ -142,10 +143,10 @@ do
     fi
     if [[ $isknown -eq 3 ]];
     then
-     /TopStor/logmsg.py Partsu04 info system $myhost $myip
      /pace/etcdput.py ready/$myhost ok
      sleep 3
      touch /pacedata/addiscsitargets 
+     /TopStor/logmsg.py Partsu04 info system $myhost $myip
     fi
     echo finish running tasks task:boradcast, log..etc >> /root/zfspingtmp
    fi
