@@ -48,13 +48,16 @@ then
  echo starginetcd >>/root/tmp2
  systemctl daemon-reload 2>/dev/null
  systemctl start etcd 2>/dev/null
- while [ $? -ne 0 ];
+ while true;
  do
-  sleep 1
-  systemctl daemon-reload 2>/dev/null
-  sleep 1
-  systemctl start etcd 2>/dev/null
   echo starting etcd=$?
+  systemctl status etcd
+  if [ $? -eq 0 ];
+  then
+   break
+  else
+   sleep 1
+  fi
  done
  echo started etcd as primary>>/root/tmp2
  datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
@@ -113,6 +116,17 @@ else
   systemctl daemon-reload 2>/dev/null
   systemctl stop etcd 2>/dev/null
   systemctl start etcd 2>/dev/null
+  while true;
+  do
+   echo starting etcd=$?
+   systemctl status etcd
+   if [ $? -eq 0 ];
+   then
+    break
+   else
+    sleep 1
+   fi
+  done
    ./etcdputlocal.py $myip 'local/'$myhost $myip
   echo sync leader with local database >>/root/tmp2
    ./etcdsync.py $myip primary primary 2>/dev/null

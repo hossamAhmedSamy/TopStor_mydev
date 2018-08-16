@@ -51,12 +51,16 @@ do
   if [ $isprimary -eq 3 ];
   then
    echo for $isprimary sending info Partsu03 booted with ip >> /root/zfspingtmp
+   targetcli clearconfig True
+   targetcli saveconfig
+   targetcli restoreconfig /pacedata/targetconfig
    /TopStor/logmsg.py Partsu03 info system $myhost $myip
    /pace/etcdput.py ready/$myhost ok
+   sleep 3
+   touch /pacedata/addiscsitargets 
    /pace/putzpool.py
    /TopStor/zpooltoimport.py all 
    sleep 3
-   touch /pacedata/addiscsitargets 
    /TopStor/logmsg.py Partsu03 info system $myhost $myip
   fi
   runningcluster=1
@@ -90,6 +94,17 @@ do
    chmod +r /etc/etcd/etcd.conf.yml
    systemctl daemon-reload 2>/dev/null
    systemctl start etcd 2>/dev/null
+   while true;
+   do
+    echo starting etcd=$?
+    systemctl status etcd
+    if [ $? -eq 0 ];
+    then
+     break
+    else
+     sleep 1
+    fi
+   done
    ./etcdput.py clusterip $clusterip 2>/dev/null
    pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24 2>/dev/null
    systemctl restart smb 2>/dev/null
@@ -144,6 +159,9 @@ do
     if [[ $isknown -eq 3 ]];
     then
      /pace/etcdput.py ready/$myhost ok
+     targetcli clearconfig True
+     targetcli saveconfig
+     targetcli restoreconfig /pacedata/targetconfig
      sleep 3
      touch /pacedata/addiscsitargets 
      /TopStor/logmsg.py Partsu04 info system $myhost $myip
@@ -162,6 +180,17 @@ do
   systemctl daemon-reload
   systemctl stop etcd 2>/dev/null
   systemctl start etcd 2>/dev/null
+  while true;
+  do
+   echo starting etcd=$?
+   systemctl status etcd
+   if [ $? -eq 0 ];
+   then
+    break
+   else
+    sleep 1
+   fi
+  done
   leaderall=` ./etcdget.py leader --prefix `
   leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
   leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`

@@ -5,9 +5,11 @@ from etcdget import etcdget as get
 from os import listdir
 from selectspare import getall
 import sys
+import logmsg
 
 def zpooltoimport(*args):
  myhost=socket.gethostname()
+ logmsg.sendlog('Zpst01','info','system')
  runningpools=[]
  readyhosts=get('ready','--prefix')
  for ready in readyhosts:
@@ -28,6 +30,7 @@ def zpooltoimport(*args):
   pooltoimport.append((pool,len(pooldisks),count))
  print(pooltoimport)
  put('toimport/'+myhost,str(pooltoimport))
+ logmsg.sendlog('Zpsu01','info','system')
  return pooltoimport 
 
 if __name__=='__main__':
