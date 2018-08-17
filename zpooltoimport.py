@@ -1,13 +1,16 @@
 #!/bin/python3.6
-import subprocess, socket
+import subprocess, socket, binascii
 from etcdput import etcdput as put
 from etcdget import etcdget as get 
+from broadcast import broadcast as broadcast 
 from os import listdir
+from os import remove 
 from selectspare import getalltmp as getall
 import sys
 import logmsg
 
 def zpooltoimport(*args):
+ myhostpools=[]
  with open('/root/toimport','w') as f:
   f.write('starting to scan for import \n')
  myhost=socket.gethostname()
@@ -23,6 +26,8 @@ def zpooltoimport(*args):
   with open('/root/toimport','a') as f:
    f.write('xall='+str(x)+'\n')
   x=getall(ready)['pools']
+  if ready == myhost:
+   myhostpools=x
   with open('/root/toimport','a') as f:
    f.write('xpool='+str(x)+'\n')
   runningpools.append(getall(ready)['pools'])
@@ -58,6 +63,16 @@ def zpooltoimport(*args):
   put('toimport/'+myhost,str(pooltoimport))
   logmsg.sendlog('Zpsu01','info','system',':found')
  else:
+  for pool in pools:
+   remove('/TopStordata/'+pool)
+  for pool in myhostpools:
+   if pool['name']=='pree' :
+    continue
+   bpoolfile=''
+   with open('/TopStordata/'+pool['name'],'rb') as f:
+    bpoolfile=f.read()
+   poolfile=binascii.hexlify(bpoolfile)
+   broadcast('Movecache','/TopStordata/'+pool['name'],poolfile) 
   put('toimport/'+myhost,'nothing')
   logmsg.sendlog('Zpsu01','info','system',':nothing')
  return pooltoimport 

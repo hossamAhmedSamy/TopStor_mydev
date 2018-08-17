@@ -2,11 +2,17 @@
 cd /pace
 export ETCDCTL_API=3
 echo $$ > /var/run/zfsping.pid
+targetcli clearconfig True
+targetcli saveconfig
+targetcli restoreconfig /pacedata/targetconfig
+targetcli saveconfig
 failddisks=''
 isknown=0
 isprimary=0
 primtostd=4
-toimport=0
+toimport=-1
+clocker=0
+oldclocker=0
 date=`date`
 enpdev='enp0s8'
 echo $date >> /root/zfspingstart
@@ -52,12 +58,13 @@ do
   if [ $isprimary -eq 3 ];
   then
    echo for $isprimary sending info Partsu03 booted with ip >> /root/zfspingtmp
-   targetcli clearconfig True
-   targetcli saveconfig
-   targetcli restoreconfig /pacedata/targetconfig
+   #targetcli clearconfig True
+   #targetcli saveconfig
+   #targetcli restoreconfig /pacedata/targetconfig
    /pace/etcdput.py ready/$myhost ok
    touch /pacedata/addiscsitargets 
    /pace/putzpool.py
+   ./etcddel.py toimport/$myhost
    toimport=1
   fi
   runningcluster=1
@@ -110,6 +117,7 @@ do
    ./etcddel.py leader 2>/dev/null
    ./etcdput.py leader/$myhost $myip 2>/dev/null
    echo importing all pools >> /root/zfspingtmp
+   ./etcddel.py toimport/$myhost
    toimport=1
    #/sbin/zpool import -am &>/dev/null
    echo running putzpool and nfs >> /root/zfspingtmp
@@ -157,10 +165,11 @@ do
     if [[ $isknown -eq 3 ]];
     then
      /pace/etcdput.py ready/$myhost ok
-     targetcli clearconfig True
-     targetcli saveconfig
-     targetcli restoreconfig /pacedata/targetconfig
+     #targetcli clearconfig True
+     #targetcli saveconfig
+     #targetcli restoreconfig /pacedata/targetconfig
      touch /pacedata/addiscsitargets 
+   ./etcddel.py toimport/$myhost
      toimport=1
     fi
     echo finish running tasks task:boradcast, log..etc >> /root/zfspingtmp
@@ -220,16 +229,36 @@ do
   ./addknown.py 2>/dev/null
   ./selectimport.py $myhost
  fi 
- if [ $toimport -eq 1 ];
+ if [ $toimport -ge 0 ];
  then
   ./etcdget.py toimport/$myhost | grep nothing
   if [ $? -eq 0 ];
   then
+   if [ $toimport -eq 1 ];
+   then
+    /TopStor/logmsg.py Partsu04 info system $myhost $myip
+   fi
+   if [ $toimport -eq 3 ];
+   then
+    /TopStor/logmsg.py Partsu06 info system
+   fi
    toimport=0
-   /TopStor/logmsg.py Partsu04 info system $myhost $myip
+   oldclocker=$clocker
   else
    /TopStor/pump.sh zpooltoimport.py all 
   fi
+ fi
+ if [[ $toimport -eq 0 ]];
+ then
+  clocker=`date +%s`
+  clockdiff=$((clocker-oldclocker))
+ fi
+ if [[ $clockdiff -ge 60 ]];
+ then
+  ./etcddel.py toimport/$myhost
+  /TopStor/logmsg.py Partst06 info system 
+  toimport=3
+  oldclocker=$clocker
  fi
  /pace/iscsiwatchdog.sh 2>/dev/null 
  /pace/putzpool.py 2>/dev/null
