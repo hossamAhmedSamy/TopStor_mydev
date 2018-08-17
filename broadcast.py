@@ -18,7 +18,7 @@ def broadcast(*args):
   knowns.append(k[1])
  print('leader',leaderip) 
  print('knowns',knowns) 
- msg={'req': 'broadcast', 'reply':z}
+ msg={'req': z[0], 'reply':z[1:]}
  print('sending', leaderip, str(msg),'recevreply',myhost)
  sendhost(leaderip, str(msg),'recvreply',myhost)
  for k in knowninfo:

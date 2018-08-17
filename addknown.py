@@ -56,7 +56,7 @@ if known != ['']:
    cmdline=['/pace/hostlost.sh',str(kn[0])]
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    etcddel('localrun/'+str(kn[0]))
-   broadcast('/TopStor/pump.sh','zpooltoimport.py','all')
+   broadcast('broadcast','/TopStor/pump.sh','zpooltoimport.py','all')
   elif (mtuple(heart[0])[1] not in str(kn[1])):
    etcddel('known/'+str(kn[0]))
    logmsg.sendlog('Partst02','warning','system', str(kn[0]))
@@ -64,7 +64,7 @@ if known != ['']:
    cmdline=['/pace/hostlost.sh',str(kn[0])]
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    etcddel('localrun/'+str(kn[0]))
-   broadcast('/TopStor/pump.sh','zpooltoimport.py','all')
+   broadcast('broadcast','/TopStor/pump.sh','zpooltoimport.py','all')
    cmdline=['/sbin/rabbitmqctl','delete_user','rabb_'+mtuple(x)[0].split('possible')[1],'YousefNadody']
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    

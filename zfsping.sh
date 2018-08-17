@@ -71,17 +71,6 @@ do
   fi
   echo adding known from list of possbiles >> /root/zfspingtmp
   ./addknown.py 2>/dev/null
-  if [ $toimport -eq 1 ];
-  then
-   ./etcdget.py toimport/$myhost | grep nothing
-   if [ $? -eq 0 ];
-   then
-    toimport=0
-    /TopStor/logmsg.py Partsu04 info system $myhost $myip
-   else
-    /TopStor/pump.sh zpooltoimport.py all 
-   fi
-  fi
  else
   echo I am not a primary etcd.. heartbeating leader >> /root/zfspingtmp
   leaderall=` ./etcdget.py leader --prefix 2>&1`
@@ -121,6 +110,7 @@ do
    ./etcddel.py leader 2>/dev/null
    ./etcdput.py leader/$myhost $myip 2>/dev/null
    echo importing all pools >> /root/zfspingtmp
+   toimport=1
    #/sbin/zpool import -am &>/dev/null
    echo running putzpool and nfs >> /root/zfspingtmp
    ./putzpool.py 2>/dev/null
@@ -171,6 +161,7 @@ do
      targetcli saveconfig
      targetcli restoreconfig /pacedata/targetconfig
      touch /pacedata/addiscsitargets 
+     toimport=1
     fi
     echo finish running tasks task:boradcast, log..etc >> /root/zfspingtmp
    fi
@@ -229,6 +220,17 @@ do
   ./addknown.py 2>/dev/null
   ./selectimport.py $myhost
  fi 
+ if [ $toimport -eq 1 ];
+ then
+  ./etcdget.py toimport/$myhost | grep nothing
+  if [ $? -eq 0 ];
+  then
+   toimport=0
+   /TopStor/logmsg.py Partsu04 info system $myhost $myip
+  else
+   /TopStor/pump.sh zpooltoimport.py all 
+  fi
+ fi
  /pace/iscsiwatchdog.sh 2>/dev/null 
  /pace/putzpool.py 2>/dev/null
   echo Collecting a change in system occured >> /root/zfspingtmp
