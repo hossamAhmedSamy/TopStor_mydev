@@ -3,7 +3,7 @@ import subprocess, socket
 from etcdput import etcdput as put
 from etcdget import etcdget as get 
 from os import listdir
-from selectspare import getall
+from selectspare import getalltmp as getall
 import sys
 import logmsg
 
@@ -11,7 +11,6 @@ def zpooltoimport(*args):
  with open('/root/toimport','w') as f:
   f.write('starting to scan for import \n')
  myhost=socket.gethostname()
- logmsg.sendlog('Zpst01','info','system')
  runningpools=[]
  readyhosts=get('ready','--prefix')
  with open('/root/toimport','a') as f:
@@ -32,6 +31,7 @@ def zpooltoimport(*args):
  pools=[f for f in listdir('/TopStordata/') if 'pdhcp' in f and f not in str(runningpools) and 'pree' not in f ]
  with open('/root/toimport','a') as f:
   f.write('stored pool db'+str(pools)+'\n')
+ logmsg.sendlog('Zpst01','info','system')
  mydisks=getall(myhost)['disks']
  mydisks=[(x['name'],x['status'],x['changeop']) for x in mydisks if 'ONLINE' not in x['status']]
  with open('/root/toimport','a') as f:
@@ -58,6 +58,7 @@ def zpooltoimport(*args):
   put('toimport/'+myhost,str(pooltoimport))
   logmsg.sendlog('Zpsu01','info','system',':found')
  else:
+  put('toimport/'+myhost,'nothing')
   logmsg.sendlog('Zpsu01','info','system',':nothing')
  return pooltoimport 
 
