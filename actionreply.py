@@ -1,5 +1,6 @@
 #!/bin/python3.6
 import codecs, logmsg
+import binascii
 from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 import subprocess
@@ -107,6 +108,14 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received broadcast from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if Movecache ##############
+ elif r["req"]=='Movecache':  
+  with open('/root/recv','a') as f:
+   f.write('received cachemove from partner :'+'\n')
+  cachename=r["reply"][0]
+  cachefile=r["reply"][1]
+  with open(cachename,'wb') as f:
+   f.write(cachefile)
  
 
 
