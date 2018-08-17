@@ -5,7 +5,7 @@ from etcddel import etcddel as deli
 import socket, sys, subprocess
 from sendhost import sendhost
 from ast import literal_eval as mtuple
-from zpooltoimport import zpooltoimport as importables
+#from zpooltoimport import zpooltoimport as importables
 
 def importpls(myhost,allinfo,*args):
  if(len(allinfo) < 0):
@@ -21,6 +21,8 @@ def importpls(myhost,allinfo,*args):
  for pool in pools.keys():
   hosts.append((pool,max(pools[pool],key=lambda x:x[1])[0])) 
  for hostpair in hosts:
+  if hostpair[0] == 'nothing':
+   continue
   owner=hostpair[1]
   ownerip=get('leader',owner)
   if ownerip[0]== -1:
@@ -28,7 +30,7 @@ def importpls(myhost,allinfo,*args):
    if ownerip[0]== -1:
     return 3
   z=['/TopStor/pump.sh','Zpool','import','-c','/TopStordata/'+hostpair[0],'-a']
-  msg={'req': 'Zpool', 'reply':z}
+  msg={'req': 'Zpoolimport', 'reply':z}
   sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
   z=['/TopStor/pump.sh','ClearCache',hostpair[0][1:]]
   msg={'req': 'ClearCache', 'reply':z}

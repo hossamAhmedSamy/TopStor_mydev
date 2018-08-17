@@ -191,8 +191,6 @@ echo i all zpool exported >>/root/tmp2
   #zpool import -a 2>/dev/null
    ./putzpool.py 2>/dev/null
   echo ran putzpool >>/root/tmp2
- else
-  /TopStor/zpooltoimport.py
  fi
  touch /var/www/html/des20/Data/Getstatspid
 fi

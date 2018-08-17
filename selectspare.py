@@ -14,6 +14,20 @@ def delall(*args):
  else:
   dels('lists/'+args[0])
 
+def getalltmp(*args):
+ with open('/root/toimport','a') as f:
+  f.write('getallargs= '+args[0]+'\n')
+ if len(args) > 1:
+  alls=get(args[1]+'/lists/'+args[0])
+ else:
+  alls=get('lists/'+args[0])
+ with open('/root/toimport','a') as f:
+  f.write('alls= '+str(alls)+'\n')
+ if len(alls) > 0 and alls[0] != -1:
+  alls=mtuple(alls[0])
+  return alls
+ else:
+  return [-1]
 def getall(*args):
  if len(args) > 1:
   alls=get(args[1]+'/lists/'+args[0])

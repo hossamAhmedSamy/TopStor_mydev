@@ -6,6 +6,7 @@ failddisks=''
 isknown=0
 isprimary=0
 primtostd=4
+toimport=0
 date=`date`
 enpdev='enp0s8'
 echo $date >> /root/zfspingstart
@@ -54,13 +55,10 @@ do
    targetcli clearconfig True
    targetcli saveconfig
    targetcli restoreconfig /pacedata/targetconfig
-   /TopStor/logmsg.py Partsu03 info system $myhost $myip
    /pace/etcdput.py ready/$myhost ok
-   sleep 3
    touch /pacedata/addiscsitargets 
    /pace/putzpool.py
-   /TopStor/zpooltoimport.py all 
-   sleep 3
+   toimport=1
    /TopStor/logmsg.py Partsu03 info system $myhost $myip
   fi
   runningcluster=1
@@ -74,6 +72,16 @@ do
   fi
   echo adding known from list of possbiles >> /root/zfspingtmp
   ./addknown.py 2>/dev/null
+  if [ $toimport -eq 1 ];
+  then
+   ./etcdget.py toimport/$myhost | grep nothing
+   if [ $? -eq 0 ];
+   then
+    toimport=0
+   else
+    /TopStor/pump.sh zpooltoimport.py all 
+   fi
+  fi
  else
   echo I am not a primary etcd.. heartbeating leader >> /root/zfspingtmp
   leaderall=` ./etcdget.py leader --prefix 2>&1`

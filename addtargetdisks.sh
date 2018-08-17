@@ -1,4 +1,7 @@
 #!/bin/sh
+#####################
+exit
+###################
 cd /pace
 myhost=`hostname -s`;
 change=0
