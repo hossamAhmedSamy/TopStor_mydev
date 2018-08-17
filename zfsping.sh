@@ -13,6 +13,7 @@ primtostd=4
 toimport=-1
 clocker=0
 oldclocker=0
+clockdiff=0
 date=`date`
 enpdev='enp0s8'
 echo $date >> /root/zfspingstart
@@ -229,7 +230,7 @@ do
   ./addknown.py 2>/dev/null
   ./selectimport.py $myhost
  fi 
- if [ $toimport -ge 0 ];
+ if [ $toimport -gt 0 ];
  then
   ./etcdget.py toimport/$myhost | grep nothing
   if [ $? -eq 0 ];
@@ -248,17 +249,19 @@ do
    /TopStor/pump.sh zpooltoimport.py all 
   fi
  fi
- if [[ $toimport -eq 0 ]];
+ if [ $toimport -eq 0 ];
  then
   clocker=`date +%s`
   clockdiff=$((clocker-oldclocker))
  fi
- if [[ $clockdiff -ge 60 ]];
+ echo Clockdiff = $clockdiff >> /root/zfspingtmp
+ if [ $clockdiff -ge 60 ];
  then
   ./etcddel.py toimport/$myhost
   /TopStor/logmsg.py Partst06 info system 
   toimport=3
   oldclocker=$clocker
+  clockdiff=0
  fi
  /pace/iscsiwatchdog.sh 2>/dev/null 
  /pace/putzpool.py 2>/dev/null
