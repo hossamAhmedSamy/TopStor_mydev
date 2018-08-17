@@ -48,7 +48,7 @@ if known != ['']:
   heart=str(heartres.stdout)[2:][:-3].split('\\n')
   print('heartbeat=',heart)
   if(heart == ['-1']):
-   print('the known ',str(kn[0]),' is gone')
+   print('the known ',str(kn[0]),' is gone, notfound')
    etcddel('known/'+str(kn[0]))
    logmsg.sendlog('Partst02','warning','system', str(kn[0]))
    etcddel('ready/'+str(kn[0]))
@@ -60,6 +60,7 @@ if known != ['']:
   elif (mtuple(heart[0])[1] not in str(kn[1])):
    etcddel('known/'+str(kn[0]))
    logmsg.sendlog('Partst02','warning','system', str(kn[0]))
+   print('the known ',str(kn[0]),' is notworking, notfound')
    cmdline=['/pace/hostlost.sh',str(kn[0])]
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    etcddel('localrun/'+str(kn[0]))

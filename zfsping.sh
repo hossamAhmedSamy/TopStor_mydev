@@ -59,7 +59,6 @@ do
    touch /pacedata/addiscsitargets 
    /pace/putzpool.py
    toimport=1
-   /TopStor/logmsg.py Partsu03 info system $myhost $myip
   fi
   runningcluster=1
   leaderall=` ./etcdget.py leader --prefix 2>/dev/null`
@@ -78,6 +77,7 @@ do
    if [ $? -eq 0 ];
    then
     toimport=0
+    /TopStor/logmsg.py Partsu04 info system $myhost $myip
    else
     /TopStor/pump.sh zpooltoimport.py all 
    fi
@@ -170,9 +170,7 @@ do
      targetcli clearconfig True
      targetcli saveconfig
      targetcli restoreconfig /pacedata/targetconfig
-     sleep 3
      touch /pacedata/addiscsitargets 
-     /TopStor/logmsg.py Partsu04 info system $myhost $myip
     fi
     echo finish running tasks task:boradcast, log..etc >> /root/zfspingtmp
    fi
