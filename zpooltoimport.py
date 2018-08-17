@@ -5,7 +5,8 @@ from etcdget import etcdget as get
 from broadcast import broadcast as broadcast 
 from os import listdir
 from os import remove 
-from selectspare import getalltmp as getall
+from selectspare import getall as getall
+from os.path import getmtime
 import sys
 import logmsg
 
@@ -23,6 +24,7 @@ def zpooltoimport(*args):
   with open('/root/toimport','a') as f:
    f.write('readyhost='+str(ready)+'\n')
   x=getall(ready)
+  myhostall=x
   with open('/root/toimport','a') as f:
    f.write('xall='+str(x)+'\n')
   x=getall(ready)['pools']
@@ -68,6 +70,9 @@ def zpooltoimport(*args):
   for pool in myhostpools:
    if pool['name']=='pree' :
     continue
+   cachetime=getmtime('/TopStordata/'+pool['name'])
+   if cachetime==pool['timestamp']:
+    continue 
    bpoolfile=''
    with open('/TopStordata/'+pool['name'],'rb') as f:
     bpoolfile=f.read()

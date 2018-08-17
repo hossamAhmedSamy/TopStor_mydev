@@ -3,9 +3,10 @@ import codecs, logmsg
 import binascii
 from ast import literal_eval as mtuple
 from etcdget import etcdget as get
-import subprocess
+import subprocess, socket
 import logmsg
 def do(body):
+ myhost=socket.gethostname()
  z=[]
  with open('/root/recv','w') as f:
   f.write('Recevied a reply:'+body[2:][:-1]+'\n')
@@ -109,7 +110,7 @@ def do(body):
    f.write('received broadcast from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if Movecache ##############
- elif r["req"]=='Movecache':  
+ elif r["req"]=='Movecache' and t["host"] != myhost:  
   with open('/root/recv','a') as f:
    f.write('received cachemove from partner :'+'\n')
   cachename=r["reply"][0]
