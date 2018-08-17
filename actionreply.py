@@ -3,6 +3,7 @@ import codecs, logmsg
 from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 import subprocess
+import logmsg
 def do(body):
  z=[]
  with open('/root/recv','w') as f:
@@ -83,11 +84,19 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received VolumeCreate from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
-########## if Zpool (import, direct command..etc) ##############
+########## if Zpool (direct command..etc) ##############
  elif r["req"]=='Zpool':  
   with open('/root/recv','a') as f:
    f.write('received Zpool from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if Zpoolimport (import) ##############
+ elif r["req"]=='Zpoolimport':  
+  pool=r["reply"][4].split('/')[2]
+  logmsg.sendlog('Zpst02','info','system',pool)
+  with open('/root/recv','a') as f:
+   f.write('received Zpool from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+  logmsg.sendlog('Zpsu02','info','system',pool)
 ########## if clear cache ##############
  elif r["req"]=='ClearCache':  
   with open('/root/recv','a') as f:

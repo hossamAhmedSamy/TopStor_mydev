@@ -14,6 +14,20 @@ def delall(*args):
  else:
   dels('lists/'+args[0])
 
+def getalltmp(*args):
+ with open('/root/toimport','a') as f:
+  f.write('getallargs= '+args[0]+'\n')
+ if len(args) > 1:
+  alls=get(args[1]+'/lists/'+args[0])
+ else:
+  alls=get('lists/'+args[0])
+ with open('/root/toimport','a') as f:
+  f.write('alls= '+str(alls)+'\n')
+ if len(alls) > 0 and alls[0] != -1:
+  alls=mtuple(alls[0])
+  return alls
+ else:
+  return [-1]
 def getall(*args):
  if len(args) > 1:
   alls=get(args[1]+'/lists/'+args[0])
@@ -53,6 +67,8 @@ def mustattach(cmdline,disksallowed,defdisk,myhost):
  
 def norm(val):
  units={'B':1/1024**2,'K':1/1024, 'M': 1, 'G':1024 , 'T': 1024**2 }
+ if type(val)==float:
+  return val
  if val[-1] != 'B':
   return float(val) 
  else:
@@ -86,6 +102,7 @@ def diskreplace(myhost,defdisks,hosts,alldisks,replacelist,raids,pools,exclude,m
    diskinfo=[x for x in alldisks if x['name']==selectdisk[0][0]]
    mindisksize=min(disksinraid,key=lambda x:norm(x[2]))
    mindisksize=mindisksize[2]
+   mindisksize=norm(mindisksize)
    diskreplace(myhost,diskinfo,hosts,alldisks,replacelist,raids,pools,'limithost',mindisksize)
    return
   diskreplace(myhost,[],hosts,alldisks,replacelist,raids,pools,exclude,mindisksize)
