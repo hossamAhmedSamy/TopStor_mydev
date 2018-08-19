@@ -1,6 +1,7 @@
 #!/bin/python3.6
 import codecs, logmsg
 import binascii
+from base64 import decodestring as decode
 from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 import subprocess, socket
@@ -114,7 +115,9 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received cachemove from partner :'+'\n')
   cachename=r["reply"][0]
-  cachefile=r["reply"][1]
+  cachefileenc=r["reply"][1]
+  #cachefile=decode(cachefileenc)
+  cachefile=binascii.unhexlify(cachefileenc)
   with open(cachename,'wb') as f:
    f.write(cachefile)
  
