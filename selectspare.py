@@ -5,43 +5,11 @@ from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 from etcdput import etcdput as put
 from etcddel import etcddel as dels 
+from poolall import getall
+from syncpools import syncmypools
 import logmsg
 disksvalue=[]
 
-def delall(*args):
- if len(args) > 1:
-  dels(args[1]+'/lists/'+args[0])
- else:
-  dels('lists/'+args[0])
-
-def getalltmp(*args):
- with open('/root/toimport','a') as f:
-  f.write('getallargs= '+args[0]+'\n')
- if len(args) > 1:
-  alls=get(args[1]+'/lists/'+args[0])
- else:
-  alls=get('lists/'+args[0])
- with open('/root/toimport','a') as f:
-  f.write('alls= '+str(alls)+'\n')
- if len(alls) > 0 and alls[0] != -1:
-  alls=mtuple(alls[0])
-  return alls
- else:
-  return [-1]
-def getall(*args):
- if len(args) > 1:
-  alls=get(args[1]+'/lists/'+args[0])
- else:
-  alls=get('lists/'+args[0])
- if len(alls) > 0 and alls[0] != -1:
-  alls=mtuple(alls[0])
-  return alls
- else:
-  return [-1]
-
-def putall(*args):
- alls=getall(args[0])
- put(args[1]+'/lists/'+args[0],str(alls))
 
 def mustattach(cmdline,disksallowed,defdisk,myhost):
    print('################################################')
@@ -58,6 +26,7 @@ def mustattach(cmdline,disksallowed,defdisk,myhost):
    try: 
     subprocess.check_call(cmd)
     logmsg.sendlog('Disu2','info','system', defdisk['id'],spare['id'],myhost)
+    syncmypools('all')
     return spare['name'] 
    except subprocess.CalledProcessError:
     logmsg.sendlog('Difa2','info','system', defdisk['id'],spare['id'],myhost)

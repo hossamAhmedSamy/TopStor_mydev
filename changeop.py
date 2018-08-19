@@ -4,9 +4,9 @@ import json
 from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 from etcdput import etcdput as put
-from selectspare import getall
-from selectspare import putall
-from selectspare import delall
+from poolall import getall
+from poolall import putall
+from poolall import delall
 import logmsg
 def forceoffline(*args):
  alls=getall(args[0])

@@ -5,7 +5,7 @@ from etcdget import etcdget as get
 from broadcast import broadcast as broadcast 
 from os import listdir
 from os import remove 
-from selectspare import getall as getall
+from poolall import getall as getall
 from os.path import getmtime
 import sys
 import logmsg
