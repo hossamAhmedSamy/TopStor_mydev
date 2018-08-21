@@ -25,7 +25,7 @@ ccnic=`/sbin/pcs resource show CC | grep nic\= | awk -F'nic=' '{print $2}' | awk
 #  echo $clusterip > /pacedata/clusterip
 # fi
 #fi
-/sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
+#/sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
 /sbin/pcs resource delete --force namespaces  2>/dev/null
 echo starting nodesearch>>/root/tmp2
 result=` ./nodesearch.py $myip 2>/dev/null`
@@ -100,6 +100,7 @@ else
 #  /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
 #  /sbin/pcs resource delete --force clusterip 
 #  /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
+  ./clearnamespace.py $enpdev
   echo starting etcd as local >>/root/tmp2
    ./etccluster.py 'local' $myip 2>/dev/null
   chmod +r /etc/etcd/etcd.conf.yml 2>/dev/null

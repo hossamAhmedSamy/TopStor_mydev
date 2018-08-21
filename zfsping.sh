@@ -93,7 +93,7 @@ do
    fi
    systemctl stop etcd 2>/dev/null
    clusterip=`cat /pacedata/clusterip`
-   echo starting primary etcd with clsuterip=$clusterip >> /root/zfspingtmp
+   echo starting primary etcd with namespace >> /root/zfspingtmp
    ./etccluster.py 'new' $myip 2>/dev/null
    chmod +r /etc/etcd/etcd.conf.yml
    systemctl daemon-reload 2>/dev/null
@@ -109,16 +109,16 @@ do
      sleep 1
     fi
    done
-   ./etcdput.py clusterip $clusterip 2>/dev/null
-   echo creating namespaces >>/root/tmp2
-   ./setnamespace.py $enpdev
-   echo created namespaces >>/root/tmp2
+   #./etcdput.py clusterip $clusterip 2>/dev/null
    #pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24 2>/dev/null
-   systemctl restart smb 2>/dev/null
    echo adding me as a leader >> /root/zfspingtmp
    ./runningetcdnodes.py $myip 2>/dev/null
    ./etcddel.py leader 2>/dev/null
    ./etcdput.py leader/$myhost $myip 2>/dev/null
+   echo creating namespaces >>/root/zfspingtmp
+   ./setnamespace.py $enpdev
+   echo created namespaces >>/root/zfspingtmp
+   systemctl restart smb 2>/dev/null
    echo importing all pools >> /root/zfspingtmp
    ./etcddel.py toimport/$myhost
    toimport=1

@@ -29,7 +29,7 @@ def importpls(myhost,allinfo,*args):
    ownerip=get('known',owner)
    if ownerip[0]== -1:
     return 3
-  z=['/TopStor/pump.sh','Zpool','import','-c','/TopStordata/'+hostpair[0],'-a']
+  z=['/TopStor/pump.sh','Zpool','import','-c','/TopStordata/'+hostpair[0],'-am']
   msg={'req': 'Zpoolimport', 'reply':z}
   sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
   z=['/TopStor/pump.sh','ClearCache',hostpair[0][1:]]
