@@ -110,7 +110,10 @@ do
     fi
    done
    ./etcdput.py clusterip $clusterip 2>/dev/null
-   pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24 2>/dev/null
+   echo creating namespaces >>/root/tmp2
+   ./setnamespace.py $enpdev
+   echo created namespaces >>/root/tmp2
+   #pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24 2>/dev/null
    systemctl restart smb 2>/dev/null
    echo adding me as a leader >> /root/zfspingtmp
    ./runningetcdnodes.py $myip 2>/dev/null

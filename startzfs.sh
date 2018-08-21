@@ -11,31 +11,25 @@ myhost=`hostname -s`
 /sbin/rabbitmqctl set_permissions -p / rabbmezo ".*" ".*" ".*" 2>/dev/null
 /sbin/rabbitmqctl set_user_tags rabbmezo administrator
 myip=`/sbin/pcs resource show CC | grep Attributes | awk '{print $2}' | awk -F'=' '{print $2}'`
- ccnic=`/sbin/pcs resource show CC | grep nic\= | awk -F'nic=' '{print $2}' | awk '{print $1}'`
-/sbin/pcs resource delete --force clusterip 2>/dev/null
-if [ ! -f /pacedata/clusterip ];
-then
- echo $clusterip > /pacedata/clusterip
-else
- len=`wc -c /pacedata/clusterip | awk '{print $1}'`
- if [ $len -ge 6 ];
- then
-  clusterip=`cat /pacedata/clusterip` 
- else
-  echo $clusterip > /pacedata/clusterip
- fi
-fi
+ccnic=`/sbin/pcs resource show CC | grep nic\= | awk -F'nic=' '{print $2}' | awk '{print $1}'`
+#/sbin/pcs resource delete --force clusterip 2>/dev/null
+#if [ ! -f /pacedata/clusterip ];
+#then
+# echo $clusterip > /pacedata/clusterip
+#else
+# len=`wc -c /pacedata/clusterip | awk '{print $1}'`
+# if [ $len -ge 6 ];
+# then
+#  clusterip=`cat /pacedata/clusterip` 
+# else
+#  echo $clusterip > /pacedata/clusterip
+# fi
+#fi
 /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
-/sbin/pcs resource delete --force clusterip  2>/dev/null
-echo finish identify clusterip >> /root/tmp2
-systemctl status etcd &>/dev/null
-if [ $? -ne 0 ];
-then
-  /sbin/pcs resource delete --force clusterip 2>/dev/null
-fi
- echo starting nodesearch>>/root/tmp2
- result=` ./nodesearch.py $myip 2>/dev/null`
- echo finish nodesearch>>/root/tmp2
+/sbin/pcs resource delete --force namespaces  2>/dev/null
+echo starting nodesearch>>/root/tmp2
+result=` ./nodesearch.py $myip 2>/dev/null`
+echo finish nodesearch>>/root/tmp2
 freshcluster=0
 echo $result | grep nothing 
 if [ $? -eq 0 ];
@@ -45,7 +39,7 @@ then
  freshcluster=1
   ./etccluster.py 'new' $myip 2>/dev/null
  chmod +r /etc/etcd/etcd.conf.yml 2>/dev/null
- echo starginetcd >>/root/tmp2
+ echo startinetcd >>/root/tmp2
  systemctl daemon-reload 2>/dev/null
  systemctl start etcd 2>/dev/null
  while true;
@@ -69,29 +63,26 @@ then
  rm -rf /var/lib/iscsi/nodes/* 2>/dev/null
  echo startiscsiwatchdog >>/root/tmp2
  /pace/iscsiwatchdog.sh 2>/dev/null
- echo started iscsiwatchdog >>/root/tmp2
- /sbin/pcs resource update clusterip nic="$enpdev" ip=$clusterip cidr_netmask=24 2>/dev/null
- if [ $? -ne 0 ];
- then
- echo creating clusterip >>/root/tmp2
-  /sbin/pcs resource create clusterip ocf:heartbeat:IPaddr2 nic="$enpdev" ip=$clusterip cidr_netmask=24 op monitor on-fail=restart 2>/dev/null
- fi
- echo createdclusterip >>/root/tmp2
- /sbin/pcs resource enable clusterip 2>/dev/null
- /sbin/pcs resource debug-start clusterip 2>/dev/null
+ echo finished iscsiwatchdog >>/root/tmp2
+ #/sbin/pcs resource update clusterip nic="$enpdev" ip=$clusterip cidr_netmask=24 2>/dev/null
+ echo creating namespaces >>/root/tmp2
+ ./setnamespace.py $enpdev
+ echo created namespaces >>/root/tmp2
+#  /sbin/pcs resource create clusterip ocf:heartbeat:IPaddr2 nic="$enpdev" ip=$clusterip cidr_netmask=24 op monitor on-fail=restart 2>/dev/null
+ #/sbin/pcs resource enable clusterip 2>/dev/null
+ #/sbin/pcs resource debug-start clusterip 2>/dev/null
  systemctl start smb
- echo startedclusterip >>/root/tmp2
-  ./etcddel.py leader --prefix 2>/dev/null
-  ./etcdput.py leader/$myhost $myip 2>/dev/null
-  ./etcdput.py primary/name $myhost 2>/dev/null
-  ./etcdput.py primary/address $myip 2>/dev/null
-  ./etcdput.py clusterip $clusterip 2>/dev/null
-  ./etcddel.py known --prefix 2>/dev/null
-  ./etcddel.py possible --prefix 2>/dev/null
-  ./etcddel.py localrun --prefix 2>/dev/null
-  ./etcddel.py to  --prefix 2>/dev/null
-  ./etcddel.py hosts  --prefix 2>/dev/null
-  ./etcddel.py oldhosts  --prefix 2>/dev/null
+ ./etcddel.py leader --prefix 2>/dev/null
+ ./etcdput.py leader/$myhost $myip 2>/dev/null
+ ./etcdput.py primary/name $myhost 2>/dev/null
+ ./etcdput.py primary/address $myip 2>/dev/null
+ ./etcdput.py clusterip $clusterip 2>/dev/null
+ ./etcddel.py known --prefix 2>/dev/null
+ ./etcddel.py possible --prefix 2>/dev/null
+ ./etcddel.py localrun --prefix 2>/dev/null
+ ./etcddel.py to  --prefix 2>/dev/null
+ ./etcddel.py hosts  --prefix 2>/dev/null
+ ./etcddel.py oldhosts  --prefix 2>/dev/null
  systemctl start topstorremote
  systemctl start topstorremoteack
  echo deleted knowns and added leader >>/root/tmp2
@@ -104,11 +95,11 @@ else
   leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
   leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
    /TopStor/logmsg.py Partst04 info system $myhost $myip
- echo getting clusterip from another leader >>/root/tmp2
-   ./etcdget.py clusterip 2>/dev/null > /pacedata/clusterip
-  /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
-  /sbin/pcs resource delete --force clusterip 
-  /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
+# echo getting clusterip from another leader >>/root/tmp2
+#   ./etcdget.py clusterip 2>/dev/null > /pacedata/clusterip
+#  /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
+#  /sbin/pcs resource delete --force clusterip 
+#  /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
   echo starting etcd as local >>/root/tmp2
    ./etccluster.py 'local' $myip 2>/dev/null
   chmod +r /etc/etcd/etcd.conf.yml 2>/dev/null
@@ -127,23 +118,24 @@ else
     sleep 1
    fi
   done
-   ./etcdputlocal.py $myip 'local/'$myhost $myip
+  ./etcdputlocal.py $myip 'local/'$myhost $myip
   echo sync leader with local database >>/root/tmp2
-   ./etcdsync.py $myip primary primary 2>/dev/null
-   ./etcddellocal.py $myip known --prefix 2>/dev/null
-   ./etcddellocal.py $myip localrun --prefix 2>/dev/null
-   ./etcddellocal.py $myip run --prefix 2>/dev/null
-   ./etcdsync.py $myip known known 2>/dev/null
-   ./etcdsync.py $myip localrun localrun 2>/dev/null
-   ./etcdsync.py $myip leader known 2>/dev/null
-   ./etcddel.py known/$myhost --prefix 2>/dev/null
-   ./etcddel.py oldhosts/$myhost  --prefix 2>/dev/null
-   ./etcddel.py hosts/$myhost  --prefix 2>/dev/null
+  ./etcdsync.py $myip primary primary 2>/dev/null
+  ./etcddellocal.py $myip known --prefix 2>/dev/null
+  ./etcddellocal.py $myip localrun --prefix 2>/dev/null
+  ./etcddellocal.py $myip run --prefix 2>/dev/null
+  ./etcdsync.py $myip known known 2>/dev/null
+  ./etcdsync.py $myip namespace namespace 2>/dev/null
+  ./etcdsync.py $myip localrun localrun 2>/dev/null
+  ./etcdsync.py $myip leader known 2>/dev/null
+  ./etcddel.py known/$myhost --prefix 2>/dev/null
+  ./etcddel.py oldhosts/$myhost  --prefix 2>/dev/null
+  ./etcddel.py hosts/$myhost  --prefix 2>/dev/null
   /sbin/rabbitmqctl add_user rabb_$leader YousefNadody 2>/dev/null
   /sbin/rabbitmqctl set_permissions -p / rabb_$leader ".*" ".*" ".*" 2>/dev/null
 #  /sbin/rabbitmqctl set_user_tags rabb_ administrator
-   ./etcddellocal.py $myip users --prefix 2>/dev/null
-   ./etcdsync.py $myip run/$leader/user users 2>/dev/null
+  ./etcddellocal.py $myip users --prefix 2>/dev/null
+  ./etcdsync.py $myip run/$leader/user users 2>/dev/null
   systemctl start topstorremote
   systemctl start topstorremoteack
   echo etcd started as local >>/root/tmp2
