@@ -56,6 +56,6 @@ done
 targetcli saveconfig
 if [ $change -eq 1 ];
 then
- #targetcli saveconfig /pacedata/targetconfig
+ targetcli saveconfig /pacedata/targetconfig
  sleep 1 
 fi

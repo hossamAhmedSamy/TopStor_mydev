@@ -28,7 +28,6 @@ do
 done
 echo startzfs run >> /root/zfspingtmp
 /pace/startzfs.sh
-#sleep 5
 date=`date `
 echo starting in $date >> /root/zfspingtmp
 while true;
@@ -154,7 +153,6 @@ do
      leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
      leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
      /pace/sendhost.py $leaderip 'user' 'recvreq' $myhost
-     sleep 1
      /pace/sendhost.py $leaderip 'cifs' 'recvreq' $myhost
      /pace/sendhost.py $leaderip 'logall' 'recvreq' $myhost
      isknown=$((isknown+1))
