@@ -2,4 +2,8 @@
 export ETCDCTL_API=3
 echo $@ > /root/Zpooltmp
 /sbin/zpool $@ > /root/Zpool
+pool=`echo $3 | awk -F'/' '{print $3}'`
+rm -rf ${3}.bak
+mv $3 ${3}.bak
+/sbin/zpool set cachefile=$3 $pool
 /pace/putzpool.py 
