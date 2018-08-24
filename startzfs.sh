@@ -55,11 +55,16 @@ then
  done
  echo started etcd as primary>>/root/tmp2
  datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
-  /TopStor/logmsg2.sh $datenow $timenow $myhost Partst03 info system $myhost $myip
-  ./runningetcdnodes.py $myip 2>/dev/null
-  ./etcddel.py known --prefix 2>/dev/null 
-  ./etcddel.py possbile --prefix 2>/dev/null 
-  ./etcddel.py ready --prefix 2>/dev/null 
+ /TopStor/logmsg2.sh $datenow $timenow $myhost Partst03 info system $myhost $myip
+ ./runningetcdnodes.py $myip 2>/dev/null
+ ./etcddel.py known --prefix 2>/dev/null 
+ ./etcddel.py possbile --prefix 2>/dev/null 
+ ./etcddel.py ready --prefix 2>/dev/null 
+ myalias=`ETCDCTL_API=3 /pace/etcdget.py alias/$myhost`
+ if [[ $myalias -eq -1 ]];
+ then
+   /pace/etcdput.py alias/$myhost $myhost
+ fi
  rm -rf /var/lib/iscsi/nodes/* 2>/dev/null
  echo startiscsiwatchdog >>/root/tmp2
  /pace/iscsiwatchdog.sh 2>/dev/null
@@ -137,6 +142,19 @@ else
 #  /sbin/rabbitmqctl set_user_tags rabb_ administrator
   ./etcddellocal.py $myip users --prefix 2>/dev/null
   ./etcdsync.py $myip run/$leader/user users 2>/dev/null
+  myalias=`ETCDCTL_API=3 /pace/etcdgetlocal.py $myip alias/$myhost`
+  if [[ $myalias -ne -1 ]];
+  then
+   /pace/etcdput.py alias/$myhost $myalias
+  else
+   myalias=`ETCDCTL_API=3 /pace/etcdget.py alias/$myhost`
+   if [[ $myalias -eq -1 ]];
+   then
+    ./etcdput.py alias/$myhost $myhost
+   fi
+  fi
+  ./etcddellocal.py $myip alias --prefix 2>/dev/null
+  ./etcdsync.py $myip alias alias 2>/dev/null
   systemctl start topstorremote
   systemctl start topstorremoteack
   echo etcd started as local >>/root/tmp2
