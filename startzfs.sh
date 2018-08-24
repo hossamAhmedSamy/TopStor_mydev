@@ -4,7 +4,6 @@ export ETCDCTL_API=3
 echo starting startzfs > /root/tmp2
 iscsimapping='/pacedata/iscsimapping';
 runningpools='/pacedata/pools/runningpools';
-clusterip='10.11.11.230'
 enpdev='enp0s8'
 myhost=`hostname -s`
 /sbin/rabbitmqctl add_user rabbmezo HIHIHI 2>/dev/null
@@ -12,20 +11,6 @@ myhost=`hostname -s`
 /sbin/rabbitmqctl set_user_tags rabbmezo administrator
 myip=`/sbin/pcs resource show CC | grep Attributes | awk '{print $2}' | awk -F'=' '{print $2}'`
 ccnic=`/sbin/pcs resource show CC | grep nic\= | awk -F'nic=' '{print $2}' | awk '{print $1}'`
-#/sbin/pcs resource delete --force clusterip 2>/dev/null
-#if [ ! -f /pacedata/clusterip ];
-#then
-# echo $clusterip > /pacedata/clusterip
-#else
-# len=`wc -c /pacedata/clusterip | awk '{print $1}'`
-# if [ $len -ge 6 ];
-# then
-#  clusterip=`cat /pacedata/clusterip` 
-# else
-#  echo $clusterip > /pacedata/clusterip
-# fi
-#fi
-#/sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
 /sbin/pcs resource delete --force namespaces  2>/dev/null
 echo starting nodesearch>>/root/tmp2
 result=` ./nodesearch.py $myip 2>/dev/null`
@@ -69,19 +54,14 @@ then
  echo startiscsiwatchdog >>/root/tmp2
  /pace/iscsiwatchdog.sh 2>/dev/null
  echo finished iscsiwatchdog >>/root/tmp2
- #/sbin/pcs resource update clusterip nic="$enpdev" ip=$clusterip cidr_netmask=24 2>/dev/null
  echo creating namespaces >>/root/tmp2
  ./setnamespace.py $enpdev
  echo created namespaces >>/root/tmp2
-#  /sbin/pcs resource create clusterip ocf:heartbeat:IPaddr2 nic="$enpdev" ip=$clusterip cidr_netmask=24 op monitor on-fail=restart 2>/dev/null
- #/sbin/pcs resource enable clusterip 2>/dev/null
- #/sbin/pcs resource debug-start clusterip 2>/dev/null
  systemctl start smb
  ./etcddel.py leader --prefix 2>/dev/null
  ./etcdput.py leader/$myhost $myip 2>/dev/null
  ./etcdput.py primary/name $myhost 2>/dev/null
  ./etcdput.py primary/address $myip 2>/dev/null
- ./etcdput.py clusterip $clusterip 2>/dev/null
  ./etcddel.py known --prefix 2>/dev/null
  ./etcddel.py possible --prefix 2>/dev/null
  ./etcddel.py localrun --prefix 2>/dev/null
@@ -100,11 +80,6 @@ else
   leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
   leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
    /TopStor/logmsg.py Partst04 info system $myhost $myip
-# echo getting clusterip from another leader >>/root/tmp2
-#   ./etcdget.py clusterip 2>/dev/null > /pacedata/clusterip
-#  /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
-#  /sbin/pcs resource delete --force clusterip 
-#  /sbin/ip addr del $clusterip/24 dev $enpdev 2>/dev/null
   ./clearnamespace.py $enpdev
   echo starting etcd as local >>/root/tmp2
    ./etccluster.py 'local' $myip 2>/dev/null
@@ -162,7 +137,6 @@ else
   echo starting iscsiwaatchdog >>/root/tmp2
   /pace/iscsiwatchdog.sh $myip $myhost $leader 2>/dev/null
   echo started iscsiwaatchdog >>/root/tmp2
-#  pcs resource disable clusterip
  fi
 fi
 

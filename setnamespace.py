@@ -1,9 +1,13 @@
 #!/bin/python3.6
 import subprocess,sys
 from etcdget import etcdget as get
+from etcdput import etcdput as put 
 import json
 def setnamespace(*args):
  nslist=get('namespace','--prefix')
+ if 'mgmtip' not in str(nslist):
+  put('namespace/mgmtip','10.11.11.252')
+  nslist=get('namespace','--prefix')
  ns=(x for x in nslist)
  for arg in args:
   try: 
@@ -14,5 +18,6 @@ def setnamespace(*args):
   subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
   cmdline='/sbin/pcs resource group add namespaces '+nsn[0].replace('namespace/','')
   subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
+  
 if __name__=='__main__':
  setnamespace(*sys.argv[1:])

@@ -231,6 +231,8 @@ do
   ./addknown.py 2>/dev/null
   ./selectimport.py $myhost
  fi 
+ echo toimport = $toimport >> /root/zfspingtmp
+ 
  if [ $toimport -gt 0 ];
  then
   ./etcdget.py toimport/$myhost | grep nothing
