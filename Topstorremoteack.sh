@@ -1,4 +1,4 @@
-#!/usr/local/bin/zsh
+#!/bin/sh
 cd /TopStor
 rm /tmp/msgrack 2>/dev/null
 mkfifo -m 600 /tmp/msgrack 2>/dev/null

@@ -1,5 +1,6 @@
-#!/usr/local/bin/zsh
+#!/bin/sh
 export ETCDCTL_API=3
+ETCDCTL_API=3
 cd /TopStor
 rm /tmp2/msgfile 2>/dev/null
 mkdir /tmp2 &>/dev/null
@@ -32,8 +33,9 @@ read line < /tmp2/msgfile
 echo $line > /TopStordata/tmpline
 request=`echo $line | awk '{print $1}'`
 reqparam=`echo $line | awk '{$1="";print}'`
-
-./$request $reqparam >/dev/null 2>&1  & 
+rm -rf /root/$request.txt 2>/dev/null
+#./$request $reqparam >/dev/null 2>&1  & 
+./$request $reqparam >/dev/null 2>/root/$request.txt  & 
 }
 done;
 echo it is dead >/TopStor/txt/status.txt

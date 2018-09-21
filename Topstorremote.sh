@@ -1,4 +1,4 @@
-#!/usr/local/bin/zsh
+#!/bin/sh
 cd /TopStor
 partners='/TopStordata/partners.txt'
 #rm /tmp/msgremotefile 2>/dev/null

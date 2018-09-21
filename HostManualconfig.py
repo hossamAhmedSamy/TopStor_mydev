@@ -8,9 +8,11 @@ from sendhost import sendhost
 import logmsg
 def setall(*bargs):
  with open('/root/tmp','w') as f:
-  f.write(str(bargs))
+  f.write('bargs'+str(bargs)+'\n')
  myhost=socket.gethostname()
- arg=bargs[0].split()
+ arg=bargs
+ with open('/root/tmp','a') as f:
+  f.write('arg'+str(arg)+'\n')
  owner=''
  name='.'
  msg={}
@@ -19,11 +21,12 @@ def setall(*bargs):
     x=x.split(':')
     owner=x[1]
  with open('/root/tmp','a') as f:
-  f.write(name+owner+'\n')
+  f.write('name_owner='+name+owner+'\n')
  name=get('alias/'+owner)
+ name=str(name[0])
  with open('/root/tmp','a') as f:
-  f.write(name[0]+owner+arg[-1]+'\n')
- logmsg.sendlog('HostManual1004','info',arg[-1],str(name[0]))
+  f.write('name_owner_admin='+name+owner+arg[-1]+'\n')
+ logmsg.sendlog('HostManual1004','info',arg[-1],name)
  z=['/TopStor/pump.sh','LocalManualConfig.py']
  for aarg in arg:
   z.append(aarg)
