@@ -65,7 +65,7 @@ do
    touch /pacedata/addiscsitargets 
    /pace/putzpool.py
    ./etcddel.py toimport/$myhost
-   toimport=1
+   toimport=2
   fi
   runningcluster=1
   leaderall=` ./etcdget.py leader --prefix 2>/dev/null`
@@ -241,6 +241,10 @@ do
    if [ $toimport -eq 1 ];
    then
     /TopStor/logmsg.py Partsu04 info system $myhost $myip
+   fi
+   if [ $toimport -eq 2 ];
+   then
+    /TopStor/logmsg.py Partsu03 info system $myhost $myip
    fi
    if [ $toimport -eq 3 ];
    then
