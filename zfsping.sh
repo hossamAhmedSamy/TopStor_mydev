@@ -41,7 +41,7 @@ do
  netstat -ant | grep 2379 | grep LISTEN &>/dev/null
  if [ $? -eq 0 ]; 
  then
-  echo I am primary etcd >> /root/zfspingtmp
+  echo I am primary etcd,isprimary:$isprimary >> /root/zfspingtmp
   if [[ $isprimary -le 10 ]];
   then
    isprimary=$((isprimary+1))
@@ -148,7 +148,7 @@ do
     echo I am not a known adding me as possible >> /root/zfspingtmp
     ./etcdput.py possible$myhost $myip 2>/dev/null
    else
-    echo I am known so running all needed etcd task:boradcast, log..etc >> /root/zfspingtmp
+    echo I am known so running all needed etcd task:boradcast,isknown:$isknown >> /root/zfspingtmp
     if [[ $isknown -eq 0 ]];
     then
      echo running sendhost.py $leaderip 'user' 'recvreq' $myhost >>/root/tmp2
