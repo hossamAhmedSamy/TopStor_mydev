@@ -22,6 +22,7 @@ def config(*bargs):
   if x not in oldarg:
    x=x.split(':')
    change[x[0]]=x[1]
+   change['old'+x[0]]=x[1]
    for y in oldarg:
     if x[0] in y and 'host' not in y:
      y=y.split(':')
@@ -42,8 +43,8 @@ def config(*bargs):
 ######### changing cluster address ###############
  if 'mgmtip' in change:
   if 'mgmtsubnet' in change:
-   subnet=change['subnet']
-   oldsubnet=change['oldsubnet']
+   subnet=change['mgmtsubnet']
+   oldsubnet=change['oldmgmtsubnet']
   else:
    subnet=oldsubnet=24
    for y in oldarg:
@@ -56,13 +57,13 @@ def config(*bargs):
   logmsg.sendlog('HostManual1su7','info',arg[-1],change['oldmgmtip']+'/'+oldsubnet,change['mgmtip']+'/'+subnet)
 ######### changing box address ###############
  if 'addr' in change:
-  if 'subnet' in change:
-   subnet=change['subnet']
-   oldsubnet=change['oldsubnet']
+  if 'addrsubnet' in change:
+   subnet=change['addrsubnet']
+   oldsubnet=change['oldaddrsubnet']
   else:
    subnet=oldsubnet=24
    for y in oldarg:
-    if 'subnet' in y:
+    if 'addrsubnet' in y:
      y=y.split(':')
      subnet=oldsubnet=y[1]
      
@@ -70,7 +71,23 @@ def config(*bargs):
   cmdline=['/TopStor/HostManualconfigCC',change['addr'],change['oldaddr'],subnet,oldsubnet]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   logmsg.sendlog('HostManual1su6','info',arg[-1],change['oldaddr']+'/'+oldsubnet,change['addr']+'/'+subnet)
+######### changing data address ###############
+ if 'dataip' in change:
+  if 'dataipsubnet' in change:
+   subnet=change['dataipsubnet']
+   oldsubnet=change['olddataipsubnet']
+  else:
+   subnet=oldsubnet=24
+   for y in oldarg:
+    if 'dataipsubnet' in y:
+     y=y.split(':')
+     subnet=oldsubnet=y[1]
+  logmsg.sendlog('HostManual1st8','info',arg[-1],change['olddataip']+'/'+oldsubnet,change['dataip']+'/'+subnet)
+  cmdline=['/TopStor/HostManualconfigDataIP',change['dataip'],change['olddataip'],subnet,oldsubnet]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  logmsg.sendlog('HostManual1su8','info',arg[-1],change['olddataip']+'/'+oldsubnet,change['dataip']+'/'+subnet)
 #####################################################
+  cmdline=['/TopStor/HostgetIPs']
  return 1
 
 if __name__=='__main__':

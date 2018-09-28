@@ -12,7 +12,15 @@ mgmtip=`pcs resource show mgmtip | grep Attributes | awk -F'ip=' '{print $2}' | 
 mgmtsubnet=`pcs resource show mgmtip | grep Attributes | awk -F'netmask=' '{print $2}' | awk -F= '{print $1}'`
 hostrout=`netstat -rn | awk '{print $2}' | grep -v "Gateway" | grep -v "IP" | grep -v "0.0.0.0"`;
 hostdns=` cat /etc/resolv.conf | grep nameserver | awk '{print $2}'`;
-jsonips=`/usr/local/bin/zsh jsonthis3.sh hostname $hostname name $hostn addr $hostip hostsubnet $hostsubnet rout $hostrout dns $hostdns mgmtip $mgmtip mgmtsubnet $mgmtsubnet`;
+/sbin/pcs resource | grep dataip
+if [ $? -eq 0 ];
+then
+ dataip=`pcs resource show dataip | grep Attributes | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+ dataipsubnet=`pcs resource show dataip | grep Attributes | awk -F'netmask=' '{print $2}' | awk -F= '{print $1}'`
+jsonips=`/usr/local/bin/zsh jsonthis3.sh hostname $hostname name $hostn addr $hostip addrsubnet $hostsubnet rout $hostrout dns $hostdns mgmtip $mgmtip mgmtsubnet $mgmtsubnet dataip $dataip dataipsubnet $dataipsubnet`;
+else
+jsonips=`/usr/local/bin/zsh jsonthis3.sh hostname $hostname name $hostn addr $hostip addrsubnet $hostsubnet rout $hostrout dns $hostdns mgmtip $mgmtip mgmtsubnet $mgmtsubnet`;
+fi
 ETCDCTL_API=3 /pace/etcdput.py prop/$hostname $jsonips
 echo $jsonips > $web; 
 echo $jsonips > $Topweb; 
