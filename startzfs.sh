@@ -12,6 +12,7 @@ myhost=`hostname -s`
 myip=`/sbin/pcs resource show CC | grep Attributes | awk '{print $2}' | awk -F'=' '{print $2}'`
 ccnic=`/sbin/pcs resource show CC | grep nic\= | awk -F'nic=' '{print $2}' | awk '{print $1}'`
 /sbin/pcs resource delete --force namespaces  2>/dev/null
+/sbin/pcs resource delete --force dataip  2>/dev/null
 echo starting nodesearch>>/root/tmp2
 result=` ./nodesearch.py $myip 2>/dev/null`
 echo finish nodesearch>>/root/tmp2
@@ -56,6 +57,7 @@ then
  echo finished iscsiwatchdog >>/root/tmp2
  echo creating namespaces >>/root/tmp2
  ./setnamespace.py $enpdev
+ ./setdataip.py
  echo created namespaces >>/root/tmp2
  systemctl start smb
  ./etcddel.py leader --prefix 2>/dev/null
@@ -81,6 +83,7 @@ else
   leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
    /TopStor/logmsg.py Partst04 info system $myhost $myip
   ./clearnamespace.py $enpdev
+  ./cleardata.py
   echo starting etcd as local >>/root/tmp2
    ./etccluster.py 'local' $myip 2>/dev/null
   chmod +r /etc/etcd/etcd.conf.yml 2>/dev/null
@@ -107,6 +110,7 @@ else
   ./etcddellocal.py $myip run --prefix 2>/dev/null
   ./etcdsync.py $myip known known 2>/dev/null
   ./etcdsync.py $myip namespace namespace 2>/dev/null
+  ./etcdsync.py $myip dataip dataip 2>/dev/null
   ./etcdsync.py $myip localrun localrun 2>/dev/null
   ./etcdsync.py $myip leader known 2>/dev/null
   ./etcddel.py known/$myhost --prefix 2>/dev/null

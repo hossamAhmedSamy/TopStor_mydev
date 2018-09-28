@@ -117,6 +117,7 @@ do
    ./etcdput.py leader/$myhost $myip 2>/dev/null
    echo creating namespaces >>/root/zfspingtmp
    ./setnamespace.py $enpdev
+   ./setdataip.py
    echo created namespaces >>/root/zfspingtmp
    systemctl restart smb 2>/dev/null
    echo importing all pools >> /root/zfspingtmp
