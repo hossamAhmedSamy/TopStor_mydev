@@ -25,3 +25,4 @@ else
  /sbin/pcs resource create dataip ocf:heartbeat:IPaddr2 ip=$hostip nic=$dev cidr_netmask=$subnet op monitor interval=5s on-fail=restart
 #/sbin/reboot
 fi
+ETCDCTL_API=3 /pace/etcdput.py dataip $hostip/$subnet/$dev
