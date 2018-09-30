@@ -8,8 +8,8 @@ change=0
 #declare -a iscsitargets=(`cat /pacedata/iscsitargets | awk '{print $2}' `);
 declare -a iscsitargets=(`ETCDCTL_API=3 ./iscsiclients.py`);
 currentdisks=`targetcli ls /iscsi`
-disks=(`lsblk -nS -o name,serial,vendor | grep -v sr0 | grep -v sda | grep -v LIO | awk '{print $1}'`)
-diskids=`lsblk -nS -o name,serial,vendor | grep -v sr0 | grep -v sda | grep -v LIO | awk '{print $1" "$2}'`
+disks=(`lsblk -nS -o name,serial,vendor | grep -v sr0 | grep -vw sda | grep -v LIO | awk '{print $1}'`)
+diskids=`lsblk -nS -o name,serial,vendor | grep -v sr0 | grep -vw sda | grep -v LIO | awk '{print $1" "$2}'`
 mappedhosts=`targetcli ls /iscsi | grep Mapped`;
 targets=`targetcli ls backstores/block | grep -v deactivated |  grep dev | awk -F'[' '{print $2}' | awk '{print $1}'`
 tpgs=(`targetcli ls /iscsi | grep iqn | grep TPG | awk -F'iqn' '{print $2}' | awk '{print $1}'`)
@@ -29,9 +29,15 @@ done
 for ddisk in "${disks[@]}"; do
  devdisk=$ddisk 
  echo ddisk===$ddisk
- echo devdisk-ddisk=$ddisk
- idisk=`echo "$diskids" | grep $ddisk | awk '{print $2}'`
- echo idisk=$idisk
+ idisk=`echo "$diskids" | grep -w $ddisk | awk '{print $2}'`
+ echo devdisk-ddisk=$ddisk $idisk
+	echo $ddisk | grep sdc
+	if [ $? -eq 0 ];
+	then
+		 echo devdisk=$devdisk
+	exit
+ fi
+
  echo $currentdisks | grep $idisk &>/dev/null
  if [ $? -ne 0 ]; then
   pdisk=`ls /dev/disk/by-id/ | grep $idisk | grep -v part`
@@ -45,7 +51,6 @@ for ddisk in "${disks[@]}"; do
   done
  fi
 done;
-
 for target in "${iscsitargets[@]}"; do
  echo $mappedhosts | grep $target &>/dev/null
  if [ $? -ne 0 ]; then
