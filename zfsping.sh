@@ -275,6 +275,6 @@ do
  /pace/putzpool.py 2>/dev/null
   echo Collecting a change in system occured >> /root/zfspingtmp
  #/pace/changeop.py hosts/$myhost/current d
- /pace/changeop.py $myhost
- /pace/selectspare.py $myhost
+	ETCDCTL_API=3 /pace/changeop.py $myhost
+	ETCDCTL_API=3 /pace/selectspare.py $myhost
 done
