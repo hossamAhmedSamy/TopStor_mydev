@@ -31,12 +31,6 @@ for ddisk in "${disks[@]}"; do
  echo ddisk===$ddisk
  idisk=`echo "$diskids" | grep -w $ddisk | awk '{print $2}'`
  echo devdisk-ddisk=$ddisk $idisk
-	echo $ddisk | grep sdc
-	if [ $? -eq 0 ];
-	then
-		 echo devdisk=$devdisk
-	exit
- fi
 
  echo $currentdisks | grep $idisk &>/dev/null
  if [ $? -ne 0 ]; then
