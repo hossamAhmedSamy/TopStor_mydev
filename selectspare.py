@@ -5,7 +5,7 @@ from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 from etcdput import etcdput as put
 from etcddel import etcddel as dels 
-from poolall import getall
+from poolall import getall as getall
 from syncpools import syncmypools
 import logmsg
 disksvalue=[]

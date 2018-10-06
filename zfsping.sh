@@ -1,6 +1,7 @@
 #!/usr/bin/sh
 cd /pace
 export ETCDCTL_API=3
+ETCDCTL_API=3
 echo $$ > /var/run/zfsping.pid
 targetcli clearconfig True
 targetcli saveconfig
