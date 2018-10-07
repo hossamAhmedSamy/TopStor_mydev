@@ -2,6 +2,7 @@
 import subprocess,sys, datetime
 import json
 from etcdget import etcdget as get
+from etcdput import etcdput as put 
 from broadcast import broadcast as broadcast 
 from ast import literal_eval as mtuple
 from socket import gethostname as hostname
@@ -12,6 +13,7 @@ def send(*bargs):
  else:
   args=bargs
  pool=args[0]
+ put('deletedpool/'+pool,pool)
  pool=str(pool).split()[-1]
  with open('/root/DGsetpool','w') as f:
   f.write('args='+str(args)+'\n')
