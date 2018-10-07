@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 export ETCDCTL_API=3
 echo $@ > /root/Zpooltmp
 /sbin/zpool $@ > /root/Zpool

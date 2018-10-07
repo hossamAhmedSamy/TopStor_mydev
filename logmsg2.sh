@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStorglobal.log'
 dt=` echo $@ | awk '{print $1}'`;
