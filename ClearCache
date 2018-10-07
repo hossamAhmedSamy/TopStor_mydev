@@ -1,4 +1,5 @@
 #!/usr/bin/sh
 export ETCDCTL_API=3
 echo here $@ > /root/clearcach
-rm -rf /TopStordata/p$@
+#rm -rf /TopStordata/p$@
+rm -rf $@
