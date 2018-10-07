@@ -15,19 +15,21 @@ def send(*bargs):
 	pool=args[0]
 	x=get('deletedpool')
 	pool=str(pool).split()[-1]
+	with open('/root/DGdespool','w') as f:
+		f.write('pooltodelete='+str(x)+'/'+str(pool)+'\n')
 	put('deletedpool',str(x)+'/'+str(pool))
-	with open('/root/DGsetpool','w') as f:
+	with open('/root/DGdespool','a') as f:
 		f.write('deletkey='+str(x)+'/'+str(pool)+'\n')
-	with open('/root/DGsetpool','a') as f:
+	with open('/root/DGdespool','a') as f:
 		f.write('args='+str(args)+'\n')
 	z=[]
-	with open('/root/DGsetpool','a') as f:
+	with open('/root/DGdespool','a') as f:
 		f.write('pool='+pool+'\n')
 	owner=args[-1]
-	with open('/root/DGsetpool','a') as f:
+	with open('/root/DGdespool','a') as f:
 		f.write('owner='+owner+'\n')
 	myhost=hostname()
-	with open('/root/DGsetpool','a') as f:
+	with open('/root/DGdespool','a') as f:
 		f.write('myhost='+myhost+'\n')
 	ownerip=get('leader',owner)
 	if ownerip[0]== -1:
@@ -39,9 +41,9 @@ def send(*bargs):
 		z.append(arg)
 	msg={'req': 'DGsetPool', 'reply':z}
 	sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
-	with open('/root/DGsetpool','a') as f:
+	with open('/root/DGdespool','a') as f:
 		f.write('myhost='+ownerip[0][1]+' '+str(msg)+' recvreply '+myhost+'\n')
-	with open('/root/DGsetpool','a') as f:
+	with open('/root/DGdespool','a') as f:
 		f.write('ClearCache /TopStor/pump.sh ClearCache /TopStordata/'+pool)
 	broadcast('ClearCache','/TopStor/pump.sh','ClearCache','/TopStordata/'+pool)
 	return 1
