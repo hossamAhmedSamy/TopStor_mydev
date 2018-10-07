@@ -19,6 +19,7 @@ def zpooltoimport(*args):
  readyhosts=get('ready','--prefix')
  with open('/root/toimport','a') as f:
   f.write('readyhosts='+str(readyhosts)+'\n')
+ deletedpools=get('deletedpools')
  for ready in readyhosts:
   ready=ready[0].replace('ready/','')
   with open('/root/toimport','a') as f:
@@ -35,7 +36,7 @@ def zpooltoimport(*args):
   runningpools.append(getall(ready)['pools'])
   with open('/root/toimport','a') as f:
    f.write('updated runningpools='+str(runningpools)+'\n')
- pools=[f for f in listdir('/TopStordata/') if 'pdhcp' in f and f not in str(runningpools) and 'pree' not in f ]
+ pools=[f for f in listdir('/TopStordata/') if 'pdhcp' in f and f not in str(runningpools) and f not in str(deletedpools) and 'pree' not in f ]
  with open('/root/toimport','a') as f:
   f.write('stored pool db'+str(pools)+'\n')
  logmsg.sendlog('Zpst01','info','system')
