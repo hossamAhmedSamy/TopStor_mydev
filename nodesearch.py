@@ -25,4 +25,7 @@ if len(serverstatus) < 6:
 etcdfile=open('/pacedata/runningetcdnodes.txt','w')
 etcdfile.write(serverstatus)
 etcdfile.close()
+etcdfile=open('/var/www/html/des20/Data/runningetcdnodes.txt','w')
+etcdfile.write(serverstatus)
+etcdfile.close()
 print(serverstatus)
