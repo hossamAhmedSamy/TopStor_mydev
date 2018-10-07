@@ -36,6 +36,8 @@ def send(*bargs):
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
  with open('/root/DGsetpool','a') as f:
   f.write('myhost='+ownerip[0][1]+' '+str(msg)+' recvreply '+myhost+'\n')
+ with open('/root/DGsetpool','a') as f:
+  f.write('ClearCache /TopStor/pump.sh ClearCache /TopStordata/'+pool)
  broadcast('ClearCache','/TopStor/pump.sh','ClearCache','/TopStordata/'+pool)
  return 1
 
