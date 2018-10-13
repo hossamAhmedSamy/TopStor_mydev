@@ -29,7 +29,7 @@ def mustattach(cmdline,disksallowed,defdisk,myhost):
     syncmypools('all')
     return spare['name'] 
    except subprocess.CalledProcessError:
-    logmsg.sendlog('Difa2','info','system', defdisk['id'],spare['id'],myhost)
+    logmsg.sendlog('Difa2','error','system', defdisk['id'],spare['id'],myhost)
     disksallowed.pop(0)
     ret=mustattach(cmdline[:-1],disksallowed,defdisk,myhost) 
     return ret
