@@ -237,9 +237,9 @@ do
  
  if [ $toimport -gt 0 ];
  then
-  mytoimport=` ETCDCTL_API=3 ./etcdget.py toimport/$myhost `
+  mytoimport=`/TopStor/etcdget.py toimport/$myhost`
   if [ $mytoimport -eq -1 ]; then 
-   echo Yes  I have no record in toimport even no nothing=$mytoimport >> /root/zfspingtmp
+   echo Yes  I have no record in toimport/$myhost even no nothing=$mytoimport >> /root/zfspingtmp
   fi
   echo $mytoimport | grep nothing
   if [ $? -eq 0 ];

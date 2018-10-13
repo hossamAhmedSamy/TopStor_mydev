@@ -1,5 +1,4 @@
 #!/bin/python3.6
-from etcdput import etcdput as put 
 from etcdget import etcdget as get
 from etcddel import etcddel as deli 
 import socket, sys, subprocess
@@ -39,7 +38,7 @@ def importpls(myhost,allinfo,*args):
 		#z=['/TopStor/pump.sh','ClearCache',hostpair[0][1:]]
 		#msg={'req': 'ClearCache', 'reply':z}
 		#sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
-	deli('to','--prefix')
+	        deli('to','--prefix')
 	return
 
 if __name__=='__main__':
