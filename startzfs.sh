@@ -83,7 +83,7 @@ else
   leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
    /TopStor/logmsg.py Partst04 info system $myhost $myip
   ./clearnamespace.py $enpdev
-  ./cleardata.py
+  ./cleardataip.py $enpdev
   echo starting etcd as local >>/root/tmp2
    ./etccluster.py 'local' $myip 2>/dev/null
   chmod +r /etc/etcd/etcd.conf.yml 2>/dev/null
