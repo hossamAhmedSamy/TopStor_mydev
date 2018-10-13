@@ -3,6 +3,8 @@ import subprocess,sys, logmsg
 from ast import literal_eval as mtuple
 from etcddel import etcddel as etcddel
 from broadcast import broadcast as broadcast 
+from etcdget import etcdget as get
+from etcdput import etcdput as put 
 import json
 endpoints=''
 data=json.load(open('/pacedata/runningetcdnodes.txt'))
@@ -19,6 +21,8 @@ if possible != ['']:
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   print('result=',result)
   cmdline=['etcdctl','--endpoints='+endpoints,'put','known/'+mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline=['etcdctl','--endpoints='+endpoints,'put','nextlead',mtuple(x)[0].split('possible')[1]+'/'+mtuple(x)[1]]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   cmdline=['/sbin/rabbitmqctl','add_user','rabb_'+mtuple(x)[0].split('possible')[1],'YousefNadody']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
@@ -50,6 +54,12 @@ if known != ['']:
   if(heart == ['-1']):
    print('the known ',str(kn[0]),' is gone, notfound')
    etcddel('known/'+str(kn[0]))
+   if str(kn[0]) in get('nextlead'):
+    nextone=get('known','--prefix')
+    if nextone==[]:
+     etcddel('nextlead')
+    else:
+     put('nextlead',nextone[0][0].replace('known/','')+'/'+nextone[0][1])
    logmsg.sendlog('Partst02','warning','system', str(kn[0]))
    etcddel('ready/'+str(kn[0]))
    etcddel('old','--prefix')
