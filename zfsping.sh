@@ -92,6 +92,10 @@ do
     /TopStor/logmsg.py Partst05 info system $myhost
     primtostd=0;
    fi
+   nextleadip=`ETCDCTL_API=3 ./etcdgetlocal.py $myip nextlead | awk -F"," '{print $2}'` 
+   echo $nextleadip | grep $myip
+   if [ $? -eq 0 ];
+   then
    systemctl stop etcd 2>/dev/null
    clusterip=`cat /pacedata/clusterip`
    echo starting primary etcd with namespace >> /root/zfspingtmp
@@ -135,6 +139,9 @@ do
    chgrp apache /var/www/html/des20/Data/* 2>/dev/null
    chmod g+r /var/www/html/des20/Data/* 2>/dev/null
    runningcluster=1
+   else:
+    sleep 1
+   fi
   else 
    echo I am not primary.. checking if I am local etcd>> /root/zfspingtmp
    netstat -ant | grep 2378 | grep $myip | grep LISTEN &>/dev/null

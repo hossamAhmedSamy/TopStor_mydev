@@ -6,33 +6,22 @@ from broadcast import broadcast as broadcast
 from etcdget import etcdget as get
 from etcdput import etcdput as put 
 import json
-endpoints=''
-data=json.load(open('/pacedata/runningetcdnodes.txt'))
-for x in data['members']:
- endpoints+=str(x['clientURLs'])[2:][:-2]
-cmdline=['/pace/etcdget.py','possible','--prefix']
-possibleres=subprocess.run(cmdline,stdout=subprocess.PIPE)
-possible=str(possibleres.stdout)[2:][:-3].split('\\n')
+possible=get('possible','--prefix')
 print('possible=',possible)
-if possible != ['']:
+if possible != []:
  for x in possible:
-  print('x=',mtuple(x)[0], mtuple(x)[1])
-  cmdline=['etcdctl','--endpoints='+endpoints,'del',mtuple(x)[0]]
+  print('x=',x[0], x[1])
+  etcddel('possible',x[0])
+  put('known/'+x[0].replace('possible',''),x[1])
+  put('nextlead',x[0].replace('possible','')+'/'+x[1])
+  cmdline=['/sbin/rabbitmqctl','add_user','rabb_'+x[0].replace('possible',''),'YousefNadody']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  print('result=',result)
-  cmdline=['etcdctl','--endpoints='+endpoints,'put','known/'+mtuple(x)[0].split('possible')[1],mtuple(x)[1]]
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  cmdline=['etcdctl','--endpoints='+endpoints,'put','nextlead',mtuple(x)[0].split('possible')[1]+'/'+mtuple(x)[1]]
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  cmdline=['/sbin/rabbitmqctl','add_user','rabb_'+mtuple(x)[0].split('possible')[1],'YousefNadody']
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  cmdline=['/sbin/rabbitmqctl','set_permissions','-p','/','rabb_'+mtuple(x)[0].split('possible')[1],'.*','.*','.*']
+  cmdline=['/sbin/rabbitmqctl','set_permissions','-p','/','rabb_'+x[0].replace('possible',''),'.*','.*','.*']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   
-  cmdline=['/pace/etcdput.py','change/'+mtuple(x)[0]+'/booted',mtuple(x)[1]]
-  subprocess.run(cmdline,stdout=subprocess.PIPE)
-  cmdline=['/pace/iscsiwatchdog.sh','2>/dev/null']
-  subprocess.run(cmdline,stdout=subprocess.PIPE)
+  put('change/'+x[0].replace('possible','')+'/booted',x[1])
+  #cmdline=['/pace/iscsiwatchdog.sh','2>/dev/null']
+  #subprocess.run(cmdline,stdout=subprocess.PIPE)
 #  cmdline=['/bin/sleep','5']
 #  subprocess.run(cmdline,stdout=subprocess.PIPE)
 #  cmdline=['/pace/iscsiwatchdog.sh','2>/dev/null']
@@ -41,25 +30,24 @@ if possible != ['']:
 #  subprocess.run(cmdline,stdout=subprocess.PIPE)
 else:
  print('possible is empty')
-cmdline=['/pace/etcdget.py','known','--prefix']
-knownres=subprocess.run(cmdline,stdout=subprocess.PIPE)
-known=str(knownres.stdout)[2:][:-3].replace('known/','').split('\\n')
-if known != ['']:
+known=get('known','--prefix')
+nextone=get('nextlead')
+if nextone[0].split('/')[0] not in  str(known):
+ print('deleting nextlead')
+ etcddel('nextlead')
+ nextone=[]
+if known != []:
  for kno in known:
-  kn=mtuple(kno) 
-  cmdline=['/pace/etcdgetlocal.py',str(kn[1]),'local','--prefix','2>/dev/null']
+  kn=kno 
+  cmdline=['/pace/etcdgetlocal.py',kn[1],'local','--prefix','2>/dev/null']
   heartres=subprocess.run(cmdline,stdout=subprocess.PIPE)
   heart=str(heartres.stdout)[2:][:-3].split('\\n')
   print('heartbeat=',heart)
   if(heart == ['-1']):
-   print('the known ',str(kn[0]),' is gone, notfound')
-   etcddel('known/'+str(kn[0]))
-   if str(kn[0]) in get('nextlead'):
-    nextone=get('known','--prefix')
-    if nextone==[]:
-     etcddel('nextlead')
-    else:
-     put('nextlead',nextone[0][0].replace('known/','')+'/'+nextone[0][1])
+   print('the known ',kn[0].repace('known/',''),' is gone, notfound')
+   etcddel(kn[0])
+   if kn[1] in str(nextone):
+    etcddel('nextlead')
    logmsg.sendlog('Partst02','warning','system', str(kn[0]))
    etcddel('ready/'+str(kn[0]))
    etcddel('old','--prefix')
@@ -67,15 +55,19 @@ if known != ['']:
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    etcddel('localrun/'+str(kn[0]))
    broadcast('broadcast','/TopStor/pump.sh','zpooltoimport.py','all')
-  elif (mtuple(heart[0])[1] not in str(kn[1])):
-   etcddel('known/'+str(kn[0]))
-   logmsg.sendlog('Partst02','warning','system', str(kn[0]))
-   print('the known ',str(kn[0]),' is notworking, notfound')
+  elif (mtuple(heart[0])[1] not in kn[1]):
+   if kn[1] in str(nextone):
+    etcddel('nextlead')
+   etcddel(kn[0])
+   logmsg.sendlog('Partst02','warning','system', kn[0])
+   print('the known ',kn[0],' is notworking, notfound')
    cmdline=['/pace/hostlost.sh',str(kn[0])]
    subprocess.run(cmdline,stdout=subprocess.PIPE)
    etcddel('localrun/'+str(kn[0]))
    broadcast('broadcast','/TopStor/pump.sh','zpooltoimport.py','all')
    cmdline=['/sbin/rabbitmqctl','delete_user','rabb_'+mtuple(x)[0].split('possible')[1],'YousefNadody']
    subprocess.run(cmdline,stdout=subprocess.PIPE)
-   
- 
+  else:
+   if nextone == []:
+    put('nextlead',kn[0].replace('known/','')+'/'+kn[1])
+    broadcast('broadcast','/TopStor/pump.sh','syncnext.sh','nextlead','nextlead')
