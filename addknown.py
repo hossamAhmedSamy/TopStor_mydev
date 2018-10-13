@@ -14,6 +14,7 @@ if possible != []:
   etcddel('possible',x[0])
   put('known/'+x[0].replace('possible',''),x[1])
   put('nextlead',x[0].replace('possible','')+'/'+x[1])
+  broadcast('broadcast','/TopStor/pump.sh','syncnext.sh','nextlead','nextlead')
   cmdline=['/sbin/rabbitmqctl','add_user','rabb_'+x[0].replace('possible',''),'YousefNadody']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   cmdline=['/sbin/rabbitmqctl','set_permissions','-p','/','rabb_'+x[0].replace('possible',''),'.*','.*','.*']
