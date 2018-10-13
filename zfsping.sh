@@ -237,9 +237,14 @@ do
  
  if [ $toimport -gt 0 ];
  then
-  ./etcdget.py toimport/$myhost | grep nothing
+  mytoimport=` ETCDCTL_API=3 ./etcdget.py toimport/$myhost `
+  if [ $mytoimport -eq -1 ]; then 
+   echo Yes  I have no record in toimport even no nothing=$mytoimport >> /root/zfspingtmp
+  fi
+  echo $mytoimport | grep nothing
   if [ $? -eq 0 ];
   then
+   echo it is nothing , toimport=$toimport >> /root/zfspingtmp
    if [ $toimport -eq 1 ];
    then
     /TopStor/logmsg.py Partsu04 info system $myhost $myip
@@ -255,6 +260,7 @@ do
    toimport=0
    oldclocker=$clocker
   else
+   echo checking zpool to import>> /root/zfspingtmp
    /TopStor/pump.sh zpooltoimport.py all 
   fi
  fi
