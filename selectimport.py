@@ -38,7 +38,7 @@ def importpls(myhost,allinfo,*args):
 		#z=['/TopStor/pump.sh','ClearCache',hostpair[0][1:]]
 		#msg={'req': 'ClearCache', 'reply':z}
 		#sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
-	        deli('to','--prefix')
+		deli('to','--prefix')
 	return
 
 if __name__=='__main__':
