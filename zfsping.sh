@@ -127,7 +127,11 @@ do
    #/sbin/zpool import -am &>/dev/null
    echo running putzpool and nfs >> /root/zfspingtmp
    ./putzpool.py 2>/dev/null
-   systemctl start nfs 2>/dev/null
+   systemctl status nfs 
+   if [ $? -ne 0 ];
+   then
+    systemctl start nfs 2>/dev/null
+   fi
    chgrp apache /var/www/html/des20/Data/* 2>/dev/null
    chmod g+r /var/www/html/des20/Data/* 2>/dev/null
    runningcluster=1
