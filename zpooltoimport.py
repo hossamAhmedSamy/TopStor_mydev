@@ -26,7 +26,6 @@ def zpooltoimport(*args):
    f.write('readyhost='+str(ready)+'\n')
   x=getall(ready)
   myhostall=x
-  deletedpools=get('deleted','--prefix')
   with open('/root/toimport','a') as f:
    f.write('xall='+str(x)+'\n')
   x=getall(ready)['pools']
