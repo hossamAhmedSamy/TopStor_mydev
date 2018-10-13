@@ -17,6 +17,7 @@ def zpooltoimport(*args):
  myhost=socket.gethostname()
  runningpools=[]
  readyhosts=get('ready','--prefix')
+ deletedpools=get('delet','--prefix')
  with open('/root/toimport','a') as f:
   f.write('readyhosts='+str(readyhosts)+'\n')
  for ready in readyhosts:
