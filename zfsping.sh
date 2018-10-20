@@ -92,7 +92,7 @@ do
     /TopStor/logmsg.py Partst05 info system $myhost
     primtostd=0;
    fi
-   nextleadip=`ETCDCTL_API=3 ./etcdgetlocal.py $myip nextlead | awk -F"," '{print $2}'` 
+   nextleadip=`ETCDCTL_API=3 ./etcdgetlocal.py $myip nextlead` 
    echo $nextleadip | grep $myip
    if [ $? -eq 0 ];
    then
