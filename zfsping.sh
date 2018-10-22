@@ -85,7 +85,7 @@ do
   echo $leaderall | grep Error  &>/dev/null
   if [ $? -eq 0 ];
   then
-   echo leader is dead.. stopping local etcd >> /root/zfspingtmp
+   echo leader is dead..  >> /root/zfspingtmp
    ./etcdgetlocal.py $myip known --prefix | wc -l | grep 1
    if [ $? -eq 0 ];
    then
@@ -93,54 +93,72 @@ do
     primtostd=0;
    fi
    nextleadip=`ETCDCTL_API=3 ./etcdgetlocal.py $myip nextlead` 
+   echo nextlead is $nextleadip  >> /root/zfspingtmp
    echo $nextleadip | grep $myip
    if [ $? -eq 0 ];
    then
-   systemctl stop etcd 2>/dev/null
-   clusterip=`cat /pacedata/clusterip`
-   echo starting primary etcd with namespace >> /root/zfspingtmp
-   ./etccluster.py 'new' $myip 2>/dev/null
-   chmod +r /etc/etcd/etcd.conf.yml
-   systemctl daemon-reload 2>/dev/null
-   systemctl start etcd 2>/dev/null
-   while true;
-   do
-    echo starting etcd=$?
-    systemctl status etcd
-    if [ $? -eq 0 ];
-    then
-     break
-    else
-     sleep 1
-    fi
-   done
+    systemctl stop etcd 2>/dev/null
+    clusterip=`cat /pacedata/clusterip`
+    echo starting primary etcd with namespace >> /root/zfspingtmp
+    ./etccluster.py 'new' $myip 2>/dev/null
+    chmod +r /etc/etcd/etcd.conf.yml
+    systemctl daemon-reload 2>/dev/null
+    systemctl start etcd 2>/dev/null
+    while true;
+    do
+     echo starting etcd=$?
+     systemctl status etcd
+     if [ $? -eq 0 ];
+     then
+      break
+     else
+      sleep 1
+     fi
+    done
    #./etcdput.py clusterip $clusterip 2>/dev/null
    #pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24 2>/dev/null
-   echo adding me as a leader >> /root/zfspingtmp
-   ./runningetcdnodes.py $myip 2>/dev/null
-   ./etcddel.py leader 2>/dev/null
-   ./etcdput.py leader/$myhost $myip 2>/dev/null
-   echo creating namespaces >>/root/zfspingtmp
-   ./setnamespace.py $enpdev
-   ./setdataip.py
-   echo created namespaces >>/root/zfspingtmp
-   systemctl restart smb 2>/dev/null
-   echo importing all pools >> /root/zfspingtmp
-   ./etcddel.py toimport/$myhost
-   toimport=1
-   #/sbin/zpool import -am &>/dev/null
-   echo running putzpool and nfs >> /root/zfspingtmp
-   ./putzpool.py 2>/dev/null
-   systemctl status nfs 
-   if [ $? -ne 0 ];
-   then
-    systemctl start nfs 2>/dev/null
-   fi
-   chgrp apache /var/www/html/des20/Data/* 2>/dev/null
-   chmod g+r /var/www/html/des20/Data/* 2>/dev/null
-   runningcluster=1
-   else:
-    sleep 1
+    echo adding me as a leader >> /root/zfspingtmp
+    ./runningetcdnodes.py $myip 2>/dev/null
+    ./etcddel.py leader 2>/dev/null
+    ./etcdput.py leader/$myhost $myip 2>/dev/null
+    echo creating namespaces >>/root/zfspingtmp
+    ./setnamespace.py $enpdev
+    ./setdataip.py
+    echo created namespaces >>/root/zfspingtmp
+    systemctl restart smb 2>/dev/null
+    echo importing all pools >> /root/zfspingtmp
+    ./etcddel.py toimport/$myhost
+    toimport=1
+    #/sbin/zpool import -am &>/dev/null
+    echo running putzpool and nfs >> /root/zfspingtmp
+    ./putzpool.py 2>/dev/null
+    systemctl status nfs 
+    if [ $? -ne 0 ];
+    then
+     systemctl start nfs 2>/dev/null
+    fi
+    chgrp apache /var/www/html/des20/Data/* 2>/dev/null
+    chmod g+r /var/www/html/des20/Data/* 2>/dev/null
+    runningcluster=1
+   else
+    systemctl stop etcd 2>/dev/null
+    echo starting waiting for new leader run >> /root/zfspingtmp
+    waiting=1
+    result='nothing'
+    while [ $waiting -eq 1 ]
+    do
+     echo still looping for new leader run >> /root/zfspingtmp
+     echo $result | grep nothing 
+     if [ $? -eq 0 ];
+     then
+      sleep 3
+      result=` ./nodesearch.py $myip 2>/dev/null`
+     else
+      echo found the new leader run $result >> /root/zfspingtmp
+      waiting=0
+     fi
+    done 
+    continue
    fi
   else 
    echo I am not primary.. checking if I am local etcd>> /root/zfspingtmp
