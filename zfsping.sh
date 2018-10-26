@@ -287,7 +287,13 @@ do
    fi
    if [ $toimport -eq 2 ];
    then
-    /TopStor/logmsg.py Partsu03 info system $myhost $myip
+    if [ $leaderfail -eq 0 ];
+    then
+     /TopStor/logmsg.py Partsu03 info system $myhost $myip
+    else
+     leaderfail=0
+    fi
+     
    fi
    if [ $toimport -eq 3 ];
    then
