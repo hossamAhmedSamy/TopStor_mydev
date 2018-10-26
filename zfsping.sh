@@ -9,6 +9,7 @@ targetcli restoreconfig /pacedata/targetconfig
 targetcli saveconfig
 failddisks=''
 isknown=0
+leaderfail=0
 isprimary=0
 primtostd=4
 toimport=-1
@@ -86,6 +87,7 @@ do
   if [ $? -eq 0 ];
   then
    echo leader is dead..  >> /root/zfspingtmp
+   leaderfail=1
    ./etcdgetlocal.py $myip known --prefix | wc -l | grep 1
    if [ $? -eq 0 ];
    then
@@ -276,7 +278,12 @@ do
    echo it is nothing , toimport=$toimport >> /root/zfspingtmp
    if [ $toimport -eq 1 ];
    then
-    /TopStor/logmsg.py Partsu04 info system $myhost $myip
+    if [ $leaderfail -eq 0 ];
+    then
+     /TopStor/logmsg.py Partsu04 info system $myhost $myip
+    else
+     leaderfail=0
+    fi
    fi
    if [ $toimport -eq 2 ];
    then
