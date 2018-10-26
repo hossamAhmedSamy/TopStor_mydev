@@ -29,4 +29,5 @@ then
  ETCDCTL_API=3 /TopStor/logmsg.py Zpsu02 info system $pool
  /sbin/zpool set cachefile=$3 $pool
  /pace/putzpool.py 
+ ETCDCTL_API=3 /pace/etcddel.py cann $pool
 fi 
