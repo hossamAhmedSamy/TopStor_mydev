@@ -99,7 +99,6 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received Zpool from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
-  logmsg.sendlog('Zpsu02','info','system',pool)
 ########## if clear cache ##############
  elif r["req"]=='ClearCache':  
   with open('/root/recv','a') as f:
