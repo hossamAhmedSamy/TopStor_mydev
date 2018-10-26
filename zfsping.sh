@@ -281,6 +281,7 @@ do
     if [ $leaderfail -eq 0 ];
     then
      /TopStor/logmsg.py Partsu04 info system $myhost $myip
+     ./etcddel.py cann --prefix 2>/dev/null
     else
      leaderfail=0
     fi
@@ -290,6 +291,7 @@ do
     if [ $leaderfail -eq 0 ];
     then
      /TopStor/logmsg.py Partsu03 info system $myhost $myip
+     ./etcddel.py cann --prefix 2>/dev/null
     else
      leaderfail=0
     fi

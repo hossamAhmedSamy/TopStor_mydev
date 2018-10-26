@@ -61,6 +61,7 @@ then
  echo created namespaces >>/root/tmp2
  systemctl start smb
  ./etcddel.py leader --prefix 2>/dev/null
+ ./etcddel.py cann --prefix 2>/dev/null
  ./etcdput.py leader/$myhost $myip 2>/dev/null
  ./etcdput.py primary/name $myhost 2>/dev/null
  ./etcdput.py primary/address $myip 2>/dev/null
