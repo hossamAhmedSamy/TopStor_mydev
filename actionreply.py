@@ -124,6 +124,11 @@ def do(body):
   with open('/root/recv2','a') as f:
    f.write('received LocalManualConfig from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if HostgetIPs ##############
+ elif r["req"]=='HostgetIPs':  
+  with open('/root/recv2','a') as f:
+   f.write('received HostgetIPs from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
  
 
 
