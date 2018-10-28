@@ -16,8 +16,10 @@ oldsubnet=` echo $@ | awk '{ print $4 }'`;
 sed -e "s/HOSTY/$hostip/g" /TopStor/sshhttp.conf > /etc/httpd/conf.d/sshhttp.conf
 sed -e "s/HOSTY/$hostip/g" /TopStor/sshhttp.conf > /etc/httpd/conf.d/sshhttp.conf
 dev=`/sbin/pcs resource show CC | grep Attrib | awk -F'nic=' '{print $2}' | awk '{print $1}'`
+/sbin/zpool export -a 
 /sbin/pcs resource update CC ip=$hostip
 /sbin/pcs resource update CC cidr_netmask=$subnet
 /sbin/ip addr del ${oldip}/$oldsubnet dev $dev
 /pace/keysend.sh $hostip
-#/sbin/reboot
+
+/sbin/reboot

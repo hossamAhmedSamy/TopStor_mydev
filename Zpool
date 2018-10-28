@@ -1,5 +1,10 @@
 #!/bin/sh
 export ETCDCTL_API=3
+x=`pgrep Zpool | grep -v $$ |  wc -l`
+if [ $x -gt 1 ];
+then
+ exit
+fi
 echo $@ > /root/Zpooltmp
 pool=`echo $3 | awk -F'/' '{print $3}'`
 success=1;
