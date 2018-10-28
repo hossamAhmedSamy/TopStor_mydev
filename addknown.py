@@ -6,6 +6,12 @@ from broadcast import broadcast as broadcast
 from etcdget import etcdget as get
 from etcdput import etcdput as put 
 import json
+x=subprocess.check_output(['pgrep','addknown'])
+x=str(x).replace("b'","").replace("'","").split('\\n')
+x=[y for y in x if y != '']
+if(len(x) > 1 ):
+ print('process still running',len(x))
+ exit()
 possible=get('possible','--prefix')
 print('possible=',possible)
 if possible != []:
