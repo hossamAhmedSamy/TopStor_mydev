@@ -43,6 +43,12 @@ def importpls(myhost,allinfo,*args):
 
 if __name__=='__main__':
  myhost=socket.gethostname()
+ x=subprocess.check_output(['pgrep','selectimport'])
+ x=str(x).replace("b'","").replace("'","").split('\\n')
+ x=[y for y in x if y != '']
+ if(len(x) > 1 ):
+  print('process still running',len(x))
+  exit()
  allinfo=get('to','--prefix')
  importpls(myhost,allinfo,*sys.argv[1:])
  

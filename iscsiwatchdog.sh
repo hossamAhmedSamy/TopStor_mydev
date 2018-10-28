@@ -1,4 +1,9 @@
 #!/bin/sh
+x=`pgrep iscsiwatchdog | grep -v $$ |  wc -l`
+if [ $x -gt 1 ];
+then
+ exit
+fi
 if [[ "$#" -eq 0 ]];
 then
  islocal=0
@@ -32,6 +37,6 @@ then
  else
   echo putzpool local $myip $myhost $islocal >> /root/zfspingtmp
   echo putzpool local $myip $myhost $islocal >> /root/iscsiwatch
-  ETCDCTL_API=3 /pace/putzpoollocal.py $myip $myhosti $leader
+  ETCDCTL_API=3 /pace/putzpoollocal.py $myip $myhost $leader
  fi
 fi

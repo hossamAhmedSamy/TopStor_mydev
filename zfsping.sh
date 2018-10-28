@@ -31,13 +31,13 @@ done
 echo startzfs run >> /root/zfspingtmp
 /pace/startzfs.sh
 date=`date `
+myhost=`hostname -s`
+myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{print $2 }'`
 echo starting in $date >> /root/zfspingtmp
 while true;
 do
  sleep 5
  needlocal=0
- myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{print $2 }'`
- myhost=`hostname -s`
  runningcluster=0
  echo check if I primary etcd >> /root/zfspingtmp
  netstat -ant | grep 2379 | grep LISTEN &>/dev/null
@@ -65,8 +65,8 @@ do
    #targetcli restoreconfig /pacedata/targetconfig
    /pace/etcdput.py ready/$myhost ok
    touch /pacedata/addiscsitargets 
-   /pace/putzpool.py
-   ./etcddel.py toimport/$myhost
+   /pace/putzpool.py &
+   ./etcddel.py toimport/$myhost &
    toimport=2
   fi
   runningcluster=1
@@ -75,11 +75,11 @@ do
   then
    echo no leader although I am primary node >> /root/zfspingtmp
    ./runningetcdnodes.py $myip 2>/dev/null
-   ./etcddel.py leader --prefix 2>/dev/null
-   ./etcdput.py leader/$myhost $myip 2>/dev/null
+   ./etcddel.py leader --prefix 2>/dev/null &
+   ./etcdput.py leader/$myhost $myip 2>/dev/null &
   fi
   echo adding known from list of possbiles >> /root/zfspingtmp
-  ./addknown.py 2>/dev/null
+  ./addknown.py 2>/dev/null &
  else
   echo I am not a primary etcd.. heartbeating leader >> /root/zfspingtmp
   leaderall=` ./etcdget.py leader --prefix 2>&1`
@@ -91,7 +91,7 @@ do
    ./etcdgetlocal.py $myip known --prefix | wc -l | grep 1
    if [ $? -eq 0 ];
    then
-    /TopStor/logmsg.py Partst05 info system $myhost
+    /TopStor/logmsg.py Partst05 info system $myhost &
     primtostd=0;
    fi
    nextleadip=`ETCDCTL_API=3 ./etcdgetlocal.py $myip nextlead` 
@@ -121,19 +121,19 @@ do
    #pcs resource create clusterip ocf:heartbeat:IPaddr nic="$enpdev" ip=$clusterip cidr_netmask=24 2>/dev/null
     echo adding me as a leader >> /root/zfspingtmp
     ./runningetcdnodes.py $myip 2>/dev/null
-    ./etcddel.py leader 2>/dev/null
-    ./etcdput.py leader/$myhost $myip 2>/dev/null
+    ./etcddel.py leader 2>/dev/null &
+    ./etcdput.py leader/$myhost $myip 2>/dev/null &
     echo creating namespaces >>/root/zfspingtmp
-    ./setnamespace.py $enpdev
-    ./setdataip.py
+    ./setnamespace.py $enpdev &
+    ./setdataip.py &
     echo created namespaces >>/root/zfspingtmp
-    systemctl restart smb 2>/dev/null
+    systemctl restart smb 2>/dev/null &
     echo importing all pools >> /root/zfspingtmp
-    ./etcddel.py toimport/$myhost
+    ./etcddel.py toimport/$myhost &
     toimport=1
     #/sbin/zpool import -am &>/dev/null
     echo running putzpool and nfs >> /root/zfspingtmp
-    ./putzpool.py 2>/dev/null
+    ./putzpool.py 2>/dev/null &
     systemctl status nfs 
     if [ $? -ne 0 ];
     then
@@ -143,7 +143,7 @@ do
     chmod g+r /var/www/html/des20/Data/* 2>/dev/null
     runningcluster=1
    else
-    systemctl stop etcd 2>/dev/null
+    systemctl stop etcd 2>/dev/null 
     echo starting waiting for new leader run >> /root/zfspingtmp
     waiting=1
     result='nothing'
@@ -179,7 +179,7 @@ do
    if [ $? -ne 0 ];
    then
     echo I am not a known adding me as possible >> /root/zfspingtmp
-    ./etcdput.py possible$myhost $myip 2>/dev/null
+    ./etcdput.py possible$myhost $myip 2>/dev/null &
    else
     echo I am known so running all needed etcd task:boradcast,isknown:$isknown >> /root/zfspingtmp
     if [[ $isknown -eq 0 ]];
@@ -188,9 +188,9 @@ do
      leaderall=` ./etcdget.py leader --prefix `
      leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
      leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
-     /pace/sendhost.py $leaderip 'user' 'recvreq' $myhost
-     /pace/sendhost.py $leaderip 'cifs' 'recvreq' $myhost
-     /pace/sendhost.py $leaderip 'logall' 'recvreq' $myhost
+     /pace/sendhost.py $leaderip 'user' 'recvreq' $myhost &
+     /pace/sendhost.py $leaderip 'cifs' 'recvreq' $myhost &
+     /pace/sendhost.py $leaderip 'logall' 'recvreq' $myhost &
      isknown=$((isknown+1))
     fi
     if [[ $isknown -le 10 ]];
@@ -199,19 +199,19 @@ do
     fi
     if [[ $isknown -eq 3 ]];
     then
-     /pace/etcdput.py ready/$myhost ok
+     /pace/etcdput.py ready/$myhost ok &
      #targetcli clearconfig True
      #targetcli saveconfig
      #targetcli restoreconfig /pacedata/targetconfig
      touch /pacedata/addiscsitargets 
-   ./etcddel.py toimport/$myhost
+   ./etcddel.py toimport/$myhost &
      toimport=1
     fi
     echo finish running tasks task:boradcast, log..etc >> /root/zfspingtmp
    fi
   fi 
  fi
- /pace/putzpool.py
+ /pace/putzpool.py &
  echo checking if I need to run local etcd >> /root/zfspingtmp
  if [[ $needlocal -eq 1 ]];
  then
@@ -235,13 +235,13 @@ do
   leaderall=` ./etcdget.py leader --prefix `
   leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
   leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
-  ./etcdsync.py $myip primary primary 2>/dev/null
-  ./etcddellocal.py $myip known --prefix 2>/dev/null
-  ./etcddellocal.py $myip localrun --prefix 2>/dev/null
-  ./etcddellocal.py $myip run --prefix 2>/dev/null
-  ./etcdsync.py $myip known known 2>/dev/null
-  ./etcdsync.py $myip localrun localrun 2>/dev/null
-  ./etcdsync.py $myip leader known 2>/dev/null
+  ./etcdsync.py $myip primary primary 2>/dev/null &
+  ./etcddellocal.py $myip known --prefix 2>/dev/null &
+  ./etcddellocal.py $myip localrun --prefix 2>/dev/null &
+  ./etcddellocal.py $myip run --prefix 2>/dev/null &
+  ./etcdsync.py $myip known known 2>/dev/null &
+  ./etcdsync.py $myip localrun localrun 2>/dev/null &
+  ./etcdsync.py $myip leader known 2>/dev/null &
 #   ./etcddellocal.py $myip known/$myhost --prefix 2>/dev/null
   echo done and exit >> /root/zfspingtmp
   continue 
@@ -249,7 +249,7 @@ do
  if [[ $needlocal -eq  2 ]];
  then
   echo I am already local etcd running iscsirefresh on $myip $myhost  >> /root/zfspingtmp
-  /pace/iscsiwatchdog.sh $myip $myhost $leader
+  /pace/iscsiwatchdog.sh $myip $myhost $leader &
  fi
  echo checking if still in the start initcron is still running  >> /root/zfspingtmp
  if [ -f /pacedata/forzfsping ];
@@ -261,15 +261,17 @@ do
  if [[ $runningcluster -eq 1 ]];
  then
   echo Yes I am primary so will check for known hosts >> /root/zfspingtmp
-  ./addknown.py 2>/dev/null
-  ./selectimport.py $myhost
+  ./addknown.py 2>/dev/null &
+  ./selectimport.py $myhost &
  fi 
  echo toimport = $toimport >> /root/zfspingtmp
  
  if [ $toimport -gt 0 ];
  then
-  mytoimport=`/TopStor/etcdget.py toimport/$myhost`
-  if [ $mytoimport -eq -1 ]; then 
+  echo ETCDCTL_API=3 /pace/etcdget.py toimport/$myhost >>2 
+  ETCDCTL_API=3 /pace/etcdget.py toimport/$myhost 2&1>>2 
+  mytoimport=`ETCDCTL_API=3 /pace/etcdget.py toimport/$myhost`
+  if [ $mytoimport == '-1' ]; then 
    echo Yes  I have no record in toimport/$myhost even no nothing=$mytoimport >> /root/zfspingtmp
   fi
   echo $mytoimport | grep nothing
@@ -280,8 +282,8 @@ do
    then
     if [ $leaderfail -eq 0 ];
     then
-     /TopStor/logmsg.py Partsu04 info system $myhost $myip
-     ./etcddel.py cann --prefix 2>/dev/null
+     /TopStor/logmsg.py Partsu04 info system $myhost $myip &
+     ./etcddel.py cann --prefix 2>/dev/null &
     else
      leaderfail=0
     fi
@@ -290,8 +292,8 @@ do
    then
     if [ $leaderfail -eq 0 ];
     then
-     /TopStor/logmsg.py Partsu03 info system $myhost $myip
-     ./etcddel.py cann --prefix 2>/dev/null
+     /TopStor/logmsg.py Partsu03 info system $myhost $myip &
+     ./etcddel.py cann --prefix 2>/dev/null &
     else
      leaderfail=0
     fi
@@ -299,13 +301,13 @@ do
    fi
    if [ $toimport -eq 3 ];
    then
-    /TopStor/logmsg.py Partsu06 info system
+    /TopStor/logmsg.py Partsu06 info system &
    fi
    toimport=0
    oldclocker=$clocker
   else
    echo checking zpool to import>> /root/zfspingtmp
-   /TopStor/pump.sh zpooltoimport.py all 
+   /TopStor/pump.sh zpooltoimport.py all  &
   fi
  fi
  if [ $toimport -eq 0 ];
@@ -316,16 +318,16 @@ do
  echo Clockdiff = $clockdiff >> /root/zfspingtmp
  if [ $clockdiff -ge 300 ];
  then
-  ./etcddel.py toimport/$myhost
-  /TopStor/logmsg.py Partst06 info system 
+  ./etcddel.py toimport/$myhost &
+  /TopStor/logmsg.py Partst06 info system  &
   toimport=3
   oldclocker=$clocker
   clockdiff=0
  fi
- /pace/iscsiwatchdog.sh 2>/dev/null 
- /pace/putzpool.py 2>/dev/null
+ /pace/iscsiwatchdog.sh 2>/dev/null  &
+ /pace/putzpool.py 2>/dev/null &
   echo Collecting a change in system occured >> /root/zfspingtmp
  #/pace/changeop.py hosts/$myhost/current d
-	ETCDCTL_API=3 /pace/changeop.py $myhost
-	ETCDCTL_API=3 /pace/selectspare.py $myhost
+	ETCDCTL_API=3 /pace/changeop.py $myhost &
+	ETCDCTL_API=3 /pace/selectspare.py $myhost &
 done

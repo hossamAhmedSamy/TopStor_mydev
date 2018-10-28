@@ -5,6 +5,14 @@ from etcdput import etcdput as put
 from etcdget import etcdget as get 
 from etcddel import etcddel as dels 
 from os.path import getmtime
+
+x=subprocess.check_output(['pgrep','putzpool'])
+x=str(x).replace("b'","").replace("'","").split('\\n')
+x=[y for y in x if y != '']
+if(len(x) > 1 ):
+ print('process still running',len(x))
+ exit()
+
 myhost=socket.gethostname()
 sitechange=0
 readyhosts=get('ready','--prefix')
