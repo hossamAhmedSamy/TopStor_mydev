@@ -169,10 +169,12 @@ def selectspare(*args):
  
  
 if __name__=='__main__':
- x=subprocess.check_output(['pgrep','selectspare'])
- x=str(x).replace("b'","").replace("'","").split('\\n')
- x=[y for y in x if y != '']
- if(len(x) > 1 ):
-  print('process still running',len(x))
-  exit()
- selectspare(*sys.argv[1:])
+ try:
+   x=subprocess.check_output(['pgrep','-c', 'selectspare'])
+   x=str(x).replace("b'","").replace("'","").split('\\n')
+   if(x[0]!= '1'):
+    print('process still running',str(x[0]))
+   else:
+    selectspare(*sys.argv[1:])
+  except:
+   pass 
