@@ -29,10 +29,13 @@ def importpls(myhost,allinfo,*args):
 			continue
 		owner=hostpair[1]
 ################# elect the host to import the pool ###############
+                locked=get('lockedpools','--prefix')
 		ownerstatus=get('cannotimport/'+owner)
 		if hostpair[0] in ownerstatus:
 			continue
 		if hostpair[0] in importedpools:
+			continue
+		if hostpair[0] in locked:
 			continue
 		importedpools.append(hostpair[0])
 		ownerip=get('leader',owner)
@@ -40,7 +43,10 @@ def importpls(myhost,allinfo,*args):
 			ownerip=get('known',owner)
 			if ownerip[0]== -1:
 				return 3
+		put('lockedpools/'+hostpair[0],'1')
+#################### end of election
 		z=['/TopStor/pump.sh','Zpool','import','-c','/TopStordata/'+hostpair[0],'-am']
+
 		msg={'req': 'Zpoolimport', 'reply':z}
 		sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
 		#z=['/TopStor/pump.sh','ClearCache',hostpair[0][1:]]
