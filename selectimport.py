@@ -21,12 +21,20 @@ def importpls(myhost,allinfo,*args):
 		for pool in mtuple(host[1]):
 			pools[pool[0]].append((host[0].split('/')[1],pool[1],pool[2]))
 	hosts=[]
+        pools=[]
 	for pool in pools.keys():
 		hosts.append((pool,max(pools[pool],key=lambda x:x[1])[0])) 
 	for hostpair in hosts:
 		if hostpair[0] == 'nothing':
 			continue
 		owner=hostpair[1]
+################# elect the host to import the pool ###############
+                ownerstatus=get('cannotimport/'+owner)
+                if hostpair[0] in ownerstatus:
+                 continue
+                if hostpair[0] in pools:
+                 continue
+                pools.append(hostpair[0])
 		ownerip=get('leader',owner)
 		if ownerip[0]== -1:
 			ownerip=get('known',owner)
