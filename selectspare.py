@@ -176,5 +176,5 @@ if __name__=='__main__':
     print('process still running',str(x[0]))
    else:
     selectspare(*sys.argv[1:])
-  except:
-   pass 
+ except:
+  pass 
