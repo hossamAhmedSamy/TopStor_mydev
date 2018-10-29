@@ -67,11 +67,11 @@ def zpooltoimport(*args):
   f.write('all pools to import'+str(pooltoimport)+'\n')
  if len(pooltoimport) > 0:
   alreadyfound=get('toimport/'+myhost)
+  if str(pool) in lockedpools:
+   logmsg.sendlog('Zpwa01','info','system',str(pool))
   if str(pool) not in alreadyfound:
    put('toimport/'+myhost,str(pooltoimport))
    logmsg.sendlog('Zpsu01','info','system',':found')
-  else:
-   logmsg.sendlog('Zpwa01','info','system',str(pool))
  else:
   for pool in pools:
    remove('/TopStordata/'+pool)
@@ -91,11 +91,13 @@ def zpooltoimport(*args):
  return pooltoimport 
 
 if __name__=='__main__':
- x=subprocess.check_output(['pgrep','zpooltoimport'])
- x=str(x).replace("b'","").replace("'","").split('\\n')
- x=[y for y in x if y != '']
- if(len(x) > 1 ):
-  print('process still running',len(x))
-  exit()
+ try:
+   x=subprocess.check_output(['pgrep','-c', 'zpooltoimport'])
+   x=str(x).replace("b'","").replace("'","").split('\\n')
+   if(str(x) != '1'):
+    print('process still running',len(x))
+    exit()
+ except:
+   pass
  zpooltoimport(*sys.argv[1:])
 
