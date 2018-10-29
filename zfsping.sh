@@ -123,16 +123,19 @@ do
     ./runningetcdnodes.py $myip 2>/dev/null
     ./etcddel.py leader 2>/dev/null &
     ./etcdput.py leader/$myhost $myip 2>/dev/null &
+    /TopStor/logmsg.py Partst02 warning system $leaderall &
     echo creating namespaces >>/root/zfspingtmp
     ./setnamespace.py $enpdev &
     ./setdataip.py &
     echo created namespaces >>/root/zfspingtmp
-    systemctl restart smb 2>/dev/null &
+   # systemctl restart smb 2>/dev/null &
     echo importing all pools >> /root/zfspingtmp
     ./etcddel.py toimport/$myhost &
     toimport=1
     #/sbin/zpool import -am &>/dev/null
     echo running putzpool and nfs >> /root/zfspingtmp
+    ./addknown.py 2>/dev/null 
+    ./selectimport.py $myhost &
     ./putzpool.py 2>/dev/null &
     systemctl status nfs 
     if [ $? -ne 0 ];
