@@ -66,8 +66,12 @@ def zpooltoimport(*args):
  with open('/root/toimport','a') as f:
   f.write('all pools to import'+str(pooltoimport)+'\n')
  if len(pooltoimport) > 0:
-  put('toimport/'+myhost,str(pooltoimport))
-  logmsg.sendlog('Zpsu01','info','system',':found')
+  alreadyfound=get('toimport/'+myhost)
+  if str(pool) not in alreadyfound:
+   put('toimport/'+myhost,str(pooltoimport))
+   logmsg.sendlog('Zpsu01','info','system',':found')
+  else:
+   logmsg.sendlog('Zpwa01','info','system',str(pool))
  else:
   for pool in pools:
    remove('/TopStordata/'+pool)
