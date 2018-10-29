@@ -1,5 +1,4 @@
 #!/bin/sh
-sleep 300
 export ETCDCTL_API=3
 echo $@ > /root/Zpoolparam
 pool=`echo $3 | awk -F'/' '{print $3}'`

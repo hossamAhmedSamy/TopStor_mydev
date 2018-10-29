@@ -68,7 +68,7 @@ def zpooltoimport(*args):
  if len(pooltoimport) > 0:
   alreadyfound=get('toimport/'+myhost)
   for pool in pools:
-   if str(pool) in lockedpools:
+   if str(pool) in str(lockedpools):
     logmsg.sendlog('Zpwa01','info','system',str(pool))
     continue
    if str(pool) not in alreadyfound:
