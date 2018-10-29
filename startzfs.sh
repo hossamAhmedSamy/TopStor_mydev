@@ -73,6 +73,7 @@ then
  ./etcddel.py oldhosts  --prefix 2>/dev/null
  systemctl start topstorremote
  systemctl start topstorremoteack
+ systemctl start servicewatchdog 
  echo deleted knowns and added leader >>/root/tmp2
 else
  echo found other host as primary.. checking if it shares same host name>>/root/tmp2
@@ -138,6 +139,7 @@ else
   ./etcdsync.py $myip alias alias 2>/dev/null
   systemctl start topstorremote
   systemctl start topstorremoteack
+  systemctl start servicewatchdog 
   echo etcd started as local >>/root/tmp2
   rm -rf /var/lib/iscsi/nodes/* 2>/dev/null
   echo starting iscsiwaatchdog >>/root/tmp2
