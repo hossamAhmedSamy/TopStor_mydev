@@ -9,7 +9,10 @@ echo "${disks[@]}" > /root/losthost
 echo "${disks[@]}" | awk '{print $1}' | awk -F'/' '{print $NF}' | while read l;
 do
  echo 1 > /sys/block/$l/device/delete 2>/dev/null
+<<<<<<< HEAD
  echo echo 1 \> /sys/block/$l/device/delete >> /root/hostlost
+=======
+>>>>>>> ae25a587fccf2cf4ec37c8f9843691cab4d3c918
 done
 echo disks="${disks[@]}" >> /root/hostlosttmp
 echo "${disks[@]}" | awk '{print $2}'  | while read l;
