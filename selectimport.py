@@ -44,7 +44,7 @@ def importpls(myhost,allinfo,*args):
 			ownerip=get('known',owner)
 			if ownerip[0]== -1:
 				return 3
-		put('lockedpools/'+hostpair[0],'1')
+		put('lockedpools/'+hostpair[0],myhost)
 #################### end of election
 		z=['/TopStor/pump.sh','Zpool','import','-c','/TopStordata/'+hostpair[0],'-am']
 
