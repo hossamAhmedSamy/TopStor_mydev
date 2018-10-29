@@ -1,10 +1,10 @@
 #!/bin/sh
 export ETCDCTL_API=3
+echo $@ > /root/Zpoolparam
 pool=`echo $3 | awk -F'/' '{print $3}'`
 x=`pgrep Zpool -c`
 if [ $x -gt 1 ];
 then
- ETCDCTL_API=3 /pace/etcddel.py lockedpools/$pool
  exit
 fi
 echo $@ > /root/Zpooltmp
