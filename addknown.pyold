@@ -1,0 +1,24 @@
+#!/bin/python3.6
+import subprocess,sys
+from ast import literal_eval as mtuple
+import json
+cmdline=['./etcdgetlocal.py','10.11.11.22','local','--prefix','2>/dev/null']
+heartres=subprocess.run(cmdline,stdout=subprocess.PIPE)
+print('heartres=',heartres)
+heart=str(heartres.stdout)[2:][:-3].split('\\n')
+print('heart=',heart)
+exit()
+if(heart == ['-1']):
+ cmdline=['/pace/hostlost.sh',str(kn[0])]
+ subprocess.run(cmdline,stdout=subprocess.PIPE)
+ cmdline=['/pace/etcddel.py','known/'+str(kn[0])]
+ subprocess.run(cmdline,stdout=subprocess.PIPE)
+elif (mtuple(heart[0])[1] not in str(kn[1])):
+ cmdline=['/pace/hostlost.sh',str(kn[0])]
+ subprocess.run(cmdline,stdout=subprocess.PIPE)
+ cmdline=['/pace/etcddel.py','known/'+str(kn[0])]
+ subprocess.run(cmdline,stdout=subprocess.PIPE)
+ cmdline=['/bin/sleep','5']
+ subprocess.run(cmdline,stdout=subprocess.PIPE)
+   
+ 
