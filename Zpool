@@ -1,6 +1,6 @@
 #!/bin/sh
 export ETCDCTL_API=3
-x=`pgrep Zpool | grep -v $$ |  wc -l`
+x=`pgrep Zpool -c`
 if [ $x -gt 1 ];
 then
  exit
@@ -8,6 +8,12 @@ fi
 echo $@ > /root/Zpooltmp
 pool=`echo $3 | awk -F'/' '{print $3}'`
 success=1;
+myhost=`hostname`
+ETCDCTL_API=3 /pace/etcdget.py cannotimport/$myhost |  grep $pool
+if [ $? -eq 0 ];
+then
+ exit
+fi
 /sbin/zpool $@ > /root/Zpool
 if [ $? -ne 0 ];
 then
