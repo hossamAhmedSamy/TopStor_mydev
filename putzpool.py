@@ -45,6 +45,7 @@ lsnapshots=[]
 lists={'pools':lpools,'disks':ldisks,'defdisks':ldefdisks,'inusedisks':linusedisks,'freedisks':lfreedisks,'sparedisks':lsparedisks,'raids':lraids,'volumes':lvolumes,'snapshots':lsnapshots, 'hosts':lhosts}
 for a in y:
  b=a.split()
+ print(b)
  if "pdhc" in a and  'pool' not in a:
   raidlist=[]
   volumelist=[]
@@ -96,7 +97,7 @@ for a in y:
   rdict={ 'name':b[0], 'changeop':'NA','status':'NA','pool':zdict['name'],'host':myhost,'disklist':disklist }
   raidlist.append(rdict)
   lraids.append(rdict)
- elif 'scsi' in a:
+ elif 'scsi' in a or 'disk' in a:
    diskid='-1'
    host='-1'
    size='-1' 
@@ -120,7 +121,7 @@ for a in y:
     # subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
    changeop=b[1]
    if host=='-1':
-    print('hostfound',b[0],zpool[len(zpool)-1]['status'])
+   # print('hostfound',b[0],zpool[len(zpool)-1]['status'])
     raidlist[len(raidlist)-1]['changeop']='Warning'
     zpool[len(zpool)-1]['changeop']='Warning'
     changeop='Removed'
@@ -148,7 +149,7 @@ if len(freepool) > 0:
   ddict={'name':'scsi-'+z[6], 'changeop':'free','status':'free','raid':'free','pool':'pree','id': str(diskid), 'host':host, 'size':size}
   disklist.append(ddict)
   ldisks.append(ddict)
-print(zpool)
+#print(zpool)
 put('hosts/'+myhost+'/current',str(zpool))
 for disk in ldisks:
  if disk['changeop']=='free':

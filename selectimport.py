@@ -57,14 +57,15 @@ def importpls(myhost,allinfo,*args):
 	return
 
 if __name__=='__main__':
- myhost=socket.gethostname()
- x=subprocess.check_output(['pgrep','selectimport'])
- x=str(x).replace("b'","").replace("'","").split('\\n')
- x=[y for y in x if y != '']
- if(len(x) > 1 ):
-  print('process still running',len(x))
-  exit()
- allinfo=get('to','--prefix')
- importpls(myhost,allinfo,*sys.argv[1:])
- 
+	myhost=socket.gethostname()
+	try:
+		x=subprocess.check_output(['pgrep','-c', 'selectimport'])
+		x=str(x).replace("b'","").replace("'","").split('\\n')
+		if(x[0]!= '1'):
+			print('process still running',str(x[0]))
+		else:
+			allinfo=get('to','--prefix')
+			importpls(myhost,allinfo,*sys.argv[1:])
+	except:
+		pass 
  
