@@ -3,10 +3,10 @@ import subprocess, socket, binascii
 from etcdput import etcdput as put
 from etcdget import etcdget as get 
 from broadcast import broadcast as broadcast 
-from os import listdir
-from os import remove 
+from os import listdir as listdir
+from os import remove as remove
 from poolall import getall as getall
-from os.path import getmtime
+from os.path import getmtime as getmtime
 import sys
 import logmsg
 
@@ -17,9 +17,12 @@ def zpooltoimport(*args):
  myhost=socket.gethostname()
  runningpools=[]
  readyhosts=get('ready','--prefix')
+ deletedpools=get('delet','--prefix')
+ cannotimport=get('cannotimport/'+myhost,'--prefix')
+ lockedpools=get('lockedpools','--prefix')
+ deletedpools=deletedpools+cannotimport+lockedpools
  with open('/root/toimport','a') as f:
   f.write('readyhosts='+str(readyhosts)+'\n')
- deletedpools=get('deletedpools')
  for ready in readyhosts:
   ready=ready[0].replace('ready/','')
   with open('/root/toimport','a') as f:
@@ -63,8 +66,12 @@ def zpooltoimport(*args):
  with open('/root/toimport','a') as f:
   f.write('all pools to import'+str(pooltoimport)+'\n')
  if len(pooltoimport) > 0:
-  put('toimport/'+myhost,str(pooltoimport))
-  logmsg.sendlog('Zpsu01','info','system',':found')
+  alreadyfound=get('toimport/'+myhost)
+  if str(pool) not in alreadyfound:
+   put('toimport/'+myhost,str(pooltoimport))
+   logmsg.sendlog('Zpsu01','info','system',':found')
+  else:
+   logmsg.sendlog('Zpwa01','info','system',str(pool))
  else:
   for pool in pools:
    remove('/TopStordata/'+pool)

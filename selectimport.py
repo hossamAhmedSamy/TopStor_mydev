@@ -1,5 +1,6 @@
 #!/bin/python3.6
 from etcdget import etcdget as get
+from etcdput import etcdput as put 
 from etcddel import etcddel as deli 
 import socket, sys, subprocess
 from sendhost import sendhost
@@ -29,7 +30,7 @@ def importpls(myhost,allinfo,*args):
 			continue
 		owner=hostpair[1]
 ################# elect the host to import the pool ###############
-                locked=get('lockedpools','--prefix')
+		locked=get('lockedpools','--prefix')
 		ownerstatus=get('cannotimport/'+owner)
 		if hostpair[0] in ownerstatus:
 			continue
