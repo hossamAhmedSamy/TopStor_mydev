@@ -3,6 +3,7 @@ export ETCDCTL_API=3
 x=`pgrep Zpool -c`
 if [ $x -gt 1 ];
 then
+ ETCDCTL_API=3 /pace/etcddel.py lockedpools/$pool
  exit
 fi
 echo $@ > /root/Zpooltmp
@@ -12,6 +13,7 @@ myhost=`hostname`
 ETCDCTL_API=3 /pace/etcdget.py cannotimport/$myhost |  grep $pool
 if [ $? -eq 0 ];
 then
+ ETCDCTL_API=3 /pace/etcddel.py lockedpools/$pool
  exit
 fi
 /sbin/zpool $@ > /root/Zpool
@@ -42,3 +44,4 @@ then
  /pace/putzpool.py 
  ETCDCTL_API=3 /pace/etcddel.py cann $pool
 fi 
+ETCDCTL_API=3 /pace/etcddel.py lockedpools/$pool
