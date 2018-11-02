@@ -2,6 +2,7 @@
 import subprocess, socket, binascii
 from etcdput import etcdput as put
 from etcdget import etcdget as get 
+from etcddel import etcddel as deli 
 from broadcast import broadcast as broadcast 
 from os import listdir as listdir
 from os import remove as remove
@@ -52,7 +53,14 @@ def zpooltoimport(*args):
   cmdline='/sbin/zpool import -c /TopStordata/'+pool
   print('checking pool: ',str(pool))
   result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+  if 'insufficient replicas' in str(result):
+   print('pool cannot be imported now')
+   put('cannotimport/'+myhost+'/'+pool,'1') 
+   deli('lockedpools',str(pool)) 
+   logmsg.sendlog('Zpfa02','warning','system',str(pool))
+   continue
   pooldisks=[x.split()[0] for x in str(result)[2:][:-3].replace('\\t','').split('\\n') if 'scsi' in x ]
+  print('result=',result)
   with open('/root/toimport','a') as f:
    f.write('pool'+str(pool)+' disks '+str(pooldisks)+'\n')
   count=0
@@ -68,7 +76,7 @@ def zpooltoimport(*args):
  if len(pooltoimport) > 0:
   alreadyfound=get('toimport/'+myhost)
   for pool in pools:
-   if str(pool) in lockedpools:
+   if str(pool) in str(lockedpools):
     logmsg.sendlog('Zpwa01','info','system',str(pool))
     continue
    if str(pool) not in alreadyfound:
@@ -79,6 +87,8 @@ def zpooltoimport(*args):
   # remove('/TopStordata/'+pool)
   for pool in myhostpools:
    if pool['name']=='pree' :
+    continue
+   if pool['name'] in str(lockedpools) :
     continue
    cachetime=getmtime('/TopStordata/'+pool['name'])
    if cachetime==pool['timestamp']:
@@ -93,13 +103,10 @@ def zpooltoimport(*args):
  return pooltoimport 
 
 if __name__=='__main__':
- try:
-   x=subprocess.check_output(['pgrep','-c', 'zpooltoimport'])
-   x=str(x).replace("b'","").replace("'","").split('\\n')
-   if(x[0]!= '1'):
-    print('process still running',str(x[0]))
-   else:
-    zpooltoimport(*sys.argv[1:])
- except:
-   pass
-
+  x=subprocess.check_output(['pgrep','-c', 'zpooltoimport'])
+  x=str(x).replace("b'","").replace("'","").split('\\n')
+  if(x[0]!= '1'):
+   print('process still running',str(x[0]))
+   exit()
+  else:
+   zpooltoimport(*sys.argv[1:])
