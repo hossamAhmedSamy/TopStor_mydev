@@ -2,6 +2,7 @@
 import subprocess, socket, binascii
 from etcdput import etcdput as put
 from etcdget import etcdget as get 
+from etcddel import etcddel as deli 
 from broadcast import broadcast as broadcast 
 from os import listdir as listdir
 from os import remove as remove
@@ -19,6 +20,7 @@ def zpooltoimport(*args):
  readyhosts=get('ready','--prefix')
  deletedpools=get('delet','--prefix')
  cannotimport=get('cannotimport/'+myhost,'--prefix')
+ lockedpools=get('lockedpools','--prefix')
  deletedpools=deletedpools+cannotimport
  with open('/root/toimport','a') as f:
   f.write('readyhosts='+str(readyhosts)+'\n')
@@ -49,8 +51,16 @@ def zpooltoimport(*args):
  pooltoimport=[]
  for pool in pools:
   cmdline='/sbin/zpool import -c /TopStordata/'+pool
+  print('checking pool: ',str(pool))
   result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+  if 'insufficient replicas' in str(result):
+   print('pool cannot be imported now')
+   put('cannotimport/'+myhost+'/'+pool,'1') 
+   deli('lockedpools',str(pool)) 
+   logmsg.sendlog('Zpfa02','warning','system',str(pool))
+   continue
   pooldisks=[x.split()[0] for x in str(result)[2:][:-3].replace('\\t','').split('\\n') if 'scsi' in x ]
+  print('result=',result)
   with open('/root/toimport','a') as f:
    f.write('pool'+str(pool)+' disks '+str(pooldisks)+'\n')
   count=0
@@ -61,17 +71,24 @@ def zpooltoimport(*args):
    with open('/root/toimport','a') as f:
     f.write('identified '+str(pool)+' to import \n')
    pooltoimport.append((pool,len(pooldisks),count))
- print(pooltoimport)
  with open('/root/toimport','a') as f:
   f.write('all pools to import'+str(pooltoimport)+'\n')
  if len(pooltoimport) > 0:
-  put('toimport/'+myhost,str(pooltoimport))
-  logmsg.sendlog('Zpsu01','info','system',':found')
- else:
+  alreadyfound=get('toimport/'+myhost)
   for pool in pools:
-   remove('/TopStordata/'+pool)
+   if str(pool) in str(lockedpools):
+    logmsg.sendlog('Zpwa01','info','system',str(pool))
+    continue
+   if str(pool) not in alreadyfound:
+    put('toimport/'+myhost,str(pooltoimport))
+    logmsg.sendlog('Zpsu01','info','system',':found')
+ else:
+  #for pool in pools:
+  # remove('/TopStordata/'+pool)
   for pool in myhostpools:
    if pool['name']=='pree' :
+    continue
+   if pool['name'] in str(lockedpools) :
     continue
    cachetime=getmtime('/TopStordata/'+pool['name'])
    if cachetime==pool['timestamp']:
@@ -87,4 +104,3 @@ def zpooltoimport(*args):
 
 if __name__=='__main__':
  zpooltoimport(*sys.argv[1:])
-
