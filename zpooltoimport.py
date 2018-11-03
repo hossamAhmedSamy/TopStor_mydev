@@ -103,10 +103,4 @@ def zpooltoimport(*args):
  return pooltoimport 
 
 if __name__=='__main__':
-  x=subprocess.check_output(['pgrep','-c', 'zpooltoimport'])
-  x=str(x).replace("b'","").replace("'","").split('\\n')
-  if(x[0]!= '1'):
-   print('process still running',str(x[0]))
-   exit()
-  else:
-   zpooltoimport(*sys.argv[1:])
+ zpooltoimport(*sys.argv[1:])
