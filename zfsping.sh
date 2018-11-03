@@ -65,11 +65,16 @@ do
    #targetcli restoreconfig /pacedata/targetconfig
    /pace/etcdput.py ready/$myhost ok
    touch /pacedata/addiscsitargets 
-   /pace/putzpool.py &
-   ./etcddel.py toimport/$myhost &
+   pgrep putzpool 
+   if [ $? -ne 0 ];
+   then
+    /pace/putzpool.py 1 $isprimary $primtostd  &
+   fi
+   ./etcddel.py toimport/$myhost
    toimport=2
   fi
   runningcluster=1
+  echo checking leader record \(it should be me\)  >> /root/zfspingtmp
   leaderall=` ./etcdget.py leader --prefix 2>/dev/null`
   if [[ -z $leaderall ]]; 
   then
@@ -79,7 +84,11 @@ do
    ./etcdput.py leader/$myhost $myip 2>/dev/null &
   fi
   echo adding known from list of possbiles >> /root/zfspingtmp
-  ./addknown.py 2>/dev/null &
+   pgrep  addknown 
+   if [ $? -ne 0 ];
+   then
+    ./addknown.py 2>/dev/null & 
+   fi
  else
   echo I am not a primary etcd.. heartbeating leader >> /root/zfspingtmp
   leaderall=` ./etcdget.py leader --prefix 2>&1`
@@ -134,9 +143,11 @@ do
     toimport=1
     #/sbin/zpool import -am &>/dev/null
     echo running putzpool and nfs >> /root/zfspingtmp
-    ./addknown.py 2>/dev/null 
-    ./selectimport.py $myhost &
-    ./putzpool.py 2>/dev/null &
+    pgrep putzpool 
+    if [ $? -ne 0 ];
+    then
+     /pace/putzpool.py 2 $isprimary $primtostd  &
+    fi
     systemctl status nfs 
     if [ $? -ne 0 ];
     then
@@ -214,7 +225,11 @@ do
    fi
   fi 
  fi
- #/pace/putzpool.py &
+ pgrep putzpool 
+ if [ $? -ne 0 ];
+ then
+  /pace/putzpool.py 3 $isprimary $primtostd  &
+ fi
  echo checking if I need to run local etcd >> /root/zfspingtmp
  if [[ $needlocal -eq 1 ]];
  then
@@ -252,7 +267,11 @@ do
  if [[ $needlocal -eq  2 ]];
  then
   echo I am already local etcd running iscsirefresh on $myip $myhost  >> /root/zfspingtmp
-  /pace/iscsiwatchdog.sh $myip $myhost $leader &
+  pgrep iscsiwatchdog
+  if [ $? -ne 0 ];
+  then
+   /pace/iscsiwatchdog.sh $myip $myhost $leader 2>/dev/null &
+  fi
  fi
  echo checking if still in the start initcron is still running  >> /root/zfspingtmp
  if [ -f /pacedata/forzfsping ];
@@ -264,8 +283,16 @@ do
  if [[ $runningcluster -eq 1 ]];
  then
   echo Yes I am primary so will check for known hosts >> /root/zfspingtmp
-  ./addknown.py 2>/dev/null &
-  ./selectimport.py $myhost &
+   pgrep  addknown 
+   if [ $? -ne 0 ];
+   then
+    ./addknown.py 2>/dev/null & 
+   fi
+   pgrep  selectimport 
+   if [ $? -ne 0 ];
+   then
+    ./selectimport.py $myhost &
+   fi
  fi 
  echo toimport = $toimport >> /root/zfspingtmp
  
@@ -310,7 +337,11 @@ do
    oldclocker=$clocker
   else
    echo checking zpool to import>> /root/zfspingtmp
-   /TopStor/zpooltoimport.py all  &
+   pgrep  zpooltoimport 
+   if [ $? -ne 0 ];
+   then
+    /TopStor/zpooltoimport.py all &
+   fi
   fi
  fi
  if [ $toimport -eq 0 ];
@@ -327,10 +358,21 @@ do
   oldclocker=$clocker
   clockdiff=0
  fi
- /pace/iscsiwatchdog.sh 2>/dev/null  &
- /pace/putzpool.py 2>/dev/null &
+ pgrep iscsiwatchdog
+ if [ $? -ne 0 ];
+ then
+  /pace/iscsiwatchdog.sh 2>/dev/null  &
+ fi
   echo Collecting a change in system occured >> /root/zfspingtmp
  #/pace/changeop.py hosts/$myhost/current d
-	ETCDCTL_API=3 /pace/changeop.py $myhost &
-	ETCDCTL_API=3 /pace/selectspare.py $myhost &
+   pgrep  changeop 
+   if [ $? -ne 0 ];
+   then
+    ETCDCTL_API=3 /pace/changeop.py $myhost &
+   fi
+   pgrep  selectspare 
+   if [ $? -ne 0 ];
+   then
+    ETCDCTL_API=3 /pace/selectspare.py $myhost &
+   fi
 done
