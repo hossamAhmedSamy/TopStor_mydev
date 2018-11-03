@@ -28,7 +28,7 @@ then
  then
   echo putzpool to leader >> /root/zfspingtmp
   echo putzpool to leader hi="$#" >> /root/iscsiwatch
-  ETCDCTL_API=3 /pace/putzpool.py 
+  ETCDCTL_API=3 /pace/putzpool.py icsiwatchversion
  else
   echo putzpool local $myip $myhost $islocal >> /root/zfspingtmp
   echo putzpool local $myip $myhost $islocal >> /root/iscsiwatch
