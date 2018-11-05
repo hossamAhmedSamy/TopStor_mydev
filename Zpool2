@@ -22,26 +22,34 @@ echo ran the import >> /root/Zpool
 /sbin/zpool status | grep $pool
 if [ $? -ne 0 ];
 then
- echo the pool $pool is not imported >> /root/Zpool
- success=0
- ETCDCTL_API=3 /TopStor/logmsg.py Zpfa02 warning system $pool
- echo cannot import it  >> /root/Zpool
- myhost=`hostname`
- slash='/'
- cannotimport=`ETCDCTL_API=3 /pace/etcdget.py cannotimport/$myhost`
- if [ -z $cannotimport ];
+ /sbin/zpool import $pool >>/root/Zpool
+ /sbin/zpool status | grep $pool
+ if [ $? -ne 0 ];
  then
-  cannotimport=''
-  slash=''
+  echo the pool $pool is not imported >> /root/Zpool
+  success=0
+  ETCDCTL_API=3 /TopStor/logmsg.py Zpfa02 warning system $pool
+  echo cannot import it  >> /root/Zpool
+  myhost=`hostname`
+  slash='/'
+  cannotimport=`ETCDCTL_API=3 /pace/etcdget.py cannotimport/$myhost`
+  if [ -z $cannotimport ];
+  then
+   cannotimport=''
+   slash=''
+  fi
+  if [ $cannotimport -eq -1 ];
+  then
+   cannotimport=''
+   slash=''
+  fi
+  echo preparing to set the cannotimport=$cannotimport  >> /root/Zpool
+  ETCDCTL_API=3 /pace/etcdput.py cannotimport/$myhost ${cannotimport}${slash}${pool}
+  echo added it  >> /root/Zpool
+ else:
+  success=1
+  echo pool $pool is hardly imported >> /root/Zpool
  fi
- if [ $cannotimport -eq -1 ];
- then
-  cannotimport=''
-  slash=''
- fi
- echo preparing to set the cannotimport=$cannotimport  >> /root/Zpool
- ETCDCTL_API=3 /pace/etcdput.py cannotimport/$myhost ${cannotimport}${slash}${pool}
- echo added it  >> /root/Zpool
 else
   success=1;
  echo pool $pool is imported   >> /root/Zpool
