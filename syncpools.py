@@ -10,6 +10,15 @@ from os.path import getmtime
 import sys
 import logmsg
 
+def syncthispool(*args):
+ pool=args[0]
+ bpoolfile=''
+ with open('/TopStordata/'+pool,'rb') as f:
+  bpoolfile=f.read()
+  poolfile=binascii.hexlify(bpoolfile)
+  broadcast('Movecache','/TopStordata/'+pool,poolfile) 
+ return 
+
 def syncmypools(*args):
  logmsg.sendlog('Zpst03','info','system')
  myhostpools=[]
@@ -32,5 +41,8 @@ def syncmypools(*args):
  return 
 
 if __name__=='__main__':
- syncmypools(*sys.argv[1:])
+ if thispool in sys.argv[1]:
+  syncthispool(*sys.arv[2:])
+ else:
+  syncmypools(*sys.argv[1:])
 

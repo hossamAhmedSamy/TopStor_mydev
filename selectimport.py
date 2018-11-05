@@ -2,7 +2,7 @@
 from etcdget import etcdget as get
 from etcdput import etcdput as put 
 from etcddel import etcddel as deli 
-import socket, sys, subprocess
+import socket, sys, subprocess,datetime
 from sendhost import sendhost
 from ast import literal_eval as mtuple
 #from zpooltoimport import zpooltoimport as importables
@@ -29,22 +29,40 @@ def importpls(myhost,allinfo,*args):
 		if hostpair[0] == 'nothing':
 			continue
 		owner=hostpair[1]
+		print('owner=',owner)
 ################# elect the host to import the pool ###############
+		print('pool toimport',hostpair[0])
+		timestamp=int(datetime.datetime.now().timestamp())+60
+		print('timestamp',str(timestamp))
 		locked=get('lockedpools','--prefix')
 		ownerstatus=get('cannotimport/'+owner)
+		print('owner',owner)
 		if hostpair[0] in ownerstatus:
+			print('in ownerstatus')
 			continue
-		if hostpair[0] in importedpools:
-			continue
+		#if hostpair[0] in importedpools:
+		#	print('in importedpools')
+		#	continue
 		if hostpair[0] in locked:
-			continue
-		importedpools.append(hostpair[0])
+			print('in locked')
+			oldtimestamp=get('lockedpools/'+hostpair[0]).split('/')[1]
+			if(int(timestamp) > int(oldtimestamp)):
+				deli('lockedpools/'+hostpair[0])
+			else:
+				continue
+		#importedpools.append(hostpair[0])
 		ownerip=get('leader',owner)
 		if ownerip[0]== -1:
+			print('here')
 			ownerip=get('known',owner)
-			if ownerip[0]== -1:
-				return 3
-		put('lockedpools/'+hostpair[0],myhost)
+			print('ownerip',ownerip[0])
+			if str(ownerip[0])== '-1':
+				print('here2lldkf')
+				return
+			else:
+				print('willcontinue')
+		print('putting into locked',hostpair[0]+'/'+owner)
+		put('lockedpools/'+hostpair[0],owner+'/'+str(timestamp))
 #################### end of election
 		z=['/TopStor/pump.sh','Zpool','import','-c','/TopStordata/'+hostpair[0],'-am']
 
@@ -53,7 +71,7 @@ def importpls(myhost,allinfo,*args):
 		#z=['/TopStor/pump.sh','ClearCache',hostpair[0][1:]]
 		#msg={'req': 'ClearCache', 'reply':z}
 		#sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
-		deli('to','--prefix')
+		deli('toimport',hostpair[0])
 	return
 
 if __name__=='__main__':
