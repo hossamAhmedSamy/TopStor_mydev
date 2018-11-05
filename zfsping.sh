@@ -298,8 +298,7 @@ do
  
  if [ $toimport -gt 0 ];
  then
-  echo ETCDCTL_API=3 /pace/etcdget.py toimport/$myhost >>2 
-  ETCDCTL_API=3 /pace/etcdget.py toimport/$myhost 2&1>>2 
+  ETCDCTL_API=3 /pace/etcdget.py toimport/$myhost 
   mytoimport=`ETCDCTL_API=3 /pace/etcdget.py toimport/$myhost`
   if [ $mytoimport == '-1' ]; then 
    echo Yes  I have no record in toimport/$myhost even no nothing=$mytoimport >> /root/zfspingtmp
