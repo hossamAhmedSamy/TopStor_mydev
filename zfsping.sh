@@ -349,7 +349,7 @@ do
   clockdiff=$((clocker-oldclocker))
  fi
  echo Clockdiff = $clockdiff >> /root/zfspingtmp
- if [ $clockdiff -ge 30 ];
+ if [ $clockdiff -ge 50 ];
  then
   ./etcddel.py toimport/$myhost &
   /TopStor/logmsg.py Partst06 info system  &

@@ -21,11 +21,14 @@ then
 # systemctl restart iscsi &>/dev/null
  echo start >> /root/iscsiwatch
  sh /pace/iscsirefresh.sh
- sh /pace/listingtargets.sh
+  echo finished start of iscsirefresh  > /root/iscsiwatch
+# sh /pace/listingtargets.sh
+  echo finished listingtargets >> /root/iscsiwatch
  if [ -f /pacedata/addiscsitargets ];
  then
   echo updating iscsitargets >> /root/iscsiwatch
   sh /pace/addtargetdisks.sh
+  echo finished updtating iscsitargets >> /root/iscsiwatch
  else
   echo cannot add new iscsi targets at the moment >> /root/iscsiwatch
  fi
@@ -33,10 +36,11 @@ then
  then
   echo putzpool to leader >> /root/zfspingtmp
   echo putzpool to leader hi="$#" >> /root/iscsiwatch
-  ETCDCTL_API=3 /pace/putzpool.py icsiwatchversion
+  ETCDCTL_API=3 /pace/putzpool.py isciwatchversion &
+  echo finished putzpool to leader hi="$#" >> /root/iscsiwatch
  else
   echo putzpool local $myip $myhost $islocal >> /root/zfspingtmp
   echo putzpool local $myip $myhost $islocal >> /root/iscsiwatch
-  ETCDCTL_API=3 /pace/putzpoollocal.py $myip $myhost $leader
+#  ETCDCTL_API=3 /pace/putzpoollocal.py $myip $myhost $leader
  fi
 fi

@@ -2,11 +2,26 @@
 from etcdget import etcdget as get
 from etcdput import etcdput as put 
 from etcddel import etcddel as deli 
+import poolall 
 import socket, sys, subprocess,datetime
 from sendhost import sendhost
 from ast import literal_eval as mtuple
 #from zpooltoimport import zpooltoimport as importables
+def electimport(myhost, allpools,*arg):
+	for poolpair in allpools:
+		pool=poolpair[0].split('/')[1]
+		chost=poolpair[1].split('/')[0]
+		hosts=poolall.getall(chost)['hosts']
+		for host in hosts: 
+			if host != chost:
+				thehost=host
+				put('pools/'+pool,chost+'/'+host)
+				print('type:',host,chost)
+				break
+	 
+	return
 
+ 
 def importpls(myhost,allinfo,*args):
 	if(len(allinfo) < 0):
 		return
@@ -76,14 +91,7 @@ def importpls(myhost,allinfo,*args):
 
 if __name__=='__main__':
 	myhost=socket.gethostname()
-	try:
-		x=subprocess.check_output(['pgrep','-c', 'selectimport'])
-		x=str(x).replace("b'","").replace("'","").split('\\n')
-		if(x[0]!= '1'):
-			print('process still running',str(x[0]))
-		else:
-			allinfo=get('to','--prefix')
-			importpls(myhost,allinfo,*sys.argv[1:])
-	except:
-		pass 
- 
+	allpools=get('pools','--prefix')
+	electimport(myhost,allpools,*sys.argv[1:])
+	allinfo=get('to','--prefix')
+	importpls(myhost,allinfo,*sys.argv[1:])
