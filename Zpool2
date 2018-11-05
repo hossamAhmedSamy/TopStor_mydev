@@ -42,7 +42,7 @@ then
  echo preparing to set the cannotimport=$cannotimport  >> /root/Zpool
  ETCDCTL_API=3 /pace/etcdput.py cannotimport/$myhost ${cannotimport}${slash}${pool}
  echo added it  >> /root/Zpool
- else
+else
   success=1;
  echo pool $pool is imported   >> /root/Zpool
 fi
