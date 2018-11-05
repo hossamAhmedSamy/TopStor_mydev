@@ -1,24 +1,31 @@
 #!/bin/python3.6
 from etcdget import etcdget as get
 from etcdput import etcdput as put 
+from broadcasttolocal import broadcasttolocal 
 from etcddel import etcddel as deli 
 import poolall 
 import socket, sys, subprocess,datetime
+from broadcast import broadcast as broadcast 
 from sendhost import sendhost
 from ast import literal_eval as mtuple
 #from zpooltoimport import zpooltoimport as importables
 def electimport(myhost, allpools,*arg):
 	for poolpair in allpools:
 		pool=poolpair[0].split('/')[1]
-		chost=poolpair[1].split('/')[0]
+		if '/' in poolpair[1]:
+			chost=poolpair[1].split('/')[0]
+			nhost=poolpair[1].split('/')[1]
+		else:
+			chost=poolpair[1]
+			nhost='nothing'
+		
 		hosts=poolall.getall(chost)['hosts']
 		for host in hosts: 
-			if host != chost:
-				thehost=host
+			if host != chost and host != nhost:
 				put('pools/'+pool,chost+'/'+host)
-				print('type:',host,chost)
+				broadcasttolocal('pools/'+pool,chost+'/'+host)
+				print('pools/'+pool,chost+'/'+host)
 				break
-	 
 	return
 
  
