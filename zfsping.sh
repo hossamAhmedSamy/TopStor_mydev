@@ -103,7 +103,7 @@ do
     /TopStor/logmsg.py Partst05 info system $myhost &
     primtostd=0;
    fi
-   ETCDCTL_API=3 /pace/etcdgetlocal.py $myip pools --prefix | grep "\/${myhost}" > /TopStordata/forlocalpools
+   ETCDCTL_API=3 /pace/etcdgetlocal.py $myip poolsnxt --prefix | grep ${myhost} > /TopStordata/forlocalpools
    ETCDCTL_API=3 /TopStor/importlocalpools.py  &
    nextleadip=`ETCDCTL_API=3 ./etcdgetlocal.py $myip nextlead` 
    echo nextlead is $nextleadip  >> /root/zfspingtmp
@@ -206,6 +206,7 @@ do
      leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
      /pace/sendhost.py $leaderip 'user' 'recvreq' $myhost &
      /pace/etcdsync.py $myip pools pools 2>/dev/null
+     /pace/etcdsync.py $myip poolsnxt poolsnext 2>/dev/null
      /pace/sendhost.py $leaderip 'cifs' 'recvreq' $myhost &
      /pace/sendhost.py $leaderip 'logall' 'recvreq' $myhost &
      isknown=$((isknown+1))
