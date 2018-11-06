@@ -71,7 +71,7 @@ def importpls(myhost,allinfo,*args):
 		if hostpair[0] in locked:
 			print('in locked')
 			oldtimestamp=get('lockedpools/'+hostpair[0]).split('/')[1]
-			if(int(timestamp) > int(oldtimestamp)):
+			if(int(timestamp)+120 > int(oldtimestamp)):
 				deli('lockedpools/'+hostpair[0])
 			else:
 				continue
