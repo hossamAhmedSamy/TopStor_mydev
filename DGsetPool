@@ -54,6 +54,7 @@ then
    /TopStor/logmsg.py DGst20 info $userreq ${nextpool} $diskns .
   /sbin/zpool add -f ${nextpool} mirror ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu20 info $userreq ${nextpool} $diskns .
   else
     /TopStor/logmsg.py DGfa20 error $userreq ${nextpool} $diskns .
@@ -70,6 +71,7 @@ then
   if [ $? -ne 0 ]; then
     /TopStor/logmsg.py DGfa7 error $userreq $diskn2 stripe
   else
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu7 info $userreq $diskn2 stripe 
   fi
  fi
@@ -77,6 +79,7 @@ then
    /TopStor/logmsg.py DGst9 info $userreq $diskn1 
   /sbin/zpool remove  ${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu9 info $userreq $diskn1 
   else 
      /TopStor/logmsg.py DGfa9 error $userreq $diskn1 
@@ -88,6 +91,7 @@ then
   echo /sbin/zpool add -f ${nextpool} cache ${disk1} 
   /sbin/zpool add -f ${nextpool} cache ${disk1} 
   if [ $? -eq 0 ]; then
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu10 info $userreq $diskn1 
   else 
     /TopStor/logmsg.py DGfa10 error $userreq $diskn1 
@@ -98,6 +102,7 @@ then
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
   /sbin/zpool add -f ${nextpool} log ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu11 info $userreq $diskn1 
   else 
     /TopStor/logmsg.py DGfa11 error $userreq $diskn1 
@@ -111,6 +116,7 @@ then
 
   /sbin/zpool add -f ${nextpool} spare ${disk1}
   if [ $? -eq 0 ]; then
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu8 info $userreq $diskn1 
   else 
     /TopStor/logmsg.py DGfa8 error $userreq $diskn1 
@@ -125,6 +131,7 @@ then
   if [ $? -ne 0 ]; then
     /TopStor/logmsg.py DG1fa6 error $userreq ${nextpool} $diskn1 
   else 
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DG1su6 info $userreq ${nextpool} $diskn1 
   fi
  fi 
@@ -146,6 +153,7 @@ then
    /TopStor/logmsg.py DGst12 info $userreq p${nextpool} $diskns
   /sbin/zpool add -f  ${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu12 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa12 error $userreq p${nextpool} $diskns
@@ -170,6 +178,7 @@ then
   nextpool=${myhost}$RANDOM;
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f ${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu13 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa13 info $userreq p${nextpool} $diskns
@@ -192,6 +201,7 @@ then
    /TopStor/logmsg.py DGst14 info $userreq p${nextpool} $diskns
   /sbin/zpool add -f ${nextpool} raidz2 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu14 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa14 error $userreq p${nextpool} $diskns
@@ -216,6 +226,7 @@ then
   nextpool=${myhost}$RANDOM;
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz2 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu15 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa15 info $userreq p${nextpool} $diskns
@@ -238,6 +249,7 @@ then
    /TopStor/logmsg.py DGst16 info $userreq p${nextpool} $diskns
   /sbin/zpool add -f ${nextpool} raidz1 ${disk1} 
   if [ $? -eq 0 ]; then
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu16 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa16 info $userreq p${nextpool} $diskns
@@ -262,6 +274,7 @@ then
   echo /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on cachefile=/TopStordata/p${nextpool} -f p${nextpool} raidz1 ${disk1} >/root/tmp
   /sbin/zpool create -o ashift=12 -o autoexpand=on -o cachefile=/TopStordata/p${nextpool} -o autoreplace=on -f p${nextpool} raidz1 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu17 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa17 error $userreq p${nextpool} $diskns
@@ -272,6 +285,7 @@ then
    /TopStor/logmsg.py DGst18 info $userreq ${nextpool} $diskn1
   /sbin/zpool add  -f ${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu18 info $userreq ${nextpool} $diskn1
   else
     /TopStor/logmsg.py DGfa18 info $userreq ${nextpool} $diskn1
@@ -296,6 +310,7 @@ then
   nextpool=${myhost}$RANDOM;
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu21 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa21 error $userreq p${nextpool} $diskns
@@ -320,6 +335,7 @@ then
   nextpool=${myhost}$RANDOM;
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} mirror ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu19 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa19  error $userreq p${nextpool} $diskns
