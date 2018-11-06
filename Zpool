@@ -1,33 +1,6 @@
 #!/bin/sh
 export ETCDCTL_API=3
-echo $@ > /root/Zpooltmp
-pool=`echo $3 | awk -F'/' '{print $3}'`
-success=1;
-/sbin/zpool $@ > /root/Zpool
-if [ $? -ne 0 ];
-then
- success=0
- /sbin/zpool import $pool 
- if [ $? -ne 0 ];
- then 
-  ETCDCTL_API=3 /TopStor/logmsg.py Zpfa02 warning system $pool
-  myhost=`hostname`
-  cannotimport=`ETCDCTL_API=3 /pace/etcdget.py cannotimport/$myhost`
-  slash='/'
-  if [ $cannotimport -eq -1 ];
-  then
-   cannotimport=''
-   slash=''
-  fi
-  ETCDCTL_API=3 /pace/etcdput.py cannotimport/$myhost ${cannotimport}${slash}${pool}
- else
-  success=1;
- fi
-fi
-if [ $success -eq 1 ]; 
-then
- ETCDCTL_API=3 /TopStor/logmsg.py Zpsu02 info system $pool
- /sbin/zpool set cachefile=$3 $pool
- /pace/putzpool.py 
- ETCDCTL_API=3 /pace/etcddel.py cann $pool
-fi 
+pool=`echo $@ | awk '{print $3}' | awk -F'/' '{print $3}'`
+/TopStor/Zpool2 $@ &
+ sleep 60
+ETCDCTL_API=3 /pace/etcddel.py lockedpools/$pool
