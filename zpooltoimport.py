@@ -20,7 +20,7 @@ def zpooltoimport(*args):
  readyhosts=get('ready','--prefix')
  deletedpools=get('delet','--prefix')
  cannotimport=get('cannotimport/'+myhost,'--prefix')
- importedpools=get('pools','--prefix')
+ importedpools=get('pools/','--prefix')
  lockedpools=get('lockedpools','--prefix')
  deletedpools=deletedpools+cannotimport+importedpools
  with open('/root/toimport','a') as f:
