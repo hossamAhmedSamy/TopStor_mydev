@@ -114,6 +114,7 @@ else
   ./etcddellocal.py $myip known --prefix 2>/dev/null
   ./etcddellocal.py $myip localrun --prefix 2>/dev/null
   ./etcddellocal.py $myip run --prefix 2>/dev/null
+  ./etcddellocal.py $myip pools --prefix 2>/dev/null
   ./etcdsync.py $myip known known 2>/dev/null
   ./etcdsync.py $myip pools pools 2>/dev/null
   ./etcdsync.py $myip poolsnxt poolsnxt 2>/dev/null
