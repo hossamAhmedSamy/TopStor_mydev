@@ -45,6 +45,7 @@ then
   fi
   echo preparing to set the cannotimport=$cannotimport  >> /root/Zpool
   ETCDCTL_API=3 /pace/etcdput.py cannotimport/$myhost ${cannotimport}${slash}${pool}
+  ETCDCTL_API=3 /pace/etcddel.py poolsnxt/$pool
   echo added it  >> /root/Zpool
  else:
   success=1
@@ -61,5 +62,6 @@ then
  ETCDCTL_API=3 /pace/etcdput.py pools/$pool $myhost
  /pace/putzpool.py
  ETCDCTL_API=3 /pace/syncpools.py thispool $pool.
+ ETCDCTL_API=3 /pace/etcddel.py poolsnxt/$pool
 fi 
 ETCDCTL_API=3 /pace/etcddel.py lockedpools/$pool
