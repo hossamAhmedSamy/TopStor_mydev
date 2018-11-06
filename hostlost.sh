@@ -18,7 +18,10 @@ do
  ETCDCTL_API=3 /pace/changeop.py $myhost scsi-$l 
 done
 echo udpating database >> /root/hostlosttmp
+ETCDCTL_API=3 /pace/etcdget.py pools --prefix | grep "\/$thehost" | grep "\/${myhost}" > /TopStordata/forlocalpools
+ETCDCTL_API=3 /TopStor/importlocalpools.py  &
 ETCDCTL_API=3 /pace/etcddel.py hosts/$thehost  --prefix
 ETCDCTL_API=3 /pace/etcddel.py cannot  --prefix
+ETCDCTL_API=3 /pace/etcddel.py pools $thehost  --prefix
 ETCDCTL_API=3 /pace/etcddel.py oldhosts/$thehost  --prefix
 ETCDCTL_API=3 /pace/putzpool.py 
