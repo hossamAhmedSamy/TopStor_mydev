@@ -19,6 +19,7 @@ then
   crontab -l | grep -v Snap > /TopStordata/cronfile
   crontab -r 
   crontab /TopStordata/cronfile
+  ETCDCTL_API=3 /pace/etcddel.py pools $pool
 
   echo > /etc/exports
    /TopStor/logmsg.py DGsu5 info $userreq $pool
