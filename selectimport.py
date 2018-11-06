@@ -10,13 +10,14 @@ from sendhost import sendhost
 from ast import literal_eval as mtuple
 #from zpooltoimport import zpooltoimport as importables
 def electimport(myhost, allpools,*arg):
+	knowns=get('known','--prefix')
 	for poolpair in allpools:
 		pool=poolpair[0].split('/')[1]
-		knowns=get('known','--prefix')
 		if '/' in poolpair[1]:
-			chost=poolpair[1].split('/')[0]
-			nhost=poolpair[1].split('/')[1]
+			chost=poolpair[1]
+			nhost=get('poolsnxt/'+pool)
 			if nhsot not in str(knowns):
+				deli('poolsnxt',nhost)
 				nhost='nothing'
 		else:
 			chost=poolpair[1]
