@@ -64,6 +64,7 @@ then
  systemctl start smb
  ./etcddel.py leader --prefix 2>/dev/null
  ./etcddel.py pools --prefix 2>/dev/null
+ ./etcddel.py poolsnxt --prefix 2>/dev/null
  ./etcddel.py cann --prefix 2>/dev/null
  ./etcdput.py leader/$myhost $myip 2>/dev/null
  ./etcdput.py primary/name $myhost 2>/dev/null
@@ -115,6 +116,7 @@ else
   ./etcddellocal.py $myip run --prefix 2>/dev/null
   ./etcdsync.py $myip known known 2>/dev/null
   ./etcdsync.py $myip pools pools 2>/dev/null
+  ./etcdsync.py $myip poolsnxt poolsnxt 2>/dev/null
   ./etcdsync.py $myip namespace namespace 2>/dev/null
   ./etcdsync.py $myip dataip dataip 2>/dev/null
   ./etcdsync.py $myip localrun localrun 2>/dev/null

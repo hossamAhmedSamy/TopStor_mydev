@@ -25,9 +25,9 @@ def electimport(myhost, allpools,*arg):
 		hosts=poolall.getall(chost)['hosts']
 		for host in hosts: 
 			if host != chost and host != nhost:
-				put('pools/'+pool,chost+'/'+host)
-				broadcasttolocal('pools/'+pool,chost+'/'+host)
-				print('pools/'+pool,chost+'/'+host)
+				put('poolsnxt/'+pool,host)
+				broadcasttolocal('poolsnxt/'+pool,host)
+				print('poolsnxt/'+pool,host)
 				break
 	return
 

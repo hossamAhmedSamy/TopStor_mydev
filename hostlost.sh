@@ -22,6 +22,6 @@ ETCDCTL_API=3 /pace/etcdget.py pools --prefix | grep "\/$thehost" | grep "\/${my
 ETCDCTL_API=3 /TopStor/importlocalpools.py  &
 ETCDCTL_API=3 /pace/etcddel.py hosts/$thehost  --prefix
 ETCDCTL_API=3 /pace/etcddel.py cannot  --prefix
-ETCDCTL_API=3 /pace/etcddel.py pools $thehost  --prefix
+ETCDCTL_API=3 /pace/etcddel.py pools $thehost
 ETCDCTL_API=3 /pace/etcddel.py oldhosts/$thehost  --prefix
 ETCDCTL_API=3 /pace/putzpool.py 
