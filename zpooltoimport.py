@@ -1,5 +1,6 @@
 #!/bin/python3.6
 import subprocess, socket, binascii
+from sendhost import sendhost
 from etcdput import etcdput as put
 from etcdget import etcdget as get 
 from etcddel import etcddel as deli 
@@ -23,14 +24,26 @@ def zpooltoimport(*args):
  importedpools=get('pools/','--prefix')
  lockedpools=get('lockedpools','--prefix')
  deletedpools=deletedpools+cannotimport+importedpools
+ timestamp=int(datetime.datetime.now().timestamp())-5
  for poolinfo in lockedpools:
   pool=poolinfo[0].split('/')[1]
   logmsg.sendlog('Zpwa01','info','system',pool)
-  timestamp=int(datetime.datetime.now().timestamp())+60
   print('in locked')
-  oldtimestamp=get('lockedpools/'+pool)[0].split('/')[1]
-  if(int(timestamp)+120 > int(oldtimestamp)):
-   deli('lockedpools/'+pool)
+  oldtimestamp=poolinfo[1].split('/')[1]
+  lockhost=poolinfo[1].split('/')[0]
+  lockhostip=get('leader/'+lockhost)
+  if( '-1' in str(lockhostip)):
+   lockhostip=get('known/'+lochost)
+   if('-1' in str(lockhostip)):
+    deli('lockedpools/'+pool)
+    continue
+  print('in locked')
+  if(int(timestamp) > int(oldtimestamp)):
+   z=['/TopStor/pump.sh','ReleasePoolLock',pool]
+   msg={'req': 'ReleasePoolLock', 'reply':z}
+   sendhost(lockhostip[0], str(msg),'recvreply',myhost)
+   print('here',lockhostip[0])
+
  with open('/root/toimport','a') as f:
   f.write('readyhosts='+str(readyhosts)+'\n')
  for ready in readyhosts:

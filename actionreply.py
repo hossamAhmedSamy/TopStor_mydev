@@ -129,6 +129,11 @@ def do(body):
   with open('/root/recv2','a') as f:
    f.write('received HostgetIPs from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if ReleasePoolLock ##############
+ elif r["req"]=='ReleasePoolLock':  
+  with open('/root/recv2','a') as f:
+   f.write('received ReleasePoolLock from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
  
 
 
