@@ -59,7 +59,7 @@ def importpls(myhost,allinfo,*args):
 		print('owner=',owner)
 ################# elect the host to import the pool ###############
 		print('pool toimport',hostpair[0])
-		timestamp=int(datetime.datetime.now().timestamp())+60
+		timestamp=int(datetime.datetime.now().timestamp())-5
 		print('timestamp',str(timestamp))
 		locked=get('lockedpools','--prefix')
 		ownerstatus=get('cannotimport/'+owner)
@@ -72,11 +72,22 @@ def importpls(myhost,allinfo,*args):
 		#	continue
 		if hostpair[0] in locked:
 			print('in locked')
-			oldtimestamp=get('lockedpools/'+hostpair[0]).split('/')[1]
-			if(int(timestamp)+120 > int(oldtimestamp)):
-				deli('lockedpools/'+hostpair[0])
-			else:
-				continue
+			lockinfo=get('lockedpools/'+hostpair[0])
+			oldtimestamp=lockinfo[0].split('/')[1]
+			lockhost=lockinfo[0].split('/')[0]
+			lockhostip=get('leader/'+lockhost)
+			if( '-1' in str(lockhostip)):
+				lockhostip=get('known/'+lochost)
+				if('-1' in str(lockhostip)):
+					deli('lockedpools/'+pool)
+					continue
+			if(int(timestamp) > int(oldtimestamp)):
+				z=['/TopStor/pump.sh','ReleasePoolLock',pool]
+				msg={'req': 'ReleasePoolLock', 'reply':z}
+				sendhost(lockhostip[0], str(msg),'recvreply',myhost)
+				print('here',lockhostip[0])
+
+			continue
 		#importedpools.append(hostpair[0])
 		ownerip=get('leader',owner)
 		if ownerip[0]== -1:
