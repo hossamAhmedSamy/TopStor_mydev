@@ -11,6 +11,7 @@ from ast import literal_eval as mtuple
 #from zpooltoimport import zpooltoimport as importables
 def electimport(myhost, allpools,*arg):
 	knowns=get('known','--prefix')
+	print('here',str(allpools))
 	for poolpair in allpools:
 		pool=poolpair[0].split('/')[1]
 		if '/' in poolpair[1]:
