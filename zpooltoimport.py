@@ -8,7 +8,7 @@ from os import listdir as listdir
 from os import remove as remove
 from poolall import getall as getall
 from os.path import getmtime as getmtime
-import sys
+import sys, datetime
 import logmsg
 
 def zpooltoimport(*args):
@@ -23,6 +23,14 @@ def zpooltoimport(*args):
  importedpools=get('pools/','--prefix')
  lockedpools=get('lockedpools','--prefix')
  deletedpools=deletedpools+cannotimport+importedpools
+ for poolinfo in lockedpools:
+  pool=poolinfo[0].split('/')[1]
+  logmsg.sendlog('Zpwa01','info','system',pool)
+  timestamp=int(datetime.datetime.now().timestamp())+60
+  print('in locked')
+  oldtimestamp=get('lockedpools/'+pool)[0].split('/')[1]
+  if(int(timestamp)+120 > int(oldtimestamp)):
+   deli('lockedpools/'+pool)
  with open('/root/toimport','a') as f:
   f.write('readyhosts='+str(readyhosts)+'\n')
  for ready in readyhosts:
@@ -61,7 +69,6 @@ def zpooltoimport(*args):
    logmsg.sendlog('Zpfa02','warning','system',str(pool))
    continue
   pooldisks=[x.split()[0] for x in str(result)[2:][:-3].replace('\\t','').split('\\n') if 'scsi' in x ]
-  print('result=',result)
   with open('/root/toimport','a') as f:
    f.write('pool'+str(pool)+' disks '+str(pooldisks)+'\n')
   count=0
@@ -78,11 +85,12 @@ def zpooltoimport(*args):
   alreadyfound=get('toimport/'+myhost)
   for pool in pools:
    if str(pool) in str(lockedpools):
-    logmsg.sendlog('Zpwa01','info','system',str(pool))
     continue
    if str(pool) not in alreadyfound:
     put('toimport/'+myhost,str(pooltoimport))
     logmsg.sendlog('Zpsu01','info','system',':found')
+    print('toimport:',str(pooltoimport))
+    exit()
  else:
   #for pool in pools:
   # remove('/TopStordata/'+pool)
