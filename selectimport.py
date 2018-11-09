@@ -11,25 +11,26 @@ from ast import literal_eval as mtuple
 #from zpooltoimport import zpooltoimport as importables
 def electimport(myhost, allpools,*arg):
 	knowns=get('known','--prefix')
-	print('here',str(allpools))
 	for poolpair in allpools:
 		pool=poolpair[0].split('/')[1]
-		if '/' in poolpair[1]:
-			chost=poolpair[1]
-			nhost=get('poolsnxt/'+pool)
-			if nhsot not in str(knowns):
-				deli('poolsnxt',nhost)
-				nhost='nothing'
-		else:
-			chost=poolpair[1]
+		chost=poolpair[1]
+		nhost=str(get('poolsnxt/'+pool)[0])
+		if nhost not in str(knowns):
+			deli('poolsnxt',nhost)
 			nhost='nothing'
+		else:
+			continue
 		
 		hosts=poolall.getall(chost)['hosts']
 		for host in hosts: 
-			if host != chost and host != nhost:
+			if host != chost:
+				with open('/root/selecttmp','a') as f:
+					f.write('\npoolpair:'+str(poolpair))
+					f.write(' ,host: '+host)
+					f.write(' ,chost:'+chost)
+					f.write(' ,nhost:'+nhost)
 				put('poolsnxt/'+pool,host)
 				broadcasttolocal('poolsnxt/'+pool,host)
-				print('poolsnxt/'+pool,host)
 				break
 	return
 
@@ -56,19 +57,13 @@ def importpls(myhost,allinfo,*args):
 		if hostpair[0] == 'nothing':
 			continue
 		owner=hostpair[1]
-		print('owner=',owner)
 ################# elect the host to import the pool ###############
-		print('pool toimport',hostpair[0])
 		timestamp=int(datetime.datetime.now().timestamp())-5
-		print('timestamp',str(timestamp))
 		locked=get('lockedpools','--prefix')
 		ownerstatus=get('cannotimport/'+owner)
-		print('owner',owner)
 		if hostpair[0] in ownerstatus:
-			print('in ownerstatus')
 			continue
 		#if hostpair[0] in importedpools:
-		#	print('in importedpools')
 		#	continue
 		if hostpair[0] in locked:
 			print('in locked')
@@ -81,25 +76,19 @@ def importpls(myhost,allinfo,*args):
 				if('-1' in str(lockhostip)):
 					deli('lockedpools/'+pool)
 					continue
-			if(int(timestamp) > int(oldtimestamp)):
+			if int(timestamp) > int(oldtimestamp):
+				put('lockedpools/'+pool,lockhost+'/'+str(timestamp))
 				z=['/TopStor/pump.sh','ReleasePoolLock',pool]
 				msg={'req': 'ReleasePoolLock', 'reply':z}
 				sendhost(lockhostip[0], str(msg),'recvreply',myhost)
-				print('here',lockhostip[0])
 
 			continue
 		#importedpools.append(hostpair[0])
 		ownerip=get('leader',owner)
 		if ownerip[0]== -1:
-			print('here')
 			ownerip=get('known',owner)
-			print('ownerip',ownerip[0])
 			if str(ownerip[0])== '-1':
-				print('here2lldkf')
 				return
-			else:
-				print('willcontinue')
-		print('putting into locked',hostpair[0]+'/'+owner)
 		put('lockedpools/'+hostpair[0],owner+'/'+str(timestamp))
 #################### end of election
 		z=['/TopStor/pump.sh','Zpool','import','-c','/TopStordata/'+hostpair[0],'-am']
