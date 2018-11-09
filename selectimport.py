@@ -15,12 +15,11 @@ def electimport(myhost, allpools,*arg):
 		pool=poolpair[0].split('/')[1]
 		chost=poolpair[1]
 		nhost=str(get('poolsnxt/'+pool)[0])
-		if nhost not in str(knowns):
+		if nhost not in str(knowns) or nhost in chost:
 			deli('poolsnxt',nhost)
 			nhost='nothing'
-		else:
+		if nhost in str(knowns):
 			continue
-		
 		hosts=poolall.getall(chost)['hosts']
 		for host in hosts: 
 			if host != chost:
@@ -103,7 +102,7 @@ def importpls(myhost,allinfo,*args):
 
 if __name__=='__main__':
 	myhost=socket.gethostname()
-	allpools=get('pools','--prefix')
+	allpools=get('pools/','--prefix')
 	electimport(myhost,allpools,*sys.argv[1:])
 	allinfo=get('to','--prefix')
 	importpls(myhost,allinfo,*sys.argv[1:])
