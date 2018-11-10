@@ -40,6 +40,7 @@ lhosts=set()
 lraids=[]
 lvolumes=[]
 lsnapshots=[]
+poolsstatus=[]
 #lists=[lpools,ldisks,ldefdisks,lavaildisks,lfreedisks,lsparedisks,lraids,lvolumes,lsnapshots]
 lists={'pools':lpools,'disks':ldisks,'defdisks':ldefdisks,'inusedisks':linusedisks,'freedisks':lfreedisks,'sparedisks':lsparedisks,'raids':lraids,'volumes':lvolumes,'snapshots':lsnapshots, 'hosts':lhosts}
 for a in y:
@@ -66,6 +67,8 @@ for a in y:
    cmdline='/sbin/zpool set cachefile=/TopStordata/'+b[0]+' '+b[0]
    subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
    cachetime='notset'
+  #put('pools/'+b[0],myhost)
+  poolsstatus.append(('pools/'+b[0],myhost))
   zdict={ 'name':b[0],'changeop':b[1], 'status':b[1],'host':myhost, 'used':str(zfslist[0].split()[6]),'available':str(zfslist[0].split()[11]), 'alloc': str(zlist[2]), 'empty': zlist[3], 'dedup': zlist[7], 'compressratio': zlist2[2],'timestamp':str(cachetime), 'raidlist': raidlist ,'volumes':volumelist}
   zpool.append(zdict)
   lpools.append(zdict) 
@@ -158,3 +161,17 @@ for disk in ldisks:
  elif disk['changeop'] != 'ONLINE': 
   ldefdisks.append(disk)
 put('lists/'+myhost,str(lists))
+xall=get('pools/','--prefix')
+x=[y for y in xall if myhost in str(y)]
+print('x: ',x)
+xnotfound=[y for y in x if y[0].replace('pools/','') not in str(poolsstatus)]
+xnew=[y for y in poolsstatus if y[0].replace('pools/','') not in str(x)]
+print('xnotfound: ',xnotfound)
+print('xnew: ',xnew)
+for y in xnotfound:
+ if y[0] not in xall:
+  dels(y[0].replace('pools/',''),'--prefix')
+ else:
+  dels(y[0])
+for y in xnew:
+ put(y[0],y[1])

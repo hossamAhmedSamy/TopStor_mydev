@@ -30,6 +30,7 @@ do
 done
 echo startzfs run >> /root/zfspingtmp
 /pace/startzfs.sh
+leadername=` ./etcdget.py leader --prefix | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
 date=`date `
 myhost=`hostname -s`
 myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{print $2 }'`
@@ -103,6 +104,9 @@ do
     /TopStor/logmsg.py Partst05 info system $myhost &
     primtostd=0;
    fi
+   ETCDCTL_API=3 /pace/etcdgetlocal.py $myip poolsnxt --prefix | grep ${myhost} > /TopStordata/forlocalpools
+   #ETCDCTL_API=3 /TopStor/importlocalpools.py  &
+   ETCDCTL_API=3 /TopStor/hostlostdeadleader.sh $leadername  &
    nextleadip=`ETCDCTL_API=3 ./etcdgetlocal.py $myip nextlead` 
    echo nextlead is $nextleadip  >> /root/zfspingtmp
    echo $nextleadip | grep $myip
@@ -156,6 +160,7 @@ do
     chgrp apache /var/www/html/des20/Data/* 2>/dev/null
     chmod g+r /var/www/html/des20/Data/* 2>/dev/null
     runningcluster=1
+    leadername=$myhost
    else
     systemctl stop etcd 2>/dev/null 
     echo starting waiting for new leader run >> /root/zfspingtmp
@@ -167,13 +172,14 @@ do
      echo $result | grep nothing 
      if [ $? -eq 0 ];
      then
-      sleep 3
+      sleep 1 
       result=` ./nodesearch.py $myip 2>/dev/null`
      else
       echo found the new leader run $result >> /root/zfspingtmp
       waiting=0
      fi
     done 
+    leadername=`./etcdget.py leader --prefix | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
     continue
    fi
   else 
@@ -203,6 +209,8 @@ do
      leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
      leaderip=`echo $leaderall | awk -F"')" '{print $1}' | awk -F", '" '{print $2}'`
      /pace/sendhost.py $leaderip 'user' 'recvreq' $myhost &
+     /pace/etcdsync.py $myip pools pools 2>/dev/null
+     /pace/etcdsync.py $myip poolsnxt poolsnext 2>/dev/null
      /pace/sendhost.py $leaderip 'cifs' 'recvreq' $myhost &
      /pace/sendhost.py $leaderip 'logall' 'recvreq' $myhost &
      isknown=$((isknown+1))
@@ -349,7 +357,7 @@ do
   clockdiff=$((clocker-oldclocker))
  fi
  echo Clockdiff = $clockdiff >> /root/zfspingtmp
- if [ $clockdiff -ge 30 ];
+ if [ $clockdiff -ge 50 ];
  then
   ./etcddel.py toimport/$myhost &
   /TopStor/logmsg.py Partst06 info system  &

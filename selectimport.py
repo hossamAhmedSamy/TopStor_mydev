@@ -1,12 +1,39 @@
 #!/bin/python3.6
 from etcdget import etcdget as get
 from etcdput import etcdput as put 
+from broadcasttolocal import broadcasttolocal 
 from etcddel import etcddel as deli 
+import poolall 
 import socket, sys, subprocess,datetime
+from broadcast import broadcast as broadcast 
 from sendhost import sendhost
 from ast import literal_eval as mtuple
 #from zpooltoimport import zpooltoimport as importables
+def electimport(myhost, allpools,*arg):
+	knowns=get('known','--prefix')
+	for poolpair in allpools:
+		pool=poolpair[0].split('/')[1]
+		chost=poolpair[1]
+		nhost=str(get('poolsnxt/'+pool)[0])
+		if nhost not in str(knowns) or nhost in chost:
+			deli('poolsnxt',nhost)
+			nhost='nothing'
+		if nhost in str(knowns):
+			continue
+		hosts=poolall.getall(chost)['hosts']
+		for host in hosts: 
+			if host != chost:
+				with open('/root/selecttmp','a') as f:
+					f.write('\npoolpair:'+str(poolpair))
+					f.write(' ,host: '+host)
+					f.write(' ,chost:'+chost)
+					f.write(' ,nhost:'+nhost)
+				put('poolsnxt/'+pool,host)
+				broadcasttolocal('poolsnxt/'+pool,host)
+				break
+	return
 
+ 
 def importpls(myhost,allinfo,*args):
 	if(len(allinfo) < 0):
 		return
@@ -29,39 +56,38 @@ def importpls(myhost,allinfo,*args):
 		if hostpair[0] == 'nothing':
 			continue
 		owner=hostpair[1]
-		print('owner=',owner)
 ################# elect the host to import the pool ###############
-		print('pool toimport',hostpair[0])
-		timestamp=int(datetime.datetime.now().timestamp())+60
-		print('timestamp',str(timestamp))
+		timestamp=int(datetime.datetime.now().timestamp())-5
 		locked=get('lockedpools','--prefix')
 		ownerstatus=get('cannotimport/'+owner)
-		print('owner',owner)
 		if hostpair[0] in ownerstatus:
-			print('in ownerstatus')
 			continue
 		#if hostpair[0] in importedpools:
-		#	print('in importedpools')
 		#	continue
 		if hostpair[0] in locked:
 			print('in locked')
-			oldtimestamp=get('lockedpools/'+hostpair[0]).split('/')[1]
-			if(int(timestamp) > int(oldtimestamp)):
-				deli('lockedpools/'+hostpair[0])
-			else:
-				continue
+			lockinfo=get('lockedpools/'+hostpair[0])
+			oldtimestamp=lockinfo[0].split('/')[1]
+			lockhost=lockinfo[0].split('/')[0]
+			lockhostip=get('leader/'+lockhost)
+			if( '-1' in str(lockhostip)):
+				lockhostip=get('known/'+lochost)
+				if('-1' in str(lockhostip)):
+					deli('lockedpools/'+pool)
+					continue
+			if int(timestamp) > int(oldtimestamp):
+				put('lockedpools/'+pool,lockhost+'/'+str(timestamp))
+				z=['/TopStor/pump.sh','ReleasePoolLock',pool]
+				msg={'req': 'ReleasePoolLock', 'reply':z}
+				sendhost(lockhostip[0], str(msg),'recvreply',myhost)
+
+			continue
 		#importedpools.append(hostpair[0])
 		ownerip=get('leader',owner)
 		if ownerip[0]== -1:
-			print('here')
 			ownerip=get('known',owner)
-			print('ownerip',ownerip[0])
 			if str(ownerip[0])== '-1':
-				print('here2lldkf')
 				return
-			else:
-				print('willcontinue')
-		print('putting into locked',hostpair[0]+'/'+owner)
 		put('lockedpools/'+hostpair[0],owner+'/'+str(timestamp))
 #################### end of election
 		z=['/TopStor/pump.sh','Zpool','import','-c','/TopStordata/'+hostpair[0],'-am']
@@ -76,14 +102,7 @@ def importpls(myhost,allinfo,*args):
 
 if __name__=='__main__':
 	myhost=socket.gethostname()
-	try:
-		x=subprocess.check_output(['pgrep','-c', 'selectimport'])
-		x=str(x).replace("b'","").replace("'","").split('\\n')
-		if(x[0]!= '1'):
-			print('process still running',str(x[0]))
-		else:
-			allinfo=get('to','--prefix')
-			importpls(myhost,allinfo,*sys.argv[1:])
-	except:
-		pass 
- 
+	allpools=get('pools/','--prefix')
+	electimport(myhost,allpools,*sys.argv[1:])
+	allinfo=get('to','--prefix')
+	importpls(myhost,allinfo,*sys.argv[1:])

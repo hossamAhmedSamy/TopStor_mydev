@@ -2,14 +2,16 @@
 import subprocess,sys
 import json
 
-myip=sys.argv[1]
-key=sys.argv[2]
-val=sys.argv[3]
-endpoints=''
-#data=json.load(open('/pacedata/runningetcdnodes.txt'));
-#for x in data['members']:
-# endpoints=endpoints+str(x['clientURLs'])[2:][:-2]
-endpoints='http://'+myip+':2378'
-cmdline=['etcdctl','-w','json','--endpoints='+endpoints,'put',key,val]
-result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-print(result)
+def etcdput(*args):
+ myip=args[0]
+ key=args[1]
+ val=args[2]
+ endpoints=''
+ endpoints='http://'+myip+':2378'
+ cmdline=['etcdctl','-w','json','--endpoints='+endpoints,'put',key,val]
+ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ print(result)
+
+if __name__=='__main__':
+ etcdput(*sys.argv[1:])
+
