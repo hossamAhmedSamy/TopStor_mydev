@@ -1,18 +1,18 @@
 #!/bin/python3.6
 import subprocess,sys
+from etcdget import etcdget as get
 from ast import literal_eval as mtuple
+from etcdputlocal import etcdputlocal as putlocal 
+from etcddellocal import etcdellocal as dellocal 
 
 
 thehost=sys.argv[1]
 key=sys.argv[2]
 tokey=sys.argv[3]
-cmdline=['/pace/etcdget.py',key,'--prefix']
-result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-if(result.stdout==b''):
+dellocal(key,'--prefix')
+mylist=get(key,'--prefix')
+if '-1' in mylist:
  print('-1')
- exit(1)
-mylist=str(result.stdout).replace(key+'/','')[2:][:-3].split('\\n')
+ exit()
 for item in mylist:
- x=mtuple(item)
- cmdline=['/pace/etcdputlocal.py',thehost, tokey+'/'+x[0], x[1]]
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ putlocal(thehost, item[0], item[1]]

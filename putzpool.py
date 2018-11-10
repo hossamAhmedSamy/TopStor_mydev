@@ -170,7 +170,7 @@ print('xnotfound: ',xnotfound)
 print('xnew: ',xnew)
 for y in xnotfound:
  if y[0] not in xall:
-  dels(y[0].replace('pools/'.''),'--prefix')
+  dels(y[0].replace('pools/',''),'--prefix')
  else:
   dels(y[0])
 for y in xnew:
