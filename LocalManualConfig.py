@@ -52,8 +52,11 @@ def config(*bargs):
      y=y.split(':')
      subnet=oldsubnet=y[1]
   logmsg.sendlog('HostManual1st7','info',arg[-1],change['oldmgmtip']+'/'+oldsubnet,change['mgmtip']+'/'+subnet)
+ with open('/root/HostManualconfigtmp2','a') as f:
+  f.write('run HostManualconfigNameSpace:'+change['mgmtip']+change['oldmgmtip']+subnet+oldsubnet+'\n')
   cmdline=['/TopStor/HostManualconfigNameSpace',change['mgmtip'],change['oldmgmtip'],subnet,oldsubnet]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  put('namespace/mgmtip',change['mgmtip']+'/'+subnet)
   logmsg.sendlog('HostManual1su7','info',arg[-1],change['oldmgmtip']+'/'+oldsubnet,change['mgmtip']+'/'+subnet)
 ######### changing box address ###############
  if 'addr' in change:
