@@ -161,14 +161,17 @@ for disk in ldisks:
  elif disk['changeop'] != 'ONLINE': 
   ldefdisks.append(disk)
 put('lists/'+myhost,str(lists))
-x=get('pools/','--prefix')
+xall=get('pools/','--prefix')
+x=[y for y in xall if myhost in str(y)]
 print('x: ',x)
-x=[y for y in x if myhost in str(y)]
 xnotfound=[y for y in x if y[0].replace('pools/','') not in str(poolsstatus)]
 xnew=[y for y in poolsstatus if y[0].replace('pools/','') not in str(x)]
 print('xnotfound: ',xnotfound)
 print('xnew: ',xnew)
 for y in xnotfound:
- dels(y[0])
+ if y[0] not in xall:
+  dels(y[0].replace('pools/'.''),'--prefix')
+ else:
+  dels(y[0])
 for y in xnew:
  put(y[0],y[1])
