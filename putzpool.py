@@ -146,7 +146,7 @@ if len(freepool) > 0:
   host=z[3].split('-')[1]
   if host not in str(readyhosts):
    continue
-  lhosts.add(host)
+#  lhosts.add(host)
   size=z[7]
   ddict={'name':'scsi-'+z[6], 'changeop':'free','status':'free','raid':'free','pool':'pree','id': str(diskid), 'host':host, 'size':size}
   disklist.append(ddict)
