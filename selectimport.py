@@ -20,7 +20,7 @@ def electimport(myhost, allpools,*arg):
 			nhost='nothing'
 		if nhost in str(knowns):
 			continue
-		hosts=poolall.getall(chost)['hosts']
+		hosts=poolall.getall(chost)['phosts']
 		for host in hosts: 
 			if host != chost:
 				with open('/root/selecttmp','a') as f:
