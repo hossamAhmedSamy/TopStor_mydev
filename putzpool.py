@@ -150,8 +150,9 @@ if len(freepool) > 0:
   ddict={'name':'scsi-'+z[6], 'changeop':'free','status':'free','raid':'free','pool':'pree','id': str(diskid), 'host':host, 'size':size}
   disklist.append(ddict)
   ldisks.append(ddict)
+print(len(lhosts), type(lhosts))
 if len(lhosts)==0:
-   lhosts=''
+   lhosts.add('')
 put('hosts/'+myhost+'/current',str(zpool))
 for disk in ldisks:
  if disk['changeop']=='free':
