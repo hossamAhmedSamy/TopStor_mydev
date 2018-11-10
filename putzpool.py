@@ -36,7 +36,7 @@ ldefdisks=[]
 linusedisks=[]
 lfreedisks=[]
 lsparedisks=[]
-lhosts={}
+lhosts=set()
 lraids=[]
 lvolumes=[]
 lsnapshots=[]
@@ -150,6 +150,8 @@ if len(freepool) > 0:
   ddict={'name':'scsi-'+z[6], 'changeop':'free','status':'free','raid':'free','pool':'pree','id': str(diskid), 'host':host, 'size':size}
   disklist.append(ddict)
   ldisks.append(ddict)
+if len(lhosts)==0:
+   lhosts=''
 put('hosts/'+myhost+'/current',str(zpool))
 for disk in ldisks:
  if disk['changeop']=='free':
