@@ -47,7 +47,7 @@ then
   ETCDCTL_API=3 /pace/etcdput.py cannotimport/$myhost ${cannotimport}${slash}${pool}
   ETCDCTL_API=3 /pace/etcddel.py poolsnxt/$pool
   echo added it  >> /root/Zpool
- else:
+ else
   success=1
   echo pool $pool is hardly imported >> /root/Zpool
  fi

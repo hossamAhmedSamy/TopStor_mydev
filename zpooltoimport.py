@@ -39,6 +39,7 @@ def zpooltoimport(*args):
     continue
   print('in locked')
   if(int(timestamp) > int(oldtimestamp)):
+   put('lockedpools/'+pool,lockhost+'/'+str(timestamp))
    z=['/TopStor/pump.sh','ReleasePoolLock',pool]
    msg={'req': 'ReleasePoolLock', 'reply':z}
    sendhost(lockhostip[0], str(msg),'recvreply',myhost)
