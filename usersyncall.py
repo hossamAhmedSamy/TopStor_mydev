@@ -5,7 +5,9 @@ from threading import Thread
 from etcdgetlocal import etcdget as getlocal
 from ast import literal_eval as mtuple
 from socket import gethostname as hostname
-def thread_add(user):
+allusers=[]
+myusers=[]
+def thread_add(*user):
  username=user[0].replace('usersinfo/','')
  userinfo=user[1].split(':')
  userid=userinfo[0]
@@ -14,16 +16,19 @@ def thread_add(user):
  userhome=userinfo[2]
  cmdline=['/TopStor/UnixAddUser_sync',username,userhash,userid,usergd,userhome]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-def thread_del(user):
+
+def thread_del(*user):
  username=user[0].replace('usersinfo/','')
  if username not in str(allusers):
- cmdline=['/TopStor/UnixDelUser_sync',username,'system']
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline=['/TopStor/UnixDelUser_sync',username,'system']
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 
 def usersyncall(*args):
  threads=[]
  allusers=get('usersinfo','--prefix')
+ print('allusers',allusers)
  myusers=getlocal(args[0],'usersinfo','--prefix')
+ print('myusers',myusers)
  for user in allusers:
   x=Thread(target=thread_add,name='addingusers',args=user)
   x.start()
