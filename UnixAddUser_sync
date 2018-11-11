@@ -23,8 +23,9 @@ useradd -c"TopStor"$pas -b $userhome -M -g $usergd -u $userid -p $userpass -s /u
 echo $homedir | grep '-1'
 if [ $? -ne 0 ];
 then
- ln -s /$homebase/$username /home/$username
- chmod o-rwx /$homebase/$username -R
+ rm -rf /home/$username
+ ln -s /$userhome /home/$username
+ chmod o-rwx /$userhome -R
 fi
 ( echo $userpass; echo $userpass) | /bin/smbpasswd -s -a $username 2>> $txtres
 cat $txtres

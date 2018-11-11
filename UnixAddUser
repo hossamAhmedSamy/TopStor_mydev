@@ -38,6 +38,7 @@ then
  echo $homedir | grep "\-1"
  if [ $? -ne 0 ];
  then
+  rm -rf /home/$username
   ln -s /$homedir/$username /home/$username
   chmod o-rwx /$homedir/$username -R
  fi
@@ -53,10 +54,10 @@ then
   gpg -u "QuickStor" -r"QuickStor" key/${username}fixed
   chmod 400 key/${username}fixed.gpg;
   rm -rf key/${username}fixed
-  userid=`echo $userline | awk -F':' '{print $2}'`
-  usergd=`echo $userline | awk -F':' '{print $3}'`
-  userhome=`echo $userline | awk -F':' '{print $5}'`
-  userhash=`echo $userline | awk -F':' '{print $4}' | awk -F'TopStor' '{print $2}'`
+  userid=`echo $userline | awk -F':' '{print $3}'`
+  usergd=`echo $userline | awk -F':' '{print $4}'`
+  userhome=`echo $userline | awk -F':' '{print $6}'`
+  userhash=`echo $userline | awk -F':' '{print $5}' | awk -F'TopStor' '{print $2}'`
   /TopStor/etcdgput.py 'usersinfo/'+$username $userid':'$usergd':'$homedir/$userhome
   /TopStor/etcdgput.py 'usershash/'+$username $userhash
   /TopStor/broadcast.py UserAdd /TopStor/pump.sh UnixAddUser_sync -d$myhost $username $userhash $userid $usergd $userhome
