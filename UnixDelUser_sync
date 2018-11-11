@@ -1,4 +1,5 @@
 #!/bin/sh
+export ETCDCTL_API=3
 web="/var/www/html/des20/Data/Usersstatus.log";
 logging="/var/www/html/des20/Data/currentinfo2.log";
 myhost=`hostname -s`
@@ -7,10 +8,13 @@ username=`echo $@ | awk '{print $1}'`;
 userreq=`echo $@ | awk '{print $2}'`;
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
+myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{print $2 }'`
 if [[ $contrun == 'true' ]]
 then
-/bin/smbpasswd -d $username;
-rm -rf /home/$username &>/dev/null
-userdel -r  $username 2>/dev/null;
-rm key/$username 2>/dev/null
+/TopStor/UnixDelUser $username $userreq
+fi
+cat /etc/passwd | grep $username
+if [ $? -ne 0 ];
+then
+ /pace/etcddellocal.py $myip users $username 
 fi
