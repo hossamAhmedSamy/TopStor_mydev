@@ -26,6 +26,7 @@ then
  /TopStor/UnixDelUser $username system
 fi
 /TopStor/logmsg.py Unlin10188 info $userreq $username
+groupdel $username
 groupadd -g $usergd $username
 useradd -c"TopStor"$pas -d $userhome -M -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username
 echo $userhome | grep NoHome
