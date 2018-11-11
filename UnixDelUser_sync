@@ -1,5 +1,6 @@
 #!/bin/sh
 export ETCDCTL_API=3
+cd /TopStor
 web="/var/www/html/des20/Data/Usersstatus.log";
 logging="/var/www/html/des20/Data/currentinfo2.log";
 myhost=`hostname -s`
