@@ -18,8 +18,15 @@ privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
+cat /etc/passwd | grep $username
+if [ $? -eq 0 ];
+then
+ /TopStor/logmsg.py Unlin10211 warning $userreq $username
+ /TopStor/UnixDelUser $username system
+fi
+/TopStor/logmsg.py Unlin10188 info $userreq $username
 groupadd -g $usergd $username
-useradd -c"TopStor"$pas -d $userhome -M -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username 2> $txtres
+useradd -c"TopStor"$pas -d $userhome -M -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username
 echo $userhome | grep NoHome
 if [ $? -ne 0 ];
 then
@@ -33,5 +40,6 @@ cat $txtres
  gpg -u "QuickStor" -r"QuickStor" key/${username}fixed
  chmod 400 key/${username}fixed.gpg;
  rm -rf key/${username}fixed
+ /TopStor/logmsg.py Unlin10222 info $userreq $username
 fi
 cd /pace
