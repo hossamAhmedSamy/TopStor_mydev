@@ -19,8 +19,8 @@ contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
 groupadd -g $usergd $username
-useradd -c"TopStor"$pas -b $userhome -M -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username 2> $txtres
-echo $homedir | grep '-1'
+useradd -c"TopStor"$pas -d $userhome -M -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username 2> $txtres
+echo $userhome | grep NoHome
 if [ $? -ne 0 ];
 then
  rm -rf /home/$username
