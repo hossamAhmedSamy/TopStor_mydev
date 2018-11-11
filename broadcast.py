@@ -25,9 +25,13 @@ def broadcast(*args):
 	with open('/root/broadcast','w') as f:
 		f.write('sending'+str(msg))
 	if leaderinfo[0][0].split('/')[1] not in dontsend:
+		with open('/root/broadcast','a') as f:
+			f.write('\nsending to leader'+leaderip)
 		print('sending', leaderip, str(msg),'recevreply',myhost)
 		sendhost(leaderip, str(msg),'recvreply',myhost)
 	for k in knowninfo:
+		with open('/root/broadcast','a') as f:
+			f.write('\nsending to known'+k[1])
 		if k[0].split('/')[1] not in dontsend:
 			print('sending', k[1], str(msg),'recevreply',myhost)
 			sendhost(k[1], str(msg),'recvreply',myhost)
