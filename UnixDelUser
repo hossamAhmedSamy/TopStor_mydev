@@ -17,7 +17,7 @@ then
 /bin/smbpasswd -d $username;
 rm -rf /home/$username &>/dev/null
 userdel -rf  $username 
-rm key/$username;
+rm  key/${username}fixed
 datenow=`date +%m/%d/%Y`;timenow=`date +%T`;
 cat /etc/passwd |  grep $username
 if [ $? -eq 0 ]; then
