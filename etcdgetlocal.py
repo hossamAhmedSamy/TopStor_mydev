@@ -24,6 +24,7 @@ def etcdget(thehost,key, prefix=''):
     print('-1')
     z.append('-1')
    print(str(result.stdout).split(key)[1][2:][:-3])
+   z.append(str(result.stdout).split(key)[1][2:][:-3])
   
  except:
   print('-1')
