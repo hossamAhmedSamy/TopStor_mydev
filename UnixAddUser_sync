@@ -23,7 +23,7 @@ cat /etc/passwd | grep $username
 if [ $? -eq 0 ];
 then
  /TopStor/logmsg.py Unlin10211 warning $userreq $username
- /TopStor/UnixDelUser $username system
+ /TopStor/UnixDelUserlocal $username system
 fi
 /TopStor/logmsg.py Unlin10188 info $userreq $username
 groupdel $username

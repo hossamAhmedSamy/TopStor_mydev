@@ -12,7 +12,7 @@ contrun=`./privthis.sh $privilege $userreq`;
 myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{print $2 }'`
 if [[ $contrun == 'true' ]]
 then
-/TopStor/UnixDelUser $username $userreq
+/TopStor/UnixDelUserlocal $username $userreq
 fi
 cat /etc/passwd | grep $username
 if [ $? -ne 0 ];
