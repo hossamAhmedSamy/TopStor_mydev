@@ -6,10 +6,13 @@ from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost
 def broadcast(*args):
+	dontsend=[x.replace('-d','') for x in args if '-d' in x]
+	datainfo=[x for x in args if '-d' not in x]
+	print('datainfo',datainfo)
 	z=[]
 	knowns=[]
 	myhost=hostname()
-	for arg in args:
+	for arg in datainfo:
 		z.append(arg)
 	leaderinfo=get('leader','--prefix')
 	knowninfo=get('known','--prefix')
@@ -21,10 +24,13 @@ def broadcast(*args):
 	msg={'req': z[0], 'reply':z[1:]}
 	with open('/root/broadcast','w') as f:
 		f.write('sending'+str(msg))
-	print('sending', leaderip, str(msg),'recevreply',myhost)
-	sendhost(leaderip, str(msg),'recvreply',myhost)
+	if leaderinfo[0][0].split('/')[1] not in dontsend:
+		print('sending', leaderip, str(msg),'recevreply',myhost)
+		sendhost(leaderip, str(msg),'recvreply',myhost)
 	for k in knowninfo:
-		sendhost(k[1], str(msg),'recvreply',myhost)
+		if k[0].split('/')[1] not in dontsend:
+			print('sending', k[1], str(msg),'recevreply',myhost)
+			sendhost(k[1], str(msg),'recvreply',myhost)
 
 if __name__=='__main__':
  broadcast(*sys.argv[1:])
