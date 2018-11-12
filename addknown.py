@@ -46,7 +46,7 @@ if str(nextone[0]).split('/')[0] not in  str(known):
 if known != []:
  for kno in known:
   kn=kno 
-  cmdline=['/pace/etcdgetlocal.py',kn[1],'local','--prefix','2>/dev/null']
+  cmdline=['/pace/etcdgetlocal.py',kn[1],'local','--prefix']
   heartres=subprocess.run(cmdline,stdout=subprocess.PIPE)
   heart=str(heartres.stdout)[2:][:-3].split('\\n')
   print('heartbeat=',heart)
