@@ -34,7 +34,9 @@ then
   homebase='-b /NoHome -M'
   /TopStor/logmsg.py Unlin1023 warning $userreq $username
  fi
- useradd -c"TopStor"$pas $homebase -p $userpass -s /usr/sbin/nologin $username 2> $txtres
+ groupdel $username
+ useradd -c"TopStor"$pas $homebase -p $userpass -s /usr/sbin/nologin $username 
+ echo useradd \-c"TopStor"$pas $homebase \-p $userpass \-s /usr/sbin/nologin $username
  echo $homedir | grep "\-1"
  if [ $? -ne 0 ];
  then
