@@ -40,8 +40,8 @@ then
  echo $homedir | grep "\-1"
  if [ $? -ne 0 ];
  then
-  rm -rf /home/$username
-  ln -s /$homedir/$username /home/$username
+  #rm -rf /home/$username
+  #ln -s /$homedir/$username /home/$username
   chmod o-rwx /$homedir/$username -R
  fi
  ( echo $userpass; echo $userpass) | /bin/smbpasswd -s -a $username 2>> $txtres
