@@ -1,0 +1,26 @@
+#!/usr/local/bin/zsh
+export ETCDCTL_API=3
+cd /TopStor
+web='/var/www/html/des20/Data/Replicatestatus.log'
+logging='/var/www/html/des20/Data/currentinfo2.log'
+glog='/var/www/html/des20/Data/TopStor.log';
+txtres='/TopStordata/'`basename $0`$userreq'.txt'
+rm $txtres 2>/dev/null
+periodel=` echo $@ | awk '{print $1}'`;
+userreq=` echo $@ | awk '{print $2}'`;
+privilege="Replication";
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]]
+then
+  /TopStor/logmsg.py Replica1045 info $userreq $periodel
+echo $periodel
+/usr/bin/crontab -l | grep -v "$periodel" | /usr/bin/crontab -  2> $txtres
+datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
+err=`wc -c  $txtres | awk '{print $1}'`;
+if [[ $err -ge  4  ]]; then
+  /TopStor/logmsg.py Replica1046 error $userreq $periodel
+else
+  /TopStor/logmsg.py Replica1047 info $userreq $periodel
+fi;
+./RemoteGetPoolperiodlist &
+fi

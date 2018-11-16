@@ -1,0 +1,25 @@
+#!/bin/sh
+export ETCDCTL_API=3
+cd /TopStor/
+echo $@ > ~/tmp
+web='/var/www/html/des20/Data/HostManualconfigstatus.log';
+logging='/var/www/html/des20/Data/currentinfo2.log';
+runningpools='/pacedata/pools/runningpools';
+glog='/var/www/html/des20/Data/TopStor.log';
+txtres='/TopStordata/'`basename $0`'.txt'
+hostname=`hostname -s`
+rm -rf $txtres &>/dev/null
+hostip=`echo $@ | awk '{ print $1 }'`;
+subnet=` echo $@ | awk '{ print $3 }'`;
+oldip=`echo $@ | awk '{ print $2 }'`;
+oldsubnet=` echo $@ | awk '{ print $4 }'`;
+sed -e "s/HOSTY/$hostip/g" /TopStor/sshhttp.conf > /etc/httpd/conf.d/sshhttp.conf
+sed -e "s/HOSTY/$hostip/g" /TopStor/sshhttp.conf > /etc/httpd/conf.d/sshhttp.conf
+dev=`/sbin/pcs resource show CC | grep Attrib | awk -F'nic=' '{print $2}' | awk '{print $1}'`
+/sbin/zpool export -a 
+/sbin/pcs resource update CC ip=$hostip
+/sbin/pcs resource update CC cidr_netmask=$subnet
+/sbin/ip addr del ${oldip}/$oldsubnet dev $dev
+/pace/keysend.sh $hostip
+
+/sbin/reboot

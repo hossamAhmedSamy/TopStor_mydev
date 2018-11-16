@@ -1,0 +1,35 @@
+#!/bin/sh
+export ETCDCTL_API=3
+cd /TopStor
+echo $@ > /root/tmp
+privilege="User_Priv";
+user=`echo $@ | awk '{print $2}'`
+contrun="false";
+userreq=` echo $@ | awk '{print $NF}'`;
+contrun=` ./privthis.sh $privilege $userreq ` ;
+if [[ $contrun == 'true' ]] 
+then
+web='/var/www/html/des20/Data/Privstatus.log';
+userpriv='/var/www/html/des20/Data/userpriv.txt';
+currentpriv='/TopStordata/userpriv.txt';
+resweb='/var/www/html/des20/Data/userprivdate.txt';
+logging='/var/www/html/des20/Data/currentinfo2.log'
+glog='/var/www/html/des20/Data/TopStor.log';
+ /TopStor/logmsg.py Priv1002 info $userreq $user
+touch $currentpriv
+cat $currentpriv | grep -v "$user" > $currentpriv.tmp  2>/dev/null
+mv $currentpriv.tmp $currentpriv
+echo $@ >> $currentpriv
+result="[";
+while read -r line ; do
+ subres=`./jsonthis3.sh $line`
+ result=${result}$subres,
+done < $currentpriv
+result=`echo $result | rev | cut -c 2- | rev`];
+echo $result > $userpriv;
+ /TopStor/Priv.py $@ 
+ /TopStor/logmsg.py Priv1003 info $userreq $user
+resdate=`date +%s`;
+res=`./jsonthis3.sh updated $resdate`;
+echo $res > $resweb ;
+fi

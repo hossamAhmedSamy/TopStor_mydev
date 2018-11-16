@@ -1,0 +1,60 @@
+#!/usr/local/bin/zsh
+export ETCDCTL_API=3
+cd /TopStor
+web='/var/www/html/des20/Data/currentinfo2.log2';
+logging='/var/www/html/des20/Data/currentinfo2.log'
+glog='/var/www/html/des20/Data/TopStor.log';
+stamp=`date +%s`;
+cronout='/TopStordata/cronoutput.log';
+oper=$@; 
+echo oper=$oper > $cronout
+oper1=`echo $oper | awk '{print $1}'`;
+realoper=`echo $oper1 | awk -F'/' '{print $2"/"$3}'`;
+
+oper2=`echo $oper | awk '{print $2}'`;
+hostnam=`cat /TopStordata/hostname`
+txtres='/TopStordata/'`basename $0`$userreq'.txt'
+rm $txtres 2>/dev/null
+echo oper1=$oper1 >> $cronout;
+echo oper2=$oper2 >> $cronout;
+echo stamp=$stamp >> $cronout
+keep=`echo $oper2 | awk -F. '{print $2}'`;
+echo keep=$keep >> $cronout
+currentsnaps=`/sbin/zfs list -t snapshot | grep -w "$realoper" | grep -w "$oper2" | awk '{print $1}'`;
+echo currentsnaps=$currentsnaps >> $cronout
+oldsnap=`echo $currentsnaps | sort | head -n 1` ;
+echo oldsnap=$oldsnap >> $cronout
+count=0
+countsnap=`echo  "$currentsnaps" | wc -l `;
+echo countsnap=$countsnap >> $cronout 
+countsnap=$(($countsnap+1));
+echo countsnapplus=$countsnap >> $cronout
+keep=$(($keep+0));
+echo keeppluszero=$keep >> $cronout
+timenow=`date`;
+userreq='system';
+if (( $countsnap >  $keep )); then 
+  /TopStor/logmsg.py Snap1022 info $userreq $hostnam $oldsnap
+ /sbin/zfs destroy $oldsnap &>${txtres}$stamp
+ if [ $? -ne  0  ]; then
+   /TopStor/logmsg.py Snap1023 error $userreq $hostnam $oldsnap
+ else
+   /TopStor/logmsg.py Snap1024 info $userreq $hostnam $oldsnap
+
+ fi
+fi
+newsnap2=`echo $oper2.$stamp`;
+echo newsnap2=$newsnap2 >> $cronout
+newsnap=`echo $oper1@$newsnap2 | awk -F'/' '{print $2"/"$3}'`;
+echo newsnap=$newsnap >> $cronout
+ /TopStor/logmsg.py Snap1026 info $userreq $hostnam $newsnap
+/sbin/zfs snapshot $newsnap &> ${txtres}$stamp
+echo snapshotresult : >> $cronout
+cat ${txtres}$stamp >> $cronout 
+echo filenameis=${txtres}$stamp >> $cronout
+err=`wc -c  ${txtres}$stamp | awk '{print $1}'`;
+if [[ $err -ge  4  ]]; then 
+   /TopStor/logmsg.py Snap1028 error $userreq $hostnam $newsnap
+else 
+   /TopStor/logmsg.py Snap1030 info $userreq $hostnam $newsnap
+fi

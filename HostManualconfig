@@ -1,0 +1,63 @@
+#!/usr/local/bin/zsh
+export ETCDCTL_API=3
+cd /TopStor/
+echo $@ > ~/tmp
+web='/var/www/html/des20/Data/HostManualconfigstatus.log';
+logging='/var/www/html/des20/Data/currentinfo2.log';
+runningpools='/pacedata/pools/runningpools';
+glog='/var/www/html/des20/Data/TopStor.log';
+txtres='/TopStordata/'`basename $0`'.txt'
+hostname=`hostname -s`
+rm -rf $txtres &>/dev/null
+hostn=`echo $@ | awk '{ print $1 }' `;
+hostip=`echo $@ | awk '{ print $2 }'`;
+hostrout=`echo $@ | awk '{ print $3 }'`;
+hostdns=` echo $@ | awk '{ print $4 }'`
+subnet=` echo $@ | awk '{ print $5 }'`;
+userreq=` echo $@ | awk '{ print $6 }'`;
+privilege="Error";
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]];
+then
+echo running logmsg > /root/Host
+  /TopStor/logmsg.py HostManual1002 info $userreq
+chattr -i /etc/resolv.conf
+sed -i "/nameserver/c\nameserver $hostdns" /etc/resolv.conf
+chattr +i /etc/resolv.conf
+grep GATEWAY /etc/sysconfig/network-scripts/ifcf* | awk -F: '{print $1}' | sort -u | xargs sed -i "/GATEWAYc\GATEWAY\=$hostrout"  2>/dev/null
+#sed -e "s/HOSTNAME/$hostn/g" -e "s/IPADD/$hostip/g" -e "s/ROUTE/$hostrout/g" rc.conf > txt/rc.conf
+#sed -ri  "s/(https:\/\/)[^=]*$/\1$hostip\//g" /etc/httpd/conf.d/sshhttp.conf 
+sed -e "s/HOSTY/$hostip/g" /TopStor/sshhttp.conf > /etc/httpd/conf.d/sshhttp.conf
+echo getting pcs >> /root/Host
+CC=`/sbin/pcs resource | grep IPaddr2 | awk '{print $1}' | grep -v cluster`
+echo CCis $CC
+oldip=`/sbin/pcs resource show $CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+oldsubnet=`/sbin/pcs resource show $CC | grep Attrib | awk -F'cidr_netmask=' '{print $2}' | awk '{print $1}'`
+dev=`/sbin/pcs resource show $CC | grep Attrib | awk -F'nic=' '{print $2}' | awk '{print $1}'`
+echo running pcs on dev=$dev >> /root/Host
+echo running pcs on subnet=$oldsubnet >> /root/Host
+echo running pcs on ip=$oldip >> /root/Host
+/sbin/pcs resource update $CC ip=$hostip
+echo updated CC on $hostip >> /root/Host
+/sbin/pcs resource update $CC cidr_netmask=$subnet
+echo updated CC on $subnet >> /root/Host
+#/sbin/pcs resource restart $CC
+#/sbin/pcs resource debug-stop $CC
+#/sbin/pcs resource debug-start $CC
+echo restarted $subnet >> /root/Host
+#/sbin/ip addr del ${oldip}/$oldsubnet dev $dev
+echo deleted $oldip on $oldsubnet for $dev >> /root/Host
+oldhostn=`cat /TopStordata/hostname`
+echo $hostn > /TopStordata/hostname
+#sed -i "s/$oldhostn/$hostn/g" $runningpools
+sed -i "/$hostname/s/\w*\$//" $runningpools
+sed -i "/$hostname/s/\$/$hostn/" $runningpools
+echo sed $hostname for $hostn on $runningpools >> /root/Host
+  /TopStor/logmsg.py HostManual1003 info $userreq $hostn ${hostip}'/'${subnet} $hostrout $hostdns
+echo running keysend >> /root/Host
+/pace/keysend.sh $hostip
+echo finish keysend >> /root/Host
+/sbin/reboot
+
+echo logging all is good >> /root/Host
+fi
