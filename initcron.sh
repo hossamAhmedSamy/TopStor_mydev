@@ -17,7 +17,7 @@ sleep 1;
 done
 rm -rf /pacedata/forzfsping
 rm -rf /pacedata/forstartzfs
-sleep 120
+sleep 240
 /sbin/pcs resource delete --force IPinit
 /sbin/ip addr del 10.11.11.254/24 dev enp0s8 
 /TopStor/factory.sh
