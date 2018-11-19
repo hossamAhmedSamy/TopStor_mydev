@@ -6,8 +6,8 @@ from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost
 def broadcast(*args):
-	dontsend=[x.replace('-d','') for x in args if '-d' in x]
-	datainfo=[x for x in args if '-d' not in x]
+	dontsend=[str(x).replace('-d','') for x in args if '-d' in str(x)]
+	datainfo=[str(x) for x in args if '-d' not in str(x)]
 	print('datainfo',datainfo)
 	z=[]
 	knowns=[]
