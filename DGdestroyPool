@@ -11,6 +11,15 @@ privilege="DISK_Groups";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
+ myhost=`hostname -s`
+ currentreq=`/pace/etcdget.py requests/DGdestroypool --prefix`
+ echo $currentreq | grep $myhost
+ if [ $? -eq 0 ];
+ then
+  exit
+ else
+  /pace/etcdput.py requests/DGdestroypool/$myhost $myhost/$userreq
+ fi
   /TopStor/logmsg.py DGst5 info $userreq $pool
  zpool destroy -f $pool &>/dev/null 
  if [ $? -ne 0 ]; then
@@ -27,4 +36,5 @@ then
  rm txt/${0:2}$userreq.txt
 fi
 sed -i "/p${nextpool}/c\\" $runningpools
+/pace/etcddel.py requests/DGdestroypool/$myhost $myhost/$userreq
  /pace/putzpool.py

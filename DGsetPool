@@ -23,6 +23,14 @@ declare -a hostparam=();
 declare -a diskparam=();
 if [[ $contrun == 'true' ]];
 then
+ currentreq=`/pace/etcdget.py requests/DGsetpool --prefix`
+ echo $currentreq | grep $myhost
+ if [ $? -eq 0 ];
+ then
+  exit
+ else
+  /pace/etcdput.py requests/DGsetpool/$myhost $myhost/$userreq
+ fi
  diskargs=${#params[@]};
  diskargs=$((diskargs-1));
  nextpool=${params[$diskargs]};
@@ -123,9 +131,9 @@ then
   fi
  fi 
  if [[ $raid == "Single" ]]; then
+   nextpool='dhcp'${RANDOM}$RANDOM;
    /TopStor/logmsg.py DG1st6 info $userreq ${nextpool} $diskn1
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
-  nextpool='dhcp'${RANDOM}$RANDOM;
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1}
   
   if [ $? -ne 0 ]; then
@@ -344,4 +352,5 @@ then
 fi
 rm txt/${0:2}$userreq.txt
 sed -i "/p${nextpool}/c\\" $runningpools
+/pace/etcddel.py requests/DGsetpool/$myhost $myhost/$userreq
 /pace/putzpool.py 
