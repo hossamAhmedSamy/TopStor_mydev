@@ -1,5 +1,7 @@
 #!/bin/sh
 cd /TopStor/key;
+export ETCDCTL_API=3
+echo $@ > /root/UnixchkUser
 web='/var/www/html/des20/Data/isuser.txt';
 resulting="not found";
 username=`echo $@ | awk '{print $1}'`;
@@ -11,8 +13,15 @@ pass1=`cat ${username}fixed`
 echo $pass1 | grep -w $userpass
 if [[ $? -eq 0 ]]; then
  resulting="ok";
+ stamp=`date +%s`;
+ /pace/etcdput.py logged/$username $stamp
+ /pace/etcdput.py updlogged/$username $stamp
+else
+ oldstamp=`/pace/etcdget.py logged/$username`
+ if [ $oldstamp -ne 1 ];
+ then
+  /pace/etcdput.py logged/$username 1 
+ else
+  /pace/etcdput.py logged/$username 0 
+ fi
 fi;
-cd /TopStor/
-resform=`/usr/local/bin/zsh jsonthis3.sh name $username status $resulting`;
-echo $resform >$web 2>txt/err.txt
-

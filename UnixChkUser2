@@ -1,0 +1,23 @@
+#!/bin/sh
+cd /TopStor/key;
+export ETCDCTL_API=3
+echo $@ > /root/UnixchkUser2
+web='/var/www/html/des20/Data/isuser.txt';
+resulting="not found";
+username=`echo $@ | awk '{print $1}'`;
+userid=`echo $@ | awk '{print $2}'`;
+stamp=`date +%s`;
+x=`/pace/etcdget.py logged/$username`
+updx=`/pace/etcdget.py updlogged/$username`
+if [ $x -ge 100 ];
+then
+ diffx=$((stamp-updx))
+ if [ $diffx -lt 60 ];
+ then
+  /pace/etcdget.py updlogged/$username $stamp
+  x=$stamp
+ else
+  /pace/etcdget.py logged/$username 1 
+ fi  
+fi
+
