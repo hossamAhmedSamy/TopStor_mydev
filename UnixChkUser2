@@ -13,7 +13,7 @@ if [ $x -ge 100 ];
 then
  diffx=$((stamp-updx))
  echo diff $diffx
- if [ $diffx -lt 60 ];
+ if [ $diffx -lt 600 ];
  then
   /pace/etcdput.py updlogged/$username $stamp
   x=$stamp
