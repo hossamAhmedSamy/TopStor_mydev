@@ -60,7 +60,7 @@ then
   usergd=`echo $userline | awk -F':' '{print $4}'`
   userhome=`echo $userline | awk -F':' '{print $6}'`
   userhash=`echo $userline | awk -F':' '{print $5}' | awk -F'TopStor' '{print $2}'`
-  /TopStor/etcdput.py 'usersinfo/'$username $userid':'$usergd':'$userhome
+  /TopStor/etcdput.py 'usersinfo/'$username $userid':'$usergd':'$userhome'/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no'
   /TopStor/etcdput.py 'usershash/'$username $userhash
   /TopStor/broadcast.py UserAdd /TopStor/pump.sh UnixAddUser_sync -d$myhost $username $userhash $userid $usergd $userhome
   /TopStor/logmsg.py Unlin1022 info $userreq $username
