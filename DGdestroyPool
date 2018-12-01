@@ -7,7 +7,7 @@ logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStor.log'
 pool=` echo $@ | awk '{print $1}'`;
 userreq=` echo $@ | awk '{print $2}'`;
-privilege="DISK_Groups";
+privilege="DiskGroups";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
