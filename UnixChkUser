@@ -19,6 +19,7 @@ echo $y
  fi
 fi
 
+cd /TopStor/key;
 rm -rf ${username}fixed
 gpg --batch --passphrase YousefNadody ${username}fixed.gpg
 pass1=`cat ${username}fixed`

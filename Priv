@@ -2,7 +2,7 @@
 export ETCDCTL_API=3
 cd /TopStor
 echo $@ > /root/tmp
-privilege="User_Priv";
+privilege="UserPrivilegesch";
 user=`echo $@ | awk -F'user_' '{print $2}' | awk -F'/' '{print $1}'`
 contrun="false";
 userreq=` echo $@ | awk -F'/' '{print $NF}'`;
