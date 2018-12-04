@@ -15,6 +15,8 @@ def config(*bargs):
  arg=bargs
  with open('/root/HostManualconfigtmp2','a') as f:
   f.write('arg:'+str(arg)+'\n')
+ with open('/root/HostManualconfigtmp2','a') as f:
+  f.write('oldarg:'+str(oldarg)+'\n')
  change={}
  owner=''
  msg={}
@@ -52,8 +54,8 @@ def config(*bargs):
      y=y.split(':')
      subnet=oldsubnet=y[1]
   logmsg.sendlog('HostManual1st7','info',arg[-1],change['oldmgmtip']+'/'+oldsubnet,change['mgmtip']+'/'+subnet)
- with open('/root/HostManualconfigtmp2','a') as f:
-  f.write('run HostManualconfigNameSpace:'+change['mgmtip']+change['oldmgmtip']+subnet+oldsubnet+'\n')
+  with open('/root/HostManualconfigtmp2','a') as f:
+   f.write('run HostManualconfigNameSpace:'+change['mgmtip']+change['oldmgmtip']+subnet+oldsubnet+'\n')
   cmdline=['/TopStor/HostManualconfigNameSpace',change['mgmtip'],change['oldmgmtip'],subnet,oldsubnet]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   put('namespace/mgmtip',change['mgmtip']+'/'+subnet)
@@ -69,7 +71,8 @@ def config(*bargs):
     if 'addrsubnet' in y:
      y=y.split(':')
      subnet=oldsubnet=y[1]
-     
+  with open('/root/HostManualconfigtmp2','a') as f:
+   f.write('/will/change box address)\n');
   logmsg.sendlog('HostManual1st6','info',arg[-1],change['oldaddr']+'/'+oldsubnet,change['addr']+'/'+subnet)
   cmdline=['/TopStor/HostManualconfigCC',change['addr'],change['oldaddr'],subnet,oldsubnet]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
