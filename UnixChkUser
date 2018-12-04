@@ -28,13 +28,17 @@ if [[ $? -eq 0 ]]; then
  resulting="ok";
  stamp=`date +%s`;
  /pace/etcdput.py logged/$username $stamp
+ /pace/broadcasttolocal.py logged/$username $stamp &
  /pace/etcdput.py updlogged/$username $stamp
+ /pace/broadcasttolocal.py updlogged/$username $stamp &
 else
  oldstamp=`/pace/etcdget.py logged/$username`
  if [ $oldstamp -ne 1 ];
  then
   /pace/etcdput.py logged/$username 1 
+ /pace/broadcasttolocal logged/$username 1 &
  else
   /pace/etcdput.py logged/$username 0 
+ /pace/broadcasttolocal logged/$username 0  &
  fi
 fi;

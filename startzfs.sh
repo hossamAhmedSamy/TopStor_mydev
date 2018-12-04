@@ -123,6 +123,7 @@ else
   ./etcdsync.py $myip dataip dataip 2>/dev/null
   ./etcdsync.py $myip localrun localrun 2>/dev/null
   ./etcdsync.py $myip leader known 2>/dev/null
+  ./etcdsync.py $myip logged logged 2>/dev/null
   /TopStor/etcdsyncnext.py $myip nextlead nextlead 2>/dev/null
   ./etcddel.py known/$myhost --prefix 2>/dev/null
   ./etcddel.py oldhosts/$myhost  --prefix 2>/dev/null

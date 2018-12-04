@@ -20,18 +20,20 @@ def config(*bargs):
  change={}
  owner=''
  msg={}
- for x in arg[:-1]:
-  if x not in oldarg:
-   x=x.split(':')
-   change[x[0]]=x[1]
-   change['old'+x[0]]=x[1]
-   for y in oldarg:
-    if x[0] in y and 'host' not in y:
-     y=y.split(':')
-     change['old'+x[0]]=y[1]
-  if 'hostname' in x:
-    x=x.split(':')
-    owner=x[1]
+ setarg=set(arg[:-1])
+ setold=set(oldarg)
+ diff=setarg-setold
+ print(diff)
+ newchange=list(diff) 
+ print(newchange)
+ for x in newchange:
+  kvx=x.split(':')
+  change[kvx[0]]=kvx[1]
+  for y in oldarg:
+   kvy=y.split(':')
+   if kvy[0]==kvx[0]:
+    change['old'+kvy[0]]=kvy[1]
+ 
  if len(change) < 1: 
   return
  logmsg.sendlog('HostManual1002','info',arg[-1])

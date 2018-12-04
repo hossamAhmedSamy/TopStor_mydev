@@ -16,9 +16,11 @@ then
  if [ $diffx -lt 600 ];
  then
   /pace/etcdput.py updlogged/$username $stamp
+  /pace/broadcasttolocal.py updlogged/$username $stamp &
   x=$stamp
  else
   /pace/etcdput.py logged/$username 1 
+  /pace/broadcasttolocal.py logged/$username 1 &
  fi  
 fi
 
