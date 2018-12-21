@@ -57,6 +57,9 @@ echo sed $hostname for $hostn on $runningpools >> /root/Host
 echo running keysend >> /root/Host
 /pace/keysend.sh $hostip
 echo finish keysend >> /root/Host
+pkill rabbitmq
+#pkill iscsi
+/sbin/iscsiadm --mode node --logoutall=all
 /sbin/reboot
 
 echo logging all is good >> /root/Host

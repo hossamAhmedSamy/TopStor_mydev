@@ -32,5 +32,6 @@ echo 127.0.0.1 $hostname >> /etc/hosts
 /sbin/pcs resource update CC cidr_netmask=$subnet
 #/pace/keysend.sh $hostip
 pkill rabbitmq
-pkill iscsi
+#pkill iscsi
+/sbin/iscsiadm --mode node --logoutall=all
 /sbin/reboot
