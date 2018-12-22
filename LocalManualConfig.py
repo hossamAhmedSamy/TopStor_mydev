@@ -42,6 +42,10 @@ def config(*bargs):
 ######### changing name ###############
  if 'name' in change:
   logmsg.sendlog('HostManual1st5','info',arg[-1],change['oldname'],change['name'])
+  for x in oldarg:
+   if 'hostname:' in x:
+    owner=x.split(':')[1]
+    break
   put('alias/'+owner,change['name'])
   logmsg.sendlog('HostManual1su5','info',arg[-1],change['oldname'],change['name'])
 ######### changing cluster address ###############
