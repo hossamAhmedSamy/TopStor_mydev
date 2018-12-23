@@ -82,6 +82,8 @@ def config(*bargs):
   logmsg.sendlog('HostManual1st6','info',arg[-1],change['oldaddr']+'/'+oldsubnet,change['addr']+'/'+subnet)
   cmdline=['/TopStor/HostManualconfigCC',change['addr'],change['oldaddr'],subnet,oldsubnet]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline=['/TopStor/rebootme',change['addr'],change['oldaddr'],subnet,oldsubnet]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   logmsg.sendlog('HostManual1su6','info',arg[-1],change['oldaddr']+'/'+oldsubnet,change['addr']+'/'+subnet)
 ######### changing data address ###############
  if 'dataip' in change:
