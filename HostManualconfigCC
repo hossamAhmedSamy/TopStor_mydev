@@ -13,7 +13,11 @@ sed -e "s/HOSTY/$hostip/g" /TopStor/sshhttp.conf > /etc/httpd/conf.d/sshhttp.con
 #dev=`/sbin/pcs resource show CC | grep Attrib | awk -F'nic=' '{print $2}' | awk '{print $1}'`
 echo hi > /root/HostCC
 echo shuttingdown 1 $hostip,$hostname, $subnet >> /root/HostCC
-/sbin/zpool export -a 
+mkdir /tmp/cpools 2>/dev/null
+rm -rf /tmp/cpools
+cp /TopStordata/pdhc* /tmp/cpools/
+/sbin/zpool export -a ;
+cp /tmp/cpools/* /TopStordata/
 /pace/etcdget.py leader --prefix | grep $hostname
 if [ $? -eq 0 ];
 then
