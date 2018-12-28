@@ -10,9 +10,15 @@ def do(body):
  myhost=socket.gethostname()
  z=[]
  with open('/root/recv','w') as f:
-  f.write('Recevied a reply:'+body[2:][:-1]+'\n')
- t=mtuple(body[2:][:-1].replace("\\'","'"))
- r=mtuple(t["req"])
+  f.write('Recevied a reply:'+str(body[2:][:-1])+'\n')
+ y=body[2:][:-1].replace('\\','').replace("'{",'"{').replace("}'",'}"').replace('"b\'',"'b;").replace('\n','').replace('"]','\\"]')
+ t=mtuple(y)
+ yy=t['req'].replace("'b;",'"b\'')
+ with open('/root/recv','w') as f:
+  f.write('Recevied a reply:'+yy+'\n')
+ r=mtuple(yy) 
+ with open('/root/recv','a') as f:
+  f.write('tis:'+'found'+'\n')
  with open('/root/recv','a') as f:
    f.write('Request details:'+r['req']+'\n')
 ########## if user ######################
@@ -114,6 +120,8 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received cachemove from partner :'+'\n')
   cachename=r["reply"][0]
+  with open('/root/recv','a') as f:
+   f.write('cachename:'+cachename+'\n')
   cachefileenc=r["reply"][1]
   #cachefile=decode(cachefileenc)
   cachefile=binascii.unhexlify(cachefileenc)

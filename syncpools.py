@@ -16,7 +16,7 @@ def syncthispool(*args):
  with open('/TopStordata/'+pool,'rb') as f:
   bpoolfile=f.read()
   poolfile=binascii.hexlify(bpoolfile)
-  broadcast('Movecache','/TopStordata/'+pool,poolfile) 
+  broadcast('Movecache','/TopStordata/'+pool,str(poolfile)) 
  return 
 
 def syncmypools(*args):
@@ -36,7 +36,7 @@ def syncmypools(*args):
   with open('/TopStordata/'+pool['name'],'rb') as f:
    bpoolfile=f.read()
   poolfile=binascii.hexlify(bpoolfile)
-  broadcast('Movecache','/TopStordata/'+pool['name'],poolfile) 
+  broadcast('Movecache','/TopStordata/'+pool['name'],str(poolfile))
  logmsg.sendlog('Zpsu03','info','system')
  return 
 

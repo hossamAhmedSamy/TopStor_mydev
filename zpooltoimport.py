@@ -120,7 +120,7 @@ def zpooltoimport(*args):
    with open('/TopStordata/'+pool['name'],'rb') as f:
     bpoolfile=f.read()
    poolfile=binascii.hexlify(bpoolfile)
-   broadcast('Movecache','/TopStordata/'+pool['name'],poolfile) 
+   broadcast('Movecache','/TopStordata/'+pool['name'],str(poolfile))
   put('toimport/'+myhost,'nothing')
   logmsg.sendlog('Zpsu01','info','system',':nothing')
  return pooltoimport 
