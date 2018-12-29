@@ -73,7 +73,8 @@ def zpooltoimport(*args):
   f.write('all my disks'+str(mydisks)+'\n')
  pooltoimport=[]
  for pool in pools:
-  cmdline='/sbin/zpool import -c /TopStordata/'+pool
+  #cmdline='/sbin/zpool import -c /TopStordata/'+pool
+  cmdline='/sbin/zpool import '+pool
   print('checking pool: ',str(pool))
   result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
   if 'insufficient replicas' in str(result):
