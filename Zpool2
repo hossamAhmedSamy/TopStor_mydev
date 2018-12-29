@@ -17,7 +17,8 @@ then
  exit
 fi
 echo starting to zpool the $pool > /root/Zpool
-/sbin/zpool import -c /TopStordata/$pool -am
+#/sbin/zpool import -c /TopStordata/$pool -am
+/sbin/zpool import $pool -am
 echo ran the import >> /root/Zpool
 /sbin/zpool status | grep $pool
 if [ $? -ne 0 ];
