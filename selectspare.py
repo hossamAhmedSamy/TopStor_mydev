@@ -22,6 +22,10 @@ def mustattach(cmdline,disksallowed,defdisk,myhost):
     cmdline=['/sbin/zpool', 'remove', defdisk['pool'],spare['name']]
     subprocess.run(cmdline,stdout=subprocess.PIPE)
    cmd.append(spare['name'])
+   cmdline=['/sbin/zpool', 'labelclear','-f', spare['name']]
+   subprocess.run(cmdline,stdout=subprocess.PIPE)
+   print(spare['name'])
+   dfasdkjd
    logmsg.sendlog('Dist2','info','system', defdisk['id'],spare['id'],myhost)
    try: 
     subprocess.check_call(cmd)
@@ -29,6 +33,8 @@ def mustattach(cmdline,disksallowed,defdisk,myhost):
     syncmypools('all')
     return spare['name'] 
    except subprocess.CalledProcessError:
+    with open('/root/tmpselect','w') as f:
+     f.write(str(cmd)+'\n')
     logmsg.sendlog('Difa2','error','system', defdisk['id'],spare['id'],myhost)
     disksallowed.pop(0)
     ret=mustattach(cmdline[:-1],disksallowed,defdisk,myhost) 
