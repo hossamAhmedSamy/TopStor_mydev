@@ -1,0 +1,7 @@
+#!/bin/sh
+export ETCDCTL_API=3
+echo $@ > /root/Zpoolclrrun
+myhost=`hostname`
+/sbin/zpool  labelclear -f $@
+/pace/etcdput.py cleareddisk/$@ $myhost
+/pace/etcddel.py clearplsdisk/$@ 
