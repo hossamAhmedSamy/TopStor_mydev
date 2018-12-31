@@ -43,10 +43,11 @@ then
   exit
  fi
  /sbin/zfs set prot:kind=CIFS $DG/$name
- cp /etc/samba/smb.conf /TopStordata/smb.confcurrent
  cp sharecifs.txt /TopStordata/$name.txt
  sed -i "s/NAMECIFS/$name/g"  /TopStordata/$name.txt
  sed -i "s/POOL/$DG/g" /TopStordata/$name.txt
+ /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name `cat /TopStordata/$name`
+ cp /etc/samba/smb.conf /TopStordata/smb.confcurrent
  cat /TopStordata/$name.txt >> /TopStordata/smb.confcurrent
  cat /TopStordata/$name.txt >> /TopStordata/CIFSshares.txt 
  cat /TopStordata/$name.txt >> /etc/samba/smb.conf 
