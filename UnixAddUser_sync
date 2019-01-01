@@ -29,13 +29,14 @@ fi
 groupdel $username
 groupadd -g $usergd $username
 rm -rf /home/$username 2>/dev/null
-homebase='-b /'$homedir' -m'  
+homebase='-b /'$userhome' -m'  
 echo $userhome | grep NoHome
 if [ $? -eq 0 ];
 then
  homebase='-b /NoHome -M'
 fi
 useradd -c"TopStor"$pas $homebase -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username
+echo useradd \-c"TopStor"$pas $homebase \-g $usergd \-u $userid \-p $userpass \-s /usr/sbin/nologin $username > /root/tmpuser
 ( echo $userpass; echo $userpass) | /bin/smbpasswd -s -a $username 2>> $txtres
 cat $txtres
  echo $userpass > key/${username}fixed
