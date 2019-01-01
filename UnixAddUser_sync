@@ -1,4 +1,5 @@
 #!/bin/sh
+export ETCDCTL_API=3
 cd /TopStor
 echo $@ > /root/usersync
 web='/var/www/html/des20/Data/Usersstatus.log';
@@ -14,7 +15,7 @@ userhome=`echo $@ | awk '{print $5}'`;
 userpass=`echo $pas | openssl enc -d -base64 -aes-256-ctr -nopad -nosalt -k '#skMe22'$username`;
 userreq='system';
 myhost=`hostname -s`
-myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{print $2 }'`
+myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
@@ -25,24 +26,9 @@ then
  /TopStor/logmsg.py Unlin10211 warning $userreq $username
  /TopStor/UnixDelUserlocal $username system
 fi
-/TopStor/logmsg.py Unlin10188 info $userreq $username
-groupdel $username
-groupadd -g $usergd $username
-useradd -c"TopStor"$pas -d $userhome -M -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username
-echo $userhome | grep NoHome
-if [ $? -ne 0 ];
-then
- rm -rf /home/$username
- ln -s /$userhome /home/$username
- chmod o-rwx /$userhome -R
-fi
-( echo $userpass; echo $userpass) | /bin/smbpasswd -s -a $username 2>> $txtres
-cat $txtres
- echo $userpass > key/${username}fixed
- gpg -u "QuickStor" -r"QuickStor" key/${username}fixed
- chmod 400 key/${username}fixed.gpg;
- rm -rf key/${username}fixed
+ echo syncing usersync 
  /pace/etcdsync.py $myip usersinfo/$username usersinfo/$username 
+# (>&2 echo iamhere $myip)
  /pace/etcdsync.py $myip usershash/$username usershash/$username 
  /TopStor/logmsg.py Unlin10222 info $userreq $username
 fi
