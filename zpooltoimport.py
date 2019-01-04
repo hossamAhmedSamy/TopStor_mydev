@@ -83,6 +83,12 @@ def zpooltoimport(*args):
    deli('lockedpools',str(pool)) 
    logmsg.sendlog('Zpfa02','warning','system',str(pool))
    continue
+  else:
+   cmdline='systemctl restart smb '
+   result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+   cmdline='systemctl restart nfs'
+   result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+   
   pooldisks=[x.split()[0] for x in str(result)[2:][:-3].replace('\\t','').split('\\n') if 'scsi' in x ]
   with open('/root/toimport','a') as f:
    f.write('pool'+str(pool)+' disks '+str(pooldisks)+'\n')

@@ -1,0 +1,90 @@
+#!/bin/sh
+export ETCDCTL_API=3
+cd /TopStor/
+echo $@ > /root/volactivate 
+web='/var/www/html/des20/Data/CIFSstatus.log';
+logging='/var/www/html/des20/Data/currentinfo2.log'
+glog='/var/www/html/des20/Data/TopStor.log';
+runningpools='/pacedata/pools/runningpools'
+txtres='/TopStordata/'`basename $0`'.txt'
+rm -rf $txtres 2>/dev/null
+host=`echo $@ | awk -F'host=' '{print $2}' | awk '{print $1}'`;
+vol=`echo $@ | awk -F'vol=' '{print $2}' | awk '{print $1}'`;
+pool=`echo $@ | awk -F'pool=' '{print $2}' | awk '{print $1}'`;
+userreq=`echo $@ | awk -F'user=' '{print $2}' | awk '{print $1}'`;
+myhost=`hostname -s`
+
+privilege="CIFS";
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]]
+then
+ stathost=`echo $host | wc -c`
+ if [ $stathost -le 1 ]; then host=$myhost; fi
+ statpool=`echo $pool | wc -c`
+ if [ $statpool -le 1 ]; then statpool=0; else statpool=1; fi
+ statvol=`echo $vol | wc -c`
+ if [ $statvol -le 1 ]; then statvol=0; else statvol=1; fi
+ stat=${statpool}${statvol}
+ case $stat in
+  01)
+   echo volume only  for $host $vol
+    declare -a vols=`/pace/etcdget.py volumes/CIFS/$host $vol`
+   ;;
+  10)
+   echo 'pool only'
+    declare -a vols=`/pace/etcdget.py volumes/CIFS/$host/$pool --prefix`
+   ;;
+  11)
+   echo 'volume and pool only'
+    declare -a vols=`/pace/etcdget.py volumes/CIFS/$host/$pool/$vol`
+   ;;
+  00)
+   echo 'host only'
+   declare -a vols=`/pace/etcdget.py volumes/CIFS/$host --prefix`
+ esac
+ echo vols="${vols[@]}"
+ volsc=`echo $vols | wc -c`
+ if [ $volsc -le 2 ];
+ then
+  echo No Volumes
+  exit
+ fi
+ echo "${vols[@]}" |  grep "\-1"
+ if [ $? -eq 0 ];
+ then
+  echo No Volumes -1
+  exit
+ fi
+ cp /etc/samba/smb.conf /TopStordata/smb.confcurrent
+ echo "${vols[@]}" | awk '{print $2}'  | while read l;
+ do
+  echo l=$l;
+  pool=`echo $l | awk -F'/' '{print $1}'`
+  name=`echo $l | awk -F'/' '{print $2}'`
+  path='/'${pool}'/'${name}
+  readv=`echo $l | awk -F'/' '{print $3}'`
+  browsable=`echo $l | awk -F'/' '{print $4}'`
+  writev=`echo $l | awk -F'/' '{print $5}'`
+  admin=`echo $l | awk -F'/' '{print $6}'`
+  writeable=`echo $l | awk -F'/' '{print $7}'`
+  yes | cp sharecifs.txt /TopStordata/${name}
+  sed -i "s/NAMECIFS/$name/g"  /TopStordata/${name}
+  sed -i "s/POOL/$pool/g" /TopStordata/${name}
+  sed -i "s/no/$readv/g" /TopStordata/${name}
+  sed -i "s/yes/$browsable/g" /TopStordata/${name}
+  sed -i "s/\@everyone/$writev/g" /TopStordata/${name}
+  sed -i "s/administrator/$admin/g" /TopStordata/${name}
+  sed -i "s/Yes/$writeable/g" /TopStordata/${name}
+  cat /TopStordata/${name} >> /TopStordata/smb.confcurrent
+  cat /TopStordata/${name} >> /TopStordata/CIFSshares.txt 
+  cat /TopStordata/${name} >> /etc/samba/smb.conf 
+ done
+ systemctl stop smb 
+ systemctl start smb  
+ echo "${vols[@]}" | awk '{print $2}'  | while read l;
+ do
+  pool=`echo $l | awk -F'/' '{print $1}'`
+  name=`echo $l | awk -F'/' '{print $2}'`
+  chmod 777 /$pool/$name
+ done
+fi
