@@ -43,18 +43,9 @@ then
   exit
  fi
  /sbin/zfs set prot:kind=CIFS $DG/$name
- cp sharecifs.txt /TopStordata/$name.txt
- sed -i "s/NAMECIFS/$name/g"  /TopStordata/$name.txt
- sed -i "s/POOL/$DG/g" /TopStordata/$name.txt
- /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name `cat /TopStordata/$name`
- cp /etc/samba/smb.conf /TopStordata/smb.confcurrent
- cat /TopStordata/$name.txt >> /TopStordata/smb.confcurrent
- cat /TopStordata/$name.txt >> /TopStordata/CIFSshares.txt 
- cat /TopStordata/$name.txt >> /etc/samba/smb.conf 
- chmod 777 /$DG/$name
- systemctl stop smb 
- systemctl start smb  
-#datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
+ myhost=`hostname -s`
+ /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/@everyone/administrator/yes 
+ ./VolumeActivateCIFS vol=$name user=$userreq
  /pace/putzpool.py 
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
  echo ready ;
