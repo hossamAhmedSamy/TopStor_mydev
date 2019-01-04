@@ -31,7 +31,7 @@ then
     declare -a vols=`/pace/etcdget.py volumes/CIFS/$host $vol`
    ;;
   10)
-   echo 'pool only'
+   echo pool only $host $pool
     declare -a vols=`/pace/etcdget.py volumes/CIFS/$host/$pool --prefix`
    ;;
   11)
