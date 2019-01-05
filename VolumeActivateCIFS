@@ -27,7 +27,7 @@ then
  stat=${statpool}${statvol}
  case $stat in
   01)
-   echo 'volume only'
+   echo volume only  for $host $vol
     declare -a vols=`/pace/etcdget.py volumes/CIFS/$host $vol`
    ;;
   10)
