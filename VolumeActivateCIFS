@@ -85,6 +85,9 @@ then
  do
   pool=`echo $l | awk -F'/' '{print $1}'`
   name=`echo $l | awk -F'/' '{print $2}'`
+  volsvalue=`/pace/etcdget.py volumes/CIFS/$host/$pool/$name`
   chmod 777 /$pool/$name
+  /pace/etcdput.py volumes/CIFS/$myhost/$pool/$name $volsvalue
+  /pace/etcddel.py volumes/CIFS/$host/$pool/$name
  done
 fi
