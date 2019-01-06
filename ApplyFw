@@ -1,0 +1,27 @@
+#!/bin/sh
+export ETCDCTL_API=3
+echo $@  > /root/applyfw
+cd /TopStor
+TopStor='/TopStor'
+tmpdir='/root'
+pace='/pace'
+web='/var/www/html/des20/'
+logging='/var/www/html/des20/Data/currentinfo2.log';
+glog='/var/www/html/des20/Data/TopStor.log';
+currentfw=`git branch | grep \* | awk '{print $2}'`
+realfw=`echo $@ | awk '{print $1}'`;
+userreq=`echo $@ | awk '{print $2}'`;
+privilege="Uploadch";
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]]
+then
+  /TopStor/logmsg.py Upsa1010 info $userreq $currentfw $realfw
+ cd $web
+ git commit -am"changing to $realfw" ; git checkout $realfw
+ cd $pace
+ git commit -am"changing to $realfw" ; git checkout $realfw
+ cd $TopStor 
+ git commit -am"changing to $realfw" ; git checkout $realfw
+  /pace/putzpool.py 
+  /TopStor/logmsg.py Upsu1010 info $userreq $currentfw $realfw
+fi

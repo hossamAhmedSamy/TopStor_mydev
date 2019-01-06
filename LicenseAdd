@@ -1,0 +1,34 @@
+#!/usr/local/bin/zsh
+export ETCDCTL_API=3
+webproxy='/var/www/html/des20/Data/Proxylist.txt';
+resweb='/var/www/html/des20/Data/Proxylist.txtupdated'
+web='/var/www/html/des20/Data/Proxystatus.log';
+logging='/var/www/html/des20/Data/currentinfo2.log';
+glog='/var/www/html/des20/Data/TopStor.log';
+proxy='/TopStordata/proxy.txt'
+licensename=`echo $@ | awk '{print $1}'`;
+userreq=`echo $@  | awk '{print $2}'`;
+privilege="Proxy";
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]]
+then
+  /TopStor/logmsg.py Replica1053 info $userreq $licensename
+isthere=`cat $proxy `
+istheren=` echo $isthere | wc -c `
+istheren=$((istheren+0));
+if [[ $istheren -le 2 ]]; then
+ isthere='n/a n/a n/a';
+fi
+proxyname=`echo $isthere | awk '{print $1}'`
+aliasname=`echo $isthere | awk '{print $3}'`
+newproxy=${proxyname}' '${licensename}' '${aliasname};
+echo $newproxy > $proxy
+subres=`./jsonthis3.sh Proxyurl $proxyname License $licensename Alias $aliasname`
+result='['${subres}']' ;
+echo $result >$webproxy
+resdate=`date +%s`;
+res=` ./jsonthis3.sh updated $resdate`;
+echo $res > $resweb;
+  /TopStor/logmsg.py Replica1054 info $userreq $licensename $proxyname
+fi
+fi

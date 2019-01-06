@@ -1,0 +1,23 @@
+#!/bin/sh
+export ETCDCTL_API=3
+cd /TopStor
+echo $@ > /root/tmp
+privilege="UserPrivilegesch";
+user=`echo $@ | awk -F'user_' '{print $2}' | awk -F'/' '{print $1}'`
+contrun="false";
+userreq=` echo $@ | awk -F'/' '{print $NF}'`;
+contrun=` ./privthis.sh $privilege $userreq ` ;
+if [[ $contrun == 'true' ]];
+then
+web='/var/www/html/des20/Data/Privstatus.log';
+userpriv='/var/www/html/des20/Data/userpriv.txt';
+currentpriv='/TopStordata/userpriv.txt';
+resweb='/var/www/html/des20/Data/userprivdate.txt';
+logging='/var/www/html/des20/Data/currentinfo2.log'
+glog='/var/www/html/des20/Data/TopStor.log';
+ /TopStor/logmsg.py Priv1002 info $userreq $user &
+userinfo=`/pace/etcdget.py usersinfo/$user | awk -F"/user" '{print $1}'`
+userinfo=${userinfo}'/'`echo $@ | awk -F'/' 'BEGIN{FS=OFS="/"}{$NF="";print}'`
+/pace/etcdput.py usersinfo/$user $userinfo
+/TopStor/logmsg.py Priv1003 info $userreq $user &
+fi
