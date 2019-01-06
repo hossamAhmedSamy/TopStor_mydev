@@ -36,5 +36,5 @@ cp /etc/samba/smb.conf /TopStordata/smb.confcurrent;
  /pace/delbroadcastlocal.py volumes $volname
  systemctl restart smb
  /pace/putzpool.py 
- /TopStor/logmsg.py NFS1002 info  $userreq $hostnam/$DG/$volname
+ /TopStor/logmsg.py NFS1002 info  $userreq $volname
 fi

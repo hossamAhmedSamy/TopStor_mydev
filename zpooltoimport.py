@@ -7,6 +7,7 @@ from etcddel import etcddel as deli
 from broadcast import broadcast as broadcast 
 from os import listdir as listdir
 from os import remove as remove
+from putzpoolimport import putzpoolimport as putz
 from poolall import getall as getall
 from os.path import getmtime as getmtime
 import sys, datetime
@@ -63,7 +64,10 @@ def zpooltoimport(*args):
   runningpools.append(getall(ready)['pools'])
   with open('/root/toimport','a') as f:
    f.write('updated runningpools='+str(runningpools)+'\n')
- pools=[f for f in listdir('/TopStordata/') if 'pdhcp' in f and f not in str(runningpools) and f not in str(deletedpools) and 'pree' not in f ]
+ #pools=[f for f in listdir('/TopStordata/') if 'pdhcp' in f and f not in str(runningpools) and f not in str(deletedpools) and 'pree' not in f ]
+ waitingpools=putz() 
+ print('waiting',waitingpools)
+ pools=[f['name'] for f in waitingpools if f['name'] not in str(runningpools) and f['name'] not in str(deletedpools) ]
  with open('/root/toimport','a') as f:
   f.write('stored pool db'+str(pools)+'\n')
  logmsg.sendlog('Zpst01','info','system')
@@ -84,7 +88,7 @@ def zpooltoimport(*args):
    logmsg.sendlog('Zpfa02','warning','system',str(pool))
    continue
   else:
-   cmdline='systemctl restart smb '
+   cmdline='/TopStor/VolumeActivateCIFS  pool='+pool+' user=system'
    result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
    cmdline='systemctl restart nfs'
    result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
