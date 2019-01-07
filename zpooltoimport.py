@@ -90,7 +90,7 @@ def zpooltoimport(*args):
   else:
    cmdline='/TopStor/VolumeActivateCIFS  pool='+pool+' user=system'
    result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
-   cmdline='systemctl restart nfs'
+   cmdline='/TopStor/VolumeActivateNFS  pool='+pool+' user=system'
    result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
    
   pooldisks=[x.split()[0] for x in str(result)[2:][:-3].replace('\\t','').split('\\n') if 'scsi' in x ]

@@ -8,10 +8,12 @@ def delblock(start,stop,filename):
   for line in f:
    if start in line:
     flag=1
-   elif stop in line:
-    flag=0
-   elif flag==0:
+   if stop in line:
+    flag=2
+   if flag==0:
     x=x+line 
+   if flag==2:
+    flag=0
  with open(filename+'.new','w') as f:
   f.write(x)
  return 
