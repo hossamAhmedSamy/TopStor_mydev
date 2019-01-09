@@ -1,28 +1,22 @@
-#!/usr/local/bin/zsh
+#!/bin/sh
+echo $@ > /root/snapnowparam
 cd /TopStor
 web='/var/www/html/des20/Data/statusglobal.log';
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
 oper=$@; 
-sshost=`echo $@ | awk '{print $1}'`;
-hostnam=`echo $@ | awk '{print $2}'`;
-oper1=`echo $oper | awk '{print $3}'`;
-oper2=`echo $oper | awk '{print $4}'`;
+myhost=$myhost;
+oper1=`echo $oper | awk '{print $1}'`;
+oper2=`echo $oper | awk '{print $2}'`;
 echo creating Snapshot $hostnam $oper1 $oper2.... > $web;
 stamp=`date +%s`;
 newsnap2=`echo $oper2.$stamp`;
 newsnap=`echo $oper1@$newsnap2`;
-echo ssh root@$sshost \"/sbin/zfs snapshot $newsnap\" $txtres 
-ssh root@$sshost /sbin/zfs snapshot $newsnap 2>> $txtres
-err=`wc -c  $txtres | awk '{print $1}'`;
-if [[ $err >  4  ]]; then
-	cat $txtres >> $web;
+/sbin/zfs snapshot $newsnap 
+if [ $? -ne 0  ]; then
         echo failed
         exit 1;
 else 
 timenow=`/usr/bin/date`
-echo $timenow: DONE...Snapshot $newsnap is created >> $web; 
-echo $timenow: DONE...Snapshot $newsnap is created  $web; 
-./GetSnaplist
 echo OK;
 exit 0
 fi;

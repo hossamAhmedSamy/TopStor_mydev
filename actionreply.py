@@ -57,11 +57,11 @@ def do(body):
 ########## if logall ######################
  elif r["req"]=='logall':
   logmsg.sendlog('Actst1001', 'info', 'system')
-  with open('/root/recv','a') as f:
+  with open('/root/recvlogall','w') as f:
    f.write('preparing logs:\n')
   conf=codecs.decode(r["reply"][0],'hex')
   conf=conf.decode('utf-8')
-  with open('/root/recv','a') as f:
+  with open('/root/recvlogall','a') as f:
    f.write('logs: '+conf+'\n')
   with open('/var/www/html/des20/Data/TopStorglobal.log','w') as f:
    f.write(conf)
@@ -83,6 +83,16 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received DGsetPool from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if SnapshotDelete ###############
+ elif r["req"]=='SnapshotDelete':  
+  with open('/root/recv','a') as f:
+   f.write('received SnapshotDelete from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if SnapshotCreate ###############
+ elif r["req"]=='SnapshotCreate':  
+  with open('/root/recv','a') as f:
+   f.write('received SnapshotCreate from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if VolumeCreate ###############
  elif r["req"]=='VolumeCreate':  
   with open('/root/recv','a') as f:
@@ -91,7 +101,7 @@ def do(body):
 ########## if VolumeDelete ##############
  elif r["req"]=='VolumeDelete':  
   with open('/root/recv','a') as f:
-   f.write('received VolumeCreate from parnter :'+str(r["reply"])+'\n')
+   f.write('received VolumeDelete from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if Zpool (direct command..etc) ##############
  elif r["req"]=='Zpool':  

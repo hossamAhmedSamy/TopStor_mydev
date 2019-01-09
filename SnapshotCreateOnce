@@ -13,21 +13,18 @@ FileS=` echo $@ | awk '{print $3}'`;
 userreq=` echo $@ | awk '{print $4}'`;
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
 rm $txtres 2>/dev/null
-DG=`echo $pDG | awk -F_ '{print $2}'`;
-hostnam=`echo $pDG | awk -F_ '{print $1}'`;
-sshost=`echo $pDG | awk -F_ '{print $1}'`;
-#sshost=`cat $runningpools | grep $hostnam | awk '{print $1}'`;
+DG=$pDG 
 privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
-  /TopStor/logmsg.py Snap1026 info $userreq $hostnam/$DG/$FileS@$name 
-/TopStor/SnapshotnowOnce $sshost $hostnam $DG/$FileS $name. > $txtres
-if [ $? -ne 0  ]]; then
-  /TopStor/logmsg.py Snap1028 error $userreq $hostnam/$DG/$FileS@$name 
+  /TopStor/logmsg.py Snap1026 info $userreq $FileS/$name 
+/TopStor/SnapshotnowOnce $DG/$FileS $name. > $txtres
+if [ $? -ne 0  ]; then
+  /TopStor/logmsg.py Snap1028 error $userreq $FileS/$name 
 else 
-  /TopStor/logmsg.py Snap1030 info $userreq $hostnam/$DG/$FileS@$name 
- /pace/putzpool.py 
+  /TopStor/logmsg.py Snap1030 info $userreq $FileS/$name 
+ /pace/putzpool.py & 
 fi;
 fi
 
