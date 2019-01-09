@@ -83,6 +83,11 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received DGsetPool from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if SnapshotRolback ###############
+ elif r["req"]=='SnapshotRollback':  
+  with open('/root/recv','a') as f:
+   f.write('received SnapshotRollback from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if SnapshotDelete ###############
  elif r["req"]=='SnapshotDelete':  
   with open('/root/recv','a') as f:

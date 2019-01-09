@@ -1,5 +1,6 @@
 #!/bin/sh
 export ETCDCTL_API=3
+echo $@ > /root/tmp
 cd /TopStor/
 myhost=`hostname -s`
 web='/var/www/html/des20/Data/Snapsstatus.log';
@@ -7,24 +8,20 @@ logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStor.log';
 runningpools='/pacedata/pools/runningpools'
 pDG=` echo $@ | awk '{print $1}'`;
-snaprol=` echo $@ | awk '{print $2}'`;
-userreq=` echo $@ | awk '{print $3}'`;
-txtres='/TopStordata/'`basename $0`$userreq'.txt'
-rm  $txtres 2>/dev/null
-hostnam=` echo $pDG | awk -F_ '{print $1}'`;
-sshost=` echo $pDG | awk -F_ '{print $1}'`;
-#sshost=`cat $runningpools | grep $hostnam | awk '{print $1}'`;
+vol=` echo $@ | awk '{print $2}'`;
+snaprol=` echo $@ | awk '{print $3}'`;
+userreq=` echo $@ | awk '{print $4}'`;
+sshost=`hostname -s`;
 privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
- /TopStor/logmsg.py Snap1040 info $userreq $snaprol
-/sbin/zfs rollback -r  $snaprol  2> $txtres;
-err=`wc -c  $txtres | awk '{print $1}'`;
-if [[ $err -ge  4  ]]; then
-  /TopStor/logmsg.py Snap1041 error $userreq $snaprol
+ /TopStor/logmsg.py Snap1040 info $userreq $vol/$snaprol
+/sbin/zfs rollback -r  $pDG/$vol@$snaprol  
+if [ $? -ne  0  ]; then
+  /TopStor/logmsg.py Snap1041 error $userreq $vol/$snaprol
 else 
-  /TopStor/logmsg.py Snap1042 info $userreq $snaprol
+  /TopStor/logmsg.py Snap1042 info $userreq $vol/$snaprol
 fi;
- /pace/putzpool.py
+ /pace/putzpool.py &
 fi
