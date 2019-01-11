@@ -21,7 +21,7 @@ then
    /TopStor/logmsg.py Snap1044 error $userreq $periodel
  else
  /bin/crontab -l | grep -v "$periodel" > /TopStordata/thiscron
- /bin/crontab /TopSTordata/thiscron
+ /bin/crontab /TopStordata/thiscron
  /pace/etcddel.py Snapperiod $periodel 
  /pace/etcddellocal.py $myip Snapperiod $periodel 2>/dev/null
  /TopStor/logmsg.py Snap1045 info $userreq $periodel
