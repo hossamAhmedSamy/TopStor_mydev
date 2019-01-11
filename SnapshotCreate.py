@@ -11,10 +11,11 @@ def send(*bargs):
  else:
   args=bargs
  sel=args[0]
- pool=args[2]
+ pool=args[1]
  pool=str(pool)
  ownerlist=[]
  owner=""
+ print('pool',pool)
  z=[]
  with open('/root/SnapshotCreate','w') as f:
   f.write('all='+str(args)+'\n')

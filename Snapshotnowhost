@@ -9,11 +9,9 @@ pDG=`echo $@ | awk '{print $1}'`;
 DG=`echo $@ | awk -F/ '{print $1}'`;
 echo $pDG
 myhost=`hostname -s`
-echo $pDG | grep $myhost
-if [ $? -ne 0 ]; then exit; fi
-pp=`/sbin/zpool list -H | awk '{ print $1 }' | head -1`
-echo $pDG | grep $pp
-if [ $? -ne 0 ]; then exit; fi
+pp=`/sbin/zpool list `
+echo $pp | grep $DG
+if [ $? -ne 0 ]; then echo host not owner; exit; fi
   res=`./Snapshotnow $@`
 #  /TopStor/logmsg.py Snap1045 error $userreq $newsnap 
  /pace/putzpool.py
