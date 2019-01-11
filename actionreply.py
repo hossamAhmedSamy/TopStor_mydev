@@ -88,6 +88,11 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received SnapshotRollback from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if PeriodManage ###############
+ elif r["req"]=='PeriodManage':  
+  with open('/root/recv','a') as f:
+   f.write('received PeriodManage from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if SnapshotDelete ###############
  elif r["req"]=='SnapshotDelete':  
   with open('/root/recv','a') as f:

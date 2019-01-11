@@ -9,6 +9,7 @@ periodel=` echo $@ | awk '{print $1}'`;
 userreq=` echo $@ | awk '{print $2}'`;
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
 myhost=`hostname -s`
+myip=`/sbin/pcs resource show CC | grep Attributes | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 rm $txtres 2>/dev/null
 privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
@@ -22,7 +23,7 @@ then
  /bin/crontab -l | grep -v "$periodel" > /TopStordata/thiscron
  /bin/crontab /TopSTordata/thiscron
  /pace/etcddel.py Snapperiod $periodel 
- /pace/broadcasttolocal Snapperiod $myhost
+ /pace/etcddellocal.py $myip Snapperiod $periodel 2>/dev/null
  /TopStor/logmsg.py Snap1045 info $userreq $periodel
 fi;
 /pace/putzpool.py & 
