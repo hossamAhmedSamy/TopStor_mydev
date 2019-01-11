@@ -90,7 +90,7 @@ def do(body):
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if PeriodManage ###############
  elif r["req"]=='PeriodManage':  
-  with open('/root/recv','a') as f:
+  with open('/root/recvperiod','w') as f:
    f.write('received PeriodManage from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if SnapshotDelete ###############
@@ -144,9 +144,9 @@ def do(body):
    f.write('cachename:'+cachename+'\n')
   cachefileenc=r["reply"][1]
   #cachefile=decode(cachefileenc)
-  cachefile=binascii.unhexlify(cachefileenc)
-  with open(cachename,'wb') as f:
-   f.write(cachefile)
+  #cachefile=binascii.unhexlify(cachefileenc)
+  #with open(cachename,'wb') as f:
+  # f.write(cachefile)
 ########## if HostManualconfig ##############
  elif r["req"]=='LocalManualConfig':  
   with open('/root/recv2','a') as f:
