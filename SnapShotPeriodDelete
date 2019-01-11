@@ -23,7 +23,7 @@ then
  /bin/crontab -l | grep -v "$periodel" > /TopStordata/thiscron
  /bin/crontab /TopStordata/thiscron
  /pace/etcddel.py Snapperiod $periodel 
- /pace/etcddellocal.py $myip Snapperiod $periodel 2>/dev/null
+ /TopStor/broadcast.py  PeriodManage /TopStor/pump.sh /TopStor/etctocronlocal.sh 
  /TopStor/logmsg.py Snap1045 info $userreq $periodel
 fi;
 /pace/putzpool.py & 
