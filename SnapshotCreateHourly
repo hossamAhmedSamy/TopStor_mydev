@@ -32,7 +32,7 @@ if [[ $err -ge  4  ]]; then
 else 
   /TopStor/logmsg.py Snap1039 info $userreq  hourly.$min.$every.$keep $DG/$FileS
   /pace/etcdput.py Snapperiod/$DG/$FileS/$stamp  $min%*/$every%*%*%*%/TopStor/Snapshotnowhost%$DG/$FileS%hourly.$keep.$min.$every.na%$stamp
- /pace/broadcasttolocal Snapperiod/$DG/$FileS/$stamp $myhost
+ ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
 fi
  /pace/putzpool.py 
 fi

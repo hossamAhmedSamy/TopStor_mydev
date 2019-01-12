@@ -32,7 +32,7 @@ if [ $? -ne  0 ]; then
 else 
   /TopStor/logmsg.py Snap1033 info $userreq Weekly.$hr.$min.$every.$keep $DG/$FileS
   /pace/etcdput.py Snapperiod/$DG/$FileS/$stamp  $min%$hr%*%*%$every%/TopStor/Snapshotnowhost%$DG/$FileS%Weekly.$keep.$hr.$min.$every%$stamp
- /pace/broadcasttolocal Snapperiod/$DG/$FileS/$stamp $myhost
+ ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
 fi;
  /pace/putzpool.py 
 fi
