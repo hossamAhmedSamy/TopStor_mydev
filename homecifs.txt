@@ -1,0 +1,9 @@
+;;;;;;;;         startUSER_only
+[USER]
+	comment = USER Home
+	valid users = USER
+	browseable = No
+	read only = No
+	inherit acls = Yes
+;;;;;;;;;;;;;;;;;;;;   stopUSER_only
+
