@@ -7,8 +7,10 @@ txtres='/TopStordata/'`basename $0`'.txt'
 rm -rf $txtres &>/dev/null
 glog='/var/www/html/des20/Data/TopStor.log';
 username=`echo $@ | awk '{print $1}'`;
-userpass=`echo $@ | awk '{print $2}'`;
-userreq=`echo $@  | awk '{print $3}'`;
+Homepool=`echo $@ | awk '{print $2}'`;
+userpass=`echo $@ | awk '{print $3}'`;
+host=`echo $@ | awk '{print $4}'`;
+userreq=`echo $@  | awk '{print $5}'`;
 myhost=`hostname -s`
 echo Unlin1017:$username > $web;
 privilege="Box_Users";
@@ -24,11 +26,13 @@ then
  fi
  pas=`echo $userpass | openssl enc -e -base64 -aes-256-ctr -nopad -nosalt -k '#skMe22'$username`
  #useradd -c"TopStor"$pas -b /p$myhost -m -p $userpass -s /usr/sbin/nologin $username 2> $txtres
- homedir=`ETCDCTL_API=3 /pace/etcdget.py homedir/active` 
- echo $homedir | grep "\-1"
+ echo $homePool | grep 'NoHome'
  if [ $? -ne 0 ];
  then
-  homebase='-b /'$homedir' -m'  
+  /TopStor/VolumeCreateHome.py $homePool $username $Quota $host
+  /pace/etcdgput.py home/$homePool Active
+ homedir=`ETCDCTL_API=3 /pace/etcdget.py homedir/active` 
+  homebase='-b /'$homedir' -M'  
   /TopStor/logmsg.py Unlin1024 info  $userreq $username $homedir
  else
   homebase='-b /NoHome -M'
