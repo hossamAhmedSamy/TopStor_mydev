@@ -28,6 +28,7 @@ else
  /pace/etcddel.py volumes $volname
  /pace/delbroadcastlocal.py volumes $volname
  /sbin/exportfs -ra
+ /TopStor/SnapShotPeriodDelete $volname $userreq
  /TopStor/logmsg.py NFS1002 info $userreq $volname
 fi;
 fi

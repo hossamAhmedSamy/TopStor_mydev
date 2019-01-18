@@ -33,6 +33,7 @@ cp /etc/samba/smb.conf /TopStordata/smb.confcurrent;
  cp /TopStordata/smb.confcurrent.new /etc/samba/smb.conf;
  /pace/etcddel.py volumes $volname
  /pace/delbroadcastlocal.py volumes $volname
+ /TopStor/SnapShotPeriodDelete $volname $userreq
  systemctl restart smb
  /pace/putzpool.py 
  /TopStor/logmsg.py NFS1002 info  $userreq $volname
