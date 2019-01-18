@@ -1,4 +1,5 @@
 #!/bin/sh
+echo $@ > /root/unixadduser
 export ETCDCTL_API=3
 cd /TopStor
 web='/var/www/html/des20/Data/Usersstatus.log';
@@ -7,7 +8,7 @@ txtres='/TopStordata/'`basename $0`'.txt'
 rm -rf $txtres &>/dev/null
 glog='/var/www/html/des20/Data/TopStor.log';
 username=`echo $@ | awk '{print $1}'`;
-Homepool=`echo $@ | awk '{print $2}'`;
+homePool=`echo $@ | awk '{print $2}'`;
 userpass=`echo $@ | awk '{print $3}'`;
 host=`echo $@ | awk '{print $4}'`;
 size=`echo $@ | awk '{print $5}'`;
@@ -31,8 +32,9 @@ then
  if [ $? -ne 0 ];
  then
   /TopStor/VolumeCreateHome.py $homePool $username $size $userreq $host
-  /pace/etcdgput.py home/$homePool Active
- homedir=`ETCDCTL_API=3 /pace/etcdget.py homedir/active` 
+  /pace/etcdput.py home/$homePool Active
+# homedir=`ETCDCTL_API=3 /pace/etcdget.py homedir/active` 
+  homedir=$homePool
   homebase='-b /'$homedir' -M'  
   /TopStor/logmsg.py Unlin1024 info  $userreq $username $homedir
  else
@@ -49,6 +51,8 @@ then
   #ln -s /$homedir/$username /home/$username
   chmod o-rwx /$homedir/$username -R
  fi
+# /bin/smbpasswd -e $username
+ /bin/smbpasswd -x $username
  ( echo $userpass; echo $userpass) | /bin/smbpasswd -s -a $username 2>> $txtres
  #mkdir -p /Data/Common/$username;
  #chown $username /Data/Common/$username;

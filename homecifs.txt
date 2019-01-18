@@ -1,8 +1,9 @@
 ;;;;;;;;         startUSER_only
 [USER]
 	comment = USER Home
+	path = /POOL/USER
 	valid users = USER
-	browseable = No
+	browseable = Yes 
 	read only = No
 	inherit acls = Yes
 ;;;;;;;;;;;;;;;;;;;;   stopUSER_only
