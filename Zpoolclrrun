@@ -4,4 +4,4 @@ echo $@ > /root/Zpoolclrrun
 myhost=`hostname`
 /sbin/zpool  labelclear -f $@
 /pace/etcdput.py cleareddisk/$@ $myhost
-/pace/etcddel.py clearplsdisk/$@ 
+#/pace/etcddel.py clearplsdisk/$@ 
