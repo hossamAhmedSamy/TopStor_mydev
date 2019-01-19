@@ -167,6 +167,11 @@ def do(body):
   with open('/root/recv2','a') as f:
    f.write('received UserAdd from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if UserDel ##############
+ elif r["req"]=='UserDel':  
+  with open('/root/recv2','a') as f:
+   f.write('received UserDel from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
  
 
 
