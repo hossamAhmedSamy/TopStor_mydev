@@ -1,7 +1,7 @@
 #!/bin/sh
 export ETCDCTL_API=3
 cd /TopStor/
-echo $@ > /root/volcreate
+echo $@ > /root/volhome
 web='/var/www/html/des20/Data/CIFSstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStor.log';
@@ -34,6 +34,7 @@ then
  if [ $? -ne 0 ];
  then
   /TopStor/logmsg.py NFS1006 error $userreq $DG/$name
+  echo error
   exit
  fi
  /sbin/zfs set prot:kind=HOMe $DG/$name
@@ -41,22 +42,24 @@ then
  x=1
  while [ $x -gt 0 ]; 
  do
-  ls -l /$pDG/$name | grep $name | grep "$name root"
+  ls -l /$pDG |  awk '{print $3}' | grep -w $name
   if [ $? -ne 0 ];
   then
+   echo here
    /bin/chown  $name /$pDG/$name
    /bin/chmod 700 /$DG/$name
    sleep 1
   else 
+   echo neer
    x=0
   fi
  done
  
  myhost=`hostname -s`
- echo /pace/etcdput.py volumes/HOMe/$myhost/$DG/$name $DG/$name/no/yes/@everyone/administrator/yes >> /root/volcreate
+ echo /pace/etcdput.py volumes/HOMe/$myhost/$DG/$name $DG/$name/no/yes/@everyone/administrator/yes >> /root/volhome
  ETCDCTL_API=3 /pace/etcdput.py volumes/HOMe/$myhost/$DG/$name $DG/$name/no/yes/@everyone/administrator/yes 
  /pace/broadcasttolocal.py volumes/HOMe/$myhost/$DG/$name $DG/$name/no/yes/@everyone/administrator/yes 
- ./VolumeActivateHome vol=$name user=$userreq
+ /TopStor/VolumeActivateHome vol=$name user=$userreq
  /pace/putzpool.py 
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
  echo ready ;
