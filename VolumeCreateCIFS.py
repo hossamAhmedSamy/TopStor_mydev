@@ -35,7 +35,7 @@ def send(*bargs):
  with open('/root/VolumeCreate','a') as f:
   f.write('myhost='+ownerip[0][1]+' '+myhost+' '+str(z)+'\n')
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
- return 1
+ return
 
 if __name__=='__main__':
  send(*sys.argv[1:])
