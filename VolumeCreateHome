@@ -36,7 +36,7 @@ then
   /TopStor/logmsg.py NFS1006 error $userreq $DG/$name
   exit
  fi
- /sbin/zfs set prot:kind=Home $DG/$name
+ /sbin/zfs set prot:kind=HOMe $DG/$name
  sleep 1 
  x=1
  while [ $x -gt 0 ]; 
@@ -53,9 +53,9 @@ then
  done
  
  myhost=`hostname -s`
- echo /pace/etcdput.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/@everyone/administrator/yes >> /root/volcreate
- ETCDCTL_API=3 /pace/etcdput.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/@everyone/administrator/yes 
- /pace/broadcasttolocal.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/@everyone/administrator/yes 
+ echo /pace/etcdput.py volumes/HOMe/$myhost/$DG/$name $DG/$name/no/yes/@everyone/administrator/yes >> /root/volcreate
+ ETCDCTL_API=3 /pace/etcdput.py volumes/HOMe/$myhost/$DG/$name $DG/$name/no/yes/@everyone/administrator/yes 
+ /pace/broadcasttolocal.py volumes/HOMe/$myhost/$DG/$name $DG/$name/no/yes/@everyone/administrator/yes 
  ./VolumeActivateHome vol=$name user=$userreq
  /pace/putzpool.py 
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
