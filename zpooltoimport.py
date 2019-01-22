@@ -88,6 +88,8 @@ def zpooltoimport(*args):
    logmsg.sendlog('Zpfa02','warning','system',str(pool))
    continue
   else:
+   cmdline='/TopStor/VolumeActivateHome  pool='+pool+' user=system'
+   result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
    cmdline='/TopStor/VolumeActivateCIFS  pool='+pool+' user=system'
    result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
    cmdline='/TopStor/VolumeActivateNFS  pool='+pool+' user=system'
