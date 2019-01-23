@@ -4,6 +4,7 @@
 	path = /POOL/USER
 	valid users = USER
 	browseable = Yes 
+	admin users = USER
 	read only = No
 	inherit acls = Yes
 ;;;;;;;;;;;;;;;;;;;;   stopUSER_only
