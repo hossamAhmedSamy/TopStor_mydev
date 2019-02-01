@@ -1,5 +1,6 @@
 #!/bin/sh
 cd /TopStor
+export ETCDCTL_API=3 
 echo $@ > /root/groupsync
 web='/var/www/html/des20/Data/Usersstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log';
@@ -7,9 +8,12 @@ txtres='/TopStordata/'`basename $0`'.txt'
 rm -rf $txtres &>/dev/null
 glog='/var/www/html/des20/Data/TopStor.log';
 username=`echo $@ | awk '{print $1}'`;
-userid=`echo $@ | awk '{print $3}'`;
-usergd=`echo $@ | awk '{print $4}'`;
-userpass=`echo $RANDOM | openssl enc -d -base64 -aes-256-ctr -nopad -nosalt -k '#skMe22'$username`;
+userid=`echo $@ | awk '{print $2}'`;
+usergd=`echo $@ | awk '{print $3}'`;
+userpass='df323jdlda'$RANDOM
+pas=`echo $userpass | openssl enc -e -base64 -aes-256-ctr -nopad -nosalt -k '#skMe22'$username`
+echo $pas $userpass
+userpass=`echo $pas`;
 userreq='system';
 myhost=`hostname -s`
 myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
@@ -27,7 +31,9 @@ fi
 groupdel $username
 groupadd -g $usergd $username
 homebase='-b /NoHome -M'
+echo useradd -c"TopStorGroup"$userpass $homebase -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username
 useradd -c"TopStorGroup"$userpass $homebase -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username
+
  /pace/etcdsync.py $myip usersigroup/$username usersigroup/$username 
  /TopStor/logmsg.py Unlin11222 info $userreq $username
 fi
