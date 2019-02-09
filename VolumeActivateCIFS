@@ -80,6 +80,7 @@ then
   cat /TopStordata/${name} >> /TopStordata/CIFSshares.txt 
   cat /TopStordata/${name} >> /etc/samba/smb.conf 
   chmod 770 /$pool/$name
+  setfacl -b /$pool/$name
   sleep 5
   for grp in $writev ;do  setfacl -m g:$grp:rwx /$pool/$name; done
  done

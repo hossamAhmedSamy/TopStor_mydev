@@ -124,6 +124,11 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received SnapshotCreate from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if VolumeChange ###############
+ elif r["req"]=='VolumeChange':  
+  with open('/root/recv','a') as f:
+   f.write('received VolumeChange from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if VolumeCreate ###############
  elif r["req"]=='VolumeCreate':  
   with open('/root/recv','a') as f:
