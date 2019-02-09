@@ -71,6 +71,7 @@ then
   echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' >> /TopStordata/exports.confcurrent
   cat /TopStordata/exports.confcurrent > /etc/exports 
   chmod 770 /$pool/$name
+  setfacl -b /$pool/$name
   sleep 5
   for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done
  done
