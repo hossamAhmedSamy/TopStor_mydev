@@ -126,12 +126,12 @@ def do(body):
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if VolumeChange ###############
  elif r["req"]=='VolumeChange':  
-  with open('/root/recv','a') as f:
+  with open('/root/recvVolumeChange','w') as f:
    f.write('received VolumeChange from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if VolumeCreate ###############
  elif r["req"]=='VolumeCreate':  
-  with open('/root/recv','a') as f:
+  with open('/root/recvVlumeCreate','a') as f:
    f.write('received VolumeCreate from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if VolumeDelete ##############
