@@ -15,24 +15,24 @@ def send(*bargs):
  pool=args[0]
  pool=str(pool)
  z=[]
- with open('/root/VolumeCreate','w') as f:
+ with open('/root/VolumeChange','w') as f:
   f.write('pool='+pool+'\n')
  owner=args[-1]
- with open('/root/VolumeCreate','a') as f:
+ with open('/root/VolumeChange','a') as f:
   f.write('owner='+owner+'\n')
  myhost=hostname()
- with open('/root/VolumeCreate','a') as f:
+ with open('/root/VolumeChange','a') as f:
   f.write('myhost='+myhost+'\n')
  ownerip=get('leader',owner)
  if ownerip[0]== -1:
   ownerip=get('known',owner)
   if ownerip[0]== -1:
    return 3
- z=['/TopStor/pump.sh','VolumeCreateCIFS']
+ z=['/TopStor/pump.sh','VolumeChangeCIFS']
  for arg in args[:-1]:
   z.append(arg)
- msg={'req': 'VolumeCreate', 'reply':z}
- with open('/root/VolumeCreate','a') as f:
+ msg={'req': 'VolumeChange', 'reply':z}
+ with open('/root/VolumeChange','a') as f:
   f.write('myhost='+ownerip[0][1]+' '+myhost+' '+str(z)+'\n')
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
  return

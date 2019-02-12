@@ -66,7 +66,8 @@ then
  #ETCDCTL_API=3 /pace/syncpools.py thispool $pool.
  ETCDCTL_API=3 /pace/etcddel.py poolsnxt/$pool
  ETCDCTL_API=3 /pace/etcddel.py cannot $pool
- /TopStor/VolumeActivateCIFS pool=$pool user=system
- /TopStor/VolumeActivateNFS pool=$pool user=system
+ /TopStor/VolumeActivateCIFS pool=$pool user=system &
+ /TopStor/VolumeActivateHome pool=$pool user=system &
+ /TopStor/VolumeActivateNFS pool=$pool user=system &
 fi 
 ETCDCTL_API=3 /pace/etcddel.py lockedpools/$pool

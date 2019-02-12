@@ -1,7 +1,7 @@
 #!/bin/sh
 export ETCDCTL_API=3
 cd /TopStor
-echo $@ > /root/tmp
+echo $@ > /root/priv
 privilege="UserPrivilegesch";
 user=`echo $@ | awk -F'user_' '{print $2}' | awk -F'/' '{print $1}'`
 contrun="false";
@@ -16,7 +16,8 @@ resweb='/var/www/html/des20/Data/userprivdate.txt';
 logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStor.log';
  /TopStor/logmsg.py Priv1002 info $userreq $user &
-userinfo=`/pace/etcdget.py usersinfo/$user | awk -F"/user" '{print $1}'`
+size=`/pace/etcdget.py usersinfo/$user | awk -F"/" '{print $4}'`
+userinfo=`/pace/etcdget.py usersinfo/$user | awk -F"/$size" '{print $1}'`'/'$size
 userinfo=${userinfo}'/'`echo $@ | awk -F'/' 'BEGIN{FS=OFS="/"}{$NF="";print}'`
 /pace/etcdput.py usersinfo/$user $userinfo
 /TopStor/logmsg.py Priv1003 info $userreq $user &

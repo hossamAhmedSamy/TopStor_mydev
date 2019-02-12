@@ -28,14 +28,14 @@ def send(*bargs):
   ownerip=get('known',owner)
   if ownerip[0]== -1:
    return 3
- z=['/TopStor/pump.sh','VolumeCreateCIFS']
+ z=['/TopStor/pump.sh','VolumeCreateHome']
  for arg in args[:-1]:
   z.append(arg)
  msg={'req': 'VolumeCreate', 'reply':z}
  with open('/root/VolumeCreate','a') as f:
   f.write('myhost='+ownerip[0][1]+' '+myhost+' '+str(z)+'\n')
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
- return
+ return 1
 
 if __name__=='__main__':
  send(*sys.argv[1:])

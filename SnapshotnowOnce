@@ -3,15 +3,13 @@ echo $@ > /root/snapnowparam
 cd /TopStor
 web='/var/www/html/des20/Data/statusglobal.log';
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
-oper=$@; 
 myhost=$myhost;
-oper1=`echo $oper | awk '{print $1}'`;
-oper2=`echo $oper | awk '{print $2}'`;
-echo creating Snapshot $hostnam $oper1 $oper2.... > $web;
+vol=`echo $@ | awk '{print $1}'| awk -F '/' '{print $1}'`;
+name=`echo $@ | awk '{print $1}' | awk -F '/' '{print $2}'`;
+pool=`echo $@ | awk '{print $2}'`;
 stamp=`date +%s`;
-newsnap2=`echo $oper2.$stamp`;
-newsnap=`echo $oper1@$newsnap2`;
-/sbin/zfs snapshot $newsnap 
+echo /sbin/zfs snapshot $pool/$vol@${name}.$stamp
+/sbin/zfs snapshot $pool/$vol@${name}.$stamp
 if [ $? -ne 0  ]; then
         echo failed
         exit 1;

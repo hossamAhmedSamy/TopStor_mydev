@@ -42,6 +42,27 @@ def do(body):
    cmdline=['/TopStor/UnixAddUser_sync',x[0],x[2],x[1]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   logmsg.sendlog('Unlin1006', 'info', 'system')
+########## if group######################
+ if r["req"]=='group':
+  logmsg.sendlog('Unlin1105', 'info', 'system')
+  with open('/etc/passwd') as f:
+   revf=f.readlines()
+   for line in revf:
+    if 'Group' in line:
+     l=line.split(':')
+     with open('/root/recv','a') as f:
+      f.write('syncing Groups: '+l[0]+'\n')
+     cmdline=['/TopStor/UnixDelGroup_sync',l[0], 'system']
+     result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  with open('/root/recv','a') as f:
+   f.write('Syncing Groups:\n')
+  for x in r["reply"]:
+   cmdline=['/TopStor/UnixAddGroup_sync',x[0],x[2],x[1]]
+   with open('/root/recv','a') as f:
+    f.write('adding Group '+str(cmdline)+'\n')
+   cmdline=['/TopStor/UnixAddGroup_sync',x[0],x[2],x[1]]
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  logmsg.sendlog('Unlin1106', 'info', 'system')
 ########## if cifs ######################
  elif r["req"]=='cifs':
   logmsg.sendlog('Actst1000', 'info', 'system')
@@ -102,6 +123,11 @@ def do(body):
  elif r["req"]=='SnapshotCreate':  
   with open('/root/recv','a') as f:
    f.write('received SnapshotCreate from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if VolumeChange ###############
+ elif r["req"]=='VolumeChange':  
+  with open('/root/recv','a') as f:
+   f.write('received VolumeChange from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if VolumeCreate ###############
  elif r["req"]=='VolumeCreate':  
@@ -166,6 +192,21 @@ def do(body):
  elif r["req"]=='UserAdd':  
   with open('/root/recv2','a') as f:
    f.write('received UserAdd from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if UserDel ##############
+ elif r["req"]=='UserDel':  
+  with open('/root/recv2','a') as f:
+   f.write('received UserDel from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if GroupAdd ##############
+ elif r["req"]=='GroupAdd':  
+  with open('/root/recv2','a') as f:
+   f.write('received GroupAdd from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if GroupDel ##############
+ elif r["req"]=='GroupDel':  
+  with open('/root/recv2','a') as f:
+   f.write('received GroupDel from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
  
 

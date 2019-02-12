@@ -1,5 +1,5 @@
 #!/bin/sh
-echo $@ > /root/delusersync
+echo $@ > /root/delsync
 export ETCDCTL_API=3
 cd /TopStor
 web="/var/www/html/des20/Data/Usersstatus.log";
@@ -13,10 +13,10 @@ contrun=`./privthis.sh $privilege $userreq`;
 myip=`pcs resource show CC | grep Attribute | awk '{print $2}' | awk -F'=' '{print $2 }'`
 if [[ $contrun == 'true' ]]
 then
-/TopStor/UnixDelUserlocal $username $userreq
+/TopStor/UnixDelGrouplocal $username $userreq
 fi
 cat /etc/passwd | grep $username
 if [ $? -ne 0 ];
 then
- /pace/etcddellocal.py $myip users $username 
+ /pace/etcddellocal.py $myip usersigroup $username 
 fi

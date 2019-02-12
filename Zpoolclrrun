@@ -1,7 +1,13 @@
 #!/bin/sh
 export ETCDCTL_API=3
 echo $@ > /root/Zpoolclrrun
-myhost=`hostname`
-/sbin/zpool  labelclear -f $@
-/pace/etcdput.py cleareddisk/$@ $myhost
-/pace/etcddel.py clearplsdisk/$@ 
+x=` ETCDCTL_API=3 /pace/etcget.py cleareddisk/$@`
+y=`ETCDCTL_API=3 /pace/etcget.py clearplsdisk/$@`
+echo $x | grep $y 
+if [ $? -ne 0 ];
+then
+ myhost=`hostname`
+ /sbin/zpool  labelclear -f $@
+ /pace/etcdput.py cleareddisk/$@ $myhost
+#/pace/etcddel.py clearplsdisk/$@ 
+fi
