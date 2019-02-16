@@ -140,6 +140,7 @@ then
     /TopStor/logmsg.py DG1fa6 error $userreq ${nextpool} $diskn1 
   else 
      ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py 'balancetype/'p$nextpool Availability 
     /TopStor/logmsg.py DG1su6 info $userreq ${nextpool} $diskn1 
   fi
  fi 
@@ -187,6 +188,7 @@ then
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f ${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py 'balancetype/'p$nextpool Availability 
     /TopStor/logmsg.py DGsu13 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa13 info $userreq p${nextpool} $diskns
@@ -235,6 +237,7 @@ then
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz2 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py 'balancetype/'p$nextpool Availability 
     /TopStor/logmsg.py DGsu15 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa15 info $userreq p${nextpool} $diskns
@@ -283,6 +286,7 @@ then
   /sbin/zpool create -o ashift=12 -o autoexpand=on -o cachefile=/TopStordata/p${nextpool} -o autoreplace=on -f p${nextpool} raidz1 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py 'balancetype/'p$nextpool Availability 
     /TopStor/logmsg.py DGsu17 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa17 error $userreq p${nextpool} $diskns
@@ -319,6 +323,7 @@ then
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py 'balancetype/'p$nextpool Availability 
     /TopStor/logmsg.py DGsu21 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa21 error $userreq p${nextpool} $diskns
@@ -344,6 +349,7 @@ then
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} mirror ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py 'balancetype/'p$nextpool Availability 
     /TopStor/logmsg.py DGsu19 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa19  error $userreq p${nextpool} $diskns

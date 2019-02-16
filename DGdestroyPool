@@ -21,7 +21,21 @@ then
   /pace/etcdput.py requests/DGdestroypool/$myhost $myhost/$userreq
  fi
   /TopStor/logmsg.py DGst5 info $userreq $pool
- zpool destroy -f $pool &>/dev/null 
+ waiting=1
+ while [ $waiting -eq 1 ];
+ do
+  sleep 1
+  pgrep zpool
+  if [ $? -ne 0 ];
+  then
+   waiting=0
+  fi
+ done
+ /sbin/zpool export -f $pool
+ sleep 1
+ /sbin/zpool import $pool
+ sleep 1
+ /sbin/zpool destroy -f $pool 2>/root/dgdestroyerror 
  if [ $? -ne 0 ]; then
    /TopStor/logmsg.py DGfa5 error $userreq $pool
  else
@@ -29,13 +43,12 @@ then
   crontab -r 
   crontab /TopStordata/cronfile
   ETCDCTL_API=3 /pace/etcddel.py pools $pool
+  ETCDCTL_API=3 /pace/etcddel.py balance $pool
   ETCDCTL_API=3 /pace/etcddel.py vol $pool
 
   echo > /etc/exports
    /TopStor/logmsg.py DGsu5 info $userreq $pool
  fi 
- rm txt/${0:2}$userreq.txt
 fi
-sed -i "/p${nextpool}/c\\" $runningpools
 /pace/etcddel.py requests/DGdestroypool/$myhost $myhost/$userreq
  /pace/putzpool.py

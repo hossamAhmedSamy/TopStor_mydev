@@ -1,5 +1,7 @@
 #!/bin/sh
+exit
 echo $@ > /tmp2/msgfile &
+
 systemctl status etcd 
 if [ $? -eq 0 ];
 then 
