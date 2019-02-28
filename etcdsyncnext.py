@@ -19,5 +19,6 @@ for item in result:
    adding='';
  else:
    adding='/'+x
+ print('mez',thehost,tokey+adding,item[1])
  cmdline=['/pace/etcdputlocal.py',thehost, tokey+adding, item[1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
