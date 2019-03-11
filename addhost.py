@@ -19,7 +19,7 @@ def addhost(*args):
        for ready in allready:
         fw.write('\n'+ready[1]+' '+ready[0].replace('ready/',''))
         pfw.write('\n'+ready[1]+' '+ready[0].replace('ready/',''))
-        ppfw.write("       - '{"+ready[0].replace('ready/','')+":9090}'"+'\n')
+        ppfw.write("       - '"+ready[0].replace('ready/','')+":9090'"+'\n')
  cmdline=['/bin/docker','restart','prom']
  subprocess.run(cmdline,stdout=subprocess.PIPE)
  cmdline=['/bin/docker','restart','grafana']
