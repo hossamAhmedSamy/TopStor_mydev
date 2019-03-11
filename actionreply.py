@@ -156,6 +156,11 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received ClearCache from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if synchosts ##############
+ elif r["req"]=='SyncHosts':  
+  with open('/root/recv','a') as f:
+   f.write('received synchosts from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if broadcast ##############
  elif r["req"]=='broadcast':  
   with open('/root/recv','a') as f:

@@ -4,6 +4,4 @@ fe00::0	ip6-localnet
 ff00::0	ip6-mcastprefix
 ff02::1	ip6-allnodes
 ff02::2	ip6-allrouters
-172.17.0.3	46bdad937ad6
-
-10.11.11.244 dhcp14771
+172.17.0.2	4781d7fe6b62

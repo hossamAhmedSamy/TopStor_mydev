@@ -4,7 +4,7 @@ datasources:
   type: prometheus
   typeLogoUrl: puplic/app/plugins/datasource/prometheus/img/prometheus_logo.svg
   access: proxy
-  url: http://zfs1:9090
+  url: http://dhcp14771:9090
   password: 
   user:
   database:
