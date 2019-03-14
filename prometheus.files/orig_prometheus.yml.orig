@@ -38,4 +38,3 @@ scrape_configs:
       - '{job="node"}'
     static_configs:
      - targets:
-       - 'HOSTNAME:9090'

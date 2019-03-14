@@ -6,6 +6,10 @@ import socket, sys, subprocess
 
 def addhost(*args):
  myhost=socket.gethostname()
+ with open('/TopStordata/grafana/provisioning/datasources/datasource.yaml','w') as fw:
+  with open('/TopStordata/grafana/provisioning/datasources/datasource.yaml.orig','r') as fr:
+   fw.write(fr.read().replace('HOSTNAME',myhost))
+   
  allready=get('ready','--prefix')
  with open('/TopStordata/grafana.files/hosts','w') as fw:
   with open('/TopStordata/grafana.files/hosts.orig','r') as fr:
