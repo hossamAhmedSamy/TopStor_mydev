@@ -5,6 +5,8 @@ from etcdput import etcdput as put
 from ast import literal_eval as mtuple
 import logmsg
 def config(*bargs):
+ cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','finished',bargs[-1]]
+ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  enpdev='enp0s8'
  with open('/root/HostManualconfigtmp2','w') as f:
   f.write('bargs:'+str(bargs)+'\n')
@@ -102,6 +104,8 @@ def config(*bargs):
   logmsg.sendlog('HostManual1su8','info',arg[-1],change['olddataip']+'/'+oldsubnet,change['dataip']+'/'+subnet)
 #####################################################
   cmdline=['/TopStor/HostgetIPs']
+ cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','finished',bargs[-1]]
+ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  return 1
 
 if __name__=='__main__':

@@ -20,7 +20,8 @@ then
  else
   /pace/etcdput.py requests/DGdestroypool/$myhost $myhost/$userreq
  fi
-  /TopStor/logmsg.py DGst5 info $userreq $pool
+ /TopStor/queuethis.sh `basename "$0"` running $userreq &
+ /TopStor/logmsg.py DGst5 info $userreq $pool
  waiting=1
  while [ $waiting -eq 1 ];
  do
@@ -52,3 +53,4 @@ then
 fi
 /pace/etcddel.py requests/DGdestroypool/$myhost $myhost/$userreq
  /pace/putzpool.py
+/TopStor/queuethis.sh `basename "$0"` finished $userreq &

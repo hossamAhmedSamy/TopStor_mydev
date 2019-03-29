@@ -7,6 +7,8 @@ from socket import gethostname as hostname
 from sendhost import sendhost
 import logmsg
 def setall(*bargs):
+ cmdline=['/TopStor/queuethis.sh','HostManualconfig.py','running',bargs[-1]]
+ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  with open('/root/tmp','w') as f:
   f.write('bargs'+str(bargs)+'\n')
  myhost=socket.gethostname()
@@ -41,6 +43,8 @@ def setall(*bargs):
   f.write('ownerip '+ownerip[0][1]+"\n")
   f.write('msg '+str(msg)+"\n")
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
+ cmdline=['/TopStor/queuethis.sh','HostManualconfig.py','finished',bargs[-1]]
+ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  return 1
 
 if __name__=='__main__':

@@ -31,6 +31,7 @@ then
  else
   /pace/etcdput.py requests/DGsetpool/$myhost $myhost/$userreq
  fi
+ /TopStor/queuethis.sh `basename "$0"` running $userreq &
  diskargs=${#params[@]};
  diskargs=$((diskargs-1));
  nextpool=${params[$diskargs]};
@@ -360,3 +361,4 @@ rm txt/${0:2}$userreq.txt
 sed -i "/p${nextpool}/c\\" $runningpools
 /pace/etcddel.py requests/DGsetpool/$myhost $myhost/$userreq
 /pace/putzpool.py 
+/TopStor/queuethis.sh `basename "$0"` finished $userreq &

@@ -3,6 +3,9 @@ cd /TopStor
 export ETCDCTL_API=3
 web='/var/www/html/des20/Data/Hostprop.txt';
 Topweb='/TopStordata/Hostprop.txt';
+echo hither > /root/Hostgetips
+user=`echo $@ | awk '{print $1}'`
+/TopStor/queuethis.sh HostgetIPs running $user
 hostname=`hostname`
 hostn=`/TopStor/etcdget.py alias/$hostname`
 hostip=`pcs resource show CC | grep Attributes | awk -F'ip=' '{print $2}' | awk '{print $1}'`
@@ -30,3 +33,4 @@ fi
 ETCDCTL_API=3 /pace/etcdput.py prop/$hostname $jsonips
 echo $jsonips > $web; 
 echo $jsonips > $Topweb; 
+/TopStor/queuethis.sh HostgetIPs finished $user

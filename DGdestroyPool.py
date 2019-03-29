@@ -8,6 +8,8 @@ from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost as sendhost
 def send(*bargs):
+	cmdline=['/TopStor/queuethis.sh','DGdestroyPool.py','running',bargs[-1]]
+	result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 	if(len(bargs) < 3):
 		args=bargs[0].split()
 	else:
@@ -25,7 +27,7 @@ def send(*bargs):
 	z=[]
 	with open('/root/DGdespool','a') as f:
 		f.write('pool='+pool+'\n')
-	owner=args[-1]
+	owner=args[-2]
 	with open('/root/DGdespool','a') as f:
 		f.write('owner='+owner+'\n')
 	myhost=hostname()
@@ -37,7 +39,7 @@ def send(*bargs):
 		if ownerip[0]== -1:
 			return 3
 	z=['/TopStor/pump.sh','DGdestroyPool']
-	for arg in args[:-1]:
+	for arg in args[:-2]:
 		z.append(arg)
 	msg={'req': 'DGsetPool', 'reply':z}
 	sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
@@ -46,6 +48,8 @@ def send(*bargs):
 	with open('/root/DGdespool','a') as f:
 		f.write('ClearCache /TopStor/pump.sh ClearCache /TopStordata/'+pool)
 	broadcast('ClearCache','/TopStor/pump.sh','ClearCache','/TopStordata/'+pool)
+	cmdline=['/TopStor/queuethis.sh','DGdestroyPool.py','finished',bargs[-1]]
+	result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 	return 1
 
 if __name__=='__main__':

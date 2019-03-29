@@ -5,6 +5,7 @@ echo $@ > /root/UnixchkUser2
 web='/var/www/html/des20/Data/isuser.txt';
 resulting="not found";
 username=`echo $@ | awk '{print $1}'`;
+/TopStor/queuethis.sh UnixchkUser2 running $username
 stamp=`date +%s`;
 x=`/pace/etcdget.py logged/$username`
 updx=`/pace/etcdget.py updlogged/$username`
@@ -23,4 +24,4 @@ then
   /pace/broadcasttolocal.py logged/$username 1 &
  fi  
 fi
-
+/TopStor/queuethis.sh UnixchkUser2 finished $username

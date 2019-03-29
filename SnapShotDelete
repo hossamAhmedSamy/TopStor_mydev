@@ -12,6 +12,7 @@ vol=` echo $@ | awk '{print $2}'`;
 pDG=$DG;
 snapdel=` echo $@ | awk '{print $3}'`;
 userreq=` echo $@ | awk '{print $4}'`;
+ /TopStor/queuethis.sh `basename "$0"` running $userreq &
 sshost=`hostname -s`
 privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
@@ -26,4 +27,5 @@ then
    /TopStor/logmsg.py Snap1025 info $userreq $vol/$snapdel
  fi;
 fi
-   /pace/putzpool.py &
+   /pace/putzpool.py 
+/TopStor/queuethis.sh `basename "$0"` finished $userreq &
