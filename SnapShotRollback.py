@@ -6,6 +6,8 @@ from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost
 def send(*bargs):
+ cmdline=['/TopStor/queuethis.sh','SnapRollback.py','running',bargs[-1]]
+ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  if(len(bargs) < 3):
   args=bargs[0].split()
  else:
@@ -38,12 +40,14 @@ def send(*bargs):
  else:
    return 3
  z=['/TopStor/pump.sh','SnapShotRollback']
- for arg in args[:-1]:
+ for arg in args:
   z.append(arg)
  msg={'req': 'SnapshotRollback', 'reply':z}
  with open('/root/SnapshotRol','a') as f:
   f.write('myhost='+ownerip+' '+myhost+' '+str(z)+'\n')
  sendhost(ownerip, str(msg),'recvreply',myhost)
+ cmdline=['/TopStor/queuethis.sh','SnapRollback.py','finished',bargs[-1]]
+ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  return 1
 
 if __name__=='__main__':

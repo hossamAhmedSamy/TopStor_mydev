@@ -14,6 +14,7 @@ k=0; keep=`echo $@ | awk '{print $5}'`; keep=$(($keep+$k)); if (($keep < 1)); th
 pDG=` echo $@ | awk '{print $1}'`; 
 FileS=` echo $@ | awk '{print $2}'`;
 userreq=` echo $@ | awk '{print $6}'`;
+/TopStor/queuethis.sh `basename "$0"` running $userreq &
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
 rm $txtres 2>/dev/null
 DG=`echo $pDG`;
@@ -36,3 +37,4 @@ else
 fi;
  /pace/putzpool.py 
 fi
+/TopStor/queuethis.sh `basename "$0"` finished $userreq &

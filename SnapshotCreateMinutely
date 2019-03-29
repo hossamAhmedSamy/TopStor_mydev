@@ -11,6 +11,7 @@ keep=0; k=`echo $@ | awk '{print $4}'`; keep=$(($keep+$k)); if (($keep < 1)); th
 pDG=` echo $@ | awk '{print $1}'`; 
 FileS=` echo $@ | awk '{print $2}'`;
 userreq=` echo $@ | awk '{print $5}'`;
+/TopStor/queuethis.sh `basename "$0"` running $userreq &
 DG=` echo $pDG`;
 myhost=`hostname -s`;
 privilege="SnapShots";
@@ -31,3 +32,4 @@ else
 fi;
  /pace/putzpool.py
 fi
+/TopStor/queuethis.sh `basename "$0"` finished $userreq &

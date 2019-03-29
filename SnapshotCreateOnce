@@ -11,6 +11,7 @@ name=`echo $@ | awk '{print $1}'`;
 pDG=`echo $@ | awk '{print $2}'`;
 FileS=` echo $@ | awk '{print $3}'`;
 userreq=` echo $@ | awk '{print $4}'`;
+/TopStor/queuethis.sh `basename "$0"` running $userreq &
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
 rm $txtres 2>/dev/null
 DG=$pDG 
@@ -27,4 +28,4 @@ else
  /pace/putzpool.py & 
 fi;
 fi
-
+/TopStor/queuethis.sh `basename "$0"` finished $userreq &
