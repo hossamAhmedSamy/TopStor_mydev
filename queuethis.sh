@@ -1,4 +1,5 @@
 #!/bin/sh
+export ETCDCTL_API=3
 stamp=`date +%s`
 ref=`echo $@ | awk '{print $1}'`
 stat=`echo $@ | awk '{print $2}'`
