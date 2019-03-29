@@ -11,6 +11,7 @@ glog='/var/www/html/des20/Data/TopStor.log';
 currentfw=`git branch | grep \* | awk '{print $2}'`
 realfw=`echo $@ | awk '{print $1}'`;
 userreq=`echo $@ | awk '{print $2}'`;
+/TopStor/queuethis.sh `basename "$0"` running $userreq &
 privilege="Uploadch";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
@@ -25,3 +26,4 @@ then
   /pace/putzpool.py 
   /TopStor/logmsg.py Upsu1010 info $userreq $currentfw $realfw
 fi
+/TopStor/queuethis.sh `basename "$0"` finished $userreq &
