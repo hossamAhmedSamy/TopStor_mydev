@@ -93,6 +93,12 @@ def do(body):
    f.write('received msg from parnter :'+str(r["reply"])+'\n')
    f.write('type of message :'+str(type(r["reply"]))+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if queue ###############
+ elif r["req"]=='queue':  
+  with open('/root/recv','a') as f:
+   f.write('received queue from parnter :'+str(r["reply"])+'\n')
+   f.write('type of message :'+str(type(r["reply"]))+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if msg2 ###############
  elif r["req"]=='msg2':  
   with open('/root/recv','a') as f:

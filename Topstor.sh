@@ -20,19 +20,28 @@ ClearExit() {
 trap ClearExit HUP
 /TopStor/wpa
 hostname=`hostname -s`
-ping -c 1 $hostname &>/dev/null
-if [ $? -ne 0 ]; then
- ./nsupdate.sh &>/dev/null
-fi
 systemctl disable NetworkManager &>/dev/null
 systemctl stop NetworkManager &>/dev/null
 #/TopStor/autoGenPatch
+pgrep beam 
+while [ $? -ne 0 ];
+do
+ sleep 1
+ pgrep beam
+done
+pgrep etcd
+while [ $? -ne 0 ];
+do
+ sleep 1
+ pgrep etcd
+done
 while true; do 
 {
 read line < /tmp2/msgfile
 echo $line > /TopStordata/tmpline
 request=`echo $line | awk '{print $1}'`
 reqparam=`echo $line | awk '{$1="";print}'`
+./queuethis.sh $request request `echo $line | awk '{print $NF}'` &
 rm -rf /root/$request.txt 2>/dev/null
 #./$request $reqparam >/dev/null 2>&1  & 
 ./$request $reqparam >/dev/null 2>/root/$request.txt  & 

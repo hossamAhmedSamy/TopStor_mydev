@@ -2,7 +2,7 @@
 import sys
 from broadcast import broadcast as broadcast 
 def send(*bargs):
-	broadcast('HostgetIPs','/TopStor/pump.sh','HostgetIPs')
+	broadcast('HostgetIPs','/TopStor/pump.sh','HostgetIPs',bargs[1])
 	return 1
 
 if __name__=='__main__':
