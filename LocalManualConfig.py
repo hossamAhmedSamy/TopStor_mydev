@@ -2,11 +2,11 @@
 import subprocess,sys, datetime
 from etcdget import etcdget as get
 from etcdput import etcdput as put
-from broadcasttolocal import broadcattolocal
+from broadcasttolocal import broadcasttolocal
 from ast import literal_eval as mtuple
 import logmsg
 def config(*bargs):
- cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','finished',bargs[-1]]
+ cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','running',bargs[-1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  enpdev='enp0s8'
  with open('/root/HostManualconfigtmp2','w') as f:
