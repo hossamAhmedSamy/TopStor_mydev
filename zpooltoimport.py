@@ -139,4 +139,8 @@ def zpooltoimport(*args):
  return pooltoimport 
 
 if __name__=='__main__':
+ cmdline=['/TopStor/queuethis.sh','zpooltoimport.py','start','system']
+ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  zpooltoimport(*sys.argv[1:])
+ cmdline=['/TopStor/queuethis.sh','zpooltoimport.py','stop','system']
+ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
