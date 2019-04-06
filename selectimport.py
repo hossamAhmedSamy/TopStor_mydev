@@ -106,8 +106,14 @@ if __name__=='__main__':
 	allpools=get('pools/','--prefix')
 	electimport(myhost,allpools,*sys.argv[1:])
 	allinfo=get('to','--prefix')
-	cmdline=['/TopStor/queuethis.sh','selectimport.py','start','system']
-	result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+	cmdline='cat /pacedata/perfmon'
+	perfmon=str(subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout)
+
+	print('perform',type(perfmon),perfmon)
+	if '1' in perfmon:
+		cmdline=['/TopStor/queuethis.sh','selectimport.py','start','system']
+		result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 	importpls(myhost,allinfo,*sys.argv[1:])
-	cmdline=['/TopStor/queuethis.sh','selectimport.py','stop','system']
-	result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+	if '1' in perfmon:
+		cmdline=['/TopStor/queuethis.sh','selectimport.py','stop','system']
+		result=subprocess.run(cmdline,stdout=subprocess.PIPE)
