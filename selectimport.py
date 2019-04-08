@@ -109,7 +109,6 @@ if __name__=='__main__':
 	cmdline='cat /pacedata/perfmon'
 	perfmon=str(subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout)
 
-	print('perform',type(perfmon),perfmon)
 	if '1' in perfmon:
 		cmdline=['/TopStor/queuethis.sh','selectimport.py','start','system']
 		result=subprocess.run(cmdline,stdout=subprocess.PIPE)

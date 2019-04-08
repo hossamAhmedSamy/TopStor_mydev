@@ -139,8 +139,12 @@ def zpooltoimport(*args):
  return pooltoimport 
 
 if __name__=='__main__':
- cmdline=['/TopStor/queuethis.sh','zpooltoimport.py','start','system']
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ cmdline='cat /pacedata/perfmon'
+ perfmon=str(subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout)
+ if '1' in perfmon:
+  cmdline=['/TopStor/queuethis.sh','zpooltoimport.py','start','system']
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  zpooltoimport(*sys.argv[1:])
- cmdline=['/TopStor/queuethis.sh','zpooltoimport.py','stop','system']
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ if '1' in perfmon:
+  cmdline=['/TopStor/queuethis.sh','zpooltoimport.py','stop','system']
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
