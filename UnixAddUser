@@ -39,6 +39,7 @@ then
  if [ $? -ne 0 ];
  then
   /TopStor/VolumeCreateHome.py $homePool $username $size $userreq $host
+  echo /TopStor/VolumeCreateHome.py $homePool $username $size $userreq $host > /root/tmphomepool
   /pace/etcdput.py home/$homePool Active
 # homedir=`ETCDCTL_API=3 /pace/etcdget.py homedir/active` 
   homedir=$homePool

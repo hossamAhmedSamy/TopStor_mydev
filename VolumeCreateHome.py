@@ -17,7 +17,7 @@ def send(*bargs):
  z=[]
  with open('/root/VolumeCreate','w') as f:
   f.write('pool='+pool+'\n')
- owner=args[-2]
+ owner=args[-1]
  with open('/root/VolumeCreate','a') as f:
   f.write('owner='+owner+'\n')
  myhost=hostname()
@@ -29,7 +29,7 @@ def send(*bargs):
   if ownerip[0]== -1:
    return 3
  z=['/TopStor/pump.sh','VolumeCreateHome']
- for arg in args[:-2]:
+ for arg in args[:-1]:
   z.append(arg)
  msg={'req': 'VolumeCreate', 'reply':z}
  with open('/root/VolumeCreate','a') as f:

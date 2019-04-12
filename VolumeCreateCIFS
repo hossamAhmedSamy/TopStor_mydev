@@ -15,6 +15,7 @@ writev=`echo $@ | awk '{print $4}'`;
 userreq=` echo $@ | awk '{print $5}'`;
 DG=`echo $pDG `;
 hostnam=`echo $pDG`;
+/TopStor/queuethis.sh `basename "$0"` running $userreq &
 #sshost=`cat $runningpools | grep $hostnam | awk '{print $1}'`;
 sshost=`echo $pDG | awk -F_ '{print $1}'`;
 
@@ -27,12 +28,14 @@ then
  if [ $? -eq 0 ];
  then
   /TopStor/logmsg.py Unlin1021vv warning $userreq $name
+  /TopStor/queuethis.sh `basename "$0"` canceled $userreq &
   exit
  fi
  /pace/etcdget.py usersinfo --prefix | grep -w $name
  if [ $? -eq 0 ];
  then
   /TopStor/logmsg.py Unlin1021vu warning $userreq $name
+  /TopStor/queuethis.sh `basename "$0"` canceled $userreq &
   exit
  fi
  echo name=$name
@@ -46,6 +49,7 @@ then
  if [ $? -eq 0 ];
  then
   /TopStor/logmsg.py NFS1005 warning $userreq $name
+  /TopStor/queuethis.sh `basename "$0"` canceled $userreq &
   exit
  fi
  cd /TopStor
@@ -53,6 +57,7 @@ then
  if [ $? -ne 0 ];
  then
   /TopStor/logmsg.py NFS1006 error $userreq $DG/$name
+  /TopStor/queuethis.sh `basename "$0"` canceled $userreq &
   exit
  fi
  /sbin/zfs set prot:kind=CIFS $DG/$name
@@ -65,3 +70,4 @@ then
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
  echo ready ;
 fi
+/TopStor/queuethis.sh `basename "$0"` finished $userreq &
