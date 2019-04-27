@@ -20,9 +20,8 @@ def etcddel(*argv):
  if mylist==['']:
   print('-1')
   return
-
- if len(argv) > 3 and argv[2] !='--prefix':
-  todel=[]
+ todel=[]
+ if len(argv) > 2 and argv[2] !='--prefix':
   args=argv[2:]
   for x in args:
    for y in zipped:
