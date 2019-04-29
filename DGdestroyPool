@@ -43,6 +43,8 @@ then
   ETCDCTL_API=3 /pace/etcddel.py pools $pool
   ETCDCTL_API=3 /TopStor/deltolocal.py pools $pool
   ETCDCTL_API=3 /pace/etcddel.py fixpool/$pool
+  ETCDCTL_API=3 /pace/etcddel.py activepool/p$nextpool running 
+  ETCDCTL_API=3 /pace/deltolocal.py activepool/p$nextpool running 
   pkill $pool
   crontab -l | grep -v Snap > /TopStordata/cronfile
   crontab -r 
