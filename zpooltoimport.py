@@ -14,6 +14,12 @@ import sys, datetime
 import logmsg
 
 def zpooltoimport(*args):
+ activepools=putz() 
+ runningpools=get('pools/','--prefix')
+ waitingpools=[f['name'] for f in activepools if f['name'] not in str(runningpools)]
+ if len(notrun) < 1:
+  print('all active pools are running')
+  return
  myhostpools=[]
  with open('/root/toimport','w') as f:
   f.write('starting to scan for import \n')
@@ -65,9 +71,8 @@ def zpooltoimport(*args):
   with open('/root/toimport','a') as f:
    f.write('updated runningpools='+str(runningpools)+'\n')
  #pools=[f for f in listdir('/TopStordata/') if 'pdhcp' in f and f not in str(runningpools) and f not in str(deletedpools) and 'pree' not in f ]
- waitingpools=putz() 
  print('waiting',waitingpools)
- pools=[f['name'] for f in waitingpools if f['name'] not in str(runningpools) and f['name'] not in str(deletedpools) ]
+ pools=[f for f in waitingpools if f not in str(deletedpools) ]
  with open('/root/toimport','a') as f:
   f.write('stored pool db'+str(pools)+'\n')
  logmsg.sendlog('Zpst01','info','system')

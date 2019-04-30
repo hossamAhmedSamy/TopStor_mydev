@@ -3,9 +3,6 @@ import subprocess
 from etcdget import etcdget as get
 
 def putzpoolimport():
- cmdline='/sbin/zpool import'
- result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
- sty=str(result)[2:][:-3].replace('\\t','').split('\\n')
  sty=get('activepool','--prefix')
  zdict={}
  zpool=[]
