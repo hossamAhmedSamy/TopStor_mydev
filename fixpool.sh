@@ -28,8 +28,8 @@ then
  echo we have to export >>/root/fixpool
  systemctl stop nfs ;
  systemctl stop smb 
- zpool export pdhcp2188219049 
- zpool import pdhcp2188219049 
+ zpool export $pool
+ zpool import $pool 
  systemctl start nfs 
  systemctl start smb
 else
