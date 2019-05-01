@@ -17,8 +17,9 @@ def zpooltoimport(*args):
  activepools=putz() 
  runningpools=get('pools/','--prefix')
  waitingpools=[f['name'] for f in activepools if f['name'] not in str(runningpools)]
- if len(notrun) < 1:
+ if len(waitingpools) < 1:
   print('all active pools are running')
+  put('toimport/'+myhost,'nothing')
   return
  myhostpools=[]
  with open('/root/toimport','w') as f:
