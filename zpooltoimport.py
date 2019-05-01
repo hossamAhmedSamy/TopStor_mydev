@@ -14,6 +14,7 @@ import sys, datetime
 import logmsg
 
 def zpooltoimport(*args):
+ myhost=socket.gethostname()
  activepools=putz() 
  runningpools=get('pools/','--prefix')
  waitingpools=[f['name'] for f in activepools if f['name'] not in str(runningpools)]
@@ -24,7 +25,6 @@ def zpooltoimport(*args):
  myhostpools=[]
  with open('/root/toimport','w') as f:
   f.write('starting to scan for import \n')
- myhost=socket.gethostname()
  runningpools=[]
  readyhosts=get('ready','--prefix')
  deletedpools=get('delet','--prefix')
