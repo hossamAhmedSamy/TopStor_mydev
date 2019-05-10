@@ -17,19 +17,22 @@ contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
 /TopStor/logmsg.py NFS1000 info $userreq $volname
+/sbin/pcs resource delete --force ip-$volname  2>/dev/null
 /sbin/zfs destroy -r $DG/$volname
 if [ $? -ne 0  ]; then
- dtn=`date +%s -d $dt`;
   /TopStor/logmsg.py NFS1001 error $userreq $volname
 else 
- cp /etc/exports /TopStordata/exports.confcurrent;
- /TopStor/delblock.py ${volname} ${volname} /TopStordata/exports.confcurrent  ;
- cp /TopStordata/exports.confcurrent.new /etc/exports;
+# cp /etc/exports /TopStordata/exports.confcurrent;
+# /TopStor/delblock.py ${volname} ${volname} /TopStordata/exports.confcurrent  ;
+# cp /TopStordata/exports.confcurrent.new /etc/exports;
+ docker stop nfs-$volname
+ rm -rf /etc/exports.$volname
  /pace/etcddel.py volumes $volname
  /pace/delbroadcastlocal.py volumes $volname
  /sbin/exportfs -ra
  /TopStor/SnapShotPeriodDelete $volname $userreq
  /TopStor/logmsg.py NFS1002 info $userreq $volname
+ rm -rf /$DG/$volname
 fi;
 fi
  /pace/putzpool.py &
