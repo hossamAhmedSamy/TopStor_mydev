@@ -27,9 +27,17 @@ if [ $count -lt 12 ];
 then
  echo we have to export >>/root/fixpool
 # systemctl stop nfs ;
+ pooldockers=`docker ps | grep $pool | awk '{print $NF}'`
+ 
  systemctl stop smb 
+ for x in ${pooldockers[@]}; do
+  docker stop $x
+ done
  zpool export $pool
  zpool import $pool 
+ for x in ${pooldockers[@]}; do
+  docker start $x
+ done
 # systemctl start nfs 
  systemctl start smb
 else
