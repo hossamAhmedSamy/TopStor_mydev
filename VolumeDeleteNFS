@@ -16,7 +16,10 @@ privilege=$pro;
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
+echo $@ > /root/VolumeDestroy
 /TopStor/logmsg.py NFS1000 info $userreq $volname
+docker stop nfs-$DG-$volname
+docker container rm nfs-$DG-$volname
 /sbin/pcs resource delete --force ip-$volname  2>/dev/null
 /sbin/zfs destroy -r $DG/$volname
 if [ $? -ne 0  ]; then
@@ -29,7 +32,7 @@ else
  rm -rf /etc/exports.$volname
  /pace/etcddel.py volumes $volname
  /pace/delbroadcastlocal.py volumes $volname
- /sbin/exportfs -ra
+# /sbin/exportfs -ra
  /TopStor/SnapShotPeriodDelete $volname $userreq
  /TopStor/logmsg.py NFS1002 info $userreq $volname
  rm -rf /$DG/$volname
