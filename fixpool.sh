@@ -26,11 +26,11 @@ done
 if [ $count -lt 12 ];
 then
  echo we have to export >>/root/fixpool
- systemctl stop nfs ;
+# systemctl stop nfs ;
  systemctl stop smb 
  zpool export $pool
  zpool import $pool 
- systemctl start nfs 
+# systemctl start nfs 
  systemctl start smb
 else
  echo pool $pool is working normally >>/root/fixpool

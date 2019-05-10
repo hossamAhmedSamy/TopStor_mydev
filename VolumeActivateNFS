@@ -56,6 +56,8 @@ then
  cp /etc/exports /TopStordata/exports.confcurrent
  echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
  do
+  modprobe nfs
+  modprobe nfsd
   echo l=$l;
   pool=`echo $l | awk -F'/' '{print $1}'`
   name=`echo $l | awk -F'/' '{print $2}'`
@@ -67,15 +69,18 @@ then
   squash=`echo $l | awk -F'/' '{print $7}'`
   subtree=`echo $l | awk -F'/' '{print $8}'`
   writev=`echo $l | awk -F'/' '{print $9}'`
+  ipaddr=`echo $l | awk -F'/' '{print $10}'`
+  ipsubnet=`echo $l | awk -F'/' '{print $11}'`
   writev=`echo $writev | sed 's/\,/ /g' `;
+  echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' > /etc/exports.$name 
   echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' >> /TopStordata/exports.confcurrent
   cat /TopStordata/exports.confcurrent > /etc/exports 
   chmod 770 /$pool/$name
   setfacl -b /$pool/$name
-  sleep 5
   for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done
+  /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
  done
- /sbin/exportfs -ra
+# /sbin/exportfs -ra
  echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
  do
   pool=`echo $l | awk -F'/' '{print $1}'`
