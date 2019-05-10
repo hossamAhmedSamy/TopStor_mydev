@@ -25,7 +25,7 @@ else
 # cp /etc/exports /TopStordata/exports.confcurrent;
 # /TopStor/delblock.py ${volname} ${volname} /TopStordata/exports.confcurrent  ;
 # cp /TopStordata/exports.confcurrent.new /etc/exports;
- docker stop nfs-$volname
+ docker stop nfs-$DG-$volname
  rm -rf /etc/exports.$volname
  /pace/etcddel.py volumes $volname
  /pace/delbroadcastlocal.py volumes $volname
