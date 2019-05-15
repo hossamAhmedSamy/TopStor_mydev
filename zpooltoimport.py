@@ -86,8 +86,9 @@ def zpooltoimport(*args):
   #cmdline='/sbin/zpool import -c /TopStordata/'+pool
   cmdline='/sbin/zpool import '+pool
   print('checking pool: ',str(pool))
-  result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
-  if 'insufficient replicas' in str(result):
+  try:
+   result=subprocess.check_output(cmdline.split(),stderr=subprocess.STDOUT)
+  except:
    print('pool cannot be imported now')
    put('cannotimport/'+myhost+'/'+pool,'1') 
    deli('lockedpools',str(pool)) 

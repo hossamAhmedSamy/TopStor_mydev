@@ -1,9 +1,2 @@
 #!/bin/sh
-echo $@ > /tmp2/msgfile &
-systemctl status etcd 
-if [ $? -eq 0 ];
-then 
- myhost=`hostname -s`
- datenow=`date +%s`
-# ETCDCTL_API=3 /TopStor/newrequest $myhost $datenow $@
-fi
+echo $@ > /tmp2/msgfile 

@@ -1,73 +1,74 @@
 #!/bin/sh
 export ETCDCTL_API=3
-cd /TopStor/
-echo $@ > /root/volcreate
+cd /TopStor
+echo $@ > /root/volcreatecifs
 web='/var/www/html/des20/Data/CIFSstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStor.log';
 runningpools='/pacedata/pools/runningpools'
-txtres='/TopStordata/'`basename $0`'.txt'
-rm -rf $txtres 2>/dev/null
 name=`echo $@ | awk '{print $2}'`;
 pDG=`echo $@ | awk '{print $1}'`;
 quota=`echo $@ | awk '{print $3}'`;
 writev=`echo $@ | awk '{print $4}'`;
-userreq=` echo $@ | awk '{print $5}'`;
-DG=`echo $pDG `;
-hostnam=`echo $pDG`;
-/TopStor/queuethis.sh `basename "$0"` running $userreq &
-#sshost=`cat $runningpools | grep $hostnam | awk '{print $1}'`;
-sshost=`echo $pDG | awk -F_ '{print $1}'`;
+ipaddr=`echo $@ | awk '{print $5}'`;
+ipsubnet=`echo $@ | awk '{print $6}'`;
+userreq=` echo $@ | awk '{print $7}'`;
+DG=$pDG;
+hi=`whoami`
+echo start $hi $userreq > /root/volcreate
+ETCDCTL_API=3 /TopStor/queuethis.sh VolumeCreateCIFS running $userreq 
+echo queuedrunning >> /root/volcreate
 
-echo CIFS1001:$hostnam/$DG/$name > $web;
 privilege="CIFS";
-contrun=`./privthis.sh $privilege $userreq`;
-if [[ $contrun == 'true' ]]
+./privthis.sh $privilege $userreq | grep true ;
+if [ $? -eq 0 ];
 then
+ echo privileged $name >> /root/volcreate
  /pace/etcdget.py volumes --prefix | grep -w $name
  if [ $? -eq 0 ];
  then
+  echo here >> /root/volcreate
   /TopStor/logmsg.py Unlin1021vv warning $userreq $name
-  /TopStor/queuethis.sh `basename "$0"` canceled $userreq &
+  /TopStor/queuethis.sh `basename "$0"` canceled $userreq 
   exit
  fi
+  echo aftervolumes >> /root/volcreate
  /pace/etcdget.py usersinfo --prefix | grep -w $name
  if [ $? -eq 0 ];
  then
+  echo here2 >> /root/volcreate
   /TopStor/logmsg.py Unlin1021vu warning $userreq $name
-  /TopStor/queuethis.sh `basename "$0"` canceled $userreq &
+  /TopStor/queuethis.sh VolumeCreateCIFS canceled $userreq 
   exit
  fi
+ echo afterusersinfo >> /root/volcreate
  echo name=$name
  /sbin/zfs list | grep -w "$name" 
  if [ $? -eq 0  ];
  then 
   /TopStor/logmsg.py NFS1003 warning $userreq $DG/$name
  fi
+ echo afterzfslist info $userreq $DG/$name >> /root/volcreate
  /TopStor/logmsg.py NFS1004 info $userreq $DG/$name
- cat /TopStordata/smb.confcurrent | grep ${name}_only  
- if [ $? -eq 0 ];
- then
-  /TopStor/logmsg.py NFS1005 warning $userreq $name
-  /TopStor/queuethis.sh `basename "$0"` canceled $userreq &
-  exit
- fi
- cd /TopStor
+ echo here4 >> /root/volcreate
+# /TopStor/logmsg.py NFS1005 warning $userreq $name
+#  /TopStor/queuethis.sh VolumeCreateCIFS canceled $userreq 
  /sbin/zfs create -o overlay=on -o acltype=posixacl -o aclinherit=passthrough -o xattr=sa -o redundant_metadata=most -o atime=off -o quota=$quota -o dedup=on -o compression=lz4  $DG/$name  
  if [ $? -ne 0 ];
  then
+  echo here5 >> /root/volcreate
   /TopStor/logmsg.py NFS1006 error $userreq $DG/$name
-  /TopStor/queuethis.sh `basename "$0"` canceled $userreq &
+  /TopStor/queuethis.sh `basename "$0"` canceled $userreq 
   exit
  fi
  /sbin/zfs set prot:kind=CIFS $DG/$name
  myhost=`hostname -s`
  echo /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes >> /root/volcreate
- ETCDCTL_API=3 /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes 
- /pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes 
+ ETCDCTL_API=3 /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
+ /pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet 
  ./VolumeActivateCIFS vol=$name user=$userreq
  /pace/putzpool.py 
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
  echo ready ;
 fi
-/TopStor/queuethis.sh `basename "$0"` finished $userreq &
+/TopStor/queuethis.sh `basename "$0"` finished $userreq 

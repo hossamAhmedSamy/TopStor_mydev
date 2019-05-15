@@ -22,20 +22,20 @@ if [[ $contrun == 'true' ]]
 then
   /TopStor/logmsg.py NFS1000 info $userreq $volname
 cd /TopStor
-/sbin/zfs destroy -rf $DG/$volname  &> $txtres
+/sbin/zfs destroy -rf $DG/$volname 
 if [ $? -ne 0  ]; then
   /TopStor/logmsg.py NFS1001 error $userreq $volname
-  exit
-fi
-cp /etc/samba/smb.conf /TopStordata/smb.confcurrent;
+else
+ cp /etc/samba/smb.conf /TopStordata/smb.confcurrent;
  rm /TopStordata/$volname;
  /TopStor/delblock.py start${volname}_only stop${volname}_only /TopStordata/smb.confcurrent  ;
  /TopStor/delblock.py start${volname}_only stop${volname}_only /TopStordata/CIFSshares.txt  ;
  cp /TopStordata/smb.confcurrent.new /etc/samba/smb.conf;
- /pace/etcddel.py volumes $volname
+ /pace/etcddel.py volume $volname
  /TopStor/SnapShotPeriodDelete $volname $userreq
- /pace/delbroadcastlocal.py volumes $volname
- systemctl restart smb
+ /pace/delbroadcastlocal.py volume $volname
+# systemctl restart smb
  /pace/putzpool.py 
  /TopStor/logmsg.py NFS1002 info  $userreq $volname
+fi
 fi
