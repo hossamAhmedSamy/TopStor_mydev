@@ -7,14 +7,14 @@ vol=`echo $@ | awk '{print $2}'`
 ipaddr=`echo $@ | awk '{print $3}'`
 ipsubnet=`echo $@ | awk '{print $4}'`
 echo $@ > /root/cifsparam
-clearvol=`./prot.py clearvol $volname | awk -F'result=' '{print $2}'`
+clearvol=`./prot.py clearvol $vol | awk -F'result=' '{print $2}'`
 if [ $clearvol != '-1' ];
 then
  docker stop $clearvol 
  docker container rm $clearvol 
  /sbin/pcs resource delete --force $clearvol  2>/dev/null
 fi
-redvol=`./prot.py redvol $volname | awk -F'result=' '{print $2}'`
+redvol=`./prot.py redvol $vol | awk -F'result=' '{print $2}'`
 if [ $redvol != '-1' ];
 then
  redipaddr=`echo $redvol | awk -F'-' '{print $NF}'`
@@ -22,8 +22,10 @@ then
  cp /TopStordata/smb.${redipaddr}.new /TopStordata/smb.${redipaddr};
  docker exec -it $redvol smbcontrol smbd reload-config
 fi
-rightvol=`/pace/etcdget.py ipaddr/$ipaddr`
-if [ $rightvol -eq '-1' ];
+rightip=`/pace/etcdget.py ipaddr/$ipaddr`
+resname=`echo $rightip | awk -F'/' '{print $1}'`
+echo $rightip | grep -w '\-1' 
+if [ $? -eq 0 ];
 then
  resname=cifs-$pool-$ipaddr
  /pace/etcdput.py ipaddr/$ipaddr $resname/$vol
@@ -50,8 +52,7 @@ then
   -v /var/lib/samba/private:/var/lib/samba/private:rw \
   --name $resname 10.11.11.124:5000/smb
 else
- resname=`echo $rightvol | awk -F'/' '{print $1}'`
- newright=${rightvol}'/'$vol 
+ newright=${rightip}'/'$vol 
  mounts=`echo $newright |sed 's/\// /g'| awk '{$1=""; print}'`
  mount=''
  for x in $mounts; 

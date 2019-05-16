@@ -63,7 +63,6 @@ then
  rm /etc/samba/smb.$volname;
  echo $DG/$volname
  /sbin/zfs destroy -rf $DG/$volname 
- exit
  if [ $? -ne 0  ]; then
    /TopStor/logmsg.py NFS1001 error $userreq $volname
  else
@@ -72,5 +71,6 @@ then
   /pace/delbroadcastlocal.py volume $volname
   /pace/putzpool.py 
   /TopStor/logmsg.py NFS1002 info  $userreq $volname
+  rm -rf /$DG/$volname
  fi
 fi
