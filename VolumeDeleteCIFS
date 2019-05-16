@@ -21,48 +21,56 @@ if [[ $contrun == 'true' ]]
 then
   /TopStor/logmsg.py NFS1000 info $userreq $volname
  cd /TopStor
- prop=`/pace/etcdget.py volumes/CIFS/$myhost/$pDG/$volname`
- ipaddr=`echo $prop | awk -F'/' '{print $8}'`
- ipaddrvol=`/pace/etcdget.py ipaddr/$ipaddr`
- count=`echo $ipaddrvol | awk -F'/' '{print $1}'`
- if [ $count -lt 2 ];
+ clearvol=`./prot.py clearvol $volname | awk -F'result=' '{print $2}'`
+ if [ $clearvol != '-1' ];
  then
-  /pace/etcddel.py ipaddr/$ipaddr
-  /pace/delbroadcastlocal.py ipaddr $ipaddr
-  docker container stop cifs-$DG-$volname
-  docker container rm -f cifs-$DG-$volname
-  /sbin/pcs resource delete --force ip-$DG-$volname  2>/dev/null
-  /sbin/zfs destroy -rf $DG/$volname 
-  if [ $? -ne 0  ]; then
-    /TopStor/logmsg.py NFS1001 error $userreq $volname
-  else
-   rm /etc/samba/smb.$volname;
-   rm /etc/samba/smb.$ipaddr;
-   /pace/etcddel.py volume $volname
-   /TopStor/SnapShotPeriodDelete $volname $userreq
-   /pace/delbroadcastlocal.py volume $volname
-   /pace/putzpool.py 
-   /TopStor/logmsg.py NFS1002 info  $userreq $volname
-  fi
+  docker stop $clearvol 
+  docker container rm $clearvol 
+  /sbin/pcs resource delete --force $clearvol  2>/dev/null
+  rm /etc/samba/smb.$ipaddr;
+ fi
+ redvol=`./prot.py redvol $volname | awk -F'result=' '{print $2}'`
+ if [ $redvol != '-1' ];
+ then
+  redipaddr=`echo $redvol | awk -F'/' '{print $1}' | awk -F'-' '{print $NF}'`
+  /TopStor/delblock.py start${volname}_only stop${volname}_only /TopStordata/smb.${redipaddr}  ;
+  cp /TopStordata/smb.${redipaddr}.new /TopStordata/smb.${redipaddr};
+  echo redvol=$redvol
+  resname=`echo $redvol | awk -F'/' '{print $1}'`
+  newright=$redvol 
+  mounts=`echo $newright |sed 's/\// /g'| awk '{$1=""; print}'`
+  mount=''
+  for x in $mounts; 
+  do
+   mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
+  done
+  docker stop $resname
+  docker rm $resname
+  docker run -d $mount --privileged \
+   -e "HOSTIP=$redipaddr"  \
+   -p $redipaddr:135:135 \
+   -p $redipaddr:137-138:137-138/udp \
+   -p $redipaddr:139:139 \
+   -p $redipaddr:445:445 \
+   -v /etc/localtime:/etc/localtime:ro \
+   -v /TopStordata/smb.${redipaddr}:/config/smb.conf:rw \
+   -v /opt/passwds/passwd:/etc/passwd:rw \
+   -v /opt/passwds/group:/etc/group:rw \
+   -v /opt/passwds/shadow:/etc/shadow:rw \
+   -v /var/lib/samba/private:/var/lib/samba/private:rw \
+   --name $resname 10.11.11.124:5000/smb
+ fi
+ rm /etc/samba/smb.$volname;
+ echo $DG/$volname
+ /sbin/zfs destroy -rf $DG/$volname 
+ exit
+ if [ $? -ne 0  ]; then
+   /TopStor/logmsg.py NFS1001 error $userreq $volname
  else
-  /sbin/zfs destroy -rf $DG/$volname 
-  if [ $? -ne 0  ]; then
-    /TopStor/logmsg.py NFS1001 error $userreq $volname
-  else
-   newcount=$((count-1));
-   origvol=`echo $ipaddrvol | awk -F'/' '{print $2}'`
-   /pace/etcdput.py ipaddr/$ipaddr $newcount/$origvol
-   /pace/broadcasttolocal.py ipaddr/$ipaddr $newcount/$origvol 
-   rm /TopStordata/$volname;
-   /TopStor/delblock.py start${volname}_only stop${volname}_only /TopStordata/smb.${ipaddr}  ;
-   rm /etc/samba/smb.$volname;
-   cp /TopStordata/smb.${ipaddr}.new /TopStordata/smb.${ipaddr};
-   docker exec -it cifs-$pool-$origvol smbcontrol reload-config
-   /pace/etcddel.py volume $volname
-   /TopStor/SnapShotPeriodDelete $volname $userreq
-   /pace/delbroadcastlocal.py volume $volname
-   /pace/putzpool.py 
-   /TopStor/logmsg.py NFS1002 info  $userreq $volname
-  fi
+  /pace/etcddel.py volume $volname
+  /TopStor/SnapShotPeriodDelete $volname $userreq
+  /pace/delbroadcastlocal.py volume $volname
+  /pace/putzpool.py 
+  /TopStor/logmsg.py NFS1002 info  $userreq $volname
  fi
 fi
