@@ -55,7 +55,7 @@ then
   echo No Volumes -1
   exit
  fi
- cp /etc/samba/smb.conf /TopStordata/smb.confcurrent
+ cp /TopStor/smb.conf /TopStordata/smb.confcurrent
  echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
  do
   echo l=$l;
@@ -70,26 +70,20 @@ then
   writev=`echo $writev | sed 's/\,/ /g' `;
   admin=`echo $l | awk -F'/' '{print $6}'`
   writeable=`echo $l | awk -F'/' '{print $7}'`
-  yes | cp sharecifs.txt /TopStordata/${name}
-  sed -i "s/NAMECIFS/$name/g"  /TopStordata/${name}
-  sed -i "s/POOL/$pool/g" /TopStordata/${name}
-  sed -i "s/no/$readv/g" /TopStordata/${name}
-  sed -i "s/yes/$browsable/g" /TopStordata/${name}
-  sed -i "s/\@everyone/$writev/g" /TopStordata/${name}
-  sed -i "s/administrator/$admin/g" /TopStordata/${name}
-  sed -i "s/Yes/$writeable/g" /TopStordata/${name}
-  cat /TopStordata/${name} >> /TopStordata/smb.confcurrent
-  cat /TopStordata/${name} >> /TopStordata/CIFSshares.txt 
-  cat /TopStordata/${name} >> /etc/samba/smb${name}.conf 
-  mkdir /etc/samba/data${name}
+  yes | cp sharecifs.txt /TopStordata/smb.${name}
+  sed -i "s/NAMECIFS/$name/g"  /TopStordata/smb.${name}
+  sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
+  sed -i "s/no/$readv/g" /TopStordata/smb.${name}
+  sed -i "s/yes/$browsable/g" /TopStordata/smb.${name}
+  sed -i "s/\@everyone/$writev/g" /TopStordata/smb.${name}
+  sed -i "s/administrator/$admin/g" /TopStordata/smb.${name}
+  sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
   chmod 770 /$pool/$name
   setfacl -b /$pool/$name
   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
   sleep 5
   for grp in $writev ;do  setfacl -m g:$grp:rwx /$pool/$name; done
  done
-# systemctl stop smb 
-# systemctl start smb  
  echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
  do
   pool=`echo $l | awk -F'/' '{print $1}'`

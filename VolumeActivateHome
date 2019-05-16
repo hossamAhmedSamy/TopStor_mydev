@@ -67,15 +67,20 @@ then
   writev=`echo $l | awk -F'/' '{print $5}'`
   admin=`echo $l | awk -F'/' '{print $6}'`
   writeable=`echo $l | awk -F'/' '{print $7}'`
-  yes | cp homecifs.txt /TopStordata/${name}
-  sed -i "s/USER/$name/g"  /TopStordata/${name}
-  sed -i "s/POOL/$pool/g" /TopStordata/${name}
-  cat /TopStordata/${name} >> /TopStordata/smb.confcurrent
-  cat /TopStordata/${name} >> /TopStordata/Homeshares.txt 
-  cat /TopStordata/${name} >> /etc/samba/smb.conf 
+  homeprop=`ETCDCTL_API=3 /pace/etcdget.py ipaddr/HOMe` 
+  if [ $homeprop -eq '-1' ];
+  then
+   ipaddr='10.11.11.20'
+   ipsubnet='24';
+  else
+   ipaddr=`echo $homeprop | awk -F'/' '{print $1}'` 
+   ipsubnet=`echo $homeprop | awk -F'/' '{print $2}'` 
+  fi
+  yes | cp homecifs.txt /TopStordata/smb.${name}
+  sed -i "s/USER/$name/g"  /TopStordata/smb.${name}
+  sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
+  /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
  done
- systemctl stop smb 
- systemctl start smb  
  echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
  do
   pool=`echo $l | awk -F'/' '{print $1}'`

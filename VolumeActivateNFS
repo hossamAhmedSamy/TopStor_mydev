@@ -72,9 +72,7 @@ then
   ipaddr=`echo $l | awk -F'/' '{print $10}'`
   ipsubnet=`echo $l | awk -F'/' '{print $11}'`
   writev=`echo $writev | sed 's/\,/ /g' `;
-  echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' > /etc/exports.$name 
-  echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' >> /TopStordata/exports.confcurrent
-  cat /TopStordata/exports.confcurrent > /etc/exports 
+  echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' > /TopStordata/exports.$name 
   chmod 770 /$pool/$name
   setfacl -b /$pool/$name
   for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done

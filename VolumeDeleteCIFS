@@ -12,30 +12,57 @@ pDG=`echo $@ | awk '{print $1}'`;
 pro=`echo $@ | awk '{print $3}'`;
 userreq=` echo $@ | awk '{print $4}'`;
 DG=`echo $pDG `;
-hostnam=`echo $pDG `;
+myhost=`hostname -s`
 txtres='/TopStordata/'`basename $0`$userreq
 rm -rf $txtres &>/dev/null
-echo CIFS1005:$hostnam/$volname > $web;
 privilege=$pro;
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
   /TopStor/logmsg.py NFS1000 info $userreq $volname
-cd /TopStor
-/sbin/zfs destroy -rf $DG/$volname 
-if [ $? -ne 0  ]; then
-  /TopStor/logmsg.py NFS1001 error $userreq $volname
-else
- cp /etc/samba/smb.conf /TopStordata/smb.confcurrent;
- rm /TopStordata/$volname;
- /TopStor/delblock.py start${volname}_only stop${volname}_only /TopStordata/smb.confcurrent  ;
- /TopStor/delblock.py start${volname}_only stop${volname}_only /TopStordata/CIFSshares.txt  ;
- cp /TopStordata/smb.confcurrent.new /etc/samba/smb.conf;
- /pace/etcddel.py volume $volname
- /TopStor/SnapShotPeriodDelete $volname $userreq
- /pace/delbroadcastlocal.py volume $volname
-# systemctl restart smb
- /pace/putzpool.py 
- /TopStor/logmsg.py NFS1002 info  $userreq $volname
-fi
+ cd /TopStor
+ prop=`/pace/etcdget.py volumes/CIFS/$myhost/$pDG/$volname`
+ ipaddr=`echo $prop | awk -F'/' '{print $8}'`
+ ipaddrvol=`/pace/etcdget.py ipaddr/$ipaddr`
+ count=`echo $ipaddrvol | awk -F'/' '{print $1}'`
+ if [ $count -lt 2 ];
+ then
+  /pace/etcddel.py ipaddr/$ipaddr
+  /pace/delbroadcastlocal.py ipaddr $ipaddr
+  docker container stop cifs-$DG-$volname
+  docker container rm -f cifs-$DG-$volname
+  /sbin/pcs resource delete --force ip-$DG-$volname  2>/dev/null
+  /sbin/zfs destroy -rf $DG/$volname 
+  if [ $? -ne 0  ]; then
+    /TopStor/logmsg.py NFS1001 error $userreq $volname
+  else
+   rm /etc/samba/smb.$volname;
+   rm /etc/samba/smb.$ipaddr;
+   /pace/etcddel.py volume $volname
+   /TopStor/SnapShotPeriodDelete $volname $userreq
+   /pace/delbroadcastlocal.py volume $volname
+   /pace/putzpool.py 
+   /TopStor/logmsg.py NFS1002 info  $userreq $volname
+  fi
+ else
+  /sbin/zfs destroy -rf $DG/$volname 
+  if [ $? -ne 0  ]; then
+    /TopStor/logmsg.py NFS1001 error $userreq $volname
+  else
+   newcount=$((count-1));
+   origvol=`echo $ipaddrvol | awk -F'/' '{print $2}'`
+   /pace/etcdput.py ipaddr/$ipaddr $newcount/$origvol
+   /pace/broadcasttolocal.py ipaddr/$ipaddr $newcount/$origvol 
+   rm /TopStordata/$volname;
+   /TopStor/delblock.py start${volname}_only stop${volname}_only /TopStordata/smb.${ipaddr}  ;
+   rm /etc/samba/smb.$volname;
+   cp /TopStordata/smb.${ipaddr}.new /TopStordata/smb.${ipaddr};
+   docker exec -it cifs-$pool-$origvol smbcontrol reload-config
+   /pace/etcddel.py volume $volname
+   /TopStor/SnapShotPeriodDelete $volname $userreq
+   /pace/delbroadcastlocal.py volume $volname
+   /pace/putzpool.py 
+   /TopStor/logmsg.py NFS1002 info  $userreq $volname
+  fi
+ fi
 fi
