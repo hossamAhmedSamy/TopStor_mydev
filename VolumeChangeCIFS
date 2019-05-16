@@ -22,14 +22,19 @@ privilege="CIFS";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
- /TopStor/logmsg.py VolCst01 info $userreq $name $writev
+ /TopStor/logmsg.py VolCst01 info $userreq $name
  echo name=$name
  myhost=`hostname -s`
+ older=`ETCDCTL_API=3 /pace/etcdget.py volumes $name `
  echo /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes >> /root/volchange
  ETCDCTL_API=3 /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
  /pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet 
- ./VolumeActivateCIFS vol=$name user=$userreq
+ echo $older | grep $ipaddr/$ipsubnet
+ if [ $? -ne 0 ];
+ then 
+  /TopStor/VolumeActivateCIFS vol=$name user=$userreq
+ fi
  /pace/putzpool.py 
- /TopStor/logmsg.py VolCsu01 info $userreq $name $writev
+ /TopStor/logmsg.py VolCsu01 info $userreq $name
  echo ready ;
 fi

@@ -23,8 +23,14 @@ contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
 /TopStor/logmsg.py VolCst01 info $userreq $name $writev
-ETCDCTL_API=3 /pace/etcdput.py volumes/NFS/$myhost/$DG/$name $DG/$name/*/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet
-/TopStor/VolumeActivateNFS vol=$name user=$userreq
+ older=`ETCDCTL_API=3 /pace/etcdget.py volumes $name `
+ ETCDCTL_API=3 /pace/etcdput.py volumes/NFS/$myhost/$DG/$name $DG/$name/*/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet
+ ETCDCTL_API=3 /pace/broadcasttolocal.py volumes/NFS/$myhost/$DG/$name $DG/$name/*/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet
+ echo $older | grep $ipaddr/$ipsubnet
+ if [ $? -ne 0 ];
+ then 
+  /TopStor/VolumeActivateNFS vol=$name user=$userreq
+ fi
 /TopStor/logmsg.py VolCsu01 info $userreq $name $writev
 fi;
  /pace/putzpool.py &
