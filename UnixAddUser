@@ -9,10 +9,12 @@ rm -rf $txtres &>/dev/null
 glog='/var/www/html/des20/Data/TopStor.log';
 username=`echo $@ | awk '{print $1}'`;
 homePool=`echo $@ | awk '{print $2}'`;
-userpass=`echo $@ | awk '{print $3}'`;
-host=`echo $@ | awk '{print $4}'`;
-size=`echo $@ | awk '{print $5}'`;
-userreq=`echo $@  | awk '{print $6}'`;
+usergroups=`echo $@ | awk  '{print $3}'`;
+grps=`echo $grpusers | sed 's/groups//g' | sed 's/\,/ /g'`
+userpass=`echo $@ | awk '{print $4}'`;
+host=`echo $@ | awk '{print $5}'`;
+size=`echo $@ | awk '{print $6}'`;
+userreq=`echo $@  | awk '{print $7}'`;
 /TopStor/queuethis.sh `basename "$0"` running $userreq &
 myhost=`hostname -s`
 echo Unlin1017:$username > $web;
@@ -78,6 +80,16 @@ then
   userhome=`echo $userline | awk -F':' '{print $6}'`
   userhash=`echo $userline | awk -F':' '{print $5}' | awk -F'TopStor' '{print $2}'`
   yes | cp /etc/{passwd,group,shadow} /opt/passwds
+  echo $grps | while read l;
+  do
+   usermod  -a -G $l $username
+   cusersall=`/pace/etcdget.py usersigroup/$l`
+   cusers=`echo $usersall | awk -F'/' '{print $3}'`
+   cusersleft=`echo $usersall | cut -d/ -f1-2`
+   cusersright=`echo $usersall | cut -d/ -f3-`
+   newusers=${cusers}','$username
+   /pace/etcdput.py usersigroup/$l $cusersright/$newusers/$cusersleft 
+  done
   /TopStor/etcdput.py 'usersinfo/'$username $userid':'$usergd':'$userhome'/'$size'/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no'
   /TopStor/etcdput.py 'usershash/'$username $userhash
   /TopStor/broadcast.py UserAdd /TopStor/pump.sh UnixAddUser_sync -d$myhost $username $userhash $userid $usergd $userhome
