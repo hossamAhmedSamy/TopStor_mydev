@@ -86,7 +86,7 @@ then
    cusersall=`/pace/etcdget.py usersigroup/$l`
    cusers=`echo $usersall | awk -F'/' '{print $3}'`
    cusersleft=`echo $usersall | cut -d/ -f1-2`
-   cusersright=`echo $usersall | cut -d/ -f3-`
+   cusersright=`echo $usersall | cut -d/ -f4-`
    newusers=${cusers}','$username
    /pace/etcdput.py usersigroup/$l $cusersright/$newusers/$cusersleft 
   done

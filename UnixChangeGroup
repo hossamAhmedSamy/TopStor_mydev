@@ -35,7 +35,7 @@ then
     usergroups=`id -Gn $l | sed 's/ /,/g' | sed "s/$l,//g" | sed "s/$groupname,//g" | sed "s/,$groupname//g" `
     echo Users to remove $l $usergroups
     echo /TopStor/UnixChangeUser $l groups$usergroups $userreq 
-    /TopStor/UnixChangeUser $l groups$usergroups $userreq 2&>/TopStor/temp2
+    /TopStor/UnixChangeUser $l groups$usergroups $userreq 2&>/root/UnixChangeUser
    else
     stableuser=${stableuser}$l','
     echo Users to keep ${stableuser}
@@ -64,7 +64,7 @@ then
    fi
    echo User to add $l $usergroups
    echo /TopStor/UnixChangeUser $l groups$usergroups $userreq 
-   /TopStor/UnixChangeUser $l groups$usergroups $userreq  2&>/TopStor/temp2
+   /TopStor/UnixChangeUser $l groups$usergroups $userreq  2&>/root/UnixChangeUser
   fi
 #  cusersleft=`echo $usersall | cut -d/ -f1-2`
 #  cusersright=`echo $usersall | cut -d/ -f4-`
