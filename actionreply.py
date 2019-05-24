@@ -199,6 +199,16 @@ def do(body):
   with open('/root/recv2','a') as f:
    f.write('received ReleasePoolLock from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if GroupChange ##############
+ elif r["req"]=='GroupChange':  
+  with open('/root/recv2','a') as f:
+   f.write('received GroupChange from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if UserChange ##############
+ elif r["req"]=='UserChange':  
+  with open('/root/recv2','a') as f:
+   f.write('received UserChange from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if UserAdd ##############
  elif r["req"]=='UserAdd':  
   with open('/root/recv2','a') as f:
