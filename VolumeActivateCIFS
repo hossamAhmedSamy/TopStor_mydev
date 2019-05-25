@@ -82,7 +82,11 @@ then
   setfacl -b /$pool/$name
   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
   sleep 1 
-  for grp in $writev ;do  setfacl -m g:$grp:rwx /$pool/$name; done
+  setfacl -b /$pool/$name
+  if [ $writev != 'nogroup' ];
+  then
+   for grp in $writev ;do  setfacl -m g:$grp:rwx /$pool/$name; done
+  fi
  done
  echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
  do
@@ -94,7 +98,11 @@ then
   volsvalue=`/pace/etcdget.py volumes/CIFS/$volhost/$pool/$name`
   chmod 770 /$pool/$name
   sleep 1 
-  for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done
+  setfacl -b /$pool/$name
+  if [ $writev != 'nogroup' ];
+  then
+   for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done
+  fi
   /pace/etcdput.py volumes/CIFS/$myhost/$pool/$name $volsvalue
   if [ $volhost != $myhost ];
   then

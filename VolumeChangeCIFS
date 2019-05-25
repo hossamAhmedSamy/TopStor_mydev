@@ -22,6 +22,10 @@ privilege="CIFS";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
+ if [ $writev != 'nogroup'];
+ then
+  writev=`echo $writev | sed 's/nogroup//g'`
+ fi
  /TopStor/logmsg.py VolCst01 info $userreq $name
  echo name=$name
  myhost=`hostname -s`

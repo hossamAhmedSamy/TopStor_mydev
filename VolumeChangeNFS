@@ -22,7 +22,11 @@ privilege="CIFS";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
-/TopStor/logmsg.py VolCst01 info $userreq $name $writev
+ if [ $writev != 'nogroup'];
+ then
+  writev=`echo $writev | sed 's/nogroup//g'`
+ fi
+/TopStor/logmsg.py VolCst01 info $userreq $name
  older=`ETCDCTL_API=3 /pace/etcdget.py volumes $name `
  ETCDCTL_API=3 /pace/etcdput.py volumes/NFS/$myhost/$DG/$name $DG/$name/*/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet
  ETCDCTL_API=3 /pace/broadcasttolocal.py volumes/NFS/$myhost/$DG/$name $DG/$name/*/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet
@@ -31,7 +35,7 @@ then
  then 
   /TopStor/VolumeActivateNFS vol=$name user=$userreq
  fi
-/TopStor/logmsg.py VolCsu01 info $userreq $name $writev
+/TopStor/logmsg.py VolCsu01 info $userreq $name
 fi;
  /pace/putzpool.py &
 echo ready ;

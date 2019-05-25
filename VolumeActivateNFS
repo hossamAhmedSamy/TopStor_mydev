@@ -76,7 +76,10 @@ then
   echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' > /TopStordata/exports.$name 
   chmod 770 /$pool/$name
   setfacl -b /$pool/$name
-  for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done
+  if [ $writev != 'nogroup' ];
+  then 
+   for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done
+  fi
   /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
  done
 # /sbin/exportfs -ra
@@ -97,7 +100,11 @@ then
   fi
   chmod 770 /$pool/$name
   sleep 1 
-  for grp in $writev; do  setfacl -m g:$grp:rwx /$pool/$name; done
+  setfacl -b /$pool/$name
+  if [ $writev != 'nogroup' ];
+  then 
+   for grp in $writev; do  setfacl -m g:$grp:rwx /$pool/$name; done
+  fi
   /pace/etcdput.py volumes/NFS/$myhost/$pool/$name $volsvalue
   if [ $volhost != $myhost ];
   then
