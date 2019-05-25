@@ -33,7 +33,7 @@ then
    echo $groupusers | grep -w $l >/dev/null 
    if [ $? -ne 0 ];
    then
-    usergroups=`id -Gn $l | sed "s/$l//g" | sed "s/$groupname//g" | sed 's/ /,/g'`
+    usergroups=`id -Gn $l | sed 's/ /,/g' | sed "s/$l,//g" | sed "s/$groupname,//g" | sed "s/,$groupname//g" | sed "s/$groupname//g"`
     echo Users to remove $l $usergroups
     /TopStor/UnixChangeUser_sync $l $usergroups $userreq 
    else
@@ -54,7 +54,14 @@ then
   echo $stableuser | grep -w $l >/dev/null
   if [ $? -ne 0 ];
   then
-   usergroups=`id -Gn $l | sed "s/$l//g" | sed 's/ /,/g'`','$groupname
+   usergroups=`id -Gn $l `
+   usergroupsl=`echo $usergroups | wc -w`
+   if [ $usergroupsl -lt 2 ];
+   then
+    usergroups=$groupname
+   else
+    usergroups=`echo $usergroups | sed 's/ /,/g' | sed "s/$l,//g"`','$groupname
+   fi
    echo User to add $l $usergroups
    /TopStor/UnixChangeUser_sync $l $usergroups $userreq 
   fi
