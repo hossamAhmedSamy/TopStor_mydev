@@ -32,7 +32,7 @@ then
    echo $groupusers | grep -w $l >/dev/null 
    if [ $? -ne 0 ];
    then
-    usergroups=`id -Gn $l | sed 's/ /,/g' | sed "s/$l,//g" | sed "s/$groupname,//g" | sed "s/,$groupname//g" `
+    usergroups=`id -Gn $l | sed 's/ /,/g' | sed "s/$l,//g" | sed "s/$groupname,//g" | sed "s/,$groupname//g" | sed "s/$groupname//g"`
     echo Users to remove $l $usergroups
     echo /TopStor/UnixChangeUser $l groups$usergroups $userreq 
     /TopStor/UnixChangeUser $l groups$usergroups $userreq 2&>/root/UnixChangeUser
