@@ -79,11 +79,13 @@ then
   sed -i "s/administrator/$admin/g" /TopStordata/smb.${name}
   sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
   chmod 770 /$pool/$name
-  setfacl -b /$pool/$name
+  echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
   sleep 1 
+  echo writve=$writev
   setfacl -b /$pool/$name
-  if [ $writev != 'nogroup' ];
+  echo $writev | grep -w nogroup
+  if [ $? -ne 0 ];
   then
    for grp in $writev ;do  setfacl -m g:$grp:rwx /$pool/$name; done
   fi
@@ -99,7 +101,8 @@ then
   chmod 770 /$pool/$name
   sleep 1 
   setfacl -b /$pool/$name
-  if [ $writev != 'nogroup' ];
+  echo $writev | grep -w nogroup
+  if [ $? -ne 0 ];
   then
    for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done
   fi

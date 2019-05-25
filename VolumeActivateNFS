@@ -76,7 +76,8 @@ then
   echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' > /TopStordata/exports.$name 
   chmod 770 /$pool/$name
   setfacl -b /$pool/$name
-  if [ $writev != 'nogroup' ];
+  echo $writev | grep -w nogroup
+  if [ $? -ne 0 ];
   then 
    for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done
   fi
@@ -101,7 +102,8 @@ then
   chmod 770 /$pool/$name
   sleep 1 
   setfacl -b /$pool/$name
-  if [ $writev != 'nogroup' ];
+  echo $writev | grep -w nogroup
+  if [ $? -ne 0 ];
   then 
    for grp in $writev; do  setfacl -m g:$grp:rwx /$pool/$name; done
   fi
