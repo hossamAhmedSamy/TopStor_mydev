@@ -96,7 +96,7 @@ then
    continue
   fi
   chmod 770 /$pool/$name
-  sleep 5
+  sleep 1 
   for grp in $writev; do  setfacl -m g:$grp:rwx /$pool/$name; done
   /pace/etcdput.py volumes/NFS/$myhost/$pool/$name $volsvalue
   if [ $volhost != $myhost ];

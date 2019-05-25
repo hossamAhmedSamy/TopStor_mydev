@@ -66,11 +66,6 @@ then
    echo /TopStor/UnixChangeUser $l groups$usergroups $userreq 
    /TopStor/UnixChangeUser $l groups$usergroups $userreq  2&>/root/UnixChangeUser
   fi
-#  cusersleft=`echo $usersall | cut -d/ -f1-2`
-#  cusersright=`echo $usersall | cut -d/ -f4-`
-#  newusers=$groupusers
-#  newop=$cusersleft'/'$newusers'/'$cusersright
-#  groupres=`echo ${newop}`
  done
  /TopStor/broadcast.py GroupChange /TopStor/pump.sh UnixChangeGroup_sync -d$myhost $@ 
  /TopStor/logmsg.py Unsu1025 info $userreq $username

@@ -10,7 +10,7 @@ glog='/var/www/html/des20/Data/TopStor.log';
 username=`echo $@ | awk '{print $1}'`;
 userid=`echo $@ | awk '{print $2}'`;
 usergd=`echo $@ | awk '{print $3}'`;
-grpusers=`echo $@ | awk '{print $4}'`;
+groupusers=`echo $@ | awk '{print $4}'`;
 userpass='df323jdlda'$RANDOM
 pas=`echo $userpass | openssl enc -e -base64 -aes-256-ctr -nopad -nosalt -k '#skMe22'$username`
 echo $pas $userpass
@@ -34,12 +34,8 @@ groupadd -g $usergd $username
 homebase='-b /NoHome -M'
 echo useradd -c"TopStorGroup"$userpass $homebase -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username
 useradd -c"TopStorGroup"$userpass $homebase -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username
-users=`echo $grpusers | sed 's/\,/ /g'`
-echo $users | while read l;
-do
- usermod  -a -G $username $l
-done
- /pace/etcdsync.py $myip usersigroup/$username usersigroup/$username 
- /TopStor/logmsg.py Unlin11222 info $userreq $username
+/TopStor/UnixChangeGroup_sync $username $groupusers $userreq
+/pace/etcdsync.py $myip usersigroup/$username usersigroup/$username 
+/TopStor/logmsg.py Unlin11222 info $userreq $username
 fi
 cd /pace
