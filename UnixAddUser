@@ -80,19 +80,10 @@ then
   userhome=`echo $userline | awk -F':' '{print $6}'`
   userhash=`echo $userline | awk -F':' '{print $5}' | awk -F'TopStor' '{print $2}'`
   yes | cp /etc/{passwd,group,shadow} /opt/passwds
-  echo $grps | while read l;
-  do
-   usermod  -a -G $l $username
-   cusersall=`/pace/etcdget.py usersigroup/$l`
-   cusers=`echo $usersall | awk -F'/' '{print $3}'`
-   cusersleft=`echo $usersall | cut -d/ -f1-2`
-   cusersright=`echo $usersall | cut -d/ -f4-`
-   newusers=${cusers}','$username
-   /pace/etcdput.py usersigroup/$l $cusersright/$newusers/$cusersleft 
-  done
   /TopStor/etcdput.py 'usersinfo/'$username $userid':'$usergd':'$userhome'/'$size'/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no'
   /TopStor/etcdput.py 'usershash/'$username $userhash
   /TopStor/broadcast.py UserAdd /TopStor/pump.sh UnixAddUser_sync -d$myhost $username $userhash $userid $usergd $userhome
+  /TopStor/UnixChangeUser $username $usergroups $userreq
   /TopStor/logmsg.py Unlin1022 info $userreq $username
  fi 
 fi
