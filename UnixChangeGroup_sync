@@ -19,7 +19,7 @@ contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
  /TopStor/logmsg.py Unst1125 info $userreq $groupname
- usersall=`/pace/etcdget.py usersigroup/$groupname`
+ usersall=`/pace/etcdgetlocal.py $myip usersigroup/$groupname`
  cusers=`echo $usersall | awk -F'/' '{print $3}' `','
  echo $cusers | grep -w no >/dev/null
  if [ $? -ne 0 ];
@@ -60,7 +60,7 @@ then
    then
     usergroups=$groupname
    else
-    usergroups=`echo $usergroups | sed 's/ /,/g' | sed "s/$l,//g"`','$groupname
+    usergroups=`echo $usergroups | sed 's/ /,/g' | sed "s/$l,//g" |sed "s/$groupname,//g" | sed "s/,$groupname//g"`','$groupname
    fi
    echo User to add $l $usergroups
    /TopStor/UnixChangeUser_sync $l $usergroups $userreq 
@@ -71,6 +71,6 @@ then
 #  newop=$cusersleft'/'$newusers'/'$cusersright
 #  groupres=`echo ${newop}`
  done
- /TopStor/logmsg.py Unsu1125 info $userreq $username
+ /TopStor/logmsg.py Unsu1125 info $userreq $groupname
 fi 
 /TopStor/queuethis.sh `basename "$0"` finished $userreq &

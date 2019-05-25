@@ -21,7 +21,7 @@ then
  /TopStor/logmsg.py Unst1124 info $userreq $username
 # cgrps=`id -Gn $username | sed "s/$username//g"` 
  usermod -G $usergroups $username
- cgrps=`/pace/etcdget.py usersigroup $username`
+ cgrps=`/pace/etcdgetlocal.py $myip usersigroup $username`
  cgrpsl=${#cgrps}
  while [ $cgrpsl  -gt 4 ];
  do
@@ -32,7 +32,7 @@ then
   echo $usergroups | grep -w $cgrp  &>/dev/null
   if [ $? -ne 0 ];
   then
-   usersall=`/pace/etcdget.py usersigroup/$cgrp`
+   usersall=`/pace/etcdgetlocal.py $myip usersigroup/$cgrp`
    cusers=`echo $usersall | awk -F'/' '{print $3}'`
    cusersleft=`echo $usersall | cut -d/ -f1-2`
    cusersright=`echo $usersall | cut -d/ -f4-`
@@ -52,7 +52,7 @@ then
   fi
  done
  echo the stable=$stablegrp
- usergropus=$usergroups','
+ usergroups=$usergroups','
  grpsl=` echo ${usergroups} | sed 's/,/ /g' | wc -w`
  while [ $grpsl -gt 0 ]; 
  do
@@ -63,13 +63,15 @@ then
   echo l=$l
   echo usrgroups=$usergroups
   echo grpsl=$grpsl
+  echo stablegrp=$stablegrp
   echo $stablegrp | grep -w $l >/dev/null
   if [ $? -ne 0 ];
   then
-   usersall=`/pace/etcdget.py usersigroup/$l`
+   usersall=`/pace/etcdgetlocal.py $myip usersigroup/$l`
    cusers=`echo $usersall | awk -F'/' '{print $3}'`
    cusersleft=`echo $usersall | cut -d/ -f1-2`
    cusersright=`echo $usersall | cut -d/ -f4-`
+   echo cusers=$cusers
    echo $cusers | grep -w no
    if [ $? -ne 0 ];
    then

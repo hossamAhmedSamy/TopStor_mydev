@@ -34,8 +34,9 @@ groupadd -g $usergd $username
 homebase='-b /NoHome -M'
 echo useradd -c"TopStorGroup"$userpass $homebase -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username
 useradd -c"TopStorGroup"$userpass $homebase -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username
+ /TopStor/etcdputlocal.py $myip 'usersigroup/'$username $userid':'$usergd':'nogrouphome/nogroupsize'/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no'
 /TopStor/UnixChangeGroup_sync $username $groupusers $userreq
-/pace/etcdsync.py $myip usersigroup/$username usersigroup/$username 
+#/pace/etcdsync.py $myip usersigroup/$username usersigroup/$username 
 /TopStor/logmsg.py Unlin11222 info $userreq $username
 fi
 cd /pace
