@@ -23,7 +23,7 @@ then
  cp /TopStordata/smb.${redipaddr}.new /TopStordata/smb.${redipaddr};
  docker exec -it $redvol smbcontrol smbd reload-config
 fi
-rightip=`/pace/etcdget.py ipaddr/$ipaddr`
+rightip=`/pace/etcdgetlocal.py $myip ipaddr/$ipaddr`
 resname=`echo $rightip | awk -F'/' '{print $1}'`
 echo $rightip | grep -w '\-1' 
 if [ $? -eq 0 ];

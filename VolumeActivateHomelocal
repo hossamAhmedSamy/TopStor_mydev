@@ -68,7 +68,7 @@ then
   writev=`echo $l | awk -F'/' '{print $5}'`
   admin=`echo $l | awk -F'/' '{print $6}'`
   writeable=`echo $l | awk -F'/' '{print $7}'`
-  homeprop=`ETCDCTL_API=3 /pace/etcdgetlocal.py $myp ipaddr/HOMe` 
+  homeprop=`ETCDCTL_API=3 /pace/etcdgetlocal.py $myip ipaddr/HOMe` 
   if [ $homeprop -eq '-1' ];
   then
    ipaddr='10.11.11.20'
