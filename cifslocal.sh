@@ -2,10 +2,11 @@
 cd /TopStor
 export ETCDCTL_API=3
 enpdev='enp0s8'
-pool=`echo $@ | awk '{print $1}'`
-vol=`echo $@ | awk '{print $2}'`
-ipaddr=`echo $@ | awk '{print $3}'`
-ipsubnet=`echo $@ | awk '{print $4}'`
+myip=`echo $@ | awk '{print $1}'`;
+pool=`echo $@ | awk '{print $2}'`
+vol=`echo $@ | awk '{print $3}'`
+ipaddr=`echo $@ | awk '{print $4}'`
+ipsubnet=`echo $@ | awk '{print $5}'`
 echo $@ > /root/cifsparam
 clearvol=`./prot.py clearvol $vol | awk -F'result=' '{print $2}'`
 if [ $clearvol != '-1' ];
@@ -18,7 +19,6 @@ redvol=`./prot.py redvol $vol | awk -F'result=' '{print $2}'`
 if [ $redvol != '-1' ];
 then
  redipaddr=`echo $redvol | awk -F'-' '{print $NF}'`
- echo redvol=$redvol redipaddr=$redipaddr
  /TopStor/delblock.py start${vol}_only stop${vol}_only /TopStordata/smb.${redipaddr}  ;
  cp /TopStordata/smb.${redipaddr}.new /TopStordata/smb.${redipaddr};
  docker exec -it $redvol smbcontrol smbd reload-config
@@ -29,7 +29,7 @@ echo $rightip | grep -w '\-1'
 if [ $? -eq 0 ];
 then
  resname=cifs-$pool-$ipaddr
- /pace/etcdput.py ipaddr/$ipaddr $resname/$vol
+ /pace/etcdputlocal.py $myip ipaddr/$ipaddr $resname/$vol
  /pace/broadcasttolocal.py ipaddr/$ipaddr $resname/$vol 
  docker stop $resname 
  docker container rm $resname 
@@ -60,7 +60,7 @@ else
  do
   mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
  done
- /pace/etcdput.py ipaddr/$ipaddr $newright 
+ /pace/etcdputlocal.py $myip ipaddr/$ipaddr $newright 
  /pace/broadcasttolocal.py ipaddr/$ipaddr $newright
  cat /TopStordata/smb.${vol} >> /TopStordata/smb.$ipaddr
  docker stop $resname

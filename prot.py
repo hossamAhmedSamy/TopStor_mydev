@@ -30,11 +30,11 @@ def redvol(vol):
   put(x[0],x[1])
   broadtolocal(x[0],x[1])
  if len(remvol) > 0:
-  print('result='+remvol[0][1])
-  return remvol[0][1]
+  print('result='+remvol[0][1].split('/')[0])
+  return 'result='+remvol[0][1].split('/')[0]
  else:
   print('result=-1')
-  return '-1' 
+  return 'result=-1' 
 
 if __name__=='__main__':
 # getipstatus(*sys.argv[1:])
