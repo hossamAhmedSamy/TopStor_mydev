@@ -1,7 +1,7 @@
 #!/bin/sh
 export ETCDCTL_API=3
 cd /TopStor/
-echo $@ > /root/volactivate 
+echo $@ > /root/volactivateparam
 web='/var/www/html/des20/Data/CIFSstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStor.log';
@@ -18,6 +18,7 @@ privilege="CIFS";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
+ echo starting Volume CIFS activation for  $>> /root/volactivateparam
  stathost=`echo $host | wc -c`
  if [ $stathost -le 1 ]; then host=$myhost; fi
  statpool=`echo $pool | wc -c`
@@ -25,6 +26,7 @@ then
  statvol=`echo $vol | wc -c`
  if [ $statvol -le 1 ]; then statvol=0; else statvol=1; fi
  stat=${statpool}${statvol}
+ echo starting Volume CIFS activation for  $stat > /root/volactivateparam
  case $stat in
   01)
    echo volume only  for  $vol
@@ -59,6 +61,7 @@ then
  echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
  do
   echo l=$l;
+  echo activating vol=$l >> /root/volactivateparam
   pool=`echo $l | awk -F'/' '{print $1}'`
   name=`echo $l | awk -F'/' '{print $2}'`
   path='/'${pool}'/'${name}
@@ -79,9 +82,10 @@ then
   sed -i "s/administrator/$admin/g" /TopStordata/smb.${name}
   sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
   chmod 770 /$pool/$name
+  echo running cifs.sh=$pool $name $ipaddr $ipsubnet >> /root/volactivateparam
   echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
-  sleep 1 
+  echo finished cifs.sh >> /root/volactivateparam
   echo writve=$writev
   setfacl -b /$pool/$name
   echo $writev | grep -w nogroup
@@ -90,6 +94,7 @@ then
    for grp in $writev ;do  setfacl -m g:$grp:rwx /$pool/$name; done
   fi
  done
+ echo setting volumes registry >> /root/volactivateparam
  echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
  do
   pool=`echo $l | awk -F'/' '{print $1}'`
@@ -112,4 +117,5 @@ then
    /pace/etcddel.py volumes/CIFS/$volhost/$pool/$name
   fi
  done
+ echo finished setting volumes regestry >> /root/volactivateparam
 fi
