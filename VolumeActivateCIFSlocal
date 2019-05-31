@@ -19,6 +19,7 @@ privilege="CIFS";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
+ echo stating $host $pool
  stathost=`echo $host | wc -c`
  if [ $stathost -le 1 ]; then host=$myhost; fi
  statpool=`echo $pool | wc -c`
@@ -34,6 +35,7 @@ then
   10)
    echo pool only $pool
     declare  vols=`/pace/etcdgetlocal.py $myip volumes/CIFS  $pool`
+    echo done
    ;;
   11)
    echo 'volume and pool only'
