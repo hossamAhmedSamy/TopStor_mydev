@@ -82,7 +82,7 @@ then
   then 
    for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done
   fi
-  /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
+  /TopStor/nfslocal.sh $myip $pool $name $ipaddr $ipsubnet
  done
 # /sbin/exportfs -ra
  echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;

@@ -83,6 +83,7 @@ then
   sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
   chmod 770 /$pool/$name
   echo /TopStor/cifslocal.sh $myip $pool $name $ipaddr $ipsubnet
+  sleep 100
   /TopStor/cifslocal.sh $myip $pool $name $ipaddr $ipsubnet
   sleep 1 
   echo writve=$writev

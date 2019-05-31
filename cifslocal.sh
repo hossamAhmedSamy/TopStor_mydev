@@ -8,14 +8,15 @@ vol=`echo $@ | awk '{print $3}'`
 ipaddr=`echo $@ | awk '{print $4}'`
 ipsubnet=`echo $@ | awk '{print $5}'`
 echo $@ > /root/cifsparam
-clearvol=`./prot.py clearvol $vol | awk -F'result=' '{print $2}'`
+echo ./protlocal.py clearvol $myip $vol \| awk -F'result=' '{print $2}'
+clearvol=`./protlocal.py clearvol $myip $vol | awk -F'result=' '{print $2}'`
 if [ $clearvol != '-1' ];
 then
  docker stop $clearvol 
  docker container rm $clearvol 
  /sbin/pcs resource delete --force $clearvol  2>/dev/null
 fi
-redvol=`./prot.py redvol $vol | awk -F'result=' '{print $2}'`
+redvol=`./protlocal.py redvol $myip $vol | awk -F'result=' '{print $2}'`
 if [ $redvol != '-1' ];
 then
  redipaddr=`echo $redvol | awk -F'-' '{print $NF}'`
@@ -25,12 +26,12 @@ then
 fi
 rightip=`/pace/etcdgetlocal.py $myip ipaddr/$ipaddr`
 resname=`echo $rightip | awk -F'/' '{print $1}'`
-echo $rightip | grep -w '\-1' 
-if [ $? -eq 0 ];
+docker ps  | grep -w $resname 
+if [ $? -ne 0 ];
 then
  resname=cifs-$pool-$ipaddr
  /pace/etcdputlocal.py $myip ipaddr/$ipaddr $resname/$vol
- /pace/broadcasttolocal.py ipaddr/$ipaddr $resname/$vol 
+ /TopStor/broadcasttolocallocal.py $myip ipaddr/$ipaddr $resname/$vol 
  docker stop $resname 
  docker container rm $resname 
  /sbin/pcs resource delete --force $resname  2>/dev/null
@@ -61,7 +62,7 @@ else
   mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
  done
  /pace/etcdputlocal.py $myip ipaddr/$ipaddr $newright 
- /pace/broadcasttolocal.py ipaddr/$ipaddr $newright
+ /TopStor/broadcasttolocallocal.py $myip ipaddr/$ipaddr $newright
  cat /TopStordata/smb.${vol} >> /TopStordata/smb.$ipaddr
  docker stop $resname
  docker rm $resname

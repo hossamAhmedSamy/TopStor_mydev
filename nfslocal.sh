@@ -1,19 +1,20 @@
 #!/bin/sh
 export ETCDCTL_API=3
 enpdev='enp0s8'
-pool=`echo $@ | awk '{print $1}'`
-vol=`echo $@ | awk '{print $2}'`
-ipaddr=`echo $@ | awk '{print $3}'`
-ipsubnet=`echo $@ | awk '{print $4}'`
+myip=`echo $@ | awk '{print $1}'`
+pool=`echo $@ | awk '{print $2}'`
+vol=`echo $@ | awk '{print $3}'`
+ipaddr=`echo $@ | awk '{print $4}'`
+ipsubnet=`echo $@ | awk '{print $5}'`
 echo $@ > /root/nfsparam
-clearvol=`./prot.py clearvol $vol | awk -F'result=' '{print $2}'`
+clearvol=`./protlocal.py clearvol $myip $vol | awk -F'result=' '{print $2}'`
 if [ $clearvol != '-1' ];
 then
  docker stop $clearvol 
  docker container rm $clearvol 
  /sbin/pcs resource delete --force $clearvol  2>/dev/null
 fi
-redvol=`./prot.py redvol $vol | awk -F'result=' '{print $2}'`
+redvol=`./protlocal.py redvol $myip $vol | awk -F'result=' '{print $2}'`
 if [ $redvol != '-1' ];
 then
  redipaddr=`echo $redvol | awk -F'/' '{print $1}' | awk -F'-' '{print $NF}'`
@@ -39,15 +40,15 @@ then
   -v /opt/passwds/shadow:/etc/shadow:rw \
   --name $resname 10.11.11.124:5000/nfs
 fi 
-rightip=`/pace/etcdget.py ipaddr/$ipaddr`
+rightip=`/pace/etcdgetlocal.py $myip ipaddr/$ipaddr`
 resname=`echo $rightip | awk -F'/' '{print $1}'`
-docker ps  | grep -w $resname 
-if [ $? -ne 0 ];
+echo $rightip | grep -w '\-1' 
+if [ $? -eq 0 ];
 then
  echo iam here
  resname=nfs-$pool-$ipaddr
- /pace/etcdput.py ipaddr/$ipaddr $resname/$vol 
- /pace/broadcasttolocal.py ipaddr/$ipaddr $resname/$vol 
+ /pace/etcdputlocal.py $myip ipaddr/$ipaddr $resname/$vol 
+ /pace/broadcasttolocallocal.py $myip ipaddr/$ipaddr $resname/$vol 
  docker stop $resname
  docker container rm $resname
  yes | cp /etc/{passwd,group,shadow} /opt/passwds
@@ -77,8 +78,8 @@ else
  cat /TopStordata/exports.${vol} >> /TopStordata/exports.$ipaddr
  docker stop $resname
  docker rm $resname
- /pace/etcdput.py ipaddr/$ipaddr $newright 
- /pace/broadcasttolocal.py ipaddr/$ipaddr $newright 
+ /pace/etcdputlocal.py $myip ipaddr/$ipaddr $newright 
+ /pace/broadcasttolocallocal.py $myip ipaddr/$ipaddr $newright 
  docker run -d $mount -v /TopStordata/exports.$ipaddr:/etc/exports:ro \
   --cap-add SYS_ADMIN -p $ipaddr:2049:2049  -p $ipaddr:2049:2049/udp \
   -p $ipaddr:32765:32765 -p $ipaddr:32765:32765/udp \
