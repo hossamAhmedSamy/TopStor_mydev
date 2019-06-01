@@ -6,8 +6,8 @@ from delbroadcastlocal import delbroadcastlocal as delilocal
 from broadcasttolocal import broadcasttolocal as broadtolocal 
 import sys
 
-def getipstatus(ipaddr,vol):
- allvols=get('ipaddr/'+ipaddr)
+def getipstatus(ipaddr,ipsubnet,vol):
+ allvols=get('ipaddr/'+ipaddr+'/'+ipsubnet)
  return allvols[0]
 
 def clearvol(vol):

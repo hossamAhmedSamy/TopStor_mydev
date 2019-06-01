@@ -23,14 +23,14 @@ then
  cp /TopStordata/smb.${redipaddr}.new /TopStordata/smb.${redipaddr};
  docker exec -it $redvol smbcontrol smbd reload-config
 fi
-rightip=`/pace/etcdget.py ipaddr/$ipaddr`
+rightip=`/pace/etcdget.py ipaddr/$ipaddr/$ipsubnet`
 resname=`echo $rightip | awk -F'/' '{print $1}'`
 echo $rightip | grep -w '\-1' 
 if [ $? -eq 0 ];
 then
  resname=cifs-$pool-$ipaddr
- /pace/etcdput.py ipaddr/$ipaddr $resname/$vol
- /pace/broadcasttolocal.py ipaddr/$ipaddr $resname/$vol 
+ /pace/etcdput.py ipaddr/$ipaddr/$ipsubnet $resname/$vol
+ /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
  docker stop $resname 
  docker container rm $resname 
  /sbin/pcs resource delete --force $resname  2>/dev/null
@@ -60,8 +60,8 @@ else
  do
   mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
  done
- /pace/etcdput.py ipaddr/$ipaddr $newright 
- /pace/broadcasttolocal.py ipaddr/$ipaddr $newright
+ /pace/etcdput.py ipaddr/$ipaddr/$ipsubnet $newright 
+ /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $newright
  cat /TopStordata/smb.${vol} >> /TopStordata/smb.$ipaddr
  docker stop $resname
  docker rm $resname

@@ -39,15 +39,15 @@ then
   -v /opt/passwds/shadow:/etc/shadow:rw \
   --name $resname 10.11.11.124:5000/nfs
 fi 
-rightip=`/pace/etcdget.py ipaddr/$ipaddr`
+rightip=`/pace/etcdget.py ipaddr/$ipaddr/$ipsubnet`
 resname=`echo $rightip | awk -F'/' '{print $1}'`
 docker ps  | grep -w $resname 
 if [ $? -ne 0 ];
 then
  echo iam here
  resname=nfs-$pool-$ipaddr
- /pace/etcdput.py ipaddr/$ipaddr $resname/$vol 
- /pace/broadcasttolocal.py ipaddr/$ipaddr $resname/$vol 
+ /pace/etcdput.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
+ /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
  docker stop $resname
  docker container rm $resname
  yes | cp /etc/{passwd,group,shadow} /opt/passwds
@@ -77,8 +77,8 @@ else
  cat /TopStordata/exports.${vol} >> /TopStordata/exports.$ipaddr
  docker stop $resname
  docker rm $resname
- /pace/etcdput.py ipaddr/$ipaddr $newright 
- /pace/broadcasttolocal.py ipaddr/$ipaddr $newright 
+ /pace/etcdput.py ipaddr/$ipaddr/$ipsubnet $newright 
+ /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $newright 
  docker run -d $mount -v /TopStordata/exports.$ipaddr:/etc/exports:ro \
   --cap-add SYS_ADMIN -p $ipaddr:2049:2049  -p $ipaddr:2049:2049/udp \
   -p $ipaddr:32765:32765 -p $ipaddr:32765:32765/udp \
