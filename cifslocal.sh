@@ -7,6 +7,7 @@ pool=`echo $@ | awk '{print $2}'`;
 i=`echo $@ | awk '{print $3}'`
 resname=`echo $i | awk -F'/' '{print $1}'`
 newright=`echo $i | cut -d/ -f2-` 
+echo newright=$newright
 ipaddr=`echo $@ | awk '{print $4}'`
 ipsubnet=`echo $@ | awk '{print $5}'`
 echo $@ > /root/cifsparam
@@ -17,6 +18,8 @@ do
  mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
 done
 echo mount=$mount
+/sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
+/sbin/pcs resource group add ip-all $resname 
 docker stop $resname
 docker rm $resname
 docker run -d $mount --privileged \
