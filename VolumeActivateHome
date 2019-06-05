@@ -13,6 +13,7 @@ vol=`echo $@ | awk -F'vol=' '{print $2}' | awk '{print $1}'`;
 pool=`echo $@ | awk -F'pool=' '{print $2}' | awk '{print $1}'`;
 userreq=`echo $@ | awk -F'user=' '{print $2}' | awk '{print $1}'`;
 myhost=`hostname -s`
+ips='0'
 
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
@@ -32,6 +33,7 @@ then
    ;;
   10)
    echo pool only $pool
+    declare  ips=`/pace/etcdget.py ipaddr $pool`
     declare  vols=`/pace/etcdget.py volumes/HOMe  $pool`
    ;;
   11)
@@ -55,33 +57,81 @@ then
   echo No Volumes -1
   exit
  fi
- cp /TopStor/smb.conf /TopStordata/smb.confcurrent
- echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
- do
-  echo l=$l;
-  pool=`echo $l | awk -F'/' '{print $1}'`
-  name=`echo $l | awk -F'/' '{print $2}'`
-  path='/'${pool}'/'${name}
-  readv=`echo $l | awk -F'/' '{print $3}'`
-  browsable=`echo $l | awk -F'/' '{print $4}'`
-  writev=`echo $l | awk -F'/' '{print $5}'`
-  admin=`echo $l | awk -F'/' '{print $6}'`
-  writeable=`echo $l | awk -F'/' '{print $7}'`
-  homeprop=`ETCDCTL_API=3 /pace/etcdget.py ipaddr/HOMe` 
-  if [ $homeprop -eq '-1' ];
+ ispoolonly=`echo $ips | wc -c `
+ if [ $ispoolonly -gt 5 ];
   then
-   ipaddr='10.11.11.20'
-   ipsubnet='24';
-  else
-   ipaddr=`echo $homeprop | awk -F'/' '{print $1}'` 
-   ipsubnet=`echo $homeprop | awk -F'/' '{print $2}'` 
-  fi
-  yes | cp homecifs.txt /TopStordata/smb.${name}
-  sed -i "s/USER/$name/g"  /TopStordata/smb.${name}
-  sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
-  echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
-  /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
- done
+  echo "${ips[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read i;
+  do
+   ip=`echo $i | awk -F'-' '{print $3}' | awk -F'/' '{print $1}'`
+   rm -rf /TopStordata/smb.$ip
+   declare ipvol=`echo $i |  cut -d/ -f2-`
+   echo "${ipvol[@]}" | sed 's/\//\n/g' | while read v;
+   do
+    l=`echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | grep $v` 
+    lc=`echo $l | wc -c `
+    if [ $lc -lt 3 ];
+    then
+     continue
+    fi
+    pool=`echo $l | awk -F'/' '{print $1}'`
+    name=`echo $l | awk -F'/' '{print $2}'`
+    path='/'${pool}'/'${name}
+    readv=`echo $l | awk -F'/' '{print $3}'`
+    browsable=`echo $l | awk -F'/' '{print $4}'`
+    writev=`echo $l | awk -F'/' '{print $5}'`
+    admin=`echo $l | awk -F'/' '{print $6}'`
+    writeable=`echo $l | awk -F'/' '{print $7}'`
+    homeprop=`ETCDCTL_API=3 /pace/etcdget.py ipaddr/HOMe` 
+    echo $homeprop | grep -w '\-1'
+    if [ $? -eq 0 ];
+    then
+     ipaddr='10.11.11.20'
+     ipsubnet='24';
+    else
+     ipaddr=`echo $homeprop | awk -F'/' '{print $1}'` 
+     ipsubnet=`echo $homeprop | awk -F'/' '{print $2}'` 
+    fi
+    yes | cp homecifs.txt /TopStordata/smb.${name}
+    sed -i "s/USER/$name/g"  /TopStordata/smb.${name}
+    sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
+    cat /TopStordata/smb.${name} >> /TopStordata/smb.$ip
+   done
+   ipc=`cat /TopStordata/smb.$ip | wc -l`
+   if [ $ipc -lt 4 ];
+   then
+     continue
+   fi
+   /TopStor/cifspoolonly.sh $pool $i $ip $ipsubnet
+  done
+ else
+  cp /TopStor/smb.conf /TopStordata/smb.confcurrent
+  echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
+  do
+   echo l=$l;
+   pool=`echo $l | awk -F'/' '{print $1}'`
+   name=`echo $l | awk -F'/' '{print $2}'`
+   path='/'${pool}'/'${name}
+   readv=`echo $l | awk -F'/' '{print $3}'`
+   browsable=`echo $l | awk -F'/' '{print $4}'`
+   writev=`echo $l | awk -F'/' '{print $5}'`
+   admin=`echo $l | awk -F'/' '{print $6}'`
+   writeable=`echo $l | awk -F'/' '{print $7}'`
+   homeprop=`ETCDCTL_API=3 /pace/etcdget.py ipaddr/HOMe` 
+   if [ $homeprop -eq '-1' ];
+   then
+    ipaddr='10.11.11.20'
+    ipsubnet='24';
+   else
+    ipaddr=`echo $homeprop | awk -F'/' '{print $1}'` 
+    ipsubnet=`echo $homeprop | awk -F'/' '{print $2}'` 
+   fi
+   yes | cp homecifs.txt /TopStordata/smb.${name}
+   sed -i "s/USER/$name/g"  /TopStordata/smb.${name}
+   sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
+   echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
+   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
+  done
+ fi
  echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
  do
   pool=`echo $l | awk -F'/' '{print $1}'`
