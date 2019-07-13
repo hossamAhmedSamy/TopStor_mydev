@@ -50,7 +50,7 @@ then
  /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
  docker stop $resname
  docker container rm $resname
- yes | cp /etc/{passwd,group,shadow} /opt/passwds
+ #yes | cp /etc/{passwd,group,shadow} /opt/passwds
  cp /TopStordata/exports.${vol} /TopStordata/exports.$ipaddr
  /sbin/pcs resource delete --force $resname  2>/dev/null
  /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart

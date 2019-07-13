@@ -36,7 +36,7 @@ then
  /sbin/pcs resource delete --force $resname  2>/dev/null
  /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
  /sbin/pcs resource group add ip-all $resname 
- yes | cp /etc/{passwd,group,shadow} /opt/passwds
+ #yes | cp /etc/{passwd,group,shadow} /opt/passwds
  cp /TopStor/smb.conf /TopStordata/smb.$ipaddr
  cat /TopStordata/smb.${vol}>> /TopStordata/smb.$ipaddr
  docker run -d -v /$pool/$vol:/$pool/$vol:rw --privileged \

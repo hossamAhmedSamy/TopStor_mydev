@@ -20,7 +20,7 @@ done
 /sbin/pcs resource group add ip-all $resname 
 docker stop $resname
 docker rm $resname
- yes | cp /etc/{passwd,group,shadow} /opt/passwds
+ #yes | cp /etc/{passwd,group,shadow} /opt/passwds
 docker run -d $mount -v /TopStordata/exports.$ipaddr:/etc/exports:ro \
  --cap-add SYS_ADMIN -p $redipaddr:2049:2049  -p $ipaddr:2049:2049/udp \
  -p $ipaddr:32765:32765 -p $ipaddr:32765:32765/udp \

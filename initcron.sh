@@ -2,9 +2,6 @@
 rm -rf /pacedata/nodesearch.txt
 touch /pacedata/forzfsping
 /sbin/pcs property set stonith-enabled=false
-rm -rf /opt/passwds
-mkdir /opt/passwds
-yes | cp /etc/{passwd,group,shadow} /opt/passwds
 nic=`/sbin/pcs resource show CC | grep nic | awk -F'nic=' '{print $2}' | awk '{print $1}'`
 while [ $? -ne 0 ];
 do
