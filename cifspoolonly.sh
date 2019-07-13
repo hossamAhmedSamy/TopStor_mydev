@@ -29,9 +29,9 @@ docker run -d $mount --privileged \
  -p $ipaddr:445:445 \
  -v /etc/localtime:/etc/localtime:ro \
  -v /TopStordata/smb.${ipaddr}:/config/smb.conf:rw \
- -v /opt/passwds/passwd:/etc/passwd:rw \
- -v /opt/passwds/group:/etc/group:rw \
- -v /opt/passwds/shadow:/etc/shadow:rw \
+ -v /etc/passwd:/etc/passwd:rw \
+ -v /etc/group:/etc/group:rw \
+ -v /etc/shadow:/etc/shadow:rw \
  -v /var/lib/samba/private:/var/lib/samba/private:rw \
  --name $resname 10.11.11.124:5000/smb
 
