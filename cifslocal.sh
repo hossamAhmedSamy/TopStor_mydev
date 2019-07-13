@@ -20,6 +20,7 @@ done
 echo mount=$mount
 /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
 /sbin/pcs resource group add ip-all $resname 
+ yes | cp /etc/{passwd,group,shadow} /opt/passwds
 docker stop $resname
 docker rm $resname
 docker run -d $mount --privileged \

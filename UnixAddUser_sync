@@ -45,7 +45,6 @@ cat $txtres
  gpg -u "QuickStor" -r"QuickStor" key/${username}fixed
  chmod 400 key/${username}fixed.gpg;
  rm -rf key/${username}fixed
- yes | cp /etc/{passwd,group,shadow} /opt/passwds
  /pace/etcdsync.py $myip usersinfo/$username usersinfo/$username 
  /pace/etcdsync.py $myip usershash/$username usershash/$username 
  /TopStor/logmsg.py Unlin10222 info $userreq $username
