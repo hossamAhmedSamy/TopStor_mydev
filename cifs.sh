@@ -36,7 +36,7 @@ then
  /sbin/pcs resource delete --force $resname  2>/dev/null
  /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
  /sbin/pcs resource group add ip-all $resname 
- #yes | cp /etc/{passwd,group,shadow} /opt/passwds
+ #yes | cp /etc/{passwd,group,shadow} /etc
  cp /TopStor/smb.conf /TopStordata/smb.$ipaddr
  cat /TopStordata/smb.${vol}>> /TopStordata/smb.$ipaddr
  docker run -d -v /$pool/$vol:/$pool/$vol:rw --privileged \
@@ -47,9 +47,9 @@ then
   -p $ipaddr:445:445 \
   -v /etc/localtime:/etc/localtime:ro \
   -v /TopStordata/smb.${ipaddr}:/config/smb.conf:rw \
-  -v /opt/passwds/passwd:/etc/passwd:rw \
-  -v /opt/passwds/group:/etc/group:rw \
-  -v /opt/passwds/shadow:/etc/shadow:rw \
+  -v /etc/passwd:/etc/passwd:rw \
+  -v /etc/group:/etc/group:rw \
+  -v /etc/shadow:/etc/shadow:rw \
   -v /var/lib/samba/private:/var/lib/samba/private:rw \
   --name $resname 10.11.11.124:5000/smb
 else
@@ -73,9 +73,9 @@ else
   -p $ipaddr:445:445 \
   -v /etc/localtime:/etc/localtime:ro \
   -v /TopStordata/smb.${ipaddr}:/config/smb.conf:rw \
-  -v /opt/passwds/passwd:/etc/passwd:rw \
-  -v /opt/passwds/group:/etc/group:rw \
-  -v /opt/passwds/shadow:/etc/shadow:rw \
+  -v /etc/passwd:/etc/passwd:rw \
+  -v /etc/group:/etc/group:rw \
+  -v /etc/shadow:/etc/shadow:rw \
   -v /var/lib/samba/private:/var/lib/samba/private:rw \
   --name $resname 10.11.11.124:5000/smb
 fi

@@ -34,9 +34,9 @@ then
   -p $redipaddr:32765:32765 -p $redipaddr:32765:32765/udp \
   -p $redipaddr:111:111 -p $redipaddr:111:111/udp \
   -p $redipaddr:32767:32767 -p $redipaddr:32767:32767/udp \
-  -v /opt/passwds/passwd:/etc/passwd:rw \
-  -v /opt/passwds/group:/etc/group:rw \
-  -v /opt/passwds/shadow:/etc/shadow:rw \
+  -v /etc/passwd:/etc/passwd:rw \
+  -v /etc/group:/etc/group:rw \
+  -v /etc/shadow:/etc/shadow:rw \
   --name $resname 10.11.11.124:5000/nfs
 fi 
 rightip=`/pace/etcdget.py ipaddr/$ipaddr/$ipsubnet`
@@ -50,7 +50,7 @@ then
  /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
  docker stop $resname
  docker container rm $resname
- #yes | cp /etc/{passwd,group,shadow} /opt/passwds
+ #yes | cp /etc/{passwd,group,shadow} /etc
  cp /TopStordata/exports.${vol} /TopStordata/exports.$ipaddr
  /sbin/pcs resource delete --force $resname  2>/dev/null
  /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
@@ -60,9 +60,9 @@ then
   -p $ipaddr:32765:32765 -p $ipaddr:32765:32765/udp \
   -p $ipaddr:111:111 -p $ipaddr:111:111/udp \
   -p $ipaddr:32767:32767 -p $ipaddr:32767:32767/udp \
-  -v /opt/passwds/passwd:/etc/passwd:rw \
-  -v /opt/passwds/group:/etc/group:rw \
-  -v /opt/passwds/shadow:/etc/shadow:rw \
+  -v /etc/passwd:/etc/passwd:rw \
+  -v /etc/group:/etc/group:rw \
+  -v /etc/shadow:/etc/shadow:rw \
   --name $resname 10.11.11.124:5000/nfs
 else
  echo iam there
@@ -84,8 +84,8 @@ else
   -p $ipaddr:32765:32765 -p $ipaddr:32765:32765/udp \
   -p $ipaddr:111:111 -p $ipaddr:111:111/udp \
   -p $ipaddr:32767:32767 -p $ipaddr:32767:32767/udp \
-  -v /opt/passwds/passwd:/etc/passwd:rw \
-  -v /opt/passwds/group:/etc/group:rw \
-  -v /opt/passwds/shadow:/etc/shadow:rw \
+  -v /etc/passwd:/etc/passwd:rw \
+  -v /etc/group:/etc/group:rw \
+  -v /etc/shadow:/etc/shadow:rw \
   --name $resname 10.11.11.124:5000/nfs
 fi

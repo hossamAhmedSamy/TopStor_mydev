@@ -24,7 +24,7 @@ docker run -d $mount -v /TopStordata/exports.$ipaddr:/etc/exports:ro \
  -p $ipaddr:32765:32765 -p $ipaddr:32765:32765/udp \
  -p $ipaddr:111:111 -p $ipaddr:111:111/udp \
  -p $ipaddr:32767:32767 -p $ipaddr:32767:32767/udp \
- -v /opt/passwds/passwd:/etc/passwd:rw \
- -v /opt/passwds/group:/etc/group:rw \
- -v /opt/passwds/shadow:/etc/shadow:rw \
+ -v /etc/passwd:/etc/passwd:rw \
+ -v /etc/group:/etc/group:rw \
+ -v /etc/shadow:/etc/shadow:rw \
  --name $resname 10.11.11.124:5000/nfs
