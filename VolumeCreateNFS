@@ -60,6 +60,5 @@ then
  fi;
  /pace/putzpool.py &
 fi
-fi
 echo ready ;
 /TopStor/queuethis.sh `basename "$0"` finished $userreq &

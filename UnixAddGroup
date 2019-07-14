@@ -1,5 +1,5 @@
 #!/bin/sh
-echo $@ > /root/unixadduser
+echo $@ > /root/unixaddgrp
 export ETCDCTL_API=3
 cd /TopStor
 web='/var/www/html/des20/Data/Usersstatus.log';
