@@ -20,6 +20,7 @@ then
  /TopStor/logmsg.py Unst1024 info $userreq $username
 # cgrps=`id -Gn $username | sed "s/$username//g"` 
  usermod -G $usergroups $username
+ usermod -a -G Everyone $username
  cgrps=`/pace/etcdget.py usersigroup $username`
  cgrpsl=${#cgrps}
  while [ $cgrpsl  -gt 4 ];

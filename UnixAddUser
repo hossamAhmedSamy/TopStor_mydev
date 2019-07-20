@@ -86,4 +86,8 @@ then
   /TopStor/logmsg.py Unlin1022 info $userreq $username
  fi 
 fi
+ln -f /etc/passwd  /opt/passwds/passwd
+ln -f /etc/group  /opt/passwds/group
+ln -f /etc/shadow  /opt/passwds/shadow
 /TopStor/queuethis.sh `basename "$0"` finished $userreq &
+
