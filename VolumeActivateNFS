@@ -75,8 +75,11 @@ then
     fi
     pool=`echo $l | awk -F'/' '{print $1}'`
     name=`echo $l | awk -F'/' '{print $2}'`
+    shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
     echo $name
-    path='/'${pool}'/'${name}
+    #path='/'${pool}'/'${name}
+    ln '/'${pool}'/'${name} '/'${pool}'/'${shortname}
+    path='/'${pool}'/'${shortname}
     who=`echo $l | awk -F'/' '{print $3}'`
     access=`echo $l | awk -F'/' '{print $4}'`
     sync=`echo $l | awk -F'/' '{print $5}'`
