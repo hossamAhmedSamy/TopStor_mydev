@@ -29,7 +29,7 @@ then
 # systemctl stop nfs ;
  pooldockers=`docker ps | grep $pool | awk '{print $NF}'`
  
- systemctl stop smb 
+# systemctl stop smb 
  for x in ${pooldockers[@]}; do
   docker stop $x
  done
@@ -39,7 +39,7 @@ then
   docker start $x
  done
 # systemctl start nfs 
- systemctl start smb
+# systemctl start smb
 else
  echo pool $pool is working normally >>/root/fixpool
  /pace/etcddel.py fixpool/$pool
