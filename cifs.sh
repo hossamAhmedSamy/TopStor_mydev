@@ -53,6 +53,7 @@ then
   -v /var/lib/samba/private:/var/lib/samba/private:rw \
   --name $resname 10.11.11.124:5000/smb
 else
+ echo 'multiple vols'
  newright=${rightip}'/'$vol 
  mounts=`echo $newright |sed 's/\// /g'| awk '{$1=""; print}'`
  mount=''
@@ -60,7 +61,7 @@ else
  for x in $mounts; 
  do
   mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
-  cat /TopSTordata/smb.$x >> /TopStordata/tempsmb.$ipaddr
+  cat /TopStordata/smb.$x >> /TopStordata/tempsmb.$ipaddr
  done
  /pace/etcdput.py ipaddr/$ipaddr/$ipsubnet $newright 
  /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $newright
