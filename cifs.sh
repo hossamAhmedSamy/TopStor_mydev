@@ -56,13 +56,15 @@ else
  newright=${rightip}'/'$vol 
  mounts=`echo $newright |sed 's/\// /g'| awk '{$1=""; print}'`
  mount=''
+ rm -rf /TopStordata/tempsmb.$ipaddr
  for x in $mounts; 
  do
   mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
+  cat /TopSTordata/smb.$x >> /TopStordata/tempsmb.$ipaddr
  done
  /pace/etcdput.py ipaddr/$ipaddr/$ipsubnet $newright 
  /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $newright
- cat /TopStordata/smb.${vol} >> /TopStordata/smb.$ipaddr
+ cp /TopStordata/tempsmb.$ipaddr  /TopStordata/smb.$ipaddr
  docker stop $resname
  docker rm $resname
  docker run -d $mount --privileged \

@@ -12,13 +12,16 @@ ipsubnet=`echo $@ | awk '{print $4}'`
 echo $@ > /root/cifsparam
 mounts=`echo $newright |sed 's/\// /g'| cut -f2-`
 mount=''
+rm -rf /TopStordata/tempsmb.$ipaddr
 for x in $mounts; 
 do
  mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
+ cat /TopSTordata/smb.$x >> /TopStordata/tempsmb.$ipaddr
 done
 echo mount=$mount
 /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
 /sbin/pcs resource group add ip-all $resname 
+cp /TopStordata/tempsmb.$ipaddr  /TopStordata/smb.$ipaddr
 docker stop $resname
 docker rm $resname
 docker run -d $mount --privileged \
