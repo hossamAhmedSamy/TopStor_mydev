@@ -126,6 +126,8 @@ then
    admin=`echo $l | awk -F'/' '{print $6}'`
    writeable=`echo $l | awk -F'/' '{print $7}'`
    yes | cp sharecifs.txt /TopStordata/smb.${name}
+   shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
+   sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/smb.${name}
    sed -i "s/NAMECIFS/$name/g"  /TopStordata/smb.${name}
    sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
    sed -i "s/no/$readv/g" /TopStordata/smb.${name}
