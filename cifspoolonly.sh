@@ -16,7 +16,7 @@ rm -rf /TopStordata/tempsmb.$ipaddr
 for x in $mounts; 
 do
  mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
- cat /TopSTordata/smb.$x >> /TopStordata/tempsmb.$ipaddr
+ cat /TopStordata/smb.$x >> /TopStordata/tempsmb.$ipaddr
 done
 echo mount=$mount
 /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
