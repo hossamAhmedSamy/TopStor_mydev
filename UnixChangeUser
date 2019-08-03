@@ -19,74 +19,103 @@ if [[ $contrun == 'true' ]]
 then
  /TopStor/logmsg.py Unst1024 info $userreq $username
 # cgrps=`id -Gn $username | sed "s/$username//g"` 
- usermod -G $usergroups $username
- usermod -a -G Everyone $username
- cgrps=`/pace/etcdget.py usersigroup $username`
- cgrpsl=${#cgrps}
- while [ $cgrpsl  -gt 4 ];
- do
-  l=`echo "${cgrps[@]}" | tail -1 `
-  cgrps=`echo "${cgrps[@]}" | sed '$d'`
+ echo $username | grep NoUser
+ if [ $? -ne 0 ];
+ then
+  usermod -G $usergroups $username
+  usermod -a -G Everyone $username
+  cgrps=`/pace/etcdget.py usersigroup $username`
   cgrpsl=${#cgrps}
-  cgrp=`echo $l | sed "s/('usersigroup\///g" | awk -F"'" '{print $1}' `  
-  echo $usergroups | grep -w $cgrp  &>/dev/null
-  if [ $? -ne 0 ];
-  then
-   usersall=`/pace/etcdget.py usersigroup/$cgrp`
-   cusers=`echo $usersall | awk -F'/' '{print $3}'`
-   cusersleft=`echo $usersall | cut -d/ -f1-2`
-   cusersright=`echo $usersall | cut -d/ -f4-`
-   newusers=`echo ${cusers} | sed "s/,$username//g" | sed "s/$username,//g"`
-   resusers=${#newusers}
-   if [ $resusers -le 2 ];
-   then
-    newusers='no'
-   fi
-   newop=$cusersleft'/'$newusers'/'$cusersright
-   groupres=`echo ${newop} | sed "s/$username,//g" | sed "s/,$username//g" `
-   echo to remove : $cgrp to be $groupres
-   /pace/etcdput.py usersigroup/$cgrp $groupres 
-  else
-   stablegrp=${stablegrp}${cgrp}',';
-   echo to keep : $cgrp
-  fi
- done
- echo the stable=$stablegrp
- usergropus=$usergroups','
- grpsl=` echo ${usergroups} | sed 's/,/ /g' | wc -w`
- while [ $grpsl -gt 0 ]; 
- do
-  l=`echo $usergroups |  cut -d, -f 1`
-  usergroups=`echo $usergroups | sed 's/ /,/g' | cut -d, -f2-`
-  usergroups=$usergroups','
-  grpsl=` echo ${usergroups} | sed 's/,/ /g' | wc -w`
-  echo l=$l
-  echo usrgroups=$usergroups
-  echo grpsl=$grpsl
-  echo $stablegrp | grep -w $l >/dev/null
-  if [ $? -ne 0 ];
-  then
-   usersall=`/pace/etcdget.py usersigroup/$l`
-   cusers=`echo $usersall | awk -F'/' '{print $3}'`
-   cusersleft=`echo $usersall | cut -d/ -f1-2`
-   cusersright=`echo $usersall | cut -d/ -f4-`
-   echo $cusers | grep -w no
+  while [ $cgrpsl  -gt 4 ];
+  do
+   l=`echo "${cgrps[@]}" | tail -1 `
+   cgrps=`echo "${cgrps[@]}" | sed '$d'`
+   cgrpsl=${#cgrps}
+   cgrp=`echo $l | sed "s/('usersigroup\///g" | awk -F"'" '{print $1}' `  
+   echo $usergroups | grep -w $cgrp  &>/dev/null
    if [ $? -ne 0 ];
    then
-    newusers=${cusers}','$username
+    usersall=`/pace/etcdget.py usersigroup/$cgrp`
+    cusers=`echo $usersall | awk -F'/' '{print $3}'`
+    cusersleft=`echo $usersall | cut -d/ -f1-2`
+    cusersright=`echo $usersall | cut -d/ -f4-`
+    newusers=`echo ${cusers} | sed "s/,$username//g" | sed "s/$username,//g"`
+    resusers=${#newusers}
+    if [ $resusers -le 2 ];
+    then
+     newusers='NoUser'
+    fi
     newop=$cusersleft'/'$newusers'/'$cusersright
-    groupres=`echo ${newop}`
-    echo appending $l to be $groupres
-    /pace/etcdput.py usersigroup/$l $groupres 
-   else 
-    newusers=$username
-    newop=$cusersleft'/'$newusers'/'$cusersright
-    groupres=`echo ${newop}`
-    echo adding $l to be $groupres
-    /pace/etcdput.py usersigroup/$l $groupres 
+    groupres=`echo ${newop} | sed "s/$username,//g" | sed "s/,$username//g" `
+    echo to remove : $cgrp to be $groupres
+    /pace/etcdput.py usersigroup/$cgrp $groupres 
+   else
+    stablegrp=${stablegrp}${cgrp}',';
+    echo to keep : $cgrp
    fi
-  fi
- done
+  done
+  echo the stable=$stablegrp
+  usergroups=$usergroups','
+  grpsl=` echo ${usergroups} | sed 's/,/ /g' | wc -w`
+  while [ $grpsl -gt 0 ]; 
+  do
+   l=`echo $usergroups |  cut -d, -f 1`
+   usergroups=`echo $usergroups | sed 's/ /,/g' | cut -d, -f2-`
+   usergroups=$usergroups','
+   grpsl=` echo ${usergroups} | sed 's/,/ /g' | wc -w`
+   echo l=$l
+   echo usrgroups=$usergroups
+   echo grpsl=$grpsl
+   echo stablegrp=$stablegrp
+   echo $stablegrp | grep -w $l >/dev/null
+   if [ $? -ne 0 ];
+   then
+    usersall=`/pace/etcdget.py usersigroup/$l`
+    cusers=`echo $usersall | awk -F'/' '{print $3}'`
+    cusersleft=`echo $usersall | cut -d/ -f1-2`
+    cusersright=`echo $usersall | cut -d/ -f4-`
+    echo $cusers | grep -w NoUser
+    if [ $? -ne 0 ];
+    then
+     newusers=${cusers}','$username
+     newop=$cusersleft'/'$newusers'/'$cusersright
+     groupres=`echo ${newop}`
+     echo appending $l to be $groupres
+     /pace/etcdput.py usersigroup/$l $groupres 
+    else 
+     echo I am here: $username
+     newusers=$username
+     newop=$cusersleft'/'$newusers'/'$cusersright
+     groupres=`echo ${newop}`
+     echo adding $l to be $groupres
+     /pace/etcdput.py usersigroup/$l $groupres 
+    fi
+   fi
+  done
+######### or else username=NoUser.. Remove all users form this usergroups
+ else
+  allusers=`/pace/etcdget.py usersigroup/$usergroups`
+  usersall=`echo $allusers | awk -F'/' '{print $3}'`','
+  usersl=` echo ${usersall} | sed 's/,/ /g' | wc -w`
+  while [ $usersl -gt 0 ]; 
+  do
+   l=`echo $usersall |  cut -d, -f 1`
+   usersall=`echo $usersall | sed 's/ /,/g' | cut -d, -f2-`
+   usersall=$usersall','
+   usersl=`echo ${usersall} | sed 's/,/ /g' | wc -w`
+   echo l=$l
+   echo usersall=$usersall
+   echo usersl=$usersl
+   gpasswd -d $l $usergroups
+  done
+   cusers=`echo $allusers | awk -F'/' '{print $3}'`
+   cusersleft=`echo $allusers | cut -d/ -f1-2`
+   cusersright=`echo $allusers | cut -d/ -f4-`
+   newusers='NoUser'
+   newop=$cusersleft'/'$newusers'/'$cusersright
+   groupres=`echo ${newop}`
+   /pace/etcdput.py usersigroup/$usergroups  $groupres 
+ fi
  /TopStor/broadcast.py UserChange /TopStor/pump.sh UnixChangeUser_sync -d$myhost $@ 
  /TopStor/logmsg.py Unlin1022 info $userreq $username
 fi 
