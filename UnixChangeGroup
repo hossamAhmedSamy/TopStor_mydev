@@ -37,9 +37,14 @@ then
   while [ $oldusersel -gt 0 ];
   do
    l=`echo $oldusers |  cut -d, -f 1`
+   lsn=`echo $l | wc -c `
    oldusers=`echo $oldusers | sed 's/ /,/g' | cut -d, -f2-`
    oldusers=$oldusers','
    oldusersel=`echo ${oldusers} | sed 's/,/ /g' | wc -w`
+   if [ $lsn -le 2 ];
+   then
+    continue
+   fi
    echo $groupusers | grep -w $l
    if [ $? -ne 0 ];
    then
@@ -49,6 +54,8 @@ then
     stableuser=$stableuser' '$l
    fi 
   done 
+  echo originalusers=$originalusers
+  sleep 3
   echo $originalusers | grep $memoryallusers 
   if [ $? -ne 0 ];
   then
