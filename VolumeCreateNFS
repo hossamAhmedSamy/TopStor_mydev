@@ -50,14 +50,18 @@ then
  cd /TopStor
  /sbin/zfs create -o overlay=on -o acltype=posixacl -o aclinherit=passthrough -o xattr=sa -o atime=off -o redundant_metadata=most -o quota=$quota -o dedup=on -o compression=lz4  $DG/$name 2> $txtres
  /sbin/zfs set prot:kind=NFS $DG/$name 
- ETCDCTL_API=3 /pace/etcdput.py volumes/NFS/$myhost/$DG/$name $DG/$name/*/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet
+ oct1=`echo $ipaddr | awk -F'.' '{print $1}'`
+ oct2=`echo $ipaddr | awk -F'.' '{print $2}'`
+ oct3=`echo $ipaddr | awk -F'.' '{print $3}'`
+ who=$oct1'.'$oct2'.'$oct3'.*'
+ ETCDCTL_API=3 /pace/etcdput.py volumes/NFS/$myhost/$DG/$name $DG/$name/$who/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet
  /TopStor/VolumeActivateNFS vol=$name user=$userreq
  ls /$DG/ | grep $name
  if [ $? -ne 0 ];
  then
   /TopStor/logmsg.py NFS1005 error  $userreq $name
  else 
-  ETCDCTL_API=3 /pace/etcdput.py volumes/NFS/$myhost/$DG/$name $DG/$name/*/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet
+  ETCDCTL_API=3 /pace/etcdput.py volumes/NFS/$myhost/$DG/$name $DG/$name/$who/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet
   /TopStor/logmsg.py NFS1007 info $userreq $name
  fi;
  /pace/putzpool.py &

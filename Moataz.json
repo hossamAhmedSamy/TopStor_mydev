@@ -138,7 +138,7 @@
       },
       "targets": [
         {
-          "expr": "irate(node_network_transmit_bytes_total{instance=~'$node', device=~\"enp.*\"}[10s])*8/1024 or irate(node_network_transmit_bytes{instance=~'$node',device=~\"enp.*\"}[10s])*8/1024",
+          "expr": "irate(node_network_transmit_bytes_total{instance=~'$node', device=~\"en.*\"}[10s])*8/1024 or irate(node_network_transmit_bytes{instance=~'$node',device=~\"en.*\"}[10s])*8/1024",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -212,7 +212,7 @@
       },
       "targets": [
         {
-          "expr": "irate(node_network_receive_bytes_total{instance=~'$node', device=~\"enp.*\"}[10s])*8/1024 or irate(node_network_receive_bytes{instance=~'$node',device=~\"enp.*\"}[10s])*8/1024",
+          "expr": "irate(node_network_receive_bytes_total{instance=~'$node', device=~\"en.*\"}[10s])*8/1024 or irate(node_network_receive_bytes{instance=~'$node',device=~\"en.*\"}[10s])*8/1024",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -427,7 +427,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "irate(node_network_receive_bytes_total{instance=~'$node', device=~\"enp.*\"}[5m])*8 or irate(node_network_receive_bytes{instance=~'$node',device=~\"enp.*\"}[5m])*8",
+          "expr": "irate(node_network_receive_bytes_total{instance=~'$node', device=~\"en.*\"}[5m])*8 or irate(node_network_receive_bytes{instance=~'$node',device=~\"en.*\"}[5m])*8",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -438,7 +438,7 @@
           "target": ""
         },
         {
-          "expr": "irate(node_network_transmit_bytes_total{instance=~'$node',device=~\"enp.*\"}[5m])*8 or irate(node_network_transmit_bytes{instance=~'$node',device=~\"enp.*\"}[5m])*8",
+          "expr": "irate(node_network_transmit_bytes_total{instance=~'$node',device=~\"en.*\"}[5m])*8 or irate(node_network_transmit_bytes{instance=~'$node',device=~\"en.*\"}[5m])*8",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -532,7 +532,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "node_network_transmit{job=\"node\",instance=~\"$node\",interface=~\"enp.*\"}",
+          "expr": "node_network_transmit{job=\"node\",instance=~\"$node\",interface=~\"en.*\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",

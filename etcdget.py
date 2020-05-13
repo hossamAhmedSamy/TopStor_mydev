@@ -8,6 +8,7 @@ def etcdget(key, prefix=''):
   endpoints=endpoints+str(x['clientURLs'])[2:][:-2]+','
  cmdline=['/bin/etcdctl','--endpoints='+endpoints,'get',key,prefix]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ print(cmdline)
  z=[]
  try:
   if(prefix =='--prefix'):

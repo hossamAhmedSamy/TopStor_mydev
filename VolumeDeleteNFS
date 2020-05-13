@@ -18,6 +18,9 @@ if [[ $contrun == 'true' ]]
 then
  echo $@ > /root/VolumeDestroy
  /TopStor/logmsg.py NFS1000 info $userreq $volname
+ cat /etc/exports | grep -v $volname > /TopStordata/exports 
+ cp /TopStordata/exports /etc/exports
+ systemctl reload nfs
  clearvol=`./prot.py clearvol $volname | awk -F'result=' '{print $2}'`
  if [ $clearvol != '-1' ];
  then
@@ -41,17 +44,6 @@ then
   do
    mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
   done
-  docker stop $resname
-  docker rm $resname
-  docker run -d $mount -v /TopStordata/exports.$redipaddr:/etc/exports:ro \
-  --cap-add SYS_ADMIN -p $redipaddr:2049:2049  -p $redipaddr:2049:2049/udp \
-  -p $redipaddr:32765:32765 -p $redipaddr:32765:32765/udp \
-  -p $redipaddr:111:111 -p $redipaddr:111:111/udp \
-  -p $redipaddr:32767:32767 -p $redipaddr:32767:32767/udp \
-  -v /opt/passwds/passwd:/etc/passwd:rw \
-  -v /opt/passwds/group:/etc/group:rw \
-  -v /opt/passwds/shadow:/etc/shadow:rw \
-  --name $resname 10.11.11.124:5000/nfs
  fi  
  rm -rf /etc/exports.$volname
  /sbin/zfs destroy -r $DG/$volname
