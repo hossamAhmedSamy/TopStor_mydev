@@ -17,14 +17,6 @@ do
 done
 /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
 /sbin/pcs resource group add ip-all $resname 
-docker stop $resname
-docker rm $resname
-docker run -d $mount -v /TopStordata/exports.$ipaddr:/etc/exports:ro \
- --cap-add SYS_ADMIN -p $ipaddr:2049:2049  -p $ipaddr:2049:2049/udp \
- -p $ipaddr:32765:32765 -p $ipaddr:32765:32765/udp \
- -p $ipaddr:111:111 -p $ipaddr:111:111/udp \
- -p $ipaddr:32767:32767 -p $ipaddr:32767:32767/udp \
- -v /etc/passwd:/etc/passwd:rw \
- -v /etc/group:/etc/group:rw \
- -v /etc/shadow:/etc/shadow:rw \
- --name $resname 10.11.11.124:5000/nfs
+cat /etc/exports | grep -v $vol  > /etc/exports
+cat /TopStordata/exports.${ipaddr} >> /etc/exports ;
+systemctl reload nfs-server
