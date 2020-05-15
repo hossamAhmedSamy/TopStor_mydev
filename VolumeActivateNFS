@@ -90,6 +90,7 @@ then
     ipaddr=`echo $l | awk -F'/' '{print $10}'`
     ipsubnet=`echo $l | awk -F'/' '{print $11}'`
     writev=`echo $writev | sed 's/\,/ /g' `;
+    echo $ipsubnet > /TopStordata/NFStmp
     echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' > /TopStordata/exports.$name 
     cat /TopStordata/exports.$name >> /TopStordata/exports.$ip
    done
@@ -98,6 +99,8 @@ then
    then
      continue
    fi
+   ipsubnet=`cat /TopStordata/NFStmp`
+   rm -rf  /TopStordata/NFStmp
    /TopStor/nfspoolonly.sh $pool $i $ip $ipsubnet
   done
  else

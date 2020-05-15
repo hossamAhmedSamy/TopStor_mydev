@@ -22,6 +22,7 @@ then
  cp /TopStordata/exports.${redipaddr}.new /TopStordata/exports.${redipaddr};
  cat /etc/exports | grep -v $vol  > /etc/exports
  cat /TopStordata/exports.${redipaddr} >> /etc/exports ;
+ systemctl start nfs-server
  systemctl reload nfs-server
  resname=`echo $redvol | awk -F'/' '{print $1}'`
  newright=$redvol 

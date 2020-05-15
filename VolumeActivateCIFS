@@ -86,6 +86,7 @@ then
     writev=`echo $writev | sed 's/\,/ /g' `;
     admin=`echo $l | awk -F'/' '{print $6}'`
     writeable=`echo $l | awk -F'/' '{print $7}'`
+    echo $ipsubnet > /TopStordata/CIFStmp
     yes | cp sharecifs.txt /TopStordata/smb.${name}
     shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
     sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/smb.${name}
@@ -103,6 +104,8 @@ then
    then
     continue
    fi
+   ipsubnet=`cat /TopStordata/CIFStmp`
+   rm -rf /TopStordata/CIFStmp
    echo i=$i
    echo ipc=$ipc for $ip
    echo ipvol=$ipvol
