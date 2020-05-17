@@ -14,7 +14,9 @@ contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
   /TopStor/logmsg.py Unlin10044 info $userreq $username
-/bin/smbpasswd -d $username;
+ currentcifs=`pcs resource | grep cifs | awk '{print $1}'`
+ echo "$currentcifs" | while read y; do docker exec $y /bin/smbpasswd -x $username;  done; 
+/bin/smbpasswd -x $username;
 #rm -rf /home/$username &>/dev/null
 userdel -rf  $username 
 rm  key/${username}fixed

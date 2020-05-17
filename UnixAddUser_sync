@@ -37,7 +37,10 @@ else
  userhome=`echo $userhome | awk -F'/' '{print $2}'`
  homebase='-b /'$userhome' -M'  
 fi
+cp /TopStor/smbuserfix.sh /etc/
 useradd -c"TopStor"$pas $homebase -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username
+currentcifs=`pcs resource | grep cifs | awk '{print $1}'`
+echo "$currentcifs" | while read y; do docker exec $y  sh /hostetc/smbuserfix.sh x $username $userpass;  done; 
 echo useradd \-c"TopStor"$pas $homebase \-g $usergd \-u $userid \-p $userpass \-s /usr/sbin/nologin $username > /root/tmpuser
 ( echo $userpass; echo $userpass) | /bin/smbpasswd -s -a $username 2>> $txtres
 cat $txtres
