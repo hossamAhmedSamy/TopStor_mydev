@@ -34,6 +34,8 @@ then
  who=$oct1'.'$oct2'.'$oct3'.*'
  ETCDCTL_API=3 /pace/etcdput.py volumes/NFS/$myhost/$DG/$name $DG/$name/$who/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet
  ETCDCTL_API=3 /pace/broadcasttolocal.py volumes/NFS/$myhost/$DG/$name $DG/$name/$who/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet
+ /sbin/zfs set ip:addr=$ipaddr $DG/$name
+ /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
  echo $older | grep $ipaddr/$ipsubnet
  if [ $? -ne 0 ];
  then 

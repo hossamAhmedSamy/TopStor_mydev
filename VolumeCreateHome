@@ -40,6 +40,8 @@ then
   exit
  fi
  /sbin/zfs set prot:kind=HOMe $DG/$name
+ /sbin/zfs set ip:addr=na $DG/$name
+ /sbin/zfs set ip:subnet=na $DG/$name
  sleep 1 
  x=1
  while [ $x -gt 0 ]; 

@@ -92,6 +92,10 @@ then
     writev=`echo $writev | sed 's/\,/ /g' `;
     echo $ipsubnet > /TopStordata/NFStmp
     echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' > /TopStordata/exports.$name 
+    echo '# ipaddress = IPADDRESS' >> /TopStordata/exports.$name
+    echo '# ipsubnet = IPSUBNET' >> /TopStordata/exports.$name
+    sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/exports.${name}
+    sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/exports.${name}
     yes | cp /TopStordata/exports.$name /$pool/exports.$name
     yes | cp /TopStordata/exports.$name /$pool/
     cat /TopStordata/exports.$name >> /TopStordata/exports.$ip

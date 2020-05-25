@@ -1,5 +1,7 @@
 ;;;;;;;;         startNAMECIFS_only
 [SHORTNAME]
+;ipaddress = IPADDRESS
+;ipsubnet = IPSUBNET
 path = /POOL/NAMECIFS
 read only = no
 browsable = yes

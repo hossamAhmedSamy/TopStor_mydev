@@ -97,6 +97,8 @@ then
     sed -i "s/administrator/$admin/g" /TopStordata/smb.${name}
     sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
     sed -i "s/\@everyone/$writev/g" /TopStordata/smb.${name}
+    sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/smb.${name}
+    sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/smb.${name}
     cat /TopStordata/smb.${name} >> /TopStordata/smb.$ip
     yes | cp /TopStordata/smb.$name /$pool/
    done
@@ -140,10 +142,10 @@ then
    sed -i "s/administrator/$admin/g" /TopStordata/smb.${name}
    sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
    chmod 770 /$pool/$name
-   echo running cifs.sh=$pool $name $ipaddr $ipsubnet >> /root/volactivateparam
-   echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
+   echo running cifs.sh=$pool $name $ipaddr $ipsubnet cifs >> /root/volactivateparam
+   echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    yes | cp /TopStordata/smb.$name /$pool/
-   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
+   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    echo finished cifs.sh >> /root/volactivateparam
    echo writve=$writev
    setfacl -b /$pool/$name

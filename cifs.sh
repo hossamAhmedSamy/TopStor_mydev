@@ -6,6 +6,7 @@ pool=`echo $@ | awk '{print $1}'`
 vol=`echo $@ | awk '{print $2}'`
 ipaddr=`echo $@ | awk '{print $3}'`
 ipsubnet=`echo $@ | awk '{print $4}'`
+vtype=`echo $@ | awk '{print $5}'`
 echo $@ > /root/cifsparam
 clearvol=`./prot.py clearvol $vol | awk -F'result=' '{print $2}'`
 if [ $clearvol != '-1' ];
@@ -29,7 +30,7 @@ resname=`echo $rightip | awk -F'/' '{print $1}'`
 echo $rightip | grep -w '\-1' 
 if [ $? -eq 0 ];
 then
- resname=cifs-$pool-$ipaddr
+ resname=$vtype-$pool-$ipaddr
  /pace/etcdput.py ipaddr/$ipaddr/$ipsubnet $resname/$vol
  /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
  docker stop $resname 
