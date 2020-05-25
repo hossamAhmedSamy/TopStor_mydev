@@ -76,4 +76,5 @@ then
   /TopStor/logmsg.py NFS1002 info  $userreq $volname
   rm -rf /$DG/$volname
  fi
+ rm -rf /$DG/smb.$volname
 fi
