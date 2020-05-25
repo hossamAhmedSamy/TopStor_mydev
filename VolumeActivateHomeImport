@@ -1,0 +1,140 @@
+#!/bin/sh
+export ETCDCTL_API=3
+cd /TopStor/
+web='/var/www/html/des20/Data/CIFSstatus.log';
+logging='/var/www/html/des20/Data/currentinfo2.log'
+glog='/var/www/html/des20/Data/TopStor.log';
+runningpools='/pacedata/pools/runningpools'
+txtres='/TopStordata/'`basename $0`'.txt'
+rm -rf $txtres 2>/dev/null
+pool=`echo $@ | awk -F'pool=' '{print $2}' | awk '{print $1}'`;
+userreq=`echo $@ | awk -F'user=' '{print $2}' | awk '{print $1}'`;
+myhost=`hostname -s`
+ips='0'
+
+run=`echo $@ | awk -F'run=' '{print $2}' | awk '{print $1}'`;
+#echo $run | grep yes
+#if [ $? -ne 0 ];
+#then 
+# exit
+#fi
+
+echo $@ > /root/volactivateImportparam
+privilege="CIFS";
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]]
+then
+ echo starting Volume Home activation for the pool $pool >> /root/volactivateImportparam
+ declare  ips=`/pace/etcdget.py ipaddr $pool`
+ declare  vols=`/pace/etcdget.py volumes/HOMe  $pool`
+ echo $vols | grep $pool
+ if [ $? -ne 0 ]; 
+ then
+  ls /$pool | grep smb\. 
+  if [ $? -eq 0 ];
+  then
+   vols=`ls /$pool | grep smb\. `
+   echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
+   do   noip=1
+   oct123='10.15.15.'
+   oct4=10
+   while [ $noip -eq 1 ];
+   do
+    oct4=$((oct4+1))
+    ip a | grep ${oct123}${oct4}
+    if [ $? -ne 0 ];
+    then
+     noip=0
+    fi
+   done  
+    ipaddr=${oct123}${oct4}
+    ipsubnet='24'
+    writev=`cat $l | grep writeable  | awk -F'= ' '{print $2}'`
+    name=`echo $l | awk -F'smb.' '{print $2}'`
+    /pace/etcdput.py volumes/HOMe/$myhost/$pool/$name $pool/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
+    yes | cp /$pool/$l /TopStordata/smb.$ipaddr
+    yes | cp /$pool/$l /TopStordata/
+    /TopStor/cifs.sh $pool $l $ipaddr $ipsubnet
+   done
+  fi
+ else
+  echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
+  do
+   pool=`echo $l | awk -F'/' '{print $1}'`
+   name=`echo $l | awk -F'/' '{print $2}'`
+   path='/'${pool}'/'${name}
+   readv=`echo $l | awk -F'/' '{print $3}'`
+   browsable=`echo $l | awk -F'/' '{print $4}'`
+   ipaddr=`echo $l | awk -F'/' '{print $8}'`
+   ipsubnet=`echo $l | awk -F'/' '{print $9}'`
+   writev=`echo $l | awk -F'/' '{print $5}'`
+   writev=`echo $writev | sed 's/\,/ /g' `;
+   admin=`echo $l | awk -F'/' '{print $6}'`
+#   writeable=`echo $l | awk -F'/' '{print $7}'`
+   sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/smb.${name}
+   sed -i "s/NAMECIFS/$name/g"  /TopStordata/smb.${name}
+   sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
+   sed -i "s/no/$readv/g" /TopStordata/smb.${name}
+   sed -i "s/yes/$browsable/g" /TopStordata/smb.${name}
+   sed -i "s/\@everyone/$writev/g" /TopStordata/smb.${name}
+   sed -i "s/administrator/$admin/g" /TopStordata/smb.${name}
+   sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
+   chmod 770 /$pool/$name
+   yes | cp /TopStordata/smb.$name /$pool/
+   /pace/etcdput.py volumes/HOMe/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
+   echo running cifs.sh=$pool $name $ipaddr $ipsubnet >> /root/volactivateparam
+   echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
+   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
+   echo finished cifs.sh >> /root/volactivateparam
+  done
+ fi
+ runvol=`./etcdget.py volumes/HOMe $pool` 
+ vols=`zfs list -H -o name,prot:kind | grep HOMe | grep $pool | awk '{print $1}' | sed "s/$pool\///g" | grep -v $pool`
+ echo "${vols[@]}" | while read vol;
+ do
+  echo  $runvol | grep $vol 
+  if [ $? -ne 0 ];
+  then
+   echo hree zfs list $vol
+   echo activating vol=$l >> /root/volactivateparam
+   name=$vol
+   path='/'${pool}'/'${name}
+   readv='Yes'
+   browsable='Yes'
+   writev='Yes'
+   noip=1
+   oct123='10.15.15.'
+   oct4=10
+   while [ $noip -eq 1 ];
+   do
+    oct4=$((oct4+1))
+    ip a | grep ${oct123}${oct4}
+    if [ $? -ne 0 ];
+    then
+     noip=0
+    fi
+   done  
+   ipaddr=${oct123}${oct4}
+   ipsubnet='24'
+   admin=$userreq
+   writeable='Yes'
+   yes | cp sharecifs.txt /TopStordata/smb.${name}
+   shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
+   sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/smb.${name}
+   sed -i "s/NAMECIFS/$name/g"  /TopStordata/smb.${name}
+   sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
+   sed -i "s/no/$readv/g" /TopStordata/smb.${name}
+   sed -i "s/yes/$browsable/g" /TopStordata/smb.${name}
+   sed -i "s/\@everyone/$writev/g" /TopStordata/smb.${name}
+   sed -i "s/administrator/$admin/g" /TopStordata/smb.${name}
+   sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
+   chmod 770 /$pool/$name
+   yes | cp /TopStordata/smb.$name /$pool/
+   /pace/etcdput.py volumes/HOMe/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
+   echo running cifs.sh=$pool $name $ipaddr $ipsubnet >> /root/volactivateparam
+   echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
+   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
+   echo finished cifs.sh >> /root/volactivateparam
+  fi
+ done
+fi

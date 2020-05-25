@@ -19,8 +19,8 @@ if [ $redvol != '-1' ];
 then
  redipaddr=`echo $redvol | awk -F'-' '{print $NF}'`
  echo redvol=$redvol redipaddr=$redipaddr
- /TopStor/delblock.py start${vol}_only stop${vol}_only /TopStordata/smb.${redipaddr}  ;
- cp /TopStordata/smb.${redipaddr}.new /TopStordata/smb.${redipaddr};
+ /TopStor/delblock.py start${vol}_only stop${vol}_only /TopStordata/smb.${ipaddr}  ;
+ cp /TopStordata/smb.${redipaddr}.new /TopStordata/smb.${ipaddr};
  docker exec -it $redvol smbcontrol smbd reload-config
 fi
 rightip=`/pace/etcdget.py ipaddr/$ipaddr/$ipsubnet`

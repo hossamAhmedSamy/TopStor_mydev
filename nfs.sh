@@ -16,10 +16,10 @@ if [ $redvol != '-1' ];
 then
  redipaddr=`echo $redvol | awk -F'/' '{print $1}' | awk -F'-' '{print $NF}'`
  echo iam here 1
- /TopStor/delblock.py ${vol} ${vol} /TopStordata/exports.${redipaddr}  ;
- cp /TopStordata/exports.${redipaddr}.new /TopStordata/exports.${redipaddr};
+ /TopStor/delblock.py ${vol} ${vol} /TopStordata/exports.${ipaddr}  ;
+ cp /TopStordata/exports.${ipaddr}.new /TopStordata/exports.${ipaddr};
  cat /etc/exports | grep -v $vol  > /etc/exports
- cat /TopStordata/exports.${redipaddr} >> /etc/exports ;
+ cat /TopStordata/exports.${ipaddr} >> /etc/exports ;
  systemctl start nfs-server
  systemctl reload nfs-server
  resname=`echo $redvol | awk -F'/' '{print $1}'`

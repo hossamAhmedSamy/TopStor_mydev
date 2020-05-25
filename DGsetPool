@@ -18,6 +18,7 @@ msgraid="nothing";
 myhost=`hostname -s`
 privilege="DiskGroups";
 contrun=`./privthis.sh $privilege $userreq`;
+echo iamhere
 declare -a params=(`echo $@`);
 declare -a hostparam=();
 declare -a diskparam=();
@@ -32,22 +33,22 @@ then
   /pace/etcdput.py requests/DGsetpool/$myhost $myhost/$userreq
  fi
  /TopStor/queuethis.sh `basename "$0"` running $userreq &
+echo iamhere
 if [[ $raid == "import" ]];
 then
  echo to import only $disk1
- /TopStor/logmsg.py DG1st22 info $userreq ${nextpool} 
  nextpool=$disk1 
+ /TopStor/logmsg.py DGst22 info $userreq ${nextpool} 
  zpool import $nextpool 
  if [ $? -ne 0 ]; then
-   /TopStor/logmsg.py DG1fa22 error $userreq ${nextpool} 
+   /TopStor/logmsg.py DGfa22 error $userreq ${nextpool} 
  else 
     ETCDCTL_API=3 /pace/etcdput.py balancetype/$nextpool Availability 
     ETCDCTL_API=3 /pace/etcdput.py activepool/$nextpool imported 
     ETCDCTL_API=3 /pace/broadcasttolocal.py pactivepool/$nextpool imported 
     ETCDCTL_API=3 /pace/etcdput.py fixpool/$nextpool imported 
-   /TopStor/logmsg.py DG1su22 info $userreq ${nextpool} 
+   /TopStor/logmsg.py DGsu22 info $userreq ${nextpool} 
  fi
-exit
 else
  echo not to import
  diskargs=${#params[@]};

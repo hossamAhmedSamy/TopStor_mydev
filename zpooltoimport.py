@@ -14,20 +14,29 @@ import sys, datetime
 import logmsg
 
 def zpooltoimport(*args):
+ cmdline='/TopStor/CheckPoolimport user=system'
+ result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
  myhost=socket.gethostname()
  activepools=putz() 
  runningpools=get('pools/','--prefix')
  waitingpools=[f['name'] for f in activepools if f['name'] not in str(runningpools) and f['status'] not in 'imported']
+ preimport=[f['name'] for f in activepools if f['name'] not in str(runningpools) and f['status']  in 'preimport']
+ for pool in preimport:
+  print('$pool needs importing')
+  cmdline='/TopStor/DGsetPool import system myhost '+pool
+  result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+ 
  pimported=[f['name'] for f in activepools if f['status'] in 'imported' ]
  if len(pimported) > 0 :
-   for pool in pimported:
-   	cmdline='/TopStor/VolumeActivateCIFSImport  pool='+pool+' user=system'
-   	result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
-   	cmdline='/TopStor/VolumeActivateHomeImport  pool='+pool+' user=system'
-   	result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
-   	cmdline='/TopStor/VolumeActivateNFSImport  pool='+pool+' user=system'
-   	result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
-        deli('active','import')
+  for pool in pimported:
+   print('pool is imported to activate the volumes')
+   cmdline='/TopStor/VolumeActivateCIFSImport  pool='+pool+' user=system'
+   result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+   cmdline='/TopStor/VolumeActivateHomeImport  pool='+pool+' user=system'
+   result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+   cmdline='/TopStor/VolumeActivateNFSImport  pool='+pool+' user=system'
+   result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+   deli('active','import')
    
  if len(waitingpools) < 1:
   print('all active pools are running')

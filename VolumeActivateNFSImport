@@ -12,12 +12,12 @@ userreq=`echo $@ | awk -F'user=' '{print $2}' | awk '{print $1}'`;
 myhost=`hostname -s`
 ips='0'
 
-run=`echo $@ | awk -F'run=' '{print $2}' | awk '{print $1}'`;
-echo $run | grep yes
-if [ $? -ne 0 ];
-then 
- exit
-fi
+#run=`echo $@ | awk -F'run=' '{print $2}' | awk '{print $1}'`;
+#echo $run | grep yes
+#if [ $? -ne 0 ];
+#then 
+# exit
+#fi
 echo $@ > /root/volactivateImportparamNFS
 privilege="CIFS";
 contrun=`./privthis.sh $privilege $userreq`;
@@ -49,6 +49,7 @@ then
     done  
     ipaddr=${oct123}${oct4}
     ipsubnet='24'
+    echo file=$l
     who=`cat $l | awk -F'(' '{print $1}' | awk '{print $2}' | awk -F'.' '{print $1.$2.$3.}'`
     access=`cat $l | awk -F'(' '{print $2' | awk -F',' '{print $1}'`
     sync=`cat $l | awk -F'(' '{print $2' | awk -F',' '{print $2}'`
@@ -68,7 +69,7 @@ then
   do
    pool=`echo $l | awk -F'/' '{print $1}'`
    name=`echo $l | awk -F'/' '{print $2}'`
-   echo $name
+   echo volume=$name
    path='/'${pool}'/'${name}
    shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
   # ln '/'${pool}'/'${name} '/'${pool}'/'${shortname}
@@ -86,8 +87,8 @@ then
    echo $ipsubnet > /TopStordata/NFStmp
    echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' > /TopStordata/exports.$name 
    yes | cp /TopStordata/exports.$name /$pool/
-   cat /TopStordata/exports.$name >> /TopStordata/exports.$ip
-   echo sending fns $ipaddr $ipsubnet
+   cat /TopStordata/exports.$name >> /TopStordata/exports.$ipaddr
+   echo sending fns $pool $name $ipaddr $ipsubnet
    /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
   done
  fi
