@@ -86,6 +86,7 @@ then
    writev=`echo $writev | sed 's/\,/ /g' `;
    echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' > /TopStordata/exports.$name 
    cat /TopStordata/exports.$name >> /TopStordata/exports.$ip
+   yes | cp /TopStordata/exports.$name /$pool/
   done
   ipc=`cat /TopStordata/exports.$ip | wc -c`
   if [ $ipc -lt 10 ];
