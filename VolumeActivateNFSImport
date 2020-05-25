@@ -33,6 +33,35 @@ then
   if [ $? -eq 0 ];
   then
     vols=`ls /$pool | grep exports\. `
+   echo "${vols[@]}" | while read l;
+   do
+    noip=1
+    oct123='10.15.15.'
+    oct4=10
+    while [ $noip -eq 1 ];
+    do
+     oct4=$((oct4+1))
+     ip a | grep ${oct123}${oct4}
+     if [ $? -ne 0 ];
+     then
+      noip=0
+     fi
+    done  
+    ipaddr=${oct123}${oct4}
+    ipsubnet='24'
+    who=`cat $l | awk -F'(' '{print $1}' | awk '{print $2}' | awk -F'.' '{print $1.$2.$3.}'`
+    access=`cat $l | awk -F'(' '{print $2' | awk -F',' '{print $1}'`
+    sync=`cat $l | awk -F'(' '{print $2' | awk -F',' '{print $2}'`
+    secure=`cat $l | awk -F'(' '{print $2' | awk -F',' '{print $3}'`
+    squash=`cat $l | awk -F'(' '{print $2' | awk -F',' '{print $4}'`
+    subtree=`cat $l | awk -F'(' '{print $2' | awk -F',' '{print $5}'`
+    ipsubnet='24'
+    name=`echo $l | awk -F'exports.' '{print $2}'`
+    /pace/etcdput.py volumes/NFS/$myhost/$pool/$name  $pool/$name/*/$access/$sync/$secure/$squash/$subtree/yes/$ipaddr/$ipsubnet
+    yes | cp /$pool/$l /TopStordata/$name.$ipaddr
+    yes | cp /$pool/$l /TopStordata/
+    /TopStor/nfs.sh $pool $l $ipaddr $ipsubnet
+   done
   fi
  else
   echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;

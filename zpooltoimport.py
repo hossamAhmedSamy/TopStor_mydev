@@ -27,6 +27,7 @@ def zpooltoimport(*args):
    	result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
    	cmdline='/TopStor/VolumeActivateNFSImport  pool='+pool+' user=system'
    	result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+        deli('active','import')
    
  if len(waitingpools) < 1:
   print('all active pools are running')

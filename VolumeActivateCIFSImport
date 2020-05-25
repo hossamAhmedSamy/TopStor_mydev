@@ -13,11 +13,12 @@ myhost=`hostname -s`
 ips='0'
 
 run=`echo $@ | awk -F'run=' '{print $2}' | awk '{print $1}'`;
-echo $run | grep yes
-if [ $? -ne 0 ];
-then 
- exit
-fi
+#echo $run | grep yes
+#if [ $? -ne 0 ];
+#then 
+# exit
+#fi
+
 echo $@ > /root/volactivateImportparam
 privilege="CIFS";
 contrun=`./privthis.sh $privilege $userreq`;
@@ -32,7 +33,29 @@ then
   ls /$pool | grep smb\. 
   if [ $? -eq 0 ];
   then
-    vols=`ls /$pool | grep smb\. `
+   vols=`ls /$pool | grep smb\. `
+   echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
+   do   noip=1
+   oct123='10.15.15.'
+   oct4=10
+   while [ $noip -eq 1 ];
+   do
+    oct4=$((oct4+1))
+    ip a | grep ${oct123}${oct4}
+    if [ $? -ne 0 ];
+    then
+     noip=0
+    fi
+   done  
+    ipaddr=${oct123}${oct4}
+    ipsubnet='24'
+    writev=`cat $l | grep writeable  | awk -F'= ' '{print $2}'`
+    name=`echo $l | awk -F'smb.' '{print $2}'`
+    /pace/etcdput.py volumes/CIFS/$myhost/$pool/$name $pool/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
+    yes | cp /$pool/$l /TopStordata/smb.$ipaddr
+    yes | cp /$pool/$l /TopStordata/
+    /TopStor/cifs.sh $pool $l $ipaddr $ipsubnet
+   done
   fi
  else
   echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
