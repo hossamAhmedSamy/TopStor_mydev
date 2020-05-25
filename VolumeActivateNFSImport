@@ -29,10 +29,10 @@ then
  echo $vols | grep $pool
  if [ $? -ne 0 ]; 
  then
-  ls /$pool | grep smb\. 
+  ls /$pool | grep exports\. 
   if [ $? -eq 0 ];
   then
-    vols=`ls /$pool | grep smb\. `
+    vols=`ls /$pool | grep exports\. `
   fi
  else
   echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
@@ -58,16 +58,18 @@ then
    echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' > /TopStordata/exports.$name 
    yes | cp /TopStordata/exports.$name /$pool/
    cat /TopStordata/exports.$name >> /TopStordata/exports.$ip
+   echo sending fns $ipaddr $ipsubnet
    /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
   done
  fi
  runvol=`./etcdget.py volumes/NFS $pool` 
  vols=`zfs list -H -o name,prot:kind | grep NFS | grep $pool | awk '{print $1}' | sed "s/$pool\///g" | grep -v $pool`
- echo "${vols[@]}" | while read vol;
+ echo "${vols[@]}" | while read name;
  do
   echo  $runvol | grep $vol 
   if [ $? -ne 0 ];
   then
+   noip=1
    oct123='10.15.15.'
    oct4=10
    while [ $noip -eq 1 ];
@@ -80,12 +82,14 @@ then
     fi
    done  
    ipaddr=${oct123}${oct4}
-   ipsubnet='255.255.255.0'
+   ipsubnet='24'
    path='/'${pool}'/'${name}
    echo $path' 10.15.15.*\(rw,sync,insecure,no_root_squash,no_all_squash\)' > /TopStordata/exports.$name 
    admin=$userreq
    yes | cp /TopStordata/exports.$name /$pool/
+   volsvalue=$pool'/'$name'/*/rw/sync/insecure/no_root_squash/no_all_squash/yes/'$ipaddr'/'$ipsubnet
    /pace/etcdput.py volumes/NFS/$myhost/$pool/$name $volsvalue
+   echo 2 /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
    /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
   fi
  done

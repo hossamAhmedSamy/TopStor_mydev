@@ -92,7 +92,7 @@ then
     fi
    done  
    ipaddr=${oct123}${oct4}
-   ipsubnet='255.255.255.0'
+   ipsubnet='24'
    admin=$userreq
    writeable='Yes'
    yes | cp sharecifs.txt /TopStordata/smb.${name}
