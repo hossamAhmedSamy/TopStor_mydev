@@ -17,7 +17,17 @@ def zpooltoimport(*args):
  myhost=socket.gethostname()
  activepools=putz() 
  runningpools=get('pools/','--prefix')
- waitingpools=[f['name'] for f in activepools if f['name'] not in str(runningpools)]
+ waitingpools=[f['name'] for f in activepools if f['name'] not in str(runningpools) and f['status'] not in 'imported']
+ pimported=[f['name'] for f in activepools if f['status'] in 'imported' ]
+ if len(pimported) > 0 :
+   for pool in pimported:
+   	cmdline='/TopStor/VolumeActivateCIFSImport  pool='+pool+' user=system'
+   	result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+   	cmdline='/TopStor/VolumeActivateHomeImport  pool='+pool+' user=system'
+   	result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+   	cmdline='/TopStor/VolumeActivateNFSImport  pool='+pool+' user=system'
+   	result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+   
  if len(waitingpools) < 1:
   print('all active pools are running')
   put('toimport/'+myhost,'nothing')
