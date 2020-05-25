@@ -24,6 +24,7 @@ then
  docker exec -it $redvol smbcontrol smbd reload-config
 fi
 rightip=`/pace/etcdget.py ipaddr/$ipaddr/$ipsubnet`
+echo  rightip=$rightip
 resname=`echo $rightip | awk -F'/' '{print $1}'`
 echo $rightip | grep -w '\-1' 
 if [ $? -eq 0 ];

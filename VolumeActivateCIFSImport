@@ -79,7 +79,19 @@ then
    readv='Yes'
    browsable='Yes'
    writev='Yes'
-   ipaddr='10.15.15.15'
+   noip=1
+   oct123='10.15.15.'
+   oct4=10
+   while [ $noip -eq 1 ];
+   do
+    oct4=$((oct4+1))
+    ip a | grep ${oct123}${oct4}
+    if [ $? -ne 0 ];
+    then
+     noip=0
+    fi
+   done  
+   ipaddr=${oct123}${oct4}
    ipsubnet='255.255.255.0'
    admin=$userreq
    writeable='Yes'

@@ -10,7 +10,7 @@ newright=`echo $i | cut -d/ -f2-`
 echo newright=$newright
 ipaddr=`echo $@ | awk '{print $4}'`
 ipsubnet=`echo $@ | awk '{print $5}'`
-echo $@ > /root/cifsparam
+echo $@ > /root/cifslocalparam
 mounts=`echo $newright |sed 's/\// /g'| cut -f2-`
 mount=''
 rm -rf /TopStordata/tempsmb.$ipaddr
