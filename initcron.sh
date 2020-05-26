@@ -21,5 +21,8 @@ sleep 240
 /sbin/pcs resource delete --force IPinit
 /sbin/ip addr del 10.11.11.254/24 dev $nic
 /TopStor/factory.sh
+echo "0" "0" "1" "*" "*"  sh /TopStor/clearlog.sh 2> txt/err.txt >> /TopStordata/cronthis
+crontab /TopStordata/cronthis
+
 
 

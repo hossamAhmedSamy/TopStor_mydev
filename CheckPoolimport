@@ -2,9 +2,13 @@
 export ETCDCTL_API=3
 cd /TopStor/
 echo $@ > /root/dgset
-importpools=` zpool import | grep 'pool:' | awk '{print $2}'`;   
+importpools=` zpool import | grep 'pool:' | awk -F': ' '{print $2}'`;   
  echo "${importpools[@]}" | while read  l;
  do 
-  echo $preimport $l > /root/Checkpoolimport
-  /TopStor/etcdput.py activepool/$l preimport
+  echo $l | grep pdhcp
+  if [ $? -eq 0 ];
+  then
+   echo $preimport $l > /root/Checkpoolimport
+   /TopStor/etcdput.py activepool/$l preimport
+  fi
  done

@@ -86,6 +86,10 @@ then
    writev=`echo $writev | sed 's/\,/ /g' `;
    echo $ipsubnet > /TopStordata/NFStmp
    echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' > /TopStordata/exports.$name 
+   echo '# ipaddress = IPADDRESS' >> /TopStordata/exports.$name
+   echo '# ipsubnet = IPSUBNET' >> /TopStordata/exports.$name
+   sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/exports.${name}
+   sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/exports.${name}
    yes | cp /TopStordata/exports.$name /$pool/
    cat /TopStordata/exports.$name >> /TopStordata/exports.$ipaddr
    echo sending fns $pool $name $ipaddr $ipsubnet
@@ -99,22 +103,18 @@ then
   echo  $runvol | grep $vol 
   if [ $? -ne 0 ];
   then
-   noip=1
-   oct123='10.15.15.'
-   oct4=10
-   while [ $noip -eq 1 ];
-   do
-    oct4=$((oct4+1))
-    ip a | grep ${oct123}${oct4}
-    if [ $? -ne 0 ];
-    then
-     noip=0
-    fi
-   done  
    ipaddr=${oct123}${oct4}
    ipsubnet='24'
+   ipaddr=`zfs get -H ip:addr $pool/$name | awk '{print $3}'`
+   echo got ip $ipaddr
+   ipsubnet=`zfs get -H ip:subnet $pool/$name | awk '{print $3}'`
+   echo got ip $ipsubnet
    path='/'${pool}'/'${name}
    echo $path' 10.15.15.*\(rw,sync,insecure,no_root_squash,no_all_squash\)' > /TopStordata/exports.$name 
+   echo '# ipaddress = IPADDRESS' >> /TopStordata/exports.$name
+   echo '# ipsubnet = IPSUBNET' >> /TopStordata/exports.$name
+   sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/exports.${name}
+   sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/exports.${name}
    admin=$userreq
    yes | cp /TopStordata/exports.$name /$pool/
    volsvalue=$pool'/'$name'/*/rw/sync/insecure/no_root_squash/no_all_squash/yes/'$ipaddr'/'$ipsubnet

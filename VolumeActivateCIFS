@@ -141,6 +141,8 @@ then
    sed -i "s/\@everyone/$writev/g" /TopStordata/smb.${name}
    sed -i "s/administrator/$admin/g" /TopStordata/smb.${name}
    sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
+   sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/smb.${name}
+   sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/smb.${name}
    chmod 770 /$pool/$name
    echo running cifs.sh=$pool $name $ipaddr $ipsubnet cifs >> /root/volactivateparam
    echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs

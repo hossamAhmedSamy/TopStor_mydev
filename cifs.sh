@@ -31,10 +31,11 @@ echo $rightip | grep -w '\-1'
 if [ $? -eq 0 ];
 then
  resname=$vtype-$pool-$ipaddr
+ echo resname=$resname
  /pace/etcdput.py ipaddr/$ipaddr/$ipsubnet $resname/$vol
  /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
- docker stop $resname 
- docker container rm $resname 
+ docker stop $resname  2>/dev/null
+ docker container rm -f $resname 2>/dev/null
  /sbin/pcs resource delete --force $resname  2>/dev/null
  /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
  /sbin/pcs resource group add ip-all $resname 

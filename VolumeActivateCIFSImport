@@ -30,34 +30,27 @@ then
  echo $vols | grep $pool
  if [ $? -ne 0 ]; 
  then
+  echo the $pool has no known volumes in the registery.
   ls /$pool | grep smb\. 
   if [ $? -eq 0 ];
   then
+   echo there is metadata about volumes in the  $pool.
    vols=`ls /$pool | grep smb\. `
-   echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
-   do   noip=1
-   oct123='10.15.15.'
-   oct4=10
-   while [ $noip -eq 1 ];
+   echo "${vols[@]}" | while read l;
    do
-    oct4=$((oct4+1))
-    ip a | grep ${oct123}${oct4}
-    if [ $? -ne 0 ];
-    then
-     noip=0
-    fi
-   done  
-    ipaddr=${oct123}${oct4}
-    ipsubnet='24'
-    writev=`cat $l | grep writeable  | awk -F'= ' '{print $2}'`
+    ipaddr=` cat /${pool}/$l | grep ipaddr | awk '{print $NF}'`
+    ipsubnet=` cat /${pool}/$l | grep ipsubnet | awk '{print $NF}'`
+    writev=`cat /$pool/$l | grep writeable  | awk -F'= ' '{print $2}'`
     name=`echo $l | awk -F'smb.' '{print $2}'`
+    echo ipaddrs=$ipaddr
     /pace/etcdput.py volumes/CIFS/$myhost/$pool/$name $pool/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
     yes | cp /$pool/$l /TopStordata/smb.$ipaddr
-    yes | cp /$pool/$l /TopStordata/
-    /TopStor/cifs.sh $pool $l $ipaddr $ipsubnet
+    echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
+    /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    done
   fi
  else
+  echo the $pool has some known  volumes in the registery.
   echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
   do
    pool=`echo $l | awk -F'/' '{print $1}'`
@@ -79,43 +72,37 @@ then
    sed -i "s/\@everyone/$writev/g" /TopStordata/smb.${name}
    sed -i "s/administrator/$admin/g" /TopStordata/smb.${name}
    sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
+   sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/smb.${name}
+   sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/smb.${name}
    chmod 770 /$pool/$name
    yes | cp /TopStordata/smb.$name /$pool/
-   /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
+   /pace/etcdput.py volumes/CIFS/$myhost/$pool/$name $pool/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
    echo running cifs.sh=$pool $name $ipaddr $ipsubnet >> /root/volactivateparam
    echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
-   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
+   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    echo finished cifs.sh >> /root/volactivateparam
   done
  fi
  runvol=`./etcdget.py volumes/CIFS $pool` 
  vols=`zfs list -H -o name,prot:kind | grep CIFS | grep $pool | awk '{print $1}' | sed "s/$pool\///g" | grep -v $pool`
- echo "${vols[@]}" | while read vol;
+ echo spanning the volumes in the pool $pool  metadata
+ echo "${vols[@]}" | while read name;
  do
-  echo  $runvol | grep $vol 
+  echo  $runvol | grep $name
   if [ $? -ne 0 ];
   then
-   echo hree zfs list $vol
-   echo activating vol=$l >> /root/volactivateparam
-   name=$vol
-   path='/'${pool}'/'${name}
-   readv='Yes'
-   browsable='Yes'
-   writev='Yes'
-   noip=1
-   oct123='10.15.15.'
-   oct4=10
-   while [ $noip -eq 1 ];
-   do
-    oct4=$((oct4+1))
-    ip a | grep ${oct123}${oct4}
-    if [ $? -ne 0 ];
-    then
-     noip=0
-    fi
-   done  
-   ipaddr=${oct123}${oct4}
-   ipsubnet='24'
+   echo the volume $name is not listed in the registery 
+   echo $name | grep \_
+   if [ $? -ne 0 ];
+   then
+    continue
+   fi
+   echo activating vol=$pool/$name >> /root/volactivateparam
+   echo activating vol=$pool/$name 
+   ipaddr=`zfs get -H ip:addr $pool/$name | awk '{print $3}'`
+   echo got ip $ipaddr
+   ipsubnet=`zfs get -H ip:subnet $pool/$name | awk '{print $3}'`
+   echo got ip $ipsubnet
    admin=$userreq
    writeable='Yes'
    yes | cp sharecifs.txt /TopStordata/smb.${name}
@@ -123,17 +110,19 @@ then
    sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/smb.${name}
    sed -i "s/NAMECIFS/$name/g"  /TopStordata/smb.${name}
    sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
-   sed -i "s/no/$readv/g" /TopStordata/smb.${name}
-   sed -i "s/yes/$browsable/g" /TopStordata/smb.${name}
-   sed -i "s/\@everyone/$writev/g" /TopStordata/smb.${name}
-   sed -i "s/administrator/$admin/g" /TopStordata/smb.${name}
+   sed -i "s/no/no/g" /TopStordata/smb.${name}
+   sed -i "s/yes/yes/g" /TopStordata/smb.${name}
+   sed -i "s/\@everyone/\@everyone/g" /TopStordata/smb.${name}
+   sed -i "s/administrator/administrator/g" /TopStordata/smb.${name}
    sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
+   sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/smb.${name}
+   sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/smb.${name}
    chmod 770 /$pool/$name
    yes | cp /TopStordata/smb.$name /$pool/
-   /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
+   /pace/etcdput.py volumes/CIFS/$myhost/$pool/$name $pool/$name/no/yes/@everyone/administrator/yes/$ipaddr/$ipsubnet
    echo running cifs.sh=$pool $name $ipaddr $ipsubnet >> /root/volactivateparam
    echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
-   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
+   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    echo finished cifs.sh >> /root/volactivateparam
   fi
  done

@@ -418,7 +418,7 @@ else
   fi
  fi 
 fi
-rm txt/${0:2}$userreq.txt
+#rm txt/${0:2}$userreq.txt
 sed -i "/p${nextpool}/c\\" $runningpools
 fi
 /pace/etcddel.py requests/DGsetpool/$myhost $myhost/$userreq

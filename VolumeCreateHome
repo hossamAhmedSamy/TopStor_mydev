@@ -14,6 +14,8 @@ name=`echo $@ | awk '{print $2}'`;
 pDG=`echo $@ | awk '{print $1}'`;
 quota=`echo $@ | awk '{print $3}'`;
 userreq=` echo $@ | awk '{print $4}'`;
+ipaddr=` echo $@ | awk '{print $5}'`;
+subnet=` echo $@ | awk '{print $6}'`;
 DG=`echo $pDG `;
 hostnam=`echo $pDG`;
 #sshost=`cat $runningpools | grep $hostnam | awk '{print $1}'`;
@@ -39,9 +41,11 @@ then
   echo error
   exit
  fi
+ usern=` echo $name | awk -F'_' '{print $1}'`
  /sbin/zfs set prot:kind=HOMe $DG/$name
  /sbin/zfs set ip:addr=na $DG/$name
  /sbin/zfs set ip:subnet=na $DG/$name
+ /sbin/zfs set ip:user=$usern $DG/$name
  sleep 1 
  x=1
  while [ $x -gt 0 ]; 
@@ -61,8 +65,8 @@ then
  
  myhost=`hostname -s`
  echo /pace/etcdput.py volumes/HOMe/$myhost/$DG/$name $DG/$name/no/yes/@everyone/administrator/yes >> /root/volhome
- ETCDCTL_API=3 /pace/etcdput.py volumes/HOMe/$myhost/$DG/$name $DG/$name/no/yes/@everyone/administrator/yes 
- /pace/broadcasttolocal.py volumes/HOMe/$myhost/$DG/$name $DG/$name/no/yes/@everyone/administrator/yes 
+ ETCDCTL_API=3 /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
+ /pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet 
  /TopStor/VolumeActivateHome vol=$name user=$userreq
  /pace/putzpool.py 
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
