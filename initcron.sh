@@ -21,9 +21,9 @@ sleep 240
 /sbin/pcs resource delete --force IPinit
 /sbin/ip addr del 10.11.11.254/24 dev $nic
 /TopStor/factory.sh
-crontab -l > /TopStordata/cronthis
-echo "0" "0" "1" "*" "*"  sh /TopStor/clearlog.sh  >> /TopStordata/cronthis
-echo "0" "*/6" "*" "*" "*"  sh /TopStor/initcleandb.sh  >> /TopStordata/cronthis
+crontab -l | grep -v Initialization > /TopStordata/cronthis
+echo "0" "0" "1" "*" "*"  sh /TopStor/clearlog.sh Initialization >> /TopStordata/cronthis
+echo "0" "*/6" "*" "*" "*"  sh /TopStor/initcleandb.sh  Initialization >> /TopStordata/cronthis
 crontab /TopStordata/cronthis
 
 

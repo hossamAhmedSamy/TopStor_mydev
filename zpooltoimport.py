@@ -31,11 +31,11 @@ def zpooltoimport(*args):
   for pool in pimported:
    print('pool is imported to activate the volumes')
    cmdline='/TopStor/VolumeActivateCIFSImport  pool='+pool+' user=system'
-   result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
-   cmdline='/TopStor/VolumeActivateHomeImport  pool='+pool+' user=system'
-   result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
-   #cmdline='/TopStor/VolumeActivateNFSImport  pool='+pool+' user=system'
    #result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+   #cmdline='/TopStor/VolumeActivateHomeImport  pool='+pool+' user=system'
+   result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+   cmdline='/TopStor/VolumeActivateNFSImport  pool='+pool+' user=system'
+   result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
    deli('active','import')
    
  if len(waitingpools) < 1:
