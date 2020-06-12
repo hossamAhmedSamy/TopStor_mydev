@@ -229,10 +229,15 @@ def do(body):
   with open('/root/recv2','a') as f:
    f.write('received GroupDel from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
-########## if GroupDel ##############
+########## if NTP  ##############
  elif r["req"]=='HostManualConfigNTP':  
   with open('/root/recv2','a') as f:
    f.write('received HostManualConfigNTP from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+ ########## if TZ  ##############
+ elif r["req"]=='HostManualConfigTZ':  
+  with open('/root/recv2','a') as f:
+   f.write('received HostManualConfigTZ from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
  
 

@@ -111,6 +111,12 @@ def config(*bargs):
   cmdline=['/TopStor/HostManualconfigNTP.py',change['ntp']]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   logmsg.sendlog('HostManual1su9','info',arg[-1],change['oldntp'],change['ntp'])
+########### changing time zone ###############
+ if 'tz' in change:
+  logmsg.sendlog('HostManual1st10','info',arg[-1],change['oldtz'],change['tz'])
+  cmdline=['/TopStor/HostManualconfigTZ.py',change['tz']]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  logmsg.sendlog('HostManual1su10','info',arg[-1],change['oldtz'],change['tz'])
 ####################################################
   cmdline=['/TopStor/HostgetIPs']
  cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','finished',bargs[-1]]
