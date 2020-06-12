@@ -15,12 +15,9 @@ def send(*bargs):
 		args=bargs[0].split()
 	else:
 		args=bargs
-	pool=args[0]
-	x=get('ntp')
-	pool=str(pool).split()[-1]
-	put('ntp',bargs[0])
-	broadcasttolocal('ntp',bargs[0])
-	broadcast('HostManualConfigNTP','/TopStor/pump.sh','HostManualConfigNTP')
+	put('ntp',bargs[-1])
+	broadcasttolocal('ntp',bargs[-1])
+	broadcast('HostManualConfigNTP','/TopStor/pump.sh','HostManualconfigNTP')
 	cmdline=['/TopStor/queuethis.sh','HostManualconfigNTP.py','finished',bargs[-1]]
 	result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 	return 1

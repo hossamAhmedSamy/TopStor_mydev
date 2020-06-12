@@ -6,7 +6,7 @@ Topweb='/TopStordata/Hostprop.txt';
 echo hither > /root/Hostgetips
 user=`echo $@ | awk '{print $1}'`
 perfmon=`cat /pacedata/perfmon`
- if [ $perfmon -eq 1 ]; then
+ if [[ $perfmon -eq 1 ]]; then
   /TopStor/queuethis.sh HostgetIPs running $user
  fi
 hostname=`hostname`
@@ -22,7 +22,8 @@ hostrout=`netstat -rn | awk '{print $2}' | grep -v "Gateway" | grep -v "IP" | gr
 if [ -z $hostrout ]; then hostrout='0'; fi
 hostdns=` cat /etc/resolv.conf | grep nameserver | awk '{print $2}'`;
 if [ -z $hostdns ]; then hostdns='0'; fi
-ntpserver=`cat /etc/chrony.conf | grep server | grep -v servers | head -1 | awk '{print $2}'`;
+#ntpserver=`cat /etc/chrony.conf | grep server | grep -v servers | head -1 | awk '{print $2}'`;
+ntpserver=`ETCDCTL_API=3 ./etcdget.py ntp`;
 /sbin/pcs resource | grep dataip
 if [ $? -eq 0 ];
 then
@@ -37,6 +38,6 @@ fi
 ETCDCTL_API=3 /pace/etcdput.py prop/$hostname $jsonips
 echo $jsonips > $web; 
 echo $jsonips > $Topweb; 
- if [ $perfmon -eq 1 ]; then
+ if [[ $perfmon -eq 1 ]]; then
   /TopStor/queuethis.sh HostgetIPs finished $user
  fi
