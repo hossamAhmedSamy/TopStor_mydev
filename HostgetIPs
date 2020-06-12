@@ -22,6 +22,7 @@ hostrout=`netstat -rn | awk '{print $2}' | grep -v "Gateway" | grep -v "IP" | gr
 if [ -z $hostrout ]; then hostrout='0'; fi
 hostdns=` cat /etc/resolv.conf | grep nameserver | awk '{print $2}'`;
 if [ -z $hostdns ]; then hostdns='0'; fi
+ntpserver=`cat /etc/chrony.conf | grep server | grep -v servers | head -1 | awk '{print $2}'`;
 /sbin/pcs resource | grep dataip
 if [ $? -eq 0 ];
 then
@@ -29,9 +30,9 @@ then
  if [ -z $dataip ]; then dataip='0'; fi
  dataipsubnet=`pcs resource show dataip | grep Attributes | awk -F'netmask=' '{print $2}' | awk '{print $1}'`
  if [ -z $dataipsubnet ]; then dataipsubnet='0'; fi
-jsonips=`/usr/local/bin/zsh jsonthis3.sh hostname $hostname name $hostn addr $hostip addrsubnet $hostsubnet rout $hostrout dns $hostdns mgmtip $mgmtip mgmtsubnet $mgmtsubnet dataip $dataip dataipsubnet $dataipsubnet`;
+jsonips=`/usr/local/bin/zsh jsonthis3.sh hostname $hostname name $hostn addr $hostip addrsubnet $hostsubnet rout $hostrout dns $hostdns mgmtip $mgmtip mgmtsubnet $mgmtsubnet dataip $dataip dataipsubnet $dataipsubnet ntp $ntpserver`;
 else
-jsonips=`/usr/local/bin/zsh jsonthis3.sh hostname $hostname name $hostn addr $hostip addrsubnet $hostsubnet rout $hostrout dns $hostdns mgmtip $mgmtip mgmtsubnet $mgmtsubnet`;
+jsonips=`/usr/local/bin/zsh jsonthis3.sh hostname $hostname name $hostn addr $hostip addrsubnet $hostsubnet rout $hostrout dns $hostdns mgmtip $mgmtip mgmtsubnet $mgmtsubnet ntp $ntpserver`;
 fi
 ETCDCTL_API=3 /pace/etcdput.py prop/$hostname $jsonips
 echo $jsonips > $web; 

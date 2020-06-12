@@ -8,7 +8,7 @@ import logmsg
 def config(*bargs):
  cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','running',bargs[-1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
- enpdev='eno1'
+ enpdev='enp0s8'
  with open('/root/HostManualconfigtmp2','w') as f:
   f.write('bargs:'+str(bargs)+'\n')
  with open('/TopStordata/Hostprop.txt') as f:
@@ -105,7 +105,13 @@ def config(*bargs):
   cmdline=['/TopStor/HostManualconfigDataIP',change['dataip'],change['olddataip'],subnet,oldsubnet]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   logmsg.sendlog('HostManual1su8','info',arg[-1],change['olddataip']+'/'+oldsubnet,change['dataip']+'/'+subnet)
-#####################################################
+########## changing ntp server ###############
+ if 'ntp' in change:
+  logmsg.sendlog('HostManual1st9','info',arg[-1],change['oldntp'],change['ntp'])
+  cmdline=['/TopStor/HostManualconfigNTP.py',change['ntp']]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  logmsg.sendlog('HostManual1su9','info',arg[-1],change['oldntp'],change['ntp'])
+####################################################
   cmdline=['/TopStor/HostgetIPs']
  cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','finished',bargs[-1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
