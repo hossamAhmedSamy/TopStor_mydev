@@ -239,6 +239,11 @@ def do(body):
   with open('/root/recv2','a') as f:
    f.write('received HostManualConfigTZ from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+  ########## if GW  ##############
+ elif r["req"]=='HostManualConfigGW':  
+  with open('/root/recv2','a') as f:
+   f.write('received HostManualConfigGW from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
  
 
 

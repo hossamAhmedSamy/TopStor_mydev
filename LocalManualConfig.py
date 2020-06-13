@@ -117,6 +117,12 @@ def config(*bargs):
   cmdline=['/TopStor/HostManualconfigTZ.py',change['tz']]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   logmsg.sendlog('HostManual1su10','info',arg[-1],change['oldtz'],change['tz'])
+############ changing gateway  ###############
+ if 'gw' in change:
+  logmsg.sendlog('HostManual1st11','info',arg[-1],change['oldgw'],change['gw'])
+  cmdline=['/TopStor/HostManualconfigGW.py',change['gw']]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  logmsg.sendlog('HostManual1su11','info',arg[-1],change['oldgw'],change['gw'])
 ####################################################
   cmdline=['/TopStor/HostgetIPs']
  cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','finished',bargs[-1]]
