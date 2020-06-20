@@ -9,14 +9,14 @@ def config(*bargs):
  cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','running',bargs[-1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  enpdev='enp0s8'
- with open('/root/HostManualconfigtmp2','w') as f:
-  f.write('bargs:'+str(bargs)+'\n')
+ with open('/root/HostManualconfigtmp3','w') as f:
+  f.write(str(bargs))
  with open('/TopStordata/Hostprop.txt') as f:
   oldbarg=f.read()
  oldbarg=oldbarg.replace('"','').replace('{','').replace('}','').replace(',',' ')
  oldarg=oldbarg.split()
  arg=bargs
- with open('/root/HostManualconfigtmp2','a') as f:
+ with open('/root/HostManualconfigtmp2','w') as f:
   f.write('arg:'+str(arg)+'\n')
  with open('/root/HostManualconfigtmp2','a') as f:
   f.write('oldarg:'+str(oldarg)+'\n')
@@ -71,26 +71,7 @@ def config(*bargs):
   put('namespace/mgmtip',change['mgmtip']+'/'+subnet)
   broadcasttolocal('namespace/mgmtip',change['mgmtip']+'/'+subnet)
   logmsg.sendlog('HostManual1su7','info',arg[-1],change['oldmgmtip']+'/'+oldsubnet,change['mgmtip']+'/'+subnet)
-######### changing box address ###############
- if 'addr' in change:
-  if 'addrsubnet' in change:
-   subnet=change['addrsubnet']
-   oldsubnet=change['oldaddrsubnet']
-  else:
-   subnet=oldsubnet=24
-   for y in oldarg:
-    if 'addrsubnet' in y:
-     y=y.split(':')
-     subnet=oldsubnet=y[1]
-  with open('/root/HostManualconfigtmp2','a') as f:
-   f.write('/will/change box address)\n');
-  logmsg.sendlog('HostManual1st6','info',arg[-1],change['oldaddr']+'/'+oldsubnet,change['addr']+'/'+subnet)
-  cmdline=['/TopStor/HostManualconfigCC',change['addr'],change['oldaddr'],subnet,oldsubnet]
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  cmdline=['/TopStor/rebootme',change['addr'],change['oldaddr'],subnet,oldsubnet]
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  logmsg.sendlog('HostManual1su6','info',arg[-1],change['oldaddr']+'/'+oldsubnet,change['addr']+'/'+subnet)
-######### changing data address ###############
+######## changing data address ###############
  if 'dataip' in change:
   if 'dataipsubnet' in change:
    subnet=change['dataipsubnet']
@@ -123,8 +104,27 @@ def config(*bargs):
   cmdline=['/TopStor/HostManualconfigGW.py',change['gw']]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   logmsg.sendlog('HostManual1su11','info',arg[-1],change['oldgw'],change['gw'])
+ ######### changing box address ###############
+ if 'addr' in change:
+  if 'addrsubnet' in change:
+   subnet=change['addrsubnet']
+   oldsubnet=change['oldaddrsubnet']
+  else:
+   subnet=oldsubnet=24
+   for y in oldarg:
+    if 'addrsubnet' in y:
+     y=y.split(':')
+     subnet=oldsubnet=y[1]
+  with open('/root/HostManualconfigtmp2','a') as f:
+   f.write('/will/change box address)\n');
+  logmsg.sendlog('HostManual1st6','info',arg[-1],change['oldaddr']+'/'+oldsubnet,change['addr']+'/'+subnet)
+  cmdline=['/TopStor/HostManualconfigCC',change['addr'],change['oldaddr'],subnet,oldsubnet]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline=['/TopStor/rebootme',change['addr'],change['oldaddr'],subnet,oldsubnet]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  logmsg.sendlog('HostManual1su6','info',arg[-1],change['oldaddr']+'/'+oldsubnet,change['addr']+'/'+subnet)
 ####################################################
-  cmdline=['/TopStor/HostgetIPs']
+# cmdline=['/TopStor/HostgetIPs']
  cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','finished',bargs[-1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  return 1
