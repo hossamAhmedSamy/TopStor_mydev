@@ -13,6 +13,7 @@ host=` echo $@ | awk '{print $3}'`;
 hostnam=` echo $@ | awk '{print $3}'`;
 disk1=` echo $@ | awk '{print $4}'`;
 diskn1=` echo $@ | awk '{print $5}'`;
+nextpool=` echo $@ | awk '{print $6}'`;
 #disk1=`ls /dev/disk/by-id/ | grep -v part | grep $disk1`
 msgraid="nothing";
 myhost=`hostname -s`
@@ -24,16 +25,33 @@ declare -a hostparam=();
 declare -a diskparam=();
 if [[ $contrun == 'true' ]];
 then
- currentreq=`/pace/etcdget.py requests/DGsetpool --prefix`
+echo $@ > /root/tmp2
+ waiting=1
+waitingc=1
+while [ $waiting -eq 1 ];
+do
+ echo to frst while >> /root/tmp2
+ currentreq=`/pace/etcdget.py requests/DGsetpool --prefix`'currentreq'
+ echo currentre=$currentreq  >> /root/tmp2
  echo $currentreq | grep $myhost
- if [ $? -eq 0 ];
+ if [ $? -ne 0 ];
  then
-  exit
- else
-  /pace/etcdput.py requests/DGsetpool/$myhost $myhost/$userreq
+ echo to continue >> /root/tmp2
+  break
  fi
+ echo to continue 0 >> /root/tmp2
+ waitingc=$((waitingc+1))
+ echo to continue 1, $waitingc >> /root/tmp2
+ if [ $waitingc -eq 20 ];
+ then
+  echo to continue 2 >> /root/tmp2
+  break
+ fi
+  echo to continue 3 >> /root/tmp2
+ sleep 1
+done
  /TopStor/queuethis.sh `basename "$0"` running $userreq &
-echo iamhere
+echo iamhere >> /root/tmp2
 if [[ $raid == "import" ]];
 then
  echo to import only $disk1
@@ -308,6 +326,7 @@ else
   fi
  fi 
  if [[ $raid == "parity" ]]; then
+  echo Iam parity>>/root/tmp2
   diskargs=${#params[@]};
   diskargs=$((diskargs-2));
   i=2
@@ -315,17 +334,24 @@ else
   diskns=""
   nextpool='dhcp'${RANDOM}$RANDOM;
   while [ $i -lt $diskargs ]; do
+   echo inwhile, i, $diskn >>/root/tmp2
    i=$((i+1));
    disk=`echo ${params[$i]} | awk -F':' '{print $1}'`
    diskn=`echo ${params[$i]} | awk -F':' '{print $2}'`
    /sbin/zpool labelclear /dev/disk/by-id/$disk;
+   echo /sbin/zpool labelclear /dev/disk/by-id/$disk;
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
+   echo finished disks $diskns >>/root/tmp2
    /TopStor/logmsg.py DGst17 info $userreq ${nextpool} $diskns
+   echo finished loggging  >>/root/tmp2
   echo /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on cachefile=/TopStordata/p${nextpool} -f p${nextpool} raidz1 ${disk1} >/root/tmp
-  /sbin/zpool create -o ashift=12 -o autoexpand=on -o cachefile=/TopStordata/p${nextpool} -o autoreplace=on -f p${nextpool} raidz1 ${disk1} 2>txt/${0:2}$userreq.txt
+  echo /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on cachefile=/TopStordata/p${nextpool} -f p${nextpool} raidz1 ${disk1}
+   echo finished creating p$nextpool  >>/root/tmp2
+  /sbin/zpool create -o ashift=12 -o autoexpand=on -o cachefile=/TopStordata/p${nextpool} -o autoreplace=on -f p${nextpool} raidz1 ${disk1}
   if [ $? -eq 0 ]; then
+     echo itisdone >> /root/tmp2
      zfs set acltype=posixacl p$nextpool
      zfs export p$nextpool
      sleep 1
@@ -337,6 +363,7 @@ else
      ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
     /TopStor/logmsg.py DGsu17 info $userreq p${nextpool} $diskns
   else
+    echo itis not done >> /root/tmp2
     /TopStor/logmsg.py DGfa17 error $userreq p${nextpool} $diskns
   fi
  fi 

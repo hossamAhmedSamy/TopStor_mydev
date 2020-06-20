@@ -15,12 +15,16 @@ def send(*bargs):
 	else:
 		args=bargs
 	pool=args[0]
-	x=get('deletedpool')
+	x=get('deletedpool','--prefix')
+	try:
+	 oldx=x[0][1]
+	except:
+	 oldx='0'
 	pool=str(pool).split()[-1]
+	with open('/root/DGdespool2','w') as f:
+		f.write(str(bargs))
+	put('deletedpool',oldx.replace('/'+str(pool),'')+'/'+str(pool))
 	with open('/root/DGdespool','w') as f:
-		f.write('pooltodelete='+str(x)+'/'+str(pool)+'\n')
-	put('deletedpool',str(x)+'/'+str(pool))
-	with open('/root/DGdespool','a') as f:
 		f.write('deletkey='+str(x)+'/'+str(pool)+'\n')
 	with open('/root/DGdespool','a') as f:
 		f.write('args='+str(args)+'\n')
@@ -53,4 +57,6 @@ def send(*bargs):
 	return 1
 
 if __name__=='__main__':
+ with open('/root/DGdespool3','w') as f:
+  f.write(str(sys.argv))
  send(*sys.argv[1:])

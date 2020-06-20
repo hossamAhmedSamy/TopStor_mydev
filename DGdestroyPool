@@ -8,18 +8,40 @@ glog='/var/www/html/des20/Data/TopStor.log'
 pool=` echo $@ | awk '{print $1}'`;
 userreq=` echo $@ | awk '{print $2}'`;
 privilege="DiskGroups";
+echo hi=$privilege > /root/tmp2
 contrun=`./privthis.sh $privilege $userreq`;
-if [[ $contrun == 'true' ]]
+echo hi=$contrun >> /root/tmp2
+echo $contrun | grep 'true'
+if [ $? -eq 0  ]
 then
+echo iam in >> /root/tmp2
  myhost=`hostname -s`
- currentreq=`/pace/etcdget.py requests/DGdestroypool --prefix`
- echo $currentreq | grep $myhost
- if [ $? -eq 0 ];
- then
-  exit
- else
-  /pace/etcdput.py requests/DGdestroypool/$myhost $myhost/$userreq
- fi
+ waiting=1
+ waitingc=1
+ while [ $waiting -eq 1 ];
+ do
+  echo to frst while >> /root/tmp2
+  currentreq=`/pace/etcdget.py requests/DGdestroypool --prefix`'currentreq'
+  echo currentre=$currentreq  >> /root/tmp2
+  echo $currentreq | grep $myhost
+  if [ $? -ne 0 ];
+  then
+  echo to continue >> /root/tmp2
+   break
+  fi
+  echo to continue 0 >> /root/tmp2
+  waitingc=$((waitingc+1))
+  echo to continue 1, $waitingc >> /root/tmp2
+  if [ $waitingc -eq 20 ];
+  then
+   echo to continue 2 >> /root/tmp2
+   break
+  fi
+   echo to continue 3 >> /root/tmp2
+  sleep 1
+ done
+ echo Iam her2 >> /root/tmp2
+ /pace/etcdput.py requests/DGdestroypool/$myhost $myhost/$userreq
  /TopStor/queuethis.sh `basename "$0"` running $userreq &
  /TopStor/logmsg.py DGst5 info $userreq $pool
  waiting=1
@@ -32,6 +54,7 @@ then
    waiting=0
   fi
  done
+ echo iam here2 >> /root/tmp2
  /sbin/zpool export -f $pool
  sleep 1
  /sbin/zpool import $pool

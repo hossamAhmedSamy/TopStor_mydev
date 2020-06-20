@@ -12,14 +12,14 @@ def send(*bargs):
   args=bargs[0].split()
  else:
   args=bargs
- pool=args[0]
- pool=str(pool).split()[-1]
+ pool=args[-2]
+ #pool=str(pool).split()[-1]
  with open('/root/DGsetpool','w') as f:
   f.write('args='+str(args)+'\n')
  z=[]
  with open('/root/DGsetpool','a') as f:
   f.write('pool='+pool+'\n')
- owner=args[-2]
+ owner=args[-1]
  with open('/root/DGsetpool','a') as f:
   f.write('owner='+owner+'\n')
  myhost=hostname()
@@ -30,8 +30,9 @@ def send(*bargs):
   ownerip=get('known',owner)
   if ownerip[0]== -1:
    return 3
+ print('owner',ownerip[0])
  z=['/TopStor/pump.sh','DGsetPool']
- for arg in args[:-2]:
+ for arg in args[:-1]:
   z.append(arg)
  msg={'req': 'DGsetPool', 'reply':z}
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)

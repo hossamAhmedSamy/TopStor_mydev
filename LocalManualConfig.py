@@ -9,14 +9,14 @@ def config(*bargs):
  cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','running',bargs[-1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  enpdev='enp0s8'
- with open('/root/HostManualconfigtmp2','w') as f:
-  f.write('bargs:'+str(bargs)+'\n')
+ with open('/root/HostManualconfigtmp3','w') as f:
+  f.write(str(bargs))
  with open('/TopStordata/Hostprop.txt') as f:
   oldbarg=f.read()
  oldbarg=oldbarg.replace('"','').replace('{','').replace('}','').replace(',',' ')
  oldarg=oldbarg.split()
  arg=bargs
- with open('/root/HostManualconfigtmp2','a') as f:
+ with open('/root/HostManualconfigtmp2','w') as f:
   f.write('arg:'+str(arg)+'\n')
  with open('/root/HostManualconfigtmp2','a') as f:
   f.write('oldarg:'+str(oldarg)+'\n')
@@ -42,6 +42,9 @@ def config(*bargs):
  logmsg.sendlog('HostManual1002','info',arg[-1])
  with open('/root/HostManualconfigtmp2','a') as f:
   f.write('change:'+str(change)+'\n')
+ '''
+ change = {'tz': 'Kuw@@(GMT+03!00)_Kuwait@_Riyadh@_Baghdad', 'oldtz': '@@_Africa/Cairo_(EET@_+0200)', 'name': 'stor11', 'oldname': 'stor0', 'mgmtip': '192.168.9.12', 'oldmgmtip': '192.168.8.24', 'ntp': '1.asia.pool.ntp.org', 'oldntp': '0.asia.pool.ntp.org'}
+ '''
 ######### changing name ###############
  if 'name' in change:
   logmsg.sendlog('HostManual1st5','info',arg[-1],change['oldname'],change['name'])
@@ -54,6 +57,7 @@ def config(*bargs):
   logmsg.sendlog('HostManual1su5','info',arg[-1],change['oldname'],change['name'])
 ######### changing cluster address ###############
  if 'mgmtip' in change:
+  print('############### found cluster address')
   if 'mgmtsubnet' in change:
    subnet=change['mgmtsubnet']
    oldsubnet=change['oldmgmtsubnet']
@@ -71,26 +75,7 @@ def config(*bargs):
   put('namespace/mgmtip',change['mgmtip']+'/'+subnet)
   broadcasttolocal('namespace/mgmtip',change['mgmtip']+'/'+subnet)
   logmsg.sendlog('HostManual1su7','info',arg[-1],change['oldmgmtip']+'/'+oldsubnet,change['mgmtip']+'/'+subnet)
-######### changing box address ###############
- if 'addr' in change:
-  if 'addrsubnet' in change:
-   subnet=change['addrsubnet']
-   oldsubnet=change['oldaddrsubnet']
-  else:
-   subnet=oldsubnet=24
-   for y in oldarg:
-    if 'addrsubnet' in y:
-     y=y.split(':')
-     subnet=oldsubnet=y[1]
-  with open('/root/HostManualconfigtmp2','a') as f:
-   f.write('/will/change box address)\n');
-  logmsg.sendlog('HostManual1st6','info',arg[-1],change['oldaddr']+'/'+oldsubnet,change['addr']+'/'+subnet)
-  cmdline=['/TopStor/HostManualconfigCC',change['addr'],change['oldaddr'],subnet,oldsubnet]
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  cmdline=['/TopStor/rebootme',change['addr'],change['oldaddr'],subnet,oldsubnet]
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  logmsg.sendlog('HostManual1su6','info',arg[-1],change['oldaddr']+'/'+oldsubnet,change['addr']+'/'+subnet)
-######### changing data address ###############
+######## changing data address ###############
  if 'dataip' in change:
   if 'dataipsubnet' in change:
    subnet=change['dataipsubnet']
@@ -113,18 +98,38 @@ def config(*bargs):
   logmsg.sendlog('HostManual1su9','info',arg[-1],change['oldntp'],change['ntp'])
 ########### changing time zone ###############
  if 'tz' in change:
-  logmsg.sendlog('HostManual1st10','info',arg[-1],change['oldtz'],change['tz'])
+  print('############## found time zone')
+  logmsg.sendlog('HostManual1st10','info',change['oldtz'],change['tz'])
   cmdline=['/TopStor/HostManualconfigTZ.py',change['tz']]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  logmsg.sendlog('HostManual1su10','info',arg[-1],change['oldtz'],change['tz'])
+  logmsg.sendlog('HostManual1su10','info',change['oldtz'],change['tz'])
 ############ changing gateway  ###############
  if 'gw' in change:
   logmsg.sendlog('HostManual1st11','info',arg[-1],change['oldgw'],change['gw'])
   cmdline=['/TopStor/HostManualconfigGW.py',change['gw']]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   logmsg.sendlog('HostManual1su11','info',arg[-1],change['oldgw'],change['gw'])
+ ######### changing box address ###############
+ if 'addr' in change:
+  if 'addrsubnet' in change:
+   subnet=change['addrsubnet']
+   oldsubnet=change['oldaddrsubnet']
+  else:
+   subnet=oldsubnet=24
+   for y in oldarg:
+    if 'addrsubnet' in y:
+     y=y.split(':')
+     subnet=oldsubnet=y[1]
+  with open('/root/HostManualconfigtmp2','a') as f:
+   f.write('/will/change box address)\n');
+  logmsg.sendlog('HostManual1st6','info',arg[-1],change['oldaddr']+'/'+oldsubnet,change['addr']+'/'+subnet)
+  cmdline=['/TopStor/HostManualconfigCC',change['addr'],change['oldaddr'],subnet,oldsubnet]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  cmdline=['/TopStor/rebootme',change['addr'],change['oldaddr'],subnet,oldsubnet]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  logmsg.sendlog('HostManual1su6','info',arg[-1],change['oldaddr']+'/'+oldsubnet,change['addr']+'/'+subnet)
 ####################################################
-  cmdline=['/TopStor/HostgetIPs']
+# cmdline=['/TopStor/HostgetIPs']
  cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','finished',bargs[-1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  return 1
