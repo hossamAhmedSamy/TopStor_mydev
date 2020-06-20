@@ -42,6 +42,9 @@ def config(*bargs):
  logmsg.sendlog('HostManual1002','info',arg[-1])
  with open('/root/HostManualconfigtmp2','a') as f:
   f.write('change:'+str(change)+'\n')
+ '''
+ change = {'tz': 'Kuw@@(GMT+03!00)_Kuwait@_Riyadh@_Baghdad', 'oldtz': '@@_Africa/Cairo_(EET@_+0200)', 'name': 'stor11', 'oldname': 'stor0', 'mgmtip': '192.168.9.12', 'oldmgmtip': '192.168.8.24', 'ntp': '1.asia.pool.ntp.org', 'oldntp': '0.asia.pool.ntp.org'}
+ '''
 ######### changing name ###############
  if 'name' in change:
   logmsg.sendlog('HostManual1st5','info',arg[-1],change['oldname'],change['name'])
@@ -54,6 +57,7 @@ def config(*bargs):
   logmsg.sendlog('HostManual1su5','info',arg[-1],change['oldname'],change['name'])
 ######### changing cluster address ###############
  if 'mgmtip' in change:
+  print('############### found cluster address')
   if 'mgmtsubnet' in change:
    subnet=change['mgmtsubnet']
    oldsubnet=change['oldmgmtsubnet']
@@ -94,10 +98,11 @@ def config(*bargs):
   logmsg.sendlog('HostManual1su9','info',arg[-1],change['oldntp'],change['ntp'])
 ########### changing time zone ###############
  if 'tz' in change:
-  logmsg.sendlog('HostManual1st10','info',arg[-1],change['oldtz'],change['tz'])
+  print('############## found time zone')
+  logmsg.sendlog('HostManual1st10','info',change['oldtz'],change['tz'])
   cmdline=['/TopStor/HostManualconfigTZ.py',change['tz']]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  logmsg.sendlog('HostManual1su10','info',arg[-1],change['oldtz'],change['tz'])
+  logmsg.sendlog('HostManual1su10','info',change['oldtz'],change['tz'])
 ############ changing gateway  ###############
  if 'gw' in change:
   logmsg.sendlog('HostManual1st11','info',arg[-1],change['oldgw'],change['gw'])
