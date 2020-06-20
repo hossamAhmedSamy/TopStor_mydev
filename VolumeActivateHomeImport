@@ -24,9 +24,9 @@ privilege="CIFS";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
- echo starting Volume HOMe activation for the pool $pool >> /root/volactivateImportparam
+ echo starting Volume Home activation for the pool $pool >> /root/volactivateImportparam
  declare  ips=`/pace/etcdget.py ipaddr $pool`
- declare  vols=`/pace/etcdget.py volumes/HOMe  $pool`
+ declare  vols=`/pace/etcdget.py volumes/Home  $pool`
  echo $vols | grep $pool
  if [ $? -ne 0 ]; 
  then
@@ -43,7 +43,7 @@ then
     writev=`cat /$pool/$l | grep writeable  | awk -F'= ' '{print $2}'`
     name=`echo $l | awk -F'smb.' '{print $2}'`
     echo ipaddrs=$ipaddr
-    /pace/etcdput.py volumes/HOMe/$myhost/$pool/$name $pool/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
+    /pace/etcdput.py volumes/Home/$myhost/$pool/$name $pool/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
     yes | cp /$pool/$l /TopStordata/smb.$ipaddr
     echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet home 
     /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet home 
@@ -76,15 +76,15 @@ then
    sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/smb.${name}
    chmod 770 /$pool/$name
    yes | cp /TopStordata/smb.$name /$pool/
-   /pace/etcdput.py volumes/HOMe/$myhost/$pool/$name $pool/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
+   /pace/etcdput.py volumes/Home/$myhost/$pool/$name $pool/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
    echo running cifs.sh=$pool $name $ipaddr $ipsubnet >> /root/volactivateparam
    echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
    /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet home
    echo finished cifs.sh >> /root/volactivateparam
   done
  fi
- runvol=`./etcdget.py volumes/HOMe $pool` 
- vols=`zfs list -H -o name,prot:kind | grep HOMe | grep $pool | awk '{print $1}' | sed "s/$pool\///g" | grep -v $pool`
+ runvol=`./etcdget.py volumes/Home $pool` 
+ vols=`zfs list -H -o name,prot:kind | grep Home | grep $pool | awk '{print $1}' | sed "s/$pool\///g" | grep -v $pool`
  echo spanning the volumes in the pool $pool  metadata
  echo "${vols[@]}" | while read name;
  do
@@ -119,7 +119,7 @@ then
    sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/smb.${name}
    chmod 770 /$pool/$name
    yes | cp /TopStordata/smb.$name /$pool/
-   /pace/etcdput.py volumes/HOMe/$myhost/$pool/$name $pool/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
+   /pace/etcdput.py volumes/Home/$myhost/$pool/$name $pool/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
    echo running cifs.sh=$pool $name $ipaddr $ipsubnet >> /root/volactivateparam
    echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
    /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet home 

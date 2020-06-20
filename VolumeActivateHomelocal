@@ -29,20 +29,20 @@ then
  case $stat in
   01)
    echo volume only  for  $vol
-    declare  vols=`/pace/etcdgetlocal.py $myip volumes/HOMe $vol`
+    declare  vols=`/pace/etcdgetlocal.py $myip volumes/Home $vol`
    ;;
   10)
    echo pool only $pool
     declare  ips=`/pace/etcdgetlocal.py $myip ipaddr $pool`
-    declare  vols=`/pace/etcdgetlocal.py $myip volumes/HOMe  $pool`
+    declare  vols=`/pace/etcdgetlocal.py $myip volumes/Home  $pool`
    ;;
   11)
    echo 'volume and pool only'
-    declare  vols=`/pace/etcdgetlocal.py $myip volumes/HOMe/$host/$pool/$vol`
+    declare  vols=`/pace/etcdgetlocal.py $myip volumes/Home/$host/$pool/$vol`
    ;;
   00)
    echo 'host only'
-   declare  vols=`/pace/etcdgetlocal.py $myip volumes/HOMe/$host --prefix`
+   declare  vols=`/pace/etcdgetlocal.py $myip volumes/Home/$host --prefix`
  esac
  echo vols="${vols[@]}"
  volsc=`echo $vols | wc -c`
@@ -78,7 +78,7 @@ then
    writev=`echo $l | awk -F'/' '{print $5}'`
    admin=`echo $l | awk -F'/' '{print $6}'`
    writeable=`echo $l | awk -F'/' '{print $7}'`
-   homeprop=`ETCDCTL_API=3 /pace/etcdgetlocal.py $myip ipaddr/HOMe` 
+   homeprop=`ETCDCTL_API=3 /pace/etcdgetlocal.py $myip ipaddr/Home` 
    if [ $homeprop -eq '-1' ];
    then
     ipaddr='10.11.11.20'
@@ -103,12 +103,12 @@ then
  do
   pool=`echo $l | awk -F'/' '{print $1}'`
   name=`echo $l | awk -F'/' '{print $2}'`
-  volhost=`/pace/etcdgetlocal.py $myip volumes/HOMe/ $name | awk -F'/' '{print $3}'`
-  volsvalue=`/pace/etcdgetlocal.py $myip volumes/HOMe/$volhost/$pool/$name`
-  /pace/etcdputlocal.py $myip volumes/HOMe/$myhost/$pool/$name $volsvalue
+  volhost=`/pace/etcdgetlocal.py $myip volumes/Home/ $name | awk -F'/' '{print $3}'`
+  volsvalue=`/pace/etcdgetlocal.py $myip volumes/Home/$volhost/$pool/$name`
+  /pace/etcdputlocal.py $myip volumes/Home/$myhost/$pool/$name $volsvalue
   if [ $volhost != $myhost ];
   then
-   /pace/etcddellocal.py $myip volumes/HOMe/$volhost/$pool/$name
+   /pace/etcddellocal.py $myip volumes/Home/$volhost/$pool/$name
   fi
  done
 fi

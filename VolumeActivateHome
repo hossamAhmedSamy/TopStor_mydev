@@ -31,20 +31,20 @@ then
  case $stat in
   01)
    echo volume only  for  $vol
-    declare  vols=`/pace/etcdget.py volumes/HOMe $vol`
+    declare  vols=`/pace/etcdget.py volumes/Home $vol`
    ;;
   10)
    echo pool only $pool
     declare  ips=`/pace/etcdget.py ipaddr $pool`
-    declare  vols=`/pace/etcdget.py volumes/HOMe  $pool`
+    declare  vols=`/pace/etcdget.py volumes/Home  $pool`
    ;;
   11)
    echo 'volume and pool only'
-    declare  vols=`/pace/etcdget.py volumes/HOMe/$host/$pool/$vol`
+    declare  vols=`/pace/etcdget.py volumes/Home/$host/$pool/$vol`
    ;;
   00)
    echo 'host only'
-   declare  vols=`/pace/etcdget.py volumes/HOMe/$host --prefix`
+   declare  vols=`/pace/etcdget.py volumes/Home/$host --prefix`
  esac
  echo vols="${vols[@]}"
  volsc=`echo $vols | wc -c`
@@ -86,7 +86,7 @@ then
     writev=`echo $writev | sed 's/\,/ /g' `;
     admin=`echo $l | awk -F'/' '{print $6}'`
     writeable=`echo $l | awk -F'/' '{print $7}'`
-    echo $ipsubnet > /TopStordata/HOMetmp
+    echo $ipsubnet > /TopStordata/Hometmp
     yes | cp sharecifs.txt /TopStordata/smb.${name}
     shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
     sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/smb.${name}
@@ -107,8 +107,8 @@ then
    then
     continue
    fi
-   ipsubnet=`cat /TopStordata/HOMetmp`
-   rm -rf /TopStordata/HOMetmp
+   ipsubnet=`cat /TopStordata/Hometmp`
+   rm -rf /TopStordata/Hometmp
    echo i=$i
    echo ipc=$ipc for $ip
    echo ipvol=$ipvol
@@ -163,8 +163,8 @@ then
   name=`echo $l | awk -F'/' '{print $2}'`
   writev=`echo $l | awk -F'/' '{print $5}'`
   writev=`echo $writev | sed 's/\,/ /g' `;
-  volhost=`/pace/etcdget.py volumes/HOMe/ $name | awk -F'/' '{print $3}'`
-  volsvalue=`/pace/etcdget.py volumes/HOMe/$volhost/$pool/$name`
+  volhost=`/pace/etcdget.py volumes/Home/ $name | awk -F'/' '{print $3}'`
+  volsvalue=`/pace/etcdget.py volumes/Home/$volhost/$pool/$name`
   chmod 770 /$pool/$name
   sleep 1 
   setfacl -b /$pool/$name
@@ -173,10 +173,10 @@ then
   then
    for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done
   fi
-  /pace/etcdput.py volumes/HOMe/$myhost/$pool/$name $volsvalue
+  /pace/etcdput.py volumes/Home/$myhost/$pool/$name $volsvalue
   if [ $volhost != $myhost ];
   then
-   /pace/etcddel.py volumes/HOMe/$volhost/$pool/$name
+   /pace/etcddel.py volumes/Home/$volhost/$pool/$name
   fi
  done
  echo finished setting volumes regestry >> /root/volactivateparam
