@@ -25,6 +25,25 @@ then
 else
  /pace/etcdput.py known/$hostname $hostip
 fi
+configured=`ETCDCTL_API=3 ./etcdget.py configured`
+echo $configured  | grep no 
+if [ $? -eq 0 ];
+then
+ ./etcdput.py configured semiCC
+else
+ echo $configured | grep semi | grep -v CC
+ if [ $? -eq 0 ];
+ then
+  ./etcdput.py configured yes
+  echo $hostname $hostip > /TopStordata/members 
+ fi
+fi
+echo $configured | grep yes 
+if [ $? -eq 0 ];
+then
+ ./UpdateHosts $hostname $hostip
+fi
+
 echo shuttingdown 2 >> /root/HostCC
 #/pace/keysend.sh $hostip
 /sbin/rabbitmqctl stop_app;
