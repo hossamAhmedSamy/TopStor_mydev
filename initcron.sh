@@ -23,7 +23,7 @@ sleep 240
 /TopStor/factory.sh
 crontab -l | grep -v Initialization > /TopStordata/cronthis
 echo "0" "0" "1" "*" "*"  sh /TopStor/clearlog.sh Initialization >> /TopStordata/cronthis
-echo "0" "*/6" "*" "*" "*"  sh /TopStor/initcleandb.sh  Initialization >> /TopStordata/cronthis
+echo "0" "*/2" "*" "*" "*"  sh /TopStor/initcleandb.sh  Initialization >> /TopStordata/cronthis
 crontab /TopStordata/cronthis
 
 
