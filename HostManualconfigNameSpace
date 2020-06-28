@@ -17,4 +17,23 @@ dev=`/sbin/pcs resource show mgmtip | grep Attrib | awk -F'nic=' '{print $2}' | 
 /sbin/pcs resource update mgmtip ip=$hostip
 /sbin/pcs resource update mgmtip cidr_netmask=$subnet
 /sbin/ip addr del ${oldip}/$oldsubnet dev $dev
+configured=`ETCDCTL_API=3 ./etcdget.py configured`
+echo $configured  | grep no
+if [ $? -eq 0 ];
+then
+ ./etcdput.py configured semiName
+else
+ echo $configured | grep semi | grep -v Name 
+ if [ $? -eq 0 ];
+ then
+  ./etcdput.py configured yes
+  echo $hostname $hostip > /TopStordata/members 
+ fi
+fi
+echo $configured | grep yes 
+if [ $? -eq 0 ];
+then
+ ./UpdateHosts $hostname $hostip
+fi
+
 #/sbin/reboot

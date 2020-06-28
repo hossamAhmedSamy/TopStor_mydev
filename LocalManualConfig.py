@@ -98,11 +98,10 @@ def config(*bargs):
   logmsg.sendlog('HostManual1su9','info',arg[-1],change['oldntp'],change['ntp'])
 ########### changing time zone ###############
  if 'tz' in change:
-  print('############## found time zone')
-  logmsg.sendlog('HostManual1st10','info',change['oldtz'],change['tz'])
+  logmsg.sendlog('HostManual1st10','info',arg[-1],change['oldtz'],change['tz'])
   cmdline=['/TopStor/HostManualconfigTZ.py',change['tz']]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  logmsg.sendlog('HostManual1su10','info',change['oldtz'],change['tz'])
+  logmsg.sendlog('HostManual1su10','info',arg[-1],change['oldtz'],change['tz'])
 ############ changing gateway  ###############
  if 'gw' in change:
   logmsg.sendlog('HostManual1st11','info',arg[-1],change['oldgw'],change['gw'])
