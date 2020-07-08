@@ -24,7 +24,7 @@ privilege="CIFS";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
- echo starting Volume CIFS activation for the pool $pool >> /root/volactivateImportparamHome
+ echo starting Volume Home activation for the pool $pool >> /root/volactivateImportparamHome
  ls /$pool | grep 'smb\.' 
  if [ $? -eq 0 ];
  then
@@ -32,14 +32,16 @@ then
   vols=`ls /$pool | grep 'smb\.' `
   echo "${vols[@]}" | while read l;
   do
-   registry=`cat /$pool/$l | grep SUMMARY | awk '{print $3}'`
-   name=` $l | awk -F'/' '{print $2}'`
-   ipaddr=` $l | awk -F'/' '{print $8}'`
-   ipsubnet=` $l | awk -F'/' '{print $9}'`
-   /pace/etcdput.py volumes/Home/$myhost/$pool/$name $registry
-   yes | cp /$pool/$l /TopStordata/smb.$ipaddr
-   echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
-   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet Home 
+   registry=`cat /$pool/$l | grep Home | grep SUMMARY | awk '{print $NF}'`
+   regn=`echo $registry | wc -c`
+   if [ $regn -gt 10 ];
+   then
+    name=` $l | awk -F'/' '{print $2}'`
+    ipaddr=` $l | awk -F'/' '{print $8}'`
+    ipsubnet=` $l | awk -F'/' '{print $9}'`
+    /pace/etcdput.py volumes/Home/$myhost/$pool/$name $registry
+    /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet Home 
+   fi
   done
  fi
 fi

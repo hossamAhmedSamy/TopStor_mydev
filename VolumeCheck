@@ -31,7 +31,7 @@ do
  ips=`cat /$pool/exports.* | grep SUMMARY | awk '{print $NF}' | awk -F'/' '{print $10}'`
  echo "${ips[@]}" | while read ip;
  do
-  docker ps | grep $ip >/dev/null 
+  cat /etc/exports | grep $ip >/dev/null 
   if [ $? -ne 0 ];
   then
    ./etcddel.py vol $ip
