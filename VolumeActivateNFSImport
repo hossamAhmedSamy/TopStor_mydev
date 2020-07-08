@@ -23,95 +23,81 @@ privilege="CIFS";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
+ echo starting
  echo starting Volume NFS activation for the pool $pool >> /root/volactivateImportparam
- declare  ips=`/pace/etcdget.py ipaddr $pool`
- declare  vols=`/pace/etcdget.py volumes/NFS  $pool`
- echo $vols | grep $pool
- if [ $? -ne 0 ]; 
- then
-  ls /$pool | grep exports\. 
-  if [ $? -eq 0 ];
-  then 
-   vols=`ls /$pool | grep exports\. `
-   echo "${vols[@]}" | while read l;
-   do
-    echo regstring $l
-    ipaddr=` cat /${pool}/$l | grep ipaddr | awk '{print $NF}'`
-    ipsubnet=` cat /${pool}/$l | grep ipsubnet | awk '{print $NF}'`
-    echo file=$l
-    who=`cat /$pool/$l | grep $pool | awk -F'(' '{print $1}' | awk '{print $2}' `
-    access=`cat /$pool/$l | grep $pool | awk -F'(' '{print $2}' | awk -F',' '{print $1}'`
-    sync=`cat /$pool/$l | grep $pool | awk -F'(' '{print $2}' | awk -F',' '{print $2}'`
-    secure=`cat /$pool/$l | grep $pool | awk -F'(' '{print $2}' | awk -F',' '{print $3}'`
-    squash=`cat /$pool/$l | grep $pool | awk -F'(' '{print $2}' | awk -F',' '{print $4}'`
-    subtree=`cat /$pool/$l | grep $pool | awk -F'(' '{print $2}' | awk -F',' '{print $5}'`
-    name=`echo $l | awk -F'exports.' '{print $2}'`
-    echo /pace/etcdput.py volumes/NFS/$myhost/$pool/$name  $pool/$name/$who/$access/$sync/$secure/$squash/$subtree/yes/$ipaddr/$ipsubnet
-    /pace/etcdput.py volumes/NFS/$myhost/$pool/$name  $pool/$name/$who/$access/$sync/$secure/$squash/$subtree/yes/$ipaddr/$ipsubnet
-    echo end the echo
-    yes | cp /$pool/$l /TopStordata/$name.$ipaddr
-    yes | cp /$pool/$l /TopStordata/
-    /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
-   done
-  fi
- else
-  echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
+ ls /$pool | grep 'exports\.'
+ if [ $? -eq 0 ];
+ then 
+  vols=`ls /$pool | grep 'exports\.' `
+  echo "${vols[@]}" | while read l;
   do
-   pool=`echo $l | awk -F'/' '{print $1}'`
-   name=`echo $l | awk -F'/' '{print $2}'`
-   echo volume=$name
-   path='/'${pool}'/'${name}
-   shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
-  # ln '/'${pool}'/'${name} '/'${pool}'/'${shortname}
-   #path='/'${pool}'/'${shortname}
-   who=`echo $l | awk -F'/' '{print $3}'`
-   access=`echo $l | awk -F'/' '{print $4}'`
-   sync=`echo $l | awk -F'/' '{print $5}'`
-   secure=`echo $l | awk -F'/' '{print $6}'`
-   squash=`echo $l | awk -F'/' '{print $7}'`
-   subtree=`echo $l | awk -F'/' '{print $8}'`
-   writev=`echo $l | awk -F'/' '{print $9}'`
-   ipaddr=`echo $l | awk -F'/' '{print $10}'`
-   ipsubnet=`echo $l | awk -F'/' '{print $11}'`
-   writev=`echo $writev | sed 's/\,/ /g' `;
-   echo $ipsubnet > /TopStordata/NFStmp
-   echo $path $who'('$access,$sync,$secure,$squash,$subtree')' > /TopStordata/exports.$name 
-   echo '# ipaddress = IPADDRESS' >> /TopStordata/exports.$name
-   echo '# ipsubnet = IPSUBNET' >> /TopStordata/exports.$name
-   sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/exports.${name}
-   sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/exports.${name}
-   yes | cp /TopStordata/exports.$name /$pool/
-   cat /TopStordata/exports.$name >> /TopStordata/exports.$ipaddr
-   echo sending fns $pool $name $ipaddr $ipsubnet
+   echo regstring $l
+   registry=`cat /${pool}/$l | grep SUMMARY | awk '{print $NF}'`
+   ipaddr=` echo $registry | awk -F'/' '{print $10}'`
+   ipsubnet=` echo $registry | awk -F'/' '{print $11}'`
+   name=`echo $l | awk -F'exports.' '{print $2}'`
    /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
   done
  fi
- runvol=`./etcdget.py vol $pool` 
- vols=`zfs list -H -o name,prot:kind | grep NFS | grep $pool | awk '{print $1}' | sed "s/$pool\///g" | grep -v $pool`
- echo "${vols[@]}" | while read name;
- do
-  echo the runvol=$runvol
-  echo the name=$name
-  echo  $runvol | grep $name 
-  if [ $? -ne 0 ];
-  then
-   echo the volume is not in registry
-   ipaddr=`zfs get -H ip:addr $pool/$name | awk '{print $3}'`
-   echo got ip $ipaddr
-   ipsubnet=`zfs get -H ip:subnet $pool/$name | awk '{print $3}'`
-   echo got ip $ipsubnet
-   path='/'${pool}'/'${name}
-   echo $path 10.15.15.*'('rw,sync,insecure,no_root_squash,no_all_squash')' > /TopStordata/exports.$name 
-   echo '# ipaddress = IPADDRESS' >> /TopStordata/exports.$name
-   echo '# ipsubnet = IPSUBNET' >> /TopStordata/exports.$name
-   sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/exports.${name}
-   sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/exports.${name}
-   admin=$userreq
-   yes | cp /TopStordata/exports.$name /$pool/
-   volsvalue=$pool'/'$name'/*/rw/sync/insecure/no_root_squash/no_all_squash/yes/'$ipaddr'/'$ipsubnet
-   /pace/etcdput.py volumes/NFS/$myhost/$pool/$name $volsvalue
-   echo 2 /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
-   /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
-  fi
- done
 fi
+#else
+#  echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
+#  do
+#   pool=`echo $l | awk -F'/' '{print $1}'`
+#   name=`echo $l | awk -F'/' '{print $2}'`
+#   echo volume=$name
+#   path='/'${pool}'/'${name}
+#   shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
+#  # ln '/'${pool}'/'${name} '/'${pool}'/'${shortname}
+#   #path='/'${pool}'/'${shortname}
+#   who=`echo $l | awk -F'/' '{print $3}'`
+#   access=`echo $l | awk -F'/' '{print $4}'`
+#   sync=`echo $l | awk -F'/' '{print $5}'`
+#   secure=`echo $l | awk -F'/' '{print $6}'`
+#   squash=`echo $l | awk -F'/' '{print $7}'`
+#   subtree=`echo $l | awk -F'/' '{print $8}'`
+#   writev=`echo $l | awk -F'/' '{print $9}'`
+#   ipaddr=`echo $l | awk -F'/' '{print $10}'`
+#   ipsubnet=`echo $l | awk -F'/' '{print $11}'`
+#   writev=`echo $writev | sed 's/\,/ /g' `;
+#   echo $ipsubnet > /TopStordata/NFStmp
+#   echo $path $who'('$access,$sync,$secure,$squash,$subtree')' > /TopStordata/exports.$name 
+#   echo '# ipaddress = IPADDRESS' >> /TopStordata/exports.$name
+#   echo '# ipsubnet = IPSUBNET' >> /TopStordata/exports.$name
+#   sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/exports.${name}
+#   sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/exports.${name}
+#   yes | cp /TopStordata/exports.$name /$pool/
+#   cat /TopStordata/exports.$name >> /TopStordata/exports.$ipaddr
+#   echo sending fns $pool $name $ipaddr $ipsubnet
+#   /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
+#  done
+# fi
+# runvol=`./etcdget.py vol $pool` 
+# vols=`zfs list -H -o name,prot:kind | grep NFS | grep $pool | awk '{print $1}' | sed "s/$pool\///g" | grep -v $pool`
+# echo "${vols[@]}" | while read name;
+# do
+#  echo the runvol=$runvol
+#  echo the name=$name
+#  echo  $runvol | grep $name 
+#  if [ $? -ne 0 ];
+#  then
+#   echo the volume is not in registry
+#   ipaddr=`zfs get -H ip:addr $pool/$name | awk '{print $3}'`
+#   echo got ip $ipaddr
+#   ipsubnet=`zfs get -H ip:subnet $pool/$name | awk '{print $3}'`
+#   echo got ip $ipsubnet
+#   path='/'${pool}'/'${name}
+#   echo $path 10.15.15.*'('rw,sync,insecure,no_root_squash,no_all_squash')' > /TopStordata/exports.$name 
+#   echo '# ipaddress = IPADDRESS' >> /TopStordata/exports.$name
+#   echo '# ipsubnet = IPSUBNET' >> /TopStordata/exports.$name
+#   sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/exports.${name}
+#   sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/exports.${name}
+#   admin=$userreq
+#   yes | cp /TopStordata/exports.$name /$pool/
+#   volsvalue=$pool'/'$name'/*/rw/sync/insecure/no_root_squash/no_all_squash/yes/'$ipaddr'/'$ipsubnet
+#   /pace/etcdput.py volumes/NFS/$myhost/$pool/$name $volsvalue
+#   echo 2 /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
+#   /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
+#  fi
+# done
+##fi

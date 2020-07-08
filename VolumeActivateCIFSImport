@@ -32,13 +32,11 @@ then
   vols=`ls /$pool | grep 'smb\.' `
   echo "${vols[@]}" | while read l;
   do
-   registry=`cat /$pool/$l | grep SUMMARY | awk '{print $3}'`
-   name=` $l | awk -F'/' '{print $2}'`
-   ipaddr=` $l | awk -F'/' '{print $8}'`
-   ipsubnet=` $l | awk -F'/' '{print $9}'`
+   registry=`cat /$pool/$l | grep SUMMARY | awk '{print $NF}'`
+   name=` echo $registry | awk -F'/' '{print $2}'`
+   ipaddr=` echo $registry | awk -F'/' '{print $8}'`
+   ipsubnet=` echo $registry | awk -F'/' '{print $9}'`
    /pace/etcdput.py volumes/CIFS/$myhost/$pool/$name $registry
-   yes | cp /$pool/$l /TopStordata/smb.$ipaddr
-   echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
   done
  fi
