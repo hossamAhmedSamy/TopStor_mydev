@@ -143,6 +143,7 @@ then
    writeable=`echo $l | awk -F'/' '{print $7}'`
    yes | cp sharecifs.txt /TopStordata/smb.${name}
    shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
+   sed -i "s/Vtype/Home/g"  /TopStordata/smb.${name}
    sed -i "s/Rpool/$pool/g"  /TopStordata/smb.${name}
    sed -i "s/Rname/$name/g"  /TopStordata/smb.${name}
    sed -i "s/Rreadv/$readv/g"  /TopStordata/smb.${name}
