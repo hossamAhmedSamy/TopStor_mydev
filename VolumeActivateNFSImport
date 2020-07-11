@@ -36,6 +36,7 @@ then
    ipaddr=` echo $registry | awk -F'/' '{print $10}'`
    ipsubnet=` echo $registry | awk -F'/' '{print $11}'`
    name=`echo $l | awk -F'exports.' '{print $2}'`
+   /pace/etcdput.py volumes/NFS/$myhost/$pool/$name $registry
    /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
   done
  fi
