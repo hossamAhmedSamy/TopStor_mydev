@@ -99,6 +99,12 @@ def do(body):
    f.write('received queue from parnter :'+str(r["reply"])+'\n')
    f.write('type of message :'+str(type(r["reply"]))+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if evacuate ###############
+ elif r["req"]=='Evacuate':  
+  with open('/root/recv','a') as f:
+   f.write('received evacuate from parnter :'+str(r["reply"])+'\n')
+   f.write('type of message :'+str(type(r["reply"]))+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if msg2 ###############
  elif r["req"]=='msg2':  
   with open('/root/recv','a') as f:
