@@ -13,20 +13,41 @@ hostname=`hostname`
 hostn=`/TopStor/etcdget.py alias/$hostname`
 hostip=`pcs resource show CC | grep Attributes | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 hostsubnet=`pcs resource show CC | grep Attributes | awk -F'netmask=' '{print $2}' | awk '{print $1}'`
-
-mgmtip=`pcs resource show mgmtip | grep Attributes | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+leader=`./etcdget.py leader --prefix`
+echo $leader | grep $hostname
+if [ $? -eq 0 ];
+then
+ isleader=1
+else
+ isleader=0
+fi
+#mgmtip=`pcs resource show mgmtip | grep Attributes | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 if [ -z $mgmtip ]; then mgmtip='0'; fi
-mgmtsubnet=`pcs resource show mgmtip | grep Attributes | awk -F'netmask=' '{print $2}' | awk '{print $1}'`
+#mgmtsubnet=`pcs resource show mgmtip | grep Attributes | awk -F'netmask=' '{print $2}' | awk '{print $1}'`
 if [ -z $mgmtsubnet ]; then mgmtsubnet='0'; fi
 hostrout=`netstat -rn | awk '{print $2}' | grep -v "Gateway" | grep -v "IP" | grep -v "0.0.0.0"`;
 if [ -z $hostrout ]; then hostrout='0'; fi
 hostdns=` cat /etc/resolv.conf | grep nameserver | awk '{print $2}' | tail -1`;
 if [ -z $hostdns ]; then hostdns='0'; fi
 #ntpserver=`cat /etc/chrony.conf | grep server | grep -v servers | head -1 | awk '{print $2}'`;
-gwserver=`ETCDCTL_API=3 ./etcdget.py gw`;
-ntpserver=`ETCDCTL_API=3 ./etcdget.py ntp`;
-configured=`ETCDCTL_API=3 ./etcdget.py configured`;
-tzone=`ETCDCTL_API=3 ./etcdget.py tz`;
+if [ $isleader -eq 1 ];
+then
+ gwserver=`ETCDCTL_API=3 ./etcdget.py gw`;
+ ntpserver=`ETCDCTL_API=3 ./etcdget.py ntp`;
+ configured=`ETCDCTL_API=3 ./etcdget.py configured`;
+ tzone=`ETCDCTL_API=3 ./etcdget.py tz`;
+ mgmtip=`ETCDCTL_API=3 ./etcdget.py namespace/mgmtip | awk -F'/' '{print $1}'`
+ mgmtsubnet=`ETCDCTL_API=3 ./etcdget.py namespace/mgmtip | awk -F'/' '{print $2}'`
+else
+ gwserver=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip gw`;
+ ntpserver=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip ntp`;
+ configured=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip configured`;
+ tzone=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip tz`;
+ mgmtip=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip namespace/mgmtip | awk -F'/' '{print $1}'`
+ echo $hostip namespace/mgmtip 
+ mgmtsubnet=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip namespace/mgmtip | awk -F'/' '{print $2}'`
+ echo $mgmtsubnet
+fi
 /sbin/pcs resource | grep dataip
 if [ $? -eq 0 ];
 then
@@ -37,6 +58,7 @@ then
 jsonips=`/usr/local/bin/zsh jsonthis3.sh hostname $hostname name $hostn addr $hostip addrsubnet $hostsubnet rout $hostrout dns $hostdns mgmtip $mgmtip mgmtsubnet $mgmtsubnet dataip $dataip dataipsubnet $dataipsubnet ntp $ntpserver tz $tzone gw $gwserver configured $configured`;
 else
 jsonips=`/usr/local/bin/zsh jsonthis3.sh hostname $hostname name $hostn addr $hostip addrsubnet $hostsubnet rout $hostrout dns $hostdns mgmtip $mgmtip mgmtsubnet $mgmtsubnet ntp $ntpserver tz $tzone gw $gwserver configured $configured`;
+echo $jsonips
 fi
 ETCDCTL_API=3 /pace/etcdput.py prop/$hostname $jsonips
 echo $jsonips > $web; 
