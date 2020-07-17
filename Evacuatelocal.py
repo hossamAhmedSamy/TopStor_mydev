@@ -17,27 +17,31 @@ def setall(*bargs):
  with open('/root/evacuatelocal','w') as f:
   f.write('bargs'+str(bargs)+'\n')
  myhost=socket.gethostname()
- hostip=get('ready/'+name)
- leader=get('leader','--prefix')
- if name in str(leader):
-  put('configured','no')
- else:
-  putlocal(hostip[0],'configured','no')
- if myhost in str(leader):
-  with open('/root/evacuatelocal','a') as f:
-   f.write('iamleader '+name+'\n')
+ lost=get('lost','--prefix')
+ if name in str(lost):
   deli("",name)
  else:
-  myip=get('ready/'+myhost)
-  with open('/root/evacuatelocal','a') as f:
-   f.write('iamknown '+myip[0]+' '+arg[-2]+'\n')
-  delilocal(myip[0],"",name)
- logmsg.sendlog('Evacuaesu01','info',arg[-1],name)
- cmdline=['/TopStor/queuethis.sh','Evacuate.py','finished',bargs[-1]]
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
- if myhost in  name:
-  cmdline=['/TopStor/rebootme','finished',bargs[-1]]
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  hostip=get('ActivePartners/'+name)
+  leader=get('leader','--prefix')
+  if name in str(leader):
+   put('configured','no')
+  else:
+   putlocal(hostip[0],'configured','no')
+  if myhost in str(leader):
+   with open('/root/evacuatelocal','a') as f:
+    f.write('iamleader '+name+'\n')
+   deli("",name)
+  else:
+   myip=get('ready/'+myhost)
+   with open('/root/evacuatelocal','a') as f:
+    f.write('iamknown '+myip[0]+' '+arg[-2]+'\n')
+   delilocal(myip[0],"",name)
+   logmsg.sendlog('Evacuaesu01','info',arg[-1],name)
+   cmdline=['/TopStor/queuethis.sh','Evacuate.py','finished',bargs[-1]]
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  if myhost in  name:
+   cmdline=['/TopStor/rebootme','finished',bargs[-1]]
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  return 1
 
 if __name__=='__main__':
