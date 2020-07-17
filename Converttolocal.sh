@@ -1,6 +1,7 @@
 #!/bin/sh
 export ETCDCTL_API=3
 cd /TopStor/
+myip=`echo $@ | awk '{print $1}'`
 echo starting etcd as local >>/root/tmp2
 ./etccluster.py 'local' $myip 2>/dev/null
 chmod +r /etc/etcd/etcd.conf.yml 2>/dev/null

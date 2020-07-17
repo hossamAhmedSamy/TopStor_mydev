@@ -24,20 +24,20 @@ def setall(*bargs):
  if myhost in str(leader):
   with open('/root/evacuatelocal','a') as f:
    f.write('iamleader '+myip[0]+' '+arg[-2]+'\n')
-  cmdline=['/TopStor/Converttolocal.sh']
+  cmdline=['/TopStor/Converttolocal.sh',myip[0]]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  delilocal(myip[0],'namespace','--prefix')
  delilocal(myip[0],'Active','--prefix')
  delilocal(myip[0],'alias','--prefix')
  delilocal(myip[0],'known','--prefix')
- putlocal(hostip[0],'configured','no')
+ putlocal(myip[0],'configured','no')
  with open('/root/evacuatelocal','a') as f:
   f.write('iamknown '+myip[0]+' '+arg[-2]+'\n')
   #logmsg.sendlog('Evacuaesu01','info',arg[-1],name)
- cmdline=['/TopStor/queuethis.sh','Evacuate.py','finished',bargs[-1]]
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
- with open('/root/evacuatelocal','a') as f:
-  f.write('sending queue log finish '+myip[0]+' '+name+'\n')
+ #cmdline=['/TopStor/queuethis.sh','Evacuate.py','finished',bargs[-1]]
+ #result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ #with open('/root/evacuatelocal','a') as f:
+ # f.write('sending queue log finish '+myip[0]+' '+name+'\n')
  with open('/root/evacuatelocal','a') as f:
   f.write('rebooting '+myip[0]+' '+name+'\n')
  cmdline=['/TopStor/rebootme','finished',bargs[-1]]
