@@ -25,8 +25,10 @@ def setall(*bargs):
   leader=get('leader','--prefix')
   if name in str(leader):
    put('configured','no')
+   deli('namespace','--prefix')
   else:
    putlocal(hostip[0],'configured','no')
+   delilocal(hostip[0],'namespace','--prefix')
   if myhost in str(leader):
    with open('/root/evacuatelocal','a') as f:
     f.write('iamleader '+name+'\n')
