@@ -41,9 +41,9 @@ def setall(*bargs):
    logmsg.sendlog('Evacuaesu01','info',arg[-1],name)
    cmdline=['/TopStor/queuethis.sh','Evacuate.py','finished',bargs[-1]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  if myhost in  name:
-   cmdline=['/TopStor/rebootme','finished',bargs[-1]]
-   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ if myhost in  name:
+  cmdline=['/TopStor/rebootme','finished',bargs[-1]]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  return 1
 
 if __name__=='__main__':
