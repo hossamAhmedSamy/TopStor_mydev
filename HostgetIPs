@@ -14,7 +14,7 @@ hostn=`/TopStor/etcdget.py alias/$hostname`
 hostip=`pcs resource show CC | grep Attributes | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 hostsubnet=`pcs resource show CC | grep Attributes | awk -F'netmask=' '{print $2}' | awk '{print $1}'`
 leader=`./etcdget.py leader --prefix`
-echo $leader | gerp $myhost
+echo $leader | grep $hostname
 if [ $? -eq 0 ];
 then
  isleader=1
@@ -36,15 +36,17 @@ then
  ntpserver=`ETCDCTL_API=3 ./etcdget.py ntp`;
  configured=`ETCDCTL_API=3 ./etcdget.py configured`;
  tzone=`ETCDCTL_API=3 ./etcdget.py tz`;
- mgmtip=`ETCDCTL_API=3 /etcdget.py namespace/mgmtip | awk -F'/' '{print $1}'`
- mgmtsubnet=`ETCDCTL_API=3 /etcdget.py namespace/mgmtip | awk -F'/' '{print $2}'`
+ mgmtip=`ETCDCTL_API=3 ./etcdget.py namespace/mgmtip | awk -F'/' '{print $1}'`
+ mgmtsubnet=`ETCDCTL_API=3 ./etcdget.py namespace/mgmtip | awk -F'/' '{print $2}'`
 else
  gwserver=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip gw`;
  ntpserver=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip ntp`;
  configured=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip configured`;
- tzone=`ETCDCTL_API=3 ./etcdgetlocal.py tz`;
- mgmtip=`ETCDCTL_API=3 /etcdgetlocal.py $hostip namespace/mgmtip | awk -F'/' '{print $1}'`
- mgmtsubnet=`ETCDCTL_API=3 /etcdget.py $hostip namespace/mgmtip | awk -F'/' '{print $2}'`
+ tzone=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip tz`;
+ mgmtip=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip namespace/mgmtip | awk -F'/' '{print $1}'`
+ echo $hostip namespace/mgmtip 
+ mgmtsubnet=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip namespace/mgmtip | awk -F'/' '{print $2}'`
+ echo $mgmtsubnet
 fi
 /sbin/pcs resource | grep dataip
 if [ $? -eq 0 ];
@@ -56,6 +58,7 @@ then
 jsonips=`/usr/local/bin/zsh jsonthis3.sh hostname $hostname name $hostn addr $hostip addrsubnet $hostsubnet rout $hostrout dns $hostdns mgmtip $mgmtip mgmtsubnet $mgmtsubnet dataip $dataip dataipsubnet $dataipsubnet ntp $ntpserver tz $tzone gw $gwserver configured $configured`;
 else
 jsonips=`/usr/local/bin/zsh jsonthis3.sh hostname $hostname name $hostn addr $hostip addrsubnet $hostsubnet rout $hostrout dns $hostdns mgmtip $mgmtip mgmtsubnet $mgmtsubnet ntp $ntpserver tz $tzone gw $gwserver configured $configured`;
+echo $jsonips
 fi
 ETCDCTL_API=3 /pace/etcdput.py prop/$hostname $jsonips
 echo $jsonips > $web; 
