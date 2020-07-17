@@ -20,7 +20,7 @@ def sendlog(*args):
  losts=get('lost','--prefix')
  if args[-2] not in str(losts):
   sendhost(hostip[0], str(msg),'recvreply',myhost)
- sleep(10)
+ sleep(60)
  leaderinfo=get('leader','--prefix')
  knowninfo=get('known','--prefix')
  leaderip=leaderinfo[0][1]
