@@ -44,22 +44,22 @@ then
  ./UpdateHosts $hostname $hostip
 fi
 
-echo shuttingdown 2 >> /root/HostCC
+#echo shuttingdown 2 >> /root/HostCC
 #/pace/keysend.sh $hostip
-/sbin/rabbitmqctl stop_app;
-echo shuttingdown 3 >> /root/HostCC
-/sbin/iscsiadm --mode node --logoutall=all;
-echo shuttingdown 4 >> /root/HostCC
-echo shuttingdown 5 for ip=$hostip mask=$subnet >> /root/HostCC
-/sbin/pcs resource update CC ip=$hostip cidr_netmask=$subnet 2>/root/err
-echo shuttingdown 6 >> /root/HostCC
-#/bin/systemctl stop httpd;
-pkill httpd
-#/bin/systemctl status httpd >>/root/HostCC
-echo shuttingdown 7 >> /root/HostCC
-echo 127.0.0.1 localhost > /etc/hosts
-echo $hostip $hostname >> /etc/hosts
-echo 127.0.0.1 $hostname >> /etc/hosts
-#/sbin/ip addr del ${oldip}/$oldsubnet dev $dev
-echo shuttingdown 8 >> /root/HostCC
-/sbin/reboot
+#/sbin/rabbitmqctl stop_app;
+#echo shuttingdown 3 >> /root/HostCC
+#/sbin/iscsiadm --mode node --logoutall=all;
+#echo shuttingdown 4 >> /root/HostCC
+#echo shuttingdown 5 for ip=$hostip mask=$subnet >> /root/HostCC
+#/sbin/pcs resource update CC ip=$hostip cidr_netmask=$subnet 2>/root/err
+#echo shuttingdown 6 >> /root/HostCC
+##/bin/systemctl stop httpd;
+#pkill httpd
+##/bin/systemctl status httpd >>/root/HostCC
+#echo shuttingdown 7 >> /root/HostCC
+#echo 127.0.0.1 localhost > /etc/hosts
+#echo $hostip $hostname >> /etc/hosts
+#echo 127.0.0.1 $hostname >> /etc/hosts
+##/sbin/ip addr del ${oldip}/$oldsubnet dev $dev
+#echo shuttingdown 8 >> /root/HostCC
+#/sbin/reboot

@@ -9,6 +9,7 @@ def config(*bargs):
  cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','running',bargs[-1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  enpdev='enp0s8'
+ needreboot=False
  with open('/root/HostManualconfigtmp3','w') as f:
   f.write(str(bargs))
  with open('/TopStordata/Hostprop.txt') as f:
@@ -108,6 +109,20 @@ def config(*bargs):
   cmdline=['/TopStor/HostManualconfigGW.py',change['gw']]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   logmsg.sendlog('HostManual1su11','info',arg[-1],change['oldgw'],change['gw'])
+ ############ changing configured  ###############
+ if 'configured' in change:
+  if 'yes' in change['configured']:
+   logmsg.sendlog('HostManual1st12','info',arg[-1])
+  else:
+   logmsg.sendlog('HostManual2st12','info',arg[-1])
+   
+  cmdline=['/TopStor/HostManualconfigCF',change['configured']]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  if 'yes' in change['configured']:
+   logmsg.sendlog('HostManual1su12','info',arg[-1])
+  else:
+   logmsg.sendlog('HostManual2su12','info',arg[-1])
+  needreboot=True
  ######### changing box address ###############
  if 'addr' in change:
   if 'addrsubnet' in change:
@@ -124,13 +139,18 @@ def config(*bargs):
   logmsg.sendlog('HostManual1st6','info',arg[-1],change['oldaddr']+'/'+oldsubnet,change['addr']+'/'+subnet)
   cmdline=['/TopStor/HostManualconfigCC',change['addr'],change['oldaddr'],subnet,oldsubnet]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  cmdline=['/TopStor/rebootme',change['addr'],change['oldaddr'],subnet,oldsubnet]
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  #cmdline=['/TopStor/rebootme',change['addr'],change['oldaddr'],subnet,oldsubnet]
+  #result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   logmsg.sendlog('HostManual1su6','info',arg[-1],change['oldaddr']+'/'+oldsubnet,change['addr']+'/'+subnet)
+  needreboot=True
 ####################################################
 # cmdline=['/TopStor/HostgetIPs']
  cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','finished',bargs[-1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ if needreboot:
+  cmdline=['/TopStor/rebootme','now']
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  
  return 1
 
 if __name__=='__main__':
