@@ -1,4 +1,5 @@
 ;;;;;;;;         startNAMECIFS_only
+;;;;;;;; SUMMARY Vtype Rpool/Rname/Rreadv/Rbrows/Rwritev/Radmin/Rwritea/Ripadd/Ripsub 
 [SHORTNAME]
 ;ipaddress = IPADDRESS
 ;ipsubnet = IPSUBNET

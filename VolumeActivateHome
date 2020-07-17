@@ -1,7 +1,7 @@
 #!/bin/sh
 export ETCDCTL_API=3
 cd /TopStor/
-echo $@ > /root/volactivateparam
+echo $@ > /root/volactivateparamHome
 web='/var/www/html/des20/Data/CIFSstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStor.log';
@@ -19,7 +19,7 @@ privilege="CIFS";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
- echo starting Volume HOME activation for  $vol >> /root/volactivateparam
+ echo starting Volume HOME activation for  $vol >> /root/volactivateparamHome
  stathost=`echo $host | wc -c`
  if [ $stathost -le 1 ]; then host=$myhost; fi
  statpool=`echo $pool | wc -c`
@@ -27,7 +27,7 @@ then
  statvol=`echo $vol | wc -c`
  if [ $statvol -le 1 ]; then statvol=0; else statvol=1; fi
  stat=${statpool}${statvol}
- echo starting Volume HOME activation for  $stat >> /root/volactivateparam
+ echo starting Volume HOME activation for  $stat >> /root/volactivateparamHome
  case $stat in
   01)
    echo volume only  for  $vol
@@ -89,6 +89,16 @@ then
     echo $ipsubnet > /TopStordata/Hometmp
     yes | cp sharecifs.txt /TopStordata/smb.${name}
     shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
+    sed -i "s/Vtype/Home/g"  /TopStordata/smb.${name}
+    sed -i "s/Rpool/$pool/g"  /TopStordata/smb.${name}
+    sed -i "s/Rname/$name/g"  /TopStordata/smb.${name}
+    sed -i "s/Rreadv/$readv/g"  /TopStordata/smb.${name}
+    sed -i "s/Rbrows/$browsable/g"  /TopStordata/smb.${name}
+    sed -i "s/Rwritev/$writev/g"  /TopStordata/smb.${name}
+    sed -i "s/Radmin/$admin/g"  /TopStordata/smb.${name}
+    sed -i "s/Rwritea/$writeable/g"  /TopStordata/smb.${name}
+    sed -i "s/Ripadd/$ipaddr/g"  /TopStordata/smb.${name}
+    sed -i "s/Ripsub/$ipsubnet/g"  /TopStordata/smb.${name}
     sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/smb.${name}
     sed -i "s/NAMECIFS/$name/g"  /TopStordata/smb.${name}
     sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
@@ -119,7 +129,7 @@ then
   echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
   do
    echo l=$l;
-   echo activating vol=$l >> /root/volactivateparam
+   echo activating vol=$l >> /root/volactivateparamHome
    pool=`echo $l | awk -F'/' '{print $1}'`
    name=`echo $l | awk -F'/' '{print $2}'`
    path='/'${pool}'/'${name}
@@ -133,6 +143,16 @@ then
    writeable=`echo $l | awk -F'/' '{print $7}'`
    yes | cp sharecifs.txt /TopStordata/smb.${name}
    shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
+   sed -i "s/Vtype/Home/g"  /TopStordata/smb.${name}
+   sed -i "s/Rpool/$pool/g"  /TopStordata/smb.${name}
+   sed -i "s/Rname/$name/g"  /TopStordata/smb.${name}
+   sed -i "s/Rreadv/$readv/g"  /TopStordata/smb.${name}
+   sed -i "s/Rbrows/$browsable/g"  /TopStordata/smb.${name}
+   sed -i "s/Rwritev/$writev/g"  /TopStordata/smb.${name}
+   sed -i "s/Radmin/$admin/g"  /TopStordata/smb.${name}
+   sed -i "s/Rwritea/$writeable/g"  /TopStordata/smb.${name}
+   sed -i "s/Ripadd/$ipaddr/g"  /TopStordata/smb.${name}
+   sed -i "s/Ripsub/$ipsubnet/g"  /TopStordata/smb.${name}
    sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/smb.${name}
    sed -i "s/NAMECIFS/$name/g"  /TopStordata/smb.${name}
    sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
@@ -142,11 +162,11 @@ then
    sed -i "s/administrator/$admin/g" /TopStordata/smb.${name}
    sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
    chmod 770 /$pool/$name
-   echo running cifs.sh=$pool $name $ipaddr $ipsubnet home >> /root/volactivateparam
+   echo running cifs.sh=$pool $name $ipaddr $ipsubnet home >> /root/volactivateparamHome
    echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet home 
    yes | cp /TopStordata/smb.$name /$pool/
    /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet home 
-   echo finished cifs.sh >> /root/volactivateparam
+   echo finished cifs.sh >> /root/volactivateparamHome
    echo writve=$writev
    setfacl -b /$pool/$name
    echo $writev | grep -w nogroup
@@ -156,7 +176,7 @@ then
    fi
   done
  fi
- echo setting volumes registry >> /root/volactivateparam
+ echo setting volumes registry >> /root/volactivateparamHome
  echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
  do
   pool=`echo $l | awk -F'/' '{print $1}'`
@@ -179,5 +199,5 @@ then
    /pace/etcddel.py volumes/Home/$volhost/$pool/$name
   fi
  done
- echo finished setting volumes regestry >> /root/volactivateparam
+ echo finished setting volumes regestry >> /root/volactivateparamHome
 fi

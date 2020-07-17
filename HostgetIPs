@@ -20,7 +20,7 @@ mgmtsubnet=`pcs resource show mgmtip | grep Attributes | awk -F'netmask=' '{prin
 if [ -z $mgmtsubnet ]; then mgmtsubnet='0'; fi
 hostrout=`netstat -rn | awk '{print $2}' | grep -v "Gateway" | grep -v "IP" | grep -v "0.0.0.0"`;
 if [ -z $hostrout ]; then hostrout='0'; fi
-hostdns=` cat /etc/resolv.conf | grep nameserver | awk '{print $2}'`;
+hostdns=` cat /etc/resolv.conf | grep nameserver | awk '{print $2}' | tail -1`;
 if [ -z $hostdns ]; then hostdns='0'; fi
 #ntpserver=`cat /etc/chrony.conf | grep server | grep -v servers | head -1 | awk '{print $2}'`;
 gwserver=`ETCDCTL_API=3 ./etcdget.py gw`;

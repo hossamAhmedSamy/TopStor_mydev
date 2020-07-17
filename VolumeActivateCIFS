@@ -89,6 +89,16 @@ then
     echo $ipsubnet > /TopStordata/CIFStmp
     yes | cp sharecifs.txt /TopStordata/smb.${name}
     shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
+    sed -i "s/Vtype/CIFS/g"  /TopStordata/smb.${name}
+    sed -i "s/Rpool/$pool/g"  /TopStordata/smb.${name}
+    sed -i "s/Rname/$name/g"  /TopStordata/smb.${name}
+    sed -i "s/Rreadv/$readv/g"  /TopStordata/smb.${name}
+    sed -i "s/Rbrows/$browsable/g"  /TopStordata/smb.${name}
+    sed -i "s/Rwritev/$writev/g"  /TopStordata/smb.${name}
+    sed -i "s/Radmin/$admin/g"  /TopStordata/smb.${name}
+    sed -i "s/Rwritea/$writeable/g"  /TopStordata/smb.${name}
+    sed -i "s/Ripadd/$ipaddr/g"  /TopStordata/smb.${name}
+    sed -i "s/Ripsub/$ipsubnet/g"  /TopStordata/smb.${name}
     sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/smb.${name}
     sed -i "s/NAMECIFS/$name/g"  /TopStordata/smb.${name}
     sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
@@ -133,6 +143,16 @@ then
    writeable=`echo $l | awk -F'/' '{print $7}'`
    yes | cp sharecifs.txt /TopStordata/smb.${name}
    shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
+   sed -i "s/Vtype/CIFS/g"  /TopStordata/smb.${name}
+   sed -i "s/Rpool/$pool/g"  /TopStordata/smb.${name}
+   sed -i "s/Rname/$name/g"  /TopStordata/smb.${name}
+   sed -i "s/Rreadv/$readv/g"  /TopStordata/smb.${name}
+   sed -i "s/Rbrows/$browsable/g"  /TopStordata/smb.${name}
+   sed -i "s/Rwritev/$writev/g"  /TopStordata/smb.${name}
+   sed -i "s/Radmin/$admin/g"  /TopStordata/smb.${name}
+   sed -i "s/Rwritea/$writeable/g"  /TopStordata/smb.${name}
+   sed -i "s/Ripadd/$ipaddr/g"  /TopStordata/smb.${name}
+   sed -i "s/Ripsub/$ipsubnet/g"  /TopStordata/smb.${name}
    sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/smb.${name}
    sed -i "s/NAMECIFS/$name/g"  /TopStordata/smb.${name}
    sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
