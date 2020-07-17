@@ -27,6 +27,9 @@ def setall(*bargs):
   cmdline=['/TopStor/Converttolocal.sh']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  delilocal(hostip[0],'namespace','--prefix')
+ delilocal(hostip[0],'Active','--prefix')
+ delilocal(hostip[0],'alias','--prefix')
+ delilocal(hostip[0],'known','--prefix')
  putlocal(hostip[0],'configured','no')
  with open('/root/evacuatelocal','a') as f:
   f.write('iamknown '+myip[0]+' '+arg[-2]+'\n')
