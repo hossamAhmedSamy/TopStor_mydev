@@ -1,5 +1,5 @@
 #!/bin/sh
-enpdev='eno1'
+enpdev='enp0s8'
 pool=`echo $@ | awk '{print $1}'`
 vol=`echo $@ | awk '{print $2}'`
 ipaddr=`echo $@ | awk '{print $3}'`
