@@ -22,7 +22,16 @@ def sendlog(*args):
  knowns=get('knwon','--prefix')
  if args[-2] not in str(losts) and args[-2] in knowns:
   sendhost(hostip[0], str(msg),'recvreply',myhost)
-  sleep(60)
+ isleader=1
+ leader=get('leader','--prefix')
+ if args[-2] in str(leader):
+  isleader=1
+  nextleader=get('nextlead')[0].split('/')[0]
+  while isleader:
+   sleep(2)
+   leader=get('leader','--prefix')
+   if nextleader in leader:
+    isleader=0
  deli("",args[-2])
  put("tosync","yes")
 

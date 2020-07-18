@@ -20,19 +20,17 @@ def setall(*bargs):
   f.write('bargs'+str(bargs)+'\n')
  myhost=socket.gethostname()
  myip=get('ready/'+myhost)
- lost=get('lost','--prefix')
  leader=get('leader','--prefix')
  if myhost in str(leader):
   with open('/root/evacuatelocal','a') as f:
    f.write('iamleader '+myip[0]+' '+arg[-2]+'\n')
-  deli('namespace','--prefix')
-  put('configured','no')
- else:
-  delilocal(hostip[0],'namespace','--prefix')
-  putlocal(hostip[0],'configured','no')
-  with open('/root/evacuatelocal','a') as f:
-   f.write('iamknown '+myip[0]+' '+arg[-2]+'\n')
-   #logmsg.sendlog('Evacuaesu01','info',arg[-1],name)
+  cmdline=['/TopStor/Converttolocal.sh']
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ delilocal(hostip[0],'namespace','--prefix')
+ putlocal(hostip[0],'configured','no')
+ with open('/root/evacuatelocal','a') as f:
+  f.write('iamknown '+myip[0]+' '+arg[-2]+'\n')
+  #logmsg.sendlog('Evacuaesu01','info',arg[-1],name)
  cmdline=['/TopStor/queuethis.sh','Evacuate.py','finished',bargs[-1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  with open('/root/evacuatelocal','a') as f:
