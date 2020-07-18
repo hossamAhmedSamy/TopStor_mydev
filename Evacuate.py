@@ -2,6 +2,7 @@
 import subprocess,sys, datetime
 import json
 from etcdget import etcdget as get
+from etcdput import etcdput as put 
 from etcddel import etcddel as deli 
 from ast import literal_eval as mtuple
 from socket import gethostname as hostname
@@ -31,7 +32,7 @@ def sendlog(*args):
    print('still leader')
    sleep(2)
    leader=get('leader','--prefix')
-   if nextleader in leader:
+   if nextleader in str(leader):
     isleader=0
  deli("",args[-2])
  put("tosync","yes")
