@@ -19,7 +19,8 @@ def sendlog(*args):
  msg={'req': 'Evacuate', 'reply':z}
  hostip=get('ActivePartners/'+args[-2])
  losts=get('lost','--prefix')
- if args[-2] not in str(losts):
+ knowns=get('knwon','--prefix')
+ if args[-2] not in str(losts) and args[-2] in knowns:
   sendhost(hostip[0], str(msg),'recvreply',myhost)
   sleep(60)
  deli("",args[-2])
