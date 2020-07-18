@@ -59,7 +59,7 @@ then
  /TopStor/logmsg.py DGst22 info $userreq ${nextpool} 
  zpool import $nextpool 
  sleep 1
- zpool status | grep $nextpool >> /root/tmp2
+ /sbin/zpool status | grep $nextpool >> /root/tmp2
  if [ $? -ne 0 ]; then
    echo something woring in the import of $nextpool >> /root/tmp2
    /TopStor/logmsg.py DGfa22 error $userreq ${nextpool} 
