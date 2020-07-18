@@ -28,6 +28,7 @@ def sendlog(*args):
   isleader=1
   nextleader=get('nextlead')[0].split('/')[0]
   while isleader:
+   print('still leader')
    sleep(2)
    leader=get('leader','--prefix')
    if nextleader in leader:
