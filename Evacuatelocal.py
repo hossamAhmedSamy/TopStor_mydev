@@ -25,8 +25,10 @@ def setall(*bargs):
   leader=get('leader','--prefix')
   if name in str(leader):
    put('configured','no')
+   deli('namespace','--prefix')
   else:
    putlocal(hostip[0],'configured','no')
+   delilocal(hostip[0],'namespace','--prefix')
   if myhost in str(leader):
    with open('/root/evacuatelocal','a') as f:
     f.write('iamleader '+name+'\n')
@@ -36,12 +38,20 @@ def setall(*bargs):
    with open('/root/evacuatelocal','a') as f:
     f.write('iamknown '+myip[0]+' '+arg[-2]+'\n')
    delilocal(myip[0],"",name)
+   with open('/root/evacuatelocal','a') as f:
+    f.write('deletedall name '+myip[0]+' '+name+'\n')
    logmsg.sendlog('Evacuaesu01','info',arg[-1],name)
+   with open('/root/evacuatelocal','a') as f:
+    f.write('sending the success log '+myip[0]+' '+name+'\n')
    cmdline=['/TopStor/queuethis.sh','Evacuate.py','finished',bargs[-1]]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  if myhost in  name:
-   cmdline=['/TopStor/rebootme','finished',bargs[-1]]
-   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   with open('/root/evacuatelocal','a') as f:
+    f.write('sending queue log '+myip[0]+' '+name+'\n')
+ if myhost in  name:
+   with open('/root/evacuatelocal','a') as f:
+    f.write('rebooting '+myip[0]+' '+name+'\n')
+  cmdline=['/TopStor/rebootme','finished',bargs[-1]]
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  return 1
 
 if __name__=='__main__':
