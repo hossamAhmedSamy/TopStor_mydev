@@ -21,6 +21,10 @@ def setall(*bargs):
  myhost=socket.gethostname()
  myip=get('ready/'+myhost)
  leader=get('leader','--prefix')
+ actives=deli('ActivePartners',myhost)
+ frstnode=get('frstnode')
+ newnode=frstnode[0].replace('/'+myhost,'').replace(myhost+'/','')
+ put('frstnode',newnode)
  if myhost in str(leader):
   with open('/root/evacuatelocal','a') as f:
    f.write('iamleader '+myip[0]+' '+arg[-2]+'\n')
@@ -30,6 +34,7 @@ def setall(*bargs):
  delilocal(myip[0],'Active','--prefix')
  delilocal(myip[0],'alias','--prefix')
  delilocal(myip[0],'known','--prefix')
+ delilocal(myip[0],'frstnode','--prefix')
  putlocal(myip[0],'configured','no')
  with open('/root/evacuatelocal','a') as f:
   f.write('iamknown '+myip[0]+' '+arg[-2]+'\n')
