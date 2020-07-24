@@ -10,7 +10,7 @@ echo $leader | grep $myip
 if [ $? -eq 0 ];
 then
  actives=`./etcdget.py Active --prefix | wc -l`
- if [ $actives -le 1 ];
+ if [ $actives -ge 2 ];
  then
   echo it is clustered with other nodes >> ~/cftmp
  else
@@ -18,7 +18,7 @@ then
  fi
 else
  actives=`./etcdgetlocal.py $myip Active --prefix | wc -l`
- if [ $actives -le 1 ];
+ if [ $actives -ge 2 ];
  then
   echo it is clustered with other nodes >> ~/cftmp
  else
