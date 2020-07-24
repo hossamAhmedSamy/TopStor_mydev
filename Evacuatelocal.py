@@ -30,11 +30,7 @@ def setall(*bargs):
    f.write('iamleader '+myip[0]+' '+arg[-2]+'\n')
   cmdline=['/TopStor/Converttolocal.sh',myip[0]]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
- delilocal(myip[0],'namespace','--prefix')
- delilocal(myip[0],'Active','--prefix')
- delilocal(myip[0],'alias','--prefix')
- delilocal(myip[0],'known','--prefix')
- delilocal(myip[0],'frstnode','--prefix')
+ putlocal(myip[0],'toreset','yes')
  putlocal(myip[0],'configured','no')
  with open('/root/evacuatelocal','a') as f:
   f.write('iamknown '+myip[0]+' '+arg[-2]+'\n')
