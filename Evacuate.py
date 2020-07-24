@@ -37,13 +37,10 @@ def sendlog(*args):
    leader=get('leader','--prefix')
    if nextleader in str(leader):
     isleader=0
- deli('ready',args[-2])
- deli('alias',args[-2])
- deli('Activ',args[-2])
- deli('prop',args[-2])
- deli('pool',args[-2])
- deli('known',args[-2])
- deli('leader',args[-2])
+ frstnode=('frstnode')
+ newnode=frstnode[0].replace('/'+args[-2],'').replace(args[-2]+'/','')
+ put('frstnode',newnode)
+ deli('',args[-2])
  put("tosync","yes")
 
 if __name__=='__main__':
