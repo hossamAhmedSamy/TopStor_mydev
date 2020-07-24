@@ -6,12 +6,14 @@ from etcdput import etcdput as put
 from etcddel import etcddel as deli 
 from ast import literal_eval as mtuple
 from socket import gethostname as hostname
+from broadcast import broadcast as broadcast 
 from sendhost import sendhost
 from time import sleep
 def sendlog(*args):
  z=[]
  knowns=[]
  myhost=hostname()
+ broadcast('RemoveTargets', args[-2])
  z=['/TopStor/Evacuatelocal.py']
  with open('/root/evacuate','w') as f:
   f.write('bargs'+str(args)+'\n')
