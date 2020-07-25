@@ -6,7 +6,7 @@ from etcddel import etcddel as deli
 from socket import gethostname as hostname
 import logmsg
 def setall(*bargs):
- thehosts=get('toremove','0')
+ thehosts=get('toremove','start')
  leader=get('leader','--prefix')[0][0].replace('leader/','')
  myhost=hostname()
  myip=get('ready',myhost)[0][1]
