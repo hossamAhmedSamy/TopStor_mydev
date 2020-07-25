@@ -28,7 +28,7 @@ def setall(*bargs):
    cmdline=['/TopStor/rebootme','finished']
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   hostreset=get('toremovereset/'+hostn,'reset')[0]
-  if hostn in hostreset: 
+  if hostn in str(hostreset): 
    if myhost not in hostn : 
     hosts=get('toremove/'+hostn,'done')
     if myhost not in str(hosts):
