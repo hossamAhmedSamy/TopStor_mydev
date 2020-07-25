@@ -9,34 +9,41 @@ from socket import gethostname as hostname
 from broadcast import broadcast as broadcast 
 from sendhost import sendhost
 from time import sleep
+import logmsg
 def sendlog(*args):
  z=[]
  knowns=[]
  myhost=hostname()
+ logmsg.sendlog('Evacuaest01','info',args[-1],args[-2])
  broadcast('RemoveTargets', args[-2])
  z=['/TopStor/Evacuatelocal.py']
  with open('/root/evacuate','w') as f:
   f.write('bargs'+str(args)+'\n')
  for arg in args:
   z.append(arg)
- msg={'req': 'Evacuate', 'reply':z}
  hostip=get('ActivePartners/'+args[-2])
  losts=get('lost','--prefix')
  knowns=get('knwon','--prefix')
  readys=get('ready','--prefix')
- if args[-2] not in str(losts) or args[-2] in str(readys):
-  sendhost(hostip[0], str(msg),'recvreply',myhost)
- isleader=1
- leader=get('leader','--prefix')
- if args[-2] in str(leader):
+ theleader=get('leader','--prefix')[0]
+ nextleader=theleader[0].replace('leader/','') 
+ leader=theleader[1]
+ if args[-2] in str(nextleader):
   isleader=1
   nextleader=get('nextlead')[0].split('/')[0]
-  while isleader:
-   print('still leader')
-   sleep(2)
-   leader=get('leader','--prefix')
-   if nextleader in str(leader):
-    isleader=0
+ if args[-2] in str(readys):
+  z.append(leader)
+  z.append(hostip)
+  msg={'req': 'Evacuate', 'reply':z}
+  sendhost(hostip[0], str(msg),'recvreply',myhost)
+ isleader=1
+ while isleader:
+  print('still leader')
+  sleep(2)
+  leader=get('leader','--prefix')
+  if nextleader in str(leader):
+   isleader=0
+ sleep(2)
  frstnode=('frstnode')
  newnode=frstnode[0].replace('/'+args[-2],'').replace(args[-2]+'/','')
  put('frstnode',newnode)
