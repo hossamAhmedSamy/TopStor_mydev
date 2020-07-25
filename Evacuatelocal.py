@@ -7,6 +7,7 @@ import logmsg
 def setall(*bargs):
  arg=bargs
  myhost=bargs[-4]
+ name=bargs[-4]
  leader=bargs[-2]
  myip=bargs[-1]
  cmdline=['/TopStor/queuethis.sh','Evacuate.py','running',bargs[-1]]
@@ -18,8 +19,8 @@ def setall(*bargs):
    f.write('iamleader '+myip+' '+name+'\n')
   cmdline=['/TopStor/Converttolocal.sh',myip]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
- putlocal(myip[0],'toreset','yes')
- putlocal(myip[0],'configured','no')
+ putlocal(myip,'toreset','yes')
+ putlocal(myip,'configured','no')
  with open('/root/evacuatelocal','a') as f:
   f.write('iamknown '+myip+' '+name+'\n')
  with open('/root/evacuatelocal','a') as f:
