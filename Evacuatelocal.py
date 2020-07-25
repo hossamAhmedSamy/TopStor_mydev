@@ -1,6 +1,7 @@
 #!/bin/python3.6
 import subprocess,sys, datetime
 from etcdput import etcdput as put 
+from etcdputlocal import etcdput as putlocal
 from etcdget import etcdget as get 
 from etcddel import etcddel as deli 
 from socket import gethostname as hostname
