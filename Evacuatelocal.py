@@ -23,6 +23,8 @@ def setall(*bargs):
   if myhost in hostn and myhost not in leader:
    putlocal(myip,'toreset','yes')
    put('toremove/'+hostn,'reset')
+   cmdline=['/pace/removetargetdisks.sh', hostn, hostip]
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
    cmdline=['/TopStor/rebootme','finished']
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   if myhost not in hostn : 
@@ -43,6 +45,9 @@ def setall(*bargs):
      doneall=0
      break
    if doneall==1:
+    frstnode=get('frstnode')[0]
+    newnode=frstnode.replace('/'+hostn,'').replace(hostn+'/','')
+    put('frstnode',newnode)
     deli("", hostn)
     put('tosync','yes')
     logmsg.sendlog('Evacuaesu01','info','system',hostn)
