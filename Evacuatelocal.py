@@ -16,7 +16,7 @@ def setall(*bargs):
  print(myip,myhost,leader,str(thehosts))
  for host in thehosts:
   hostn=host[0].replace('toremove/','')
-  hostip=get('ActivePartners/'+hostn)
+  hostip=get('ActivePartners/'+hostn)[0]
   if myhost in hostn and myhost in leader:
    cmdline=['/TopStor/Converttolocal.sh',myip]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
