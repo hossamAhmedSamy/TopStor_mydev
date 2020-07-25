@@ -44,7 +44,7 @@ def sendlog(*args):
   if nextleader in str(leader):
    isleader=0
  sleep(2)
- frstnode=('frstnode')
+ frstnode=get('frstnode')
  newnode=frstnode[0].replace('/'+args[-2],'').replace(args[-2]+'/','')
  put('frstnode',newnode)
  deli('',args[-2])
