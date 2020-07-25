@@ -22,7 +22,7 @@ def setall(*bargs):
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   if myhost in hostn and myhost not in leader:
    putlocal(myip,'toreset','yes')
-   put('toremove/'+hostn,'reset')
+   put('toremovereset/'+hostn,'reset')
    cmdline=['/pace/removetargetdisks.sh', hostn, hostip]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
    cmdline=['/TopStor/rebootme','finished']
@@ -37,7 +37,7 @@ def setall(*bargs):
    actives=get('Active','--prefix')
    dones=get('toremove/'+hostn,'done')
    doneall=1
-   hostreset=get('toremove/'+hostn,'reset')[0]
+   hostreset=get('toremovereset/'+hostn,'reset')[0]
    for active in actives:
     activen=active[0].replace('ActivePartners/','')
     if activen not in str(dones) and activen not in str(thehosts) and hostn in hostreset: 
