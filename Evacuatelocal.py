@@ -27,30 +27,31 @@ def setall(*bargs):
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
    cmdline=['/TopStor/rebootme','finished']
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  if myhost not in hostn : 
-   hosts=get('toremove/'+hostn,'done')
-   if myhost not in str(hosts):
-    put('toremove/'+hostn+'/'+myhost,'done')
-    cmdline=['/pace/removetargetdisks.sh', hostn, hostip]
-    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  if myhost not in hostn and myhost in leader:
-   actives=get('Active','--prefix')
-   dones=get('toremove/'+hostn,'done')
-   doneall=1
-   hostreset=get('toremovereset/'+hostn,'reset')[0]
-   for active in actives:
-    activen=active[0].replace('ActivePartners/','')
-    if activen not in str(dones) and activen not in str(thehosts) and hostn in hostreset: 
-     print(activen,str(dones),str(thehosts))
-     doneall=0
-     break
-   if doneall==1:
-    frstnode=get('frstnode')[0]
-    newnode=frstnode.replace('/'+hostn,'').replace(hostn+'/','')
-    put('frstnode',newnode)
-    deli("", hostn)
-    put('tosync','yes')
-    logmsg.sendlog('Evacuaesu01','info','system',hostn)
+  hostreset=get('toremovereset/'+hostn,'reset')[0]
+  if hostn in hostreset: 
+   if myhost not in hostn : 
+    hosts=get('toremove/'+hostn,'done')
+    if myhost not in str(hosts):
+     put('toremove/'+hostn+'/'+myhost,'done')
+     cmdline=['/pace/removetargetdisks.sh', hostn, hostip]
+     result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   if myhost not in hostn and myhost in leader:
+    actives=get('Active','--prefix')
+    dones=get('toremove/'+hostn,'done')
+    doneall=1
+    for active in actives:
+     activen=active[0].replace('ActivePartners/','')
+     if activen not in str(dones) and activen not in str(thehosts): 
+      print(activen,str(dones),str(thehosts))
+      doneall=0
+      break
+    if doneall==1:
+     frstnode=get('frstnode')[0]
+     newnode=frstnode.replace('/'+hostn,'').replace(hostn+'/','')
+     put('frstnode',newnode)
+     deli("", hostn)
+     put('tosync','yes')
+     logmsg.sendlog('Evacuaesu01','info','system',hostn)
  return
 
 if __name__=='__main__':
