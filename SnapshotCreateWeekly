@@ -29,9 +29,9 @@ crontab -l > $cronthis
 echo $min  $hr "*" "*" $every  /TopStor/Snapshotnowhost $DG/$FileS Weekly.$keep.$hr.$min.$every $stamp 2>txt/SnapshotnowSystem.txt >> $cronthis
 crontab $cronthis
 if [ $? -ne  0 ]; then
-   /TopStor/logmsg.py Snap1032 error $userreq Weekly.$hr.$min.$every.$keep $DG/$FileS
+   /TopStor/logmsg.py Snap1032 error $userreq  $DG/$FileS
 else 
-  /TopStor/logmsg.py Snap1033 info $userreq Weekly.$hr.$min.$every.$keep $DG/$FileS
+  /TopStor/logmsg.py Snap1033 info $userreq Weekly.$keep.$hr.$min.$every.$stamp $DG/$FileS
   /pace/etcdput.py Snapperiod/$DG/$FileS/$stamp  $min%$hr%*%*%$every%/TopStor/Snapshotnowhost%$DG/$FileS%Weekly.$keep.$hr.$min.$every%$stamp
  ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
 fi;

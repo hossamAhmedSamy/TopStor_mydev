@@ -29,9 +29,9 @@ crontab $cronthis 2>> $txtres
 err=`wc -c  $txtres | awk '{print $1}'`;
 datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
 if [[ $err -ge  4  ]]; then
-  /TopStor/logmsg.py Snap1038 error $userreq  
+  /TopStor/logmsg.py Snap1038 error $userreq $DG/$FileS 
 else 
-  /TopStor/logmsg.py Snap1039 info $userreq  hourly.$min.$every.$keep $DG/$FileS
+  /TopStor/logmsg.py Snap1039 info $userreq  hourly.$keep.$min.$every.$stamp $DG/$FileS
   /pace/etcdput.py Snapperiod/$DG/$FileS/$stamp  $min%*/$every%*%*%*%/TopStor/Snapshotnowhost%$DG/$FileS%hourly.$keep.$min.$every.na%$stamp
  ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
 fi
