@@ -26,7 +26,7 @@ crontab $cronthis
 if [ $? -ne 0  ]; then
   /TopStor/logmsg.py Snap1035 error $userreq $FileS
 else 
-  /TopStor/logmsg.py Snap1036 info $userreq $FileS
+  /TopStor/logmsg.py Snap1036 info $userreq $stamp $FileS
   /pace/etcdput.py Snapperiod/$DG/$FileS/$stamp  */$every%*%*%*%*%/TopStor/Snapshotnowhost%$DG/$FileS%Minutely.$keep.$every.na.na%$stamp
  ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
 fi;
