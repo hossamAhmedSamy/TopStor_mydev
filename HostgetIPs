@@ -64,5 +64,5 @@ ETCDCTL_API=3 /pace/etcdput.py prop/$hostname $jsonips
 echo $jsonips > $web; 
 echo $jsonips > $Topweb; 
  if [[ $perfmon -eq 1 ]]; then
-  /TopStor/queuethis.sh HostgetIPs finished $user
+  /TopStor/queuethis.sh HostgetIPs stop $user
  fi

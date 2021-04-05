@@ -12,7 +12,7 @@ def linewords(theline,lword):
 cmdline='cat /pacedata/perfmon'
 perfmon=str(subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout)
 if '1' in perfmon:
- cmdline=['/TopStor/queuethis.sh','GetDiskList','running','web']
+ cmdline=['/TopStor/queuethis.sh','GetDisklist','running','web']
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 iscsimapping=open("/pacedata/iscsimapping")
 runningpools=open("/pacedata/pools/runningpools")
@@ -110,5 +110,5 @@ iscsimapping.close()
 runningpools.close()
 #print(sorted(disklist,key=itemgetter("id")))
 if '1' in perfmon:
- cmdline=['/TopStor/queuethis.sh','GetDiskList','running','web']
+ cmdline=['/TopStor/queuethis.sh','GetDisklist','stop','web']
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)

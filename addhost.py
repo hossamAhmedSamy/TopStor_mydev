@@ -5,6 +5,12 @@ from etcdget import etcdget as get
 import socket, sys, subprocess
 
 def addhost(*args):
+ with open('/pacedata/perfmon') as f:
+  perfmon = f.readline()
+  if '1' in perfmon:
+   cmdline=['/TopStor/queuethis.sh','addhost','running','system']
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ 
  myhost=socket.gethostname()
  with open('/TopStordata/grafana/provisioning/datasources/datasource.yaml','w') as fw:
   with open('/TopStordata/grafana/provisioning/datasources/datasource.yaml.orig','r') as fr:
@@ -28,6 +34,11 @@ def addhost(*args):
  subprocess.run(cmdline,stdout=subprocess.PIPE)
  cmdline=['/bin/docker','restart','grafana']
  subprocess.run(cmdline,stdout=subprocess.PIPE)
+ with open('/pacedata/perfmon') as f:
+  perfmon = f.readline()
+  if '1' in perfmon:
+   cmdline=['/TopStor/queuethis.sh','addhost','stop','system']
+   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   
  return
 if __name__=='__main__':
