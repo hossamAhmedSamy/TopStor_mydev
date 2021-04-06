@@ -145,7 +145,7 @@ def config(*bargs):
   needreboot=True
 ####################################################
 # cmdline=['/TopStor/HostgetIPs']
- cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','finished',bargs[-1]]
+ cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','stop',bargs[-1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  if needreboot:
   cmdline=['/TopStor/rebootme','now']

@@ -71,4 +71,4 @@ then
  /pace/putzpool.py &
 fi
 echo ready ;
-/TopStor/queuethis.sh `basename "$0"` finished $userreq &
+/TopStor/queuethis.sh `basename "$0"` stop $userreq &

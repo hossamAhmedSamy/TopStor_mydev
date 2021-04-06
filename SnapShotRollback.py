@@ -46,7 +46,7 @@ def send(*bargs):
  with open('/root/SnapshotRol','a') as f:
   f.write('myhost='+ownerip+' '+myhost+' '+str(z)+'\n')
  sendhost(ownerip, str(msg),'recvreply',myhost)
- cmdline=['/TopStor/queuethis.sh','SnapRollback.py','finished',bargs[-1]]
+ cmdline=['/TopStor/queuethis.sh','SnapRollback.py','stop',bargs[-1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  return 1
 

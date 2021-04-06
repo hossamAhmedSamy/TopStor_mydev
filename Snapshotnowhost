@@ -16,4 +16,4 @@ if [ $? -ne 0 ]; then echo host not owner; exit; fi
   res=`./Snapshotnow $@`
 #  /TopStor/logmsg.py Snap1045 error $userreq $newsnap 
 /pace/putzpool.py
-/TopStor/queuethis.sh `basename "$0"` finished system &
+/TopStor/queuethis.sh `basename "$0"` stop system &

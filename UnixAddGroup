@@ -51,4 +51,4 @@ fi
 ln -f /etc/passwd  /opt/passwds/passwd
 ln -f /etc/group  /opt/passwds/group
 ln -f /etc/shadow  /opt/passwds/shadow
-/TopStor/queuethis.sh `basename "$0"` finished $userreq
+/TopStor/queuethis.sh `basename "$0"` stop $userreq

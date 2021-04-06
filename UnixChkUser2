@@ -24,4 +24,4 @@ then
   /pace/broadcasttolocal.py logged/$username 1 &
  fi  
 fi
-/TopStor/queuethis.sh UnixchkUser2 finished $username
+/TopStor/queuethis.sh UnixchkUser2 stop $username

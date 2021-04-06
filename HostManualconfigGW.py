@@ -14,7 +14,7 @@ def send(*bargs):
 	put('gw',bargs[-1])
 	broadcasttolocal('gw',bargs[-1])
 	broadcast('HostManualConfigTZ','/TopStor/pump.sh','HostManualconfigGW')
-	cmdline=['/TopStor/queuethis.sh','HostManualconfigGW.py','finished',bargs[-1]]
+	cmdline=['/TopStor/queuethis.sh','HostManualconfigGW.py','stop',bargs[-1]]
 	result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 	return 1
 

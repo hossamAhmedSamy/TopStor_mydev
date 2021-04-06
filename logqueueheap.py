@@ -10,7 +10,8 @@ import heapq
 
 
 def heapthis(*args):
- logfile = args[0]
+ #logfile = args[0]
+ logfile = '/var/www/html/des20/Data/TopStorqueue.log'
  stamps = dict()
  with open(logfile) as f:
   for l in f:

@@ -38,7 +38,7 @@ def send(*bargs):
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
  with open('/root/DGsetpool','a') as f:
   f.write('myhost='+ownerip[0][1]+' '+str(msg)+' recvreply '+myhost+'\n')
- cmdline=['/TopStor/queuethis.sh','DGsetPool.py','finished',bargs[-1]]
+ cmdline=['/TopStor/queuethis.sh','DGsetPool.py','stop',bargs[-1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  return 1
 

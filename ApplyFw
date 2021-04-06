@@ -26,4 +26,4 @@ then
   /pace/putzpool.py 
   /TopStor/logmsg.py Upsu1010 info $userreq $currentfw $realfw
 fi
-/TopStor/queuethis.sh `basename "$0"` finished $userreq &
+/TopStor/queuethis.sh `basename "$0"` stop $userreq &

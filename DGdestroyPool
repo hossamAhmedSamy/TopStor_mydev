@@ -81,4 +81,4 @@ echo iam in >> /root/tmp2
 fi
 /pace/etcddel.py requests/DGdestroypool/$myhost $myhost/$userreq
  /pace/putzpool.py
-/TopStor/queuethis.sh `basename "$0"` finished $userreq &
+/TopStor/queuethis.sh `basename "$0"` stop $userreq &

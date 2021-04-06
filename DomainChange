@@ -77,4 +77,4 @@ else
  fi;
 fi;
 fi
-/TopStor/queuethis.sh `basename "$0"` finished $userreq &
+/TopStor/queuethis.sh `basename "$0"` stop $userreq &

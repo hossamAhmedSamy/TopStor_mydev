@@ -52,7 +52,7 @@ def send(*bargs):
 	with open('/root/DGdespool','a') as f:
 		f.write('ClearCache /TopStor/pump.sh ClearCache /TopStordata/'+pool)
 	broadcast('ClearCache','/TopStor/pump.sh','ClearCache','/TopStordata/'+pool)
-	cmdline=['/TopStor/queuethis.sh','DGdestroyPool.py','finished',bargs[-1]]
+	cmdline=['/TopStor/queuethis.sh','DGdestroyPool.py','stop',bargs[-1]]
 	result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 	return 1
 

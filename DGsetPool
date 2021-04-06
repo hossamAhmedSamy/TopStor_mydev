@@ -347,12 +347,12 @@ else
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-   echo finished disks $diskns >>/root/tmp2
+   echo stop disks $diskns >>/root/tmp2
    /TopStor/logmsg.py DGst17 info $userreq ${nextpool} $diskns
-   echo finished loggging  >>/root/tmp2
+   echo stop loggging  >>/root/tmp2
   echo /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on cachefile=/TopStordata/p${nextpool} -f p${nextpool} raidz1 ${disk1} >/root/tmp
   echo /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on cachefile=/TopStordata/p${nextpool} -f p${nextpool} raidz1 ${disk1}
-   echo finished creating p$nextpool  >>/root/tmp2
+   echo stop creating p$nextpool  >>/root/tmp2
   /sbin/zpool create -o ashift=12 -o autoexpand=on -o cachefile=/TopStordata/p${nextpool} -o autoreplace=on -f p${nextpool} raidz1 ${disk1}
   if [ $? -eq 0 ]; then
      echo itisdone >> /root/tmp2
@@ -454,5 +454,5 @@ sed -i "/p${nextpool}/c\\" $runningpools
 fi
 /pace/etcddel.py requests/DGsetpool/$myhost $myhost/$userreq
 /pace/putzpool.py 
-/TopStor/queuethis.sh `basename "$0"` finished $userreq &
+/TopStor/queuethis.sh `basename "$0"` stop $userreq &
 

@@ -43,7 +43,7 @@ def setall(*bargs):
   f.write('ownerip '+ownerip[0][1]+"\n")
   f.write('msg '+str(msg)+"\n")
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
- cmdline=['/TopStor/queuethis.sh','HostManualconfig.py','finished',bargs[-1]]
+ cmdline=['/TopStor/queuethis.sh','HostManualconfig.py','stop',bargs[-1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  return 1
 

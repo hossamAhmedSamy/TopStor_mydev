@@ -96,4 +96,4 @@ then
  /TopStor/broadcast.py GroupChange /TopStor/pump.sh UnixChangeGroup_sync -d$myhost $@ 
  /TopStor/logmsg.py Unsu1025 info $userreq $username
 fi 
-/TopStor/queuethis.sh `basename "$0"` finished $userreq &
+/TopStor/queuethis.sh `basename "$0"` stop $userreq &

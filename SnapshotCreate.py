@@ -49,7 +49,7 @@ def send(*bargs):
  with open('/root/SnapshotCreate','a') as f:
   f.write('myhost='+ownerip[0][1]+' '+myhost+' '+str(z)+'\n')
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
- cmdline=['/TopStor/queuethis.sh','SnapshotCreate.py','finished',bargs[-1]]
+ cmdline=['/TopStor/queuethis.sh','SnapshotCreate.py','stop',bargs[-1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  return 1
 

@@ -23,4 +23,4 @@ userinfo=${userinfo}'/'`echo $@ | awk -F'/' 'BEGIN{FS=OFS="/"}{$NF="";print}'`
 /pace/etcdput.py usersinfo/$user $userinfo
 /TopStor/logmsg.py Priv1003 info $userreq $user &
 fi
-/TopStor/queuethis.sh `basename "$0"` finished $userreq &
+/TopStor/queuethis.sh `basename "$0"` stop $userreq &
