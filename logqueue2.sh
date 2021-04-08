@@ -1,6 +1,7 @@
 #!/bin/sh
 echo $@ > /root/qtmp
-glog='/var/www/html/des20/Data/TopStorqueue.log'
+#glog='/var/www/html/des20/Data/TopStorqueue.log'
+glog='/tmp2/msgqueue'
 dt=` echo $@ | awk '{print $1}'`;
 tm=` echo $@ | awk '{print $2}'`;
 fromhost=` echo $@ | awk '{print $3}'`;
