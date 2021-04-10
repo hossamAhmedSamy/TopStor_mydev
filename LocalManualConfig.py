@@ -39,6 +39,7 @@ def config(*bargs):
     change['old'+kvy[0]]=kvy[1]
  
  if len(change) < 1: 
+  queuethis('LocalManualConfig.py','stop_cancel',bargs[-1])
   return
  logmsg.sendlog('HostManual1002','info',arg[-1])
  with open('/root/HostManualconfigtmp2','a') as f:
