@@ -165,7 +165,7 @@ then
    echo running cifs.sh=$pool $name $ipaddr $ipsubnet home >> /root/volactivateparamHome
    echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet home 
    yes | cp /TopStordata/smb.$name /$pool/
-   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet home 
+   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet Home 
    echo finished cifs.sh >> /root/volactivateparamHome
    echo writve=$writev
    setfacl -b /$pool/$name

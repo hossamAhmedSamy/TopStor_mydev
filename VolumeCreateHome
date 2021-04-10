@@ -71,6 +71,5 @@ then
  ./VolumeActivateHome vol=$name user=$userreq
  /pace/putzpool.py 
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
- echo ready ;
 fi
 /TopStor/logqueue.py `basename "$0"` stop $userreq 
