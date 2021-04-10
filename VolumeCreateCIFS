@@ -31,7 +31,7 @@ then
  then
   echo here >> /root/volcreate
   /TopStor/logmsg.py Unlin1021vv warning $userreq $shortname
-  /TopStor/logqueue.py `basename "$0"` canceled $userreq 
+  /TopStor/logqueue.py `basename "$0"` stop_canceled $userreq 
   exit
  fi
   echo aftervolumes >> /root/volcreate
