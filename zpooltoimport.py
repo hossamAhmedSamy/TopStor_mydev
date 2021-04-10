@@ -1,5 +1,6 @@
 #!/bin/python3.6
 import subprocess, socket, binascii
+from logqueue import queuethis
 from sendhost import sendhost
 from etcdput import etcdput as put
 from etcdget import etcdget as get 
@@ -169,9 +170,7 @@ if __name__=='__main__':
  cmdline='cat /pacedata/perfmon'
  perfmon=str(subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout)
  if '1' in perfmon:
-  cmdline=['/TopStor/queuethis.sh','zpooltoimport.py','start','system']
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  queuethis('zpooltoimport.py','start','system')
  zpooltoimport(*sys.argv[1:])
  if '1' in perfmon:
-  cmdline=['/TopStor/queuethis.sh','zpooltoimport.py','stop','system']
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  queuethis('zpooltoimport.py','stop','system')

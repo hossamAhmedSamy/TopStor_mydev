@@ -2,6 +2,11 @@
 echo $@ >/root/tmp
 cd /TopStor
 export ETCDCTL_API=3
+perfmon=`cat /pacedata/perfmon`
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py VolumeChangeNFS start system &
+fi
 myhost=`hostname -s`
 web='/var/www/html/des20/Data/NFSstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log'
@@ -48,4 +53,7 @@ then
 /TopStor/logmsg.py VolCsu01 info $userreq $name
 fi;
  /pace/putzpool.py &
-echo ready ;
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py VolumeChangeNFS stop system &
+fi

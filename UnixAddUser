@@ -17,7 +17,7 @@ HomeAddr=`echo $@  | awk '{print $6}' | awk -F'/' '{print $2}'`;
 HomeSubnet=`echo $@  | awk '{print $6}' | awk -F'/' '{print $3}'`;
 host=`echo $@ | awk '{print $7}'`;
 userreq=`echo $@  | awk '{print $8}'`;
-/TopStor/queuethis.sh `basename "$0"` running $userreq &
+/TopStor/logqueue.py `basename "$0"` running $userreq &
 myhost=`hostname -s`
 echo Unlin1017:$username > $web;
 privilege="Box_Users";
@@ -96,5 +96,5 @@ fi
 ln -f /etc/passwd  /opt/passwds/passwd
 ln -f /etc/group  /opt/passwds/group
 ln -f /etc/shadow  /opt/passwds/shadow
-/TopStor/queuethis.sh `basename "$0"` stop $userreq &
+/TopStor/logqueue.py `basename "$0"` stop $userreq &
 

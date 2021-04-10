@@ -11,7 +11,7 @@ username=`echo $@ | awk '{print $1}'`;
 groupusers=`echo $@ | awk '{print $2}'`;
 userreq=`echo $@  | awk '{print $3}'`;
 myhost=`hostname -s`
-/TopStor/queuethis.sh `basename "$0"` running $userreq
+/TopStor/logqueue.py `basename "$0"` running $userreq
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
@@ -51,4 +51,4 @@ fi
 ln -f /etc/passwd  /opt/passwds/passwd
 ln -f /etc/group  /opt/passwds/group
 ln -f /etc/shadow  /opt/passwds/shadow
-/TopStor/queuethis.sh `basename "$0"` stop $userreq
+/TopStor/logqueue.py `basename "$0"` stop $userreq

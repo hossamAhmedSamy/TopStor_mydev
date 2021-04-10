@@ -1,5 +1,6 @@
 #!/bin/python3.6
 import subprocess,sys, datetime
+from logqueue import queuethis
 import json
 from etcdget import etcdget as get
 from etcdput import etcdput as put 
@@ -8,8 +9,7 @@ from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost as sendhost
 def send(*bargs):
-	cmdline=['/TopStor/queuethis.sh','DGdestroyPool.py','running',bargs[-1]]
-	result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+	queuethis('DGdestroyPool.py','running',bargs[-1])
 	if(len(bargs) < 3):
 		args=bargs[0].split()
 	else:
@@ -20,6 +20,7 @@ def send(*bargs):
 	 oldx=x[0][1]
 	except:
 	 oldx='0'
+	print('x',oldx)
 	pool=str(pool).split()[-1]
 	with open('/root/DGdespool2','w') as f:
 		f.write(str(bargs))
@@ -52,8 +53,7 @@ def send(*bargs):
 	with open('/root/DGdespool','a') as f:
 		f.write('ClearCache /TopStor/pump.sh ClearCache /TopStordata/'+pool)
 	broadcast('ClearCache','/TopStor/pump.sh','ClearCache','/TopStordata/'+pool)
-	cmdline=['/TopStor/queuethis.sh','DGdestroyPool.py','stop',bargs[-1]]
-	result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+	queuethis('DGdestroyPool.py','stop',bargs[-1])
 	return 1
 
 if __name__=='__main__':

@@ -10,7 +10,7 @@ glog='/var/www/html/des20/Data/TopStor.log';
 username=`echo $@ | awk '{print $1}'`;
 usergroups=`echo $@ | awk  '{print $2}' | sed 's/groups//g' `;
 userreq=`echo $@  | awk '{print $3}'`;
-/TopStor/queuethis.sh `basename "$0"` running $userreq &
+/TopStor/logqueue.py `basename "$0"` running $userreq &
 myhost=`hostname -s`
 myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 stablegrp=""
@@ -91,4 +91,4 @@ then
  done
  /TopStor/logmsg.py Unsu1124 info $userreq $username
 fi 
-/TopStor/queuethis.sh `basename "$0"` stop $userreq &
+/TopStor/logqueue.py `basename "$0"` stop $userreq &

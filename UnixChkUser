@@ -7,6 +7,12 @@ resulting="not found";
 username=`echo $@ | awk '{print $1}'`;
 userchk=`echo $@ | awk '{print $2}'`;
 userpass=`echo $@ | awk '{print $3}'`;
+perfmon=`cat /pacedata/perfmon`
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py UnixChkUser start system &
+fi
+stamp=`date +%s`;
 y=`/pace/etcdget.py logged/$username | wc -c`
 if [ $y -ge 5 ];
 then
@@ -15,6 +21,10 @@ echo $y
  x=`/pace/etcdget.py logged/$username | wc -c`
  if [ $x -ge 5 ];
  then
+  echo $perfmon | grep 1 
+  if [ $? -eq 0 ]; then
+   /TopStor/logqueue.py UnixChkUser stop system &
+  fi
   exit 
  fi
 fi
@@ -42,3 +52,7 @@ else
  /pace/broadcasttolocal logged/$username 0  &
  fi
 fi;
+echo $perfmon | grep 1 
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py UnixChkUser stop system &
+fi

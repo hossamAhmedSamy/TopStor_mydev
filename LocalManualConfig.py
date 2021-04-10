@@ -1,13 +1,13 @@
 #!/bin/python3.6
 import subprocess,sys, datetime
+from logqueue import queuethis
 from etcdget import etcdget as get
 from etcdput import etcdput as put
 from broadcasttolocal import broadcasttolocal
 from ast import literal_eval as mtuple
 import logmsg
 def config(*bargs):
- cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','running',bargs[-1]]
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ queuethis('LocalManualConfig.py','running',bargs[-1])
  enpdev='enp0s8'
  needreboot=False
  with open('/root/HostManualconfigtmp3','w') as f:
@@ -145,8 +145,7 @@ def config(*bargs):
   needreboot=True
 ####################################################
 # cmdline=['/TopStor/HostgetIPs']
- cmdline=['/TopStor/queuethis.sh','LocalManualconfig.py','stop',bargs[-1]]
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ queuethis('LocalManualConfig.py','stop',bargs[-1])
  if needreboot:
   cmdline=['/TopStor/rebootme','now']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)

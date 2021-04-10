@@ -12,8 +12,8 @@ myhost=`hostname -s`
 pp=`/sbin/zpool list `
 echo $pp | grep $DG
 if [ $? -ne 0 ]; then echo host not owner; exit; fi
-/TopStor/queuethis.sh `basename "$0"` running system &
+/TopStor/logqueue.py `basename "$0"` running system &
   res=`./Snapshotnow $@`
 #  /TopStor/logmsg.py Snap1045 error $userreq $newsnap 
 /pace/putzpool.py
-/TopStor/queuethis.sh `basename "$0"` stop system &
+/TopStor/logqueue.py `basename "$0"` stop system &

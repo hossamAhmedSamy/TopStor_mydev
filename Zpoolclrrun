@@ -4,7 +4,7 @@ echo $@ > /root/Zpoolclrrun
 perfmon=`cat /pacedata/perfmon`
 echo $perfmon | grep 1
 if [ $? -eq 0 ]; then
- /TopStor/queuethis.sh Zpoolclrrun start system &
+ /TopStor/logqueue.py Zpoolclrrun start system &
 fi
 x=` ETCDCTL_API=3 /pace/etcget.py cleareddisk/$@`
 y=`ETCDCTL_API=3 /pace/etcget.py clearplsdisk/$@`
@@ -18,5 +18,5 @@ then
 fi
 echo $perfmon | grep 1
 if [ $? -eq 0 ]; then
- /TopStor/queuethis.sh Zpoolclrrun stop system &
+ /TopStor/logqueue.py Zpoolclrrun stop system &
 fi

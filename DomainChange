@@ -16,7 +16,7 @@ pass=`echo $@ | awk '{ print $3 }'`;
 domcont=` host -t SRV _ldap._tcp.$doms | awk '{print $NF}' | head -1 | rev | cut -c 2- | rev `;
 #domcont=` echo $@ | awk '{ print $4 }'`
 userreq=` echo $@ | awk '{ print $5 }'`;
-/TopStor/queuethis.sh `basename "$0"` running $userreq &
+/TopStor/logqueue.py `basename "$0"` running $userreq &
 privilege="Active_Directory";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == "true" ]];
@@ -77,4 +77,4 @@ else
  fi;
 fi;
 fi
-/TopStor/queuethis.sh `basename "$0"` stop $userreq &
+/TopStor/logqueue.py `basename "$0"` stop $userreq &

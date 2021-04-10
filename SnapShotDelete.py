@@ -1,13 +1,12 @@
 #!/bin/python3.6
-import subprocess,sys, datetime
-import json
+import sys, datetime
+from logqueue import queuethis
 from etcdget import etcdget as get
 from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost
 def send(*bargs):
- cmdline=['/TopStor/queuethis.sh','SnapShotDelete.py','running',bargs[-1]]
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ queuethis('SnapShotDelete.py','running',bargs[-1])
  if(len(bargs) < 3):
   args=bargs[0].split()
  else:
@@ -25,8 +24,7 @@ def send(*bargs):
   print(ownerlist)
   owner=ownerlist[0]
  else:
-  cmdline=['/TopStor/queuethis.sh','SnapShotDelete.py','canceled',bargs[-1]]
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  queuethis('SnapShotDelete.py','stop_canceled',bargs[-1])
   return 1
  with open('/root/SnapshotDelete','a') as f:
   f.write('owner='+owner+'\n')
@@ -37,8 +35,7 @@ def send(*bargs):
  if str(owneriplist[0])!= '-1':
   ownerip=owneriplist[0]
  else:
-   cmdline=['/TopStor/queuethis.sh','SnapShotDelete.py','canceled',bargs[-1]]
-   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   queuethis('SnapShotDelete.py','stop_canceled',bargs[-1])
    return 3
  z=['/TopStor/pump.sh','SnapShotDelete']
  for arg in args:
@@ -47,8 +44,7 @@ def send(*bargs):
  with open('/root/SnapshotDelete','a') as f:
   f.write('myhost='+ownerip+' '+myhost+' '+str(z)+'\n')
  sendhost(ownerip, str(msg),'recvreply',myhost)
- cmdline=['/TopStor/queuethis.sh','SnapShotDelete.py','stop',bargs[-1]]
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ queuethis('SnapShotDelete.py','stop',bargs[-1])
  return 1
 
 if __name__=='__main__':

@@ -18,7 +18,7 @@ userreq=` echo $@ | awk '{print $7}'`;
 DG=$pDG;
 hi=`whoami`
 echo start $hi $userreq > /root/volcreate
-ETCDCTL_API=3 /TopStor/queuethis.sh VolumeCreateHome running $userreq 
+ETCDCTL_API=3 /TopStor/logqueue.py VolumeCreateHome running $userreq 
 echo queuedrunning >> /root/volcreate
 
 privilege="CIFS";
@@ -31,7 +31,7 @@ then
 # then
 #  echo here >> /root/volcreate
 #  /TopStor/logmsg.py Unlin1021vv warning $userreq $shortname
-#  /TopStor/queuethis.sh `basename "$0"` canceled $userreq 
+#  /TopStor/logqueue.py `basename "$0"` stop_canceled $userreq 
 #  exit
 # fi
 #  echo aftervolumes >> /root/volcreate
@@ -40,7 +40,7 @@ then
 # then
 #  echo here2 >> /root/volcreate
 #  /TopStor/logmsg.py Unlin1021vu warning $userreq $shrotname
-#  /TopStor/queuethis.sh VolumeCreateHome canceled $userreq 
+#  /TopStor/logqueue.py VolumeCreateHome stop_canceled $userreq 
 #  exit
 # fi
  echo afterusersinfo >> /root/volcreate
@@ -58,7 +58,7 @@ then
  then
   echo here5 >> /root/volcreate
   /TopStor/logmsg.py NFS1006 error $userreq $DG/$name
-  /TopStor/queuethis.sh `basename "$0"` canceled $userreq 
+  /TopStor/logqueue.py `basename "$0"` stop_canceled $userreq 
   exit
  fi
  /sbin/zfs set prot:kind=Home $DG/$name
@@ -73,4 +73,4 @@ then
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
  echo ready ;
 fi
-/TopStor/queuethis.sh `basename "$0"` stop $userreq 
+/TopStor/logqueue.py `basename "$0"` stop $userreq 

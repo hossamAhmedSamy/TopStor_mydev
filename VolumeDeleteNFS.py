@@ -1,5 +1,6 @@
 #!/bin/python3.6
-import subprocess,sys, datetime
+import sys, datetime
+from logqueue import queuethis
 import json
 from etcdget import etcdget as get
 from ast import literal_eval as mtuple
@@ -10,8 +11,13 @@ def send(*bargs):
   args=bargs[0].split()
  else:
   args=bargs
- print(args)
- print(args[0])
+ with open('/pacedata/perfmon') as f:
+  if '1' in f.readline():
+   perfmon = 1
+  else:
+   perfmon = 0
+ if perfmon:
+   queuethis('VolumeDeleteNFS.py','broadcast',bargs[-1])
  pool=args[0]
  pool=str(pool)
  z=[]

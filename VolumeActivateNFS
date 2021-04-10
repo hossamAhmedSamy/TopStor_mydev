@@ -104,6 +104,7 @@ then
    fi
    ipsubnet=`cat /TopStordata/NFStmp`
    rm -rf  /TopStordata/NFStmp
+   echo running nfspoolonly
    /TopStor/nfspoolonly.sh $pool $i $ip $ipsubnet
   done
  else
@@ -139,6 +140,7 @@ then
    then 
     for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done
    fi
+   echo running nfs $pool $name $ipaddr $ipsubnet
    /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
   done
  fi

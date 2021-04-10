@@ -1,6 +1,7 @@
 #!/bin/sh
 logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStorglobal.log'
+echo $@ > /root/logmsg2tmp
 dt=` echo $@ | awk '{print $1}'`;
 tm=` echo $@ | awk '{print $2}'`;
 fromhost=` echo $@ | awk '{print $3}'`;

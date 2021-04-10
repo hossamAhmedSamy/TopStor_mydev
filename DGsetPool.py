@@ -1,13 +1,13 @@
 #!/bin/python3.6
 import subprocess,sys, datetime
+from logqueue import queuethis
 import json
 from etcdget import etcdget as get
 from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost
 def send(*bargs):
- cmdline=['/TopStor/queuethis.sh','DGsetPool.py','running',bargs[-1]]
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ queuethis('DGsetPool.py','running',bargs[-1])
  if(len(bargs) < 3):
   args=bargs[0].split()
  else:
@@ -38,8 +38,7 @@ def send(*bargs):
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
  with open('/root/DGsetpool','a') as f:
   f.write('myhost='+ownerip[0][1]+' '+str(msg)+' recvreply '+myhost+'\n')
- cmdline=['/TopStor/queuethis.sh','DGsetPool.py','stop',bargs[-1]]
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ queuethis('DGsetPool.py','stop',bargs[-1])
  return 1
 
 if __name__=='__main__':

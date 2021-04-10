@@ -3,11 +3,9 @@ export ETCDCTL_API=3
 ETCDCTL_API=3
 cd /TopStor
 rm /tmp2/msgfile 2>/dev/null
-rm /tmp2/msgqueue 2>/dev/null
 mkdir /tmp2 &>/dev/null
 chown apache /tmp2 &>/dev/null
 mkfifo -m 660 /tmp2/msgfile 2>/dev/null
-mkfifo -m 660 /tmp2/msgqueue 2>/dev/null
 
 export REMOTE=Topstor
 export ETCDCTL_API=3
@@ -47,7 +45,7 @@ reqparam=`echo $line | awk '{$1="";print}'`
 perfmon=`cat /pacedata/perfmon`
 echo $perfmon | grep 1
 if [ $? -eq 0 ]; then
- ./queuethis.sh $request request `echo $line | awk '{print $NF}'` &
+ ./logqueue.py $request request `echo $line | awk '{print $NF}'` &
 fi
 rm -rf /root/$request.txt 2>/dev/null
 #./$request $reqparam >/dev/null 2>&1  & 

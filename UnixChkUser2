@@ -5,7 +5,11 @@ echo $@ > /root/UnixchkUser2
 web='/var/www/html/des20/Data/isuser.txt';
 resulting="not found";
 username=`echo $@ | awk '{print $1}'`;
-/TopStor/queuethis.sh UnixchkUser2 running $username
+perfmon=`cat /pacedata/perfmon`
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py UnixChkUser2 start system &
+fi
 stamp=`date +%s`;
 x=`/pace/etcdget.py logged/$username`
 updx=`/pace/etcdget.py updlogged/$username`
@@ -24,4 +28,7 @@ then
   /pace/broadcasttolocal.py logged/$username 1 &
  fi  
 fi
-/TopStor/queuethis.sh UnixchkUser2 stop $username
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py UnixChkUser2 stop system &
+fi

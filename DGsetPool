@@ -50,7 +50,7 @@ do
   echo to continue 3 >> /root/tmp2
  sleep 1
 done
- /TopStor/queuethis.sh `basename "$0"` running $userreq &
+ /TopStor/logqueue.py `basename "$0"` running $userreq &
 echo iamhere >> /root/tmp2
 if [[ $raid == "import" ]];
 then
@@ -454,5 +454,5 @@ sed -i "/p${nextpool}/c\\" $runningpools
 fi
 /pace/etcddel.py requests/DGsetpool/$myhost $myhost/$userreq
 /pace/putzpool.py 
-/TopStor/queuethis.sh `basename "$0"` stop $userreq &
+/TopStor/logqueue.py `basename "$0"` stop $userreq &
 

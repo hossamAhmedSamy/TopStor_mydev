@@ -1,6 +1,11 @@
 #!/bin/sh
 cd /TopStor
 export ETCDCTL_API=3
+perfmon=`cat /pacedata/perfmon`
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py VolumeDeleteNFS start system &
+fi
 web='/var/www/html/des20/Data/CIFSstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStor.log';
@@ -59,3 +64,7 @@ then
  rm -rf /$DG/exports.$volname
 fi
  /pace/putzpool.py &
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py VolumeDeleteNFS stop system &
+fi

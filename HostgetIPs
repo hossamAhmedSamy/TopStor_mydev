@@ -7,7 +7,7 @@ echo hither > /root/Hostgetips
 user=`echo $@ | awk '{print $1}'`
 perfmon=`cat /pacedata/perfmon`
  if [[ $perfmon -eq 1 ]]; then
-  /TopStor/queuethis.sh HostgetIPs running $user
+  /TopStor/logqueue.py HostgetIPs running $user
  fi
 hostname=`hostname`
 hostn=`/TopStor/etcdget.py alias/$hostname`
@@ -64,5 +64,5 @@ ETCDCTL_API=3 /pace/etcdput.py prop/$hostname $jsonips
 echo $jsonips > $web; 
 echo $jsonips > $Topweb; 
  if [[ $perfmon -eq 1 ]]; then
-  /TopStor/queuethis.sh HostgetIPs stop $user
+  /TopStor/logqueue.py HostgetIPs stop $user
  fi

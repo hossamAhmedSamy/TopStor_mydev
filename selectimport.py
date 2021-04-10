@@ -1,10 +1,11 @@
 #!/bin/python3.6
 from etcdget import etcdget as get
+from logqueue import queuethis
 from etcdput import etcdput as put 
 from broadcasttolocal import broadcasttolocal 
 from etcddel import etcddel as deli 
 import poolall 
-import socket, sys, subprocess,datetime
+import socket, sys, datetime
 from broadcast import broadcast as broadcast 
 from sendhost import sendhost
 from ast import literal_eval as mtuple
@@ -110,9 +111,7 @@ if __name__=='__main__':
 	perfmon=str(subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout)
 
 	if '1' in perfmon:
-		cmdline=['/TopStor/queuethis.sh','selectimport.py','start','system']
-		result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+		queuethis('selectimport.py','start','system')
 	importpls(myhost,allinfo,*sys.argv[1:])
 	if '1' in perfmon:
-		cmdline=['/TopStor/queuethis.sh','selectimport.py','stop','system']
-		result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+		queuethis('selectimport.py','stop','system')

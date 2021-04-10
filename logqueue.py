@@ -1,11 +1,11 @@
 #!/bin/python3.6
-import subprocess,sys, datetime
-import json
+import sys, datetime
+from time import time
 from etcdget import etcdget as get
 from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost
-def sendlog(*args):
+def queuethis(*args):
  z=[]
  knowns=[]
  myhost=hostname()
@@ -14,7 +14,9 @@ def sendlog(*args):
  z=['/TopStor/logqueue2.sh', dt, tm, myhost ]
  for arg in args:
   z.append(arg)
- print('z=',z)
+ z.append(int(time()*1000))
+ with open('/root/logqueuetmp','w') as f:
+  f.write(str(z))
  leaderinfo=get('leader','--prefix')
  knowninfo=get('known','--prefix')
  leaderip=leaderinfo[0][1]
@@ -28,6 +30,7 @@ def sendlog(*args):
  for k in knowninfo:
   sendhost(k[1], str(msg),'recvreply',myhost)
   knowns.append(k[1])
+ print('logqueue z=',z)
 
 if __name__=='__main__':
- sendlog(*sys.argv[1:])
+ queuethis(*sys.argv[1:])

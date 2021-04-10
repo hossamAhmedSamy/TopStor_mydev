@@ -6,6 +6,7 @@ from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 import subprocess, socket
 import logmsg
+from logqueueheap import heapthis
 def do(body):
  myhost=socket.gethostname()
  z=[]
@@ -95,10 +96,10 @@ def do(body):
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if queue ###############
  elif r["req"]=='queue':  
-  with open('/root/recv','a') as f:
+  with open('/root/recvqueue','w') as f:
    f.write('received queue from parnter :'+str(r["reply"])+'\n')
    f.write('type of message :'+str(type(r["reply"]))+'\n')
-  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+  heapthis(r["reply"][1:])
 ########## if evacuate ###############
  elif r["req"]=='Evacuate':  
   with open('/root/recv','a') as f:
