@@ -3,6 +3,8 @@ import sys
 from etcdget import etcdget as get
 from etcdput import etcdput as put 
 from etcddel import etcddel as dels 
+from socket import gethostname as hostname
+from sendhost import sendhost
 stamps = dict()
 stampseq = []
 otask = dict()
@@ -10,6 +12,7 @@ ctask = dict()
 lenctask = 0
 def heapthis(line):
  global stamps,lenctask, stampseq, otask, ctask
+ myhost=hostname()
  try:
   linestamp = int(line[-1])
  except:
@@ -46,14 +49,12 @@ def heapthis(line):
    if lenctask > 20: 
     with open('/TopStordata/taskperf','a') as f:
      f.write(str(ctask)+'\n')
+    nextlead = get('nextlead')[0].split('/')[1]
+    z = [str(ctask)]
+    msg={'req': 'taskperf', 'reply':z}
+    sendhost(nextlead, str(msg),'recvreply',myhost)
     ctask = dict()
     lenctask = 0
-# dels('OpenTasks','--prefix')
-# for host in otask:
-#  for task in otask[host]:
-#   for status in otask[host][task]:
-#    if status:
-#     put('OpenTasks/'+host+'/'+task+'/'+status, str(otask[host][task][status]['stamp'])+'/'+otask[host][task][status]['at']+'/'+otask[host][task][status]['on'])
  return  
  
  

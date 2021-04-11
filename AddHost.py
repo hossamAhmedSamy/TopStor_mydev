@@ -10,6 +10,7 @@ def setall(*bargs):
  queuethis('AddHost.py','running',bargs[-1])
  logmsg.sendlog('AddHostst01','info',arg[-1],name)
  put('allowedPartners',name)
+ queuethis('AddHost.py','stop_initiated',bargs[-1])
 
 if __name__=='__main__':
  setall(*sys.argv[1:])

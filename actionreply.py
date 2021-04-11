@@ -94,6 +94,13 @@ def do(body):
    f.write('received msg from parnter :'+str(r["reply"])+'\n')
    f.write('type of message :'+str(type(r["reply"]))+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if taskperf ###############
+ elif r["req"]=='taskperf':  
+  with open('/root/recvtaskperf','w') as f:
+   f.write('received queue from parnter :'+str(r["reply"])+'\n')
+   f.write('type of message :'+str(type(r["reply"]))+'\n')
+  with open('/TopStordata/taskperf','a') as f:
+   f.write(str(["reply"][1:])
 ########## if queue ###############
  elif r["req"]=='queue':  
   with open('/root/recvqueue','w') as f:
