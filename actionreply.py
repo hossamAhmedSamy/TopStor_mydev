@@ -13,6 +13,8 @@ def do(body):
  with open('/root/recv','w') as f:
   f.write('Recevied a reply:'+str(body[2:][:-1])+'\n')
  y=body[2:][:-1].replace('\\','').replace("'{",'"{').replace("}'",'}"').replace('"b\'',"'b;").replace('\n','').replace('"]','\\"]')
+ with open('/root/recv','w') as f:
+   f.write('Received '+y)
  t=mtuple(y)
  yy=t['req'].replace("'b;",'"b\'')
  with open('/root/recv','w') as f:
@@ -99,8 +101,10 @@ def do(body):
   with open('/root/recvtaskperf','w') as f:
    f.write('received queue from parnter :'+str(r["reply"])+'\n')
    f.write('type of message :'+str(type(r["reply"]))+'\n')
+  #print('i am here',r["reply"][-1].replace('!','"').replace('@',"'").replace('~','{').replace('$','}'))
   with open('/TopStordata/taskperf','a') as f:
-   f.write(str(["reply"][1:]))
+   f.write(r["reply"][-1].replace('!','"').replace('@',"'").replace('~','{').replace('$','}')+'\n')
+   print('wirtten archive')
 ########## if queue ###############
  elif r["req"]=='queue':  
   with open('/root/recvqueue','w') as f:
