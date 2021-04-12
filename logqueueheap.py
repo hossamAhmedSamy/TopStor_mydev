@@ -49,8 +49,9 @@ def heapthis(line):
    if lenctask > 20: 
     with open('/TopStordata/taskperf','a') as f:
      f.write(str(ctask)+'\n')
+    
     nextlead = get('nextlead')[0].split('/')[1]
-    z = [str(ctask)]
+    z = [str(ctask).replace('"','!').replace("'",'@').replace('{','~').replace('}','$')]
     msg={'req': 'taskperf', 'reply':z}
     sendhost(nextlead, str(msg),'recvreply',myhost)
     ctask = dict()
