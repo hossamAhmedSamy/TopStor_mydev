@@ -10,7 +10,7 @@ myhost=`hostname -s`
 glog='/var/www/html/des20/Data/TopStor.log'
 username=`echo $@ | awk '{print $1}'`;
 userreq=`echo $@ | awk '{print $2}'`;
-/TopStor/logqueue.py `basename "$0"` running $userreq &
+/TopStor/logqueue.py `basename "$0"` running $userreq 
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
@@ -40,4 +40,4 @@ else
  /TopStor/logmsg.py Unlin1110 info $userreq $username
 fi;
 fi
-/TopStor/logqueue.py `basename "$0"` stop $userreq &
+/TopStor/logqueue.py `basename "$0"` stop $userreq 

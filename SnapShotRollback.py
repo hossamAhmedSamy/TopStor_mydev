@@ -26,6 +26,7 @@ def send(*bargs):
   print(ownerlist)
   owner=ownerlist[0]
  else:
+  queuethis('SnapRollback.py','stop_cancel',bargs[-1])
   exit()
 
  with open('/root/SnapshotRol','a') as f:

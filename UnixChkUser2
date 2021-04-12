@@ -8,7 +8,7 @@ username=`echo $@ | awk '{print $1}'`;
 perfmon=`cat /pacedata/perfmon`
 echo $perfmon | grep 1
 if [ $? -eq 0 ]; then
- /TopStor/logqueue.py UnixChkUser2 start system &
+ /TopStor/logqueue.py UnixChkUser2 start system 
 fi
 stamp=`date +%s`;
 x=`/pace/etcdget.py logged/$username`
@@ -21,7 +21,7 @@ then
  if [ $diffx -lt 600 ];
  then
   /pace/etcdput.py updlogged/$username $stamp
-  /pace/broadcasttolocal.py updlogged/$username $stamp &
+  /pace/broadcasttolocal.py updlogged/$username $stamp 
   x=$stamp
  else
   /pace/etcdput.py logged/$username 1 
@@ -30,5 +30,5 @@ then
 fi
 echo $perfmon | grep 1
 if [ $? -eq 0 ]; then
- /TopStor/logqueue.py UnixChkUser2 stop system &
+ /TopStor/logqueue.py UnixChkUser2 stop system 
 fi

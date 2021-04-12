@@ -16,12 +16,12 @@ dellocal(thehost,tokey,'--prefix')
 print('mylist:',mylist)
 if '-1' in mylist:
  print('-1')
- exit()
-for item in mylist:
- moditem=""
- restitem=""
- if '/' in item[0]:
-  moditem=item[0].split('/')[0]
-  restitem='/'+item[0].replace(moditem+'/','')
- putlocal(thehost, tokey+restitem, item[1])
+else:
+ for item in mylist:
+  moditem=""
+  restitem=""
+  if '/' in item[0]:
+   moditem=item[0].split('/')[0]
+   restitem='/'+item[0].replace(moditem+'/','')
+  putlocal(thehost, tokey+restitem, item[1])
  

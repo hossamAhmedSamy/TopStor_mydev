@@ -145,7 +145,7 @@ def zpooltoimport(*args):
     put('toimport/'+myhost,str(pooltoimport))
     logmsg.sendlog('Zpsu01','info','system',':found')
     print('toimport:',str(pooltoimport))
-    exit()
+    return 
  else:
   #for pool in pools:
   # remove('/TopStordata/'+pool)

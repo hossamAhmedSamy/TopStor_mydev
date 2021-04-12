@@ -282,4 +282,3 @@ if __name__=='__main__':
  import sys
  msg=str({'host': 'localhost', 'req': sys.argv[1]})
  do('b"'+msg+'"') 
- exit()
