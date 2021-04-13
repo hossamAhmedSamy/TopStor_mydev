@@ -8,7 +8,7 @@ from sendhost import sendhost
 stamps = dict()
 stampseq = []
 otask = dict()
-ctask = dict()
+ctask = ''
 lenctask = 0
 def heapthis(line):
  global stamps,lenctask, stampseq, otask, ctask
@@ -21,8 +21,8 @@ def heapthis(line):
   return 
  if line[2] not in otask:
   otask[line[2]] = dict() 
- if line[2] not in ctask:
-  ctask[line[2]] = dict() 
+ #if line[2] not in ctask:
+ # ctask[line[2]] = dict() 
  if linestamp not in stamps:
   stamps[linestamp] = dict()
  stamps[linestamp][line[2]] = []
@@ -31,30 +31,32 @@ def heapthis(line):
  stamps[linestamp][line[2]].append(st)
  if st['task'] not in otask[line[2]]:
   otask[line[2]][st['task']] = dict() 
- if st['task'] not in ctask[line[2]]:
-  ctask[line[2]][st['task']] = [] 
+ #if st['task'] not in ctask[line[2]]:
+ # ctask[line[2]][st['task']] = [] 
  if 'stop' not in st['status']:
   otask[line[2]][st['task']][st['status']] = {'stamp':linestamp,'at':st['at'],'on':st['on']}
   put('OpenTasks/'+line[2]+'/'+st['task']+'/'+st['status'], str(linestamp)+'/'+st['at']+'/'+st['on'])
  else:
-  cutask = otask[line[2]][st['task']]
+  cutask = otask[line[2]][st['task']].copy()
   if not cutask:
    otask[line[2]][st['task']] = dict() 
   else:
    cutask[st['status']] = {'stamp':linestamp,'at':st['at'],'on':st['on']}
-   ctask[line[2]][st['task']].append(cutask)
+   for stall in cutask:
+    ctask +=line[2]+' '+st['task']+' '+stall+' '+str(cutask[stall]['stamp'])+' '+cutask[stall]['at']+' '+cutask[stall]['on']+'\n'
+   #ctask[line[2]][st['task']].append(cutask)
    otask[line[2]][st['task']] = dict() 
    dels('OpenTasks/'+line[2],st['task'])
-   lenctask += len(ctask[line[2]][st['task']])
-   if lenctask > 20: 
+   lenctask += 1 
+   if lenctask > 0: 
     with open('/TopStordata/taskperf','a') as f:
-     f.write(str(ctask)+'\n')
+     f.write(ctask)
     
     nextlead = get('nextlead')[0].split('/')[1]
-    z = [str(ctask).replace('"','!').replace("'",'@').replace('{','~').replace('}','$')]
+    z = [ctask]
     msg={'req': 'taskperf', 'reply':z}
     sendhost(nextlead, str(msg),'recvreply',myhost)
-    ctask = dict()
+    ctask = ''
     lenctask = 0
  return  
  
