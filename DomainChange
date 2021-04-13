@@ -16,7 +16,7 @@ pass=`echo $@ | awk '{ print $3 }'`;
 domcont=` host -t SRV _ldap._tcp.$doms | awk '{print $NF}' | head -1 | rev | cut -c 2- | rev `;
 #domcont=` echo $@ | awk '{ print $4 }'`
 userreq=` echo $@ | awk '{ print $5 }'`;
-/TopStor/logqueue.py `basename "$0"` running $userreq &
+/TopStor/logqueue.py `basename "$0"` running $userreq 
 privilege="Active_Directory";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == "true" ]];
@@ -33,6 +33,7 @@ cat $runningpools | grep $hostn
 if [ $? -ne 0 ]; then
  echo pls configure storage first.;
   /TopStor/logmsg.py Domain1015 error $userreq $domain
+  /TopStor/logqueue.py `basename "$0"` stop_cancel $userreq 
  exit;
 fi
 poolis=`cat $runningpools | grep $hostn | awk '{print $2}'`
@@ -77,4 +78,4 @@ else
  fi;
 fi;
 fi
-/TopStor/logqueue.py `basename "$0"` stop $userreq &
+/TopStor/logqueue.py `basename "$0"` stop $userreq 

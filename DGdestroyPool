@@ -42,7 +42,7 @@ echo iam in >> /root/tmp2
  done
  echo Iam her2 >> /root/tmp2
  /pace/etcdput.py requests/DGdestroypool/$myhost $myhost/$userreq
- /TopStor/logqueue.py `basename "$0"` running $userreq &
+ /TopStor/logqueue.py `basename "$0"` running $userreq 
  /TopStor/logmsg.py DGst5 info $userreq $pool
  waiting=1
  while [ $waiting -eq 1 ];
@@ -81,4 +81,4 @@ echo iam in >> /root/tmp2
 fi
 /pace/etcddel.py requests/DGdestroypool/$myhost $myhost/$userreq
  /pace/putzpool.py
-/TopStor/logqueue.py `basename "$0"` stop $userreq &
+/TopStor/logqueue.py `basename "$0"` stop $userreq 
