@@ -103,7 +103,8 @@ def do(body):
    f.write('type of message :'+str(type(r["reply"]))+'\n')
   #print('i am here',r["reply"][-1].replace('!','"').replace('@',"'").replace('~','{').replace('$','}'))
   with open('/TopStordata/taskperf','a') as f:
-   f.write(r["reply"][-1].replace('!','"').replace('@',"'").replace('~','{').replace('$','}')+'\n')
+   #f.write(r["reply"][-1].replace('!','"').replace('@',"'").replace('~','{').replace('$','}')+'\n')
+   f.write(r["reply"][-1][:-1].replace('ndhcp','\ndhcp')+'\n')
    print('wirtten archive')
 ########## if queue ###############
  elif r["req"]=='queue':  
