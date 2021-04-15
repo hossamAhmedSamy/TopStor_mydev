@@ -1,5 +1,5 @@
 #!/bin/python3.6
-import sys 
+import sys, subprocess
 from etcdget import etcdget as get
 from etcdput import etcdput as put 
 from etcddel import etcddel as dels 
@@ -58,6 +58,8 @@ def heapthis(line):
     z = [ctask]
     msg={'req': 'taskperf', 'reply':z}
     sendhost(nextlead, str(msg),'recvreply',myhost)
+    cmdline=['logrotate','logqueue.cfg']
+    subprocess.run(cmdline,stdout=subprocess.PIPE)
     ctask = ''
     lenctask = 0
  return  
