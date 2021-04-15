@@ -96,6 +96,12 @@ def do(body):
    f.write('received msg from parnter :'+str(r["reply"])+'\n')
    f.write('type of message :'+str(type(r["reply"]))+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########### if synq ###############
+ elif r["req"]=='synq':  
+  with open('/root/recv','a') as f:
+   f.write('received msg from parnter :'+str(r["reply"])+'\n')
+   f.write('type of message :'+str(type(r["reply"]))+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if taskperf ###############
  elif r["req"]=='taskperf':  
   with open('/root/recvtaskperf','w') as f:
