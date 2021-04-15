@@ -48,11 +48,13 @@ def heapthis(line):
    otask[line[2]][st['task']] = dict() 
    dels('OpenTasks/'+line[2],st['task'])
    lenctask += 1 
-   if lenctask > 0: 
+   if lenctask > 20: 
     with open('/TopStordata/taskperf','a') as f:
      f.write(ctask)
-    
-    nextlead = get('nextlead')[0].split('/')[1]
+    thenextlead =get('nextlead')
+    if 'dhcp' not in str(thenextlead):
+     return
+    nextlead = thenextlead[0].split('/')[1]
     z = [ctask]
     msg={'req': 'taskperf', 'reply':z}
     sendhost(nextlead, str(msg),'recvreply',myhost)
