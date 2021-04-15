@@ -7,6 +7,8 @@ from etcdget import etcdget as get
 import subprocess, socket
 import logmsg
 from logqueueheap import heapthis
+
+
 def do(body):
  myhost=socket.gethostname()
  z=[]
@@ -98,14 +100,14 @@ def do(body):
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if taskperf ###############
  elif r["req"]=='taskperf':  
-  with open('/root/recvtaskperf','w') as f:
-   f.write('received queue from parnter :'+str(r["reply"])+'\n')
-   f.write('type of message :'+str(type(r["reply"]))+'\n')
-  #print('i am here',r["reply"][-1].replace('!','"').replace('@',"'").replace('~','{').replace('$','}'))
-  with open('/TopStordata/taskperf','a') as f:
-   #f.write(r["reply"][-1].replace('!','"').replace('@',"'").replace('~','{').replace('$','}')+'\n')
-   f.write(r["reply"][-1][:-1].replace('ndhcp','\ndhcp')+'\n')
-   print('wirtten archive')
+   with open('/root/recvtaskperf','w') as f:
+    f.write('received queue from parnter :'+str(r["reply"])+'\n')
+    f.write('type of message :'+str(type(r["reply"]))+'\n')
+   #print('i am here',r["reply"][-1].replace('!','"').replace('@',"'").replace('~','{').replace('$','}'))
+   with open('/TopStordata/taskperf','a') as f:
+    #f.write(r["reply"][-1].replace('!','"').replace('@',"'").replace('~','{').replace('$','}')+'\n')
+    f.write(r["reply"][-1][:-1].replace('ndhcp','\ndhcp')+'\n')
+    print('wirtten archive')
 ########## if queue ###############
  elif r["req"]=='queue':  
   with open('/root/recvqueue','w') as f:
