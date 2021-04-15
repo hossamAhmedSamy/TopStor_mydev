@@ -156,6 +156,8 @@ def do(body):
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if syncq ###############
  elif r["req"]=='syncq':  
+  with open('/root/recvsyncq','w') as f:
+   f.write('recieved request to sync:'+str(r["reply"][0]))
   syncnextlead(r["reply"][0])
 ########## if syncthisfile ###############
  elif r["req"]=='syncthisfile':  

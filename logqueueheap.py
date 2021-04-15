@@ -1,5 +1,5 @@
 #!/bin/python3.6
-import sys, subprocess
+import sys, subprocess, os
 from etcdget import etcdget as get
 from etcdput import etcdput as put 
 from etcddel import etcddel as dels 
@@ -63,10 +63,31 @@ def heapthis(line):
     ctask = ''
     lenctask = 0
  return  
- 
+
+def syncnextlead(lastfile):
+ myhost=hostname()
+ filelist = os.listdir('/TopStordata/')
+ filelist = [ x for x in filelist if 'taskperf' in x ]
+ filelist.sort()
+ filetosend = [ x for x in filelist if filelist.index(x) > filelist.index(lastfile) ]
+ thenextlead =get('nextlead')
+ if 'dhcp' not in str(thenextlead):
+  return
+ nextlead = thenextlead[0].split('/')[1]
+ filetosend.append('taskperf')
+ for filethis in filetosend:
+  z=['/TopStordata/'+filethis]
+  with open(z[0],'r') as f:
+   z.append(f.read())
+   #print(z)
+   msg={'req': 'syncthisfile', 'reply':z}
+   sendhost(nextlead, str(msg),'recvreply',myhost)
+ return  
  
 if __name__=='__main__':
  #heapthis(*sys.argv[1:])
+ syncnextlead('taskperf-2021041522')
+ 
  x=['/TopStor/logqueue2.sh', '04/09/2021', '20:34:31', 'dhcp6517', 'selectspare.py', 'start', 'system', '1617989669']
  heapthis(x[1:])
  x=['/TopStor/logqueue2.sh', '04/09/2021', '20:34:32', 'dhcp6517', 'addknown.py', 'running', 'system', '1617989671']
