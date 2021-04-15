@@ -6,7 +6,7 @@ from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 import subprocess, socket
 import logmsg
-from logqueueheap import heapthis
+from logqueueheap import heapthis, syncnextlead
 
 
 def do(body):
@@ -114,6 +114,8 @@ def do(body):
     #f.write(r["reply"][-1].replace('!','"').replace('@',"'").replace('~','{').replace('$','}')+'\n')
     f.write(r["reply"][-1][:-1].replace('ndhcp','\ndhcp')+'\n')
     print('wirtten archive')
+   cmdline=['/sbin/logrotate','logqueue.cfg','-f']
+   subprocess.run(cmdline,stdout=subprocess.PIPE)
 ########## if queue ###############
  elif r["req"]=='queue':  
   with open('/root/recvqueue','w') as f:
@@ -152,6 +154,17 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received SnapshotDelete from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if syncq ###############
+ elif r["req"]=='syncq':  
+  syncnextlead(r["reply"][0])
+########## if syncthisfile ###############
+ elif r["req"]=='syncthisfile':  
+  with open('/root/recv','a') as f:
+   f.write('received received file from parnter :'+str(r["reply"][0])+'\n')
+  print(r["reply"][0])
+  print(r["reply"][1].replace('ndhcp','\ndhcp')+'\n')
+  with open(r["reply"][0],'w') as f:
+   f.write(r["reply"][1].replace('ndhcp','\ndhcp')+'\n')
 ########## if SnapshotCreate ###############
  elif r["req"]=='SnapshotCreate':  
   with open('/root/recv','a') as f:
