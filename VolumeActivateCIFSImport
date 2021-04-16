@@ -41,6 +41,7 @@ then
     ipsubnet=` echo $registry | awk -F'/' '{print $9}'`
     /pace/etcdput.py volumes/CIFS/$myhost/$pool/$name $registry
    echo here put in etcd $pool and $name 
+    cp /$pool/smb.$name /TopStordata/
     /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    fi
   done

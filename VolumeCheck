@@ -14,19 +14,24 @@ ips='0'
 pools=`ls -1 / | grep pdhcp `
 echo "${pools[@]}" | while read pool;
 do
+ echo '############' $pool '##############'
  ips=`cat /$pool/smb.* | grep SUMMARY | awk '{print $NF}' | awk -F'/' '{print $8}'`
  echo "${ips[@]}" | while read ip;
  do
+  echo '############' $ip '##############'
   docker ps | grep $ip  >/dev/null
   if [ $? -ne 0 ];
   then
    ./etcddel.py vol $ip
-   pcs resource delete cifs-$pool-$ip 2>/dev/null
-   pcs resource delete home-$pool-$ip 2>/dev/null
-   /TopStor/VolumeActivateCIFSImport pool=$pool user=system
-   /TopStor/VolumeActivateHomeImport pool=$pool user=system
+   /sbin/pcs resource delete cifs-$pool-$ip 
+   /sbin/pcs resource delete Home-$pool-$ip 
+   echo '############' deleted $ip '##############'
   fi
  done
+  sleep 20
+  echo activatinggggggggggggggggggggggg
+  /TopStor/VolumeActivateCIFSImport pool=$pool user=system
+  /TopStor/VolumeActivateHomeImport pool=$pool user=system
  ips=`cat /$pool/exports.* | grep SUMMARY | awk '{print $NF}' | awk -F'/' '{print $10}'`
  echo "${ips[@]}" | while read ip;
  do

@@ -105,7 +105,7 @@ def zpooltoimport(*args):
  pooltoimport=[]
  for pool in pools:
   #cmdline='/sbin/zpool import -c /TopStordata/'+pool
-  cmdline='/sbin/zpool import '+pool
+  cmdline='/sbin/zpool import '+pool+' -m'
   print('checking pool: ',str(pool))
   try:
    result=subprocess.check_output(cmdline.split(),stderr=subprocess.STDOUT)
