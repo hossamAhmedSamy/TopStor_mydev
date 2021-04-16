@@ -60,6 +60,8 @@ def heapthis(line):
     sendhost(nextlead, str(msg),'recvreply',myhost)
     cmdline=['logrotate','logqueue.cfg']
     subprocess.run(cmdline,stdout=subprocess.PIPE)
+    cmdline=['touch','/TopStordata/taskperf']
+    subprocess.run(cmdline,stdout=subprocess.PIPE)
     ctask = ''
     lenctask = 0
  return  
@@ -82,6 +84,8 @@ def syncnextlead(lastfile):
    #print(z)
    msg={'req': 'syncthisfile', 'reply':z}
    sendhost(nextlead, str(msg),'recvreply',myhost)
+ with open('/root/syncnextleadtmp','w') as f:
+   f.write('sent to '+nextlead+' '+str(filetosend)+'\n')
  return  
  
 if __name__=='__main__':
