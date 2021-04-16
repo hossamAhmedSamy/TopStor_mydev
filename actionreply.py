@@ -162,7 +162,7 @@ def do(body):
 ########## if syncthisfile ###############
  elif r["req"]=='syncthisfile':  
   with open('/root/recvsyncthis','a') as f:
-   f.write('received received file from parnter :'+str(r["reply"][0])+'\n')
+   f.write('receivee here file from parnter :'+str(r["reply"][0])+'\n')
   print(r["reply"][0])
   print(r["reply"][1].replace('ndhcp','\ndhcp')+'\n')
   with open(r["reply"][0],'w') as f:
