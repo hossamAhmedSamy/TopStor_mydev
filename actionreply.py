@@ -7,6 +7,7 @@ from etcdget import etcdget as get
 import subprocess, socket
 import logmsg
 from logqueueheap import heapthis, syncnextlead
+from syncq import syncq 
 
 
 def do(body):
@@ -109,13 +110,13 @@ def do(body):
    with open('/root/recvtaskperf','w') as f:
     f.write('received queue from parnter :'+str(r["reply"])+'\n')
     f.write('type of message :'+str(type(r["reply"]))+'\n')
-   #print('i am here',r["reply"][-1].replace('!','"').replace('@',"'").replace('~','{').replace('$','}'))
    with open('/TopStordata/taskperf','a') as f:
-    #f.write(r["reply"][-1].replace('!','"').replace('@',"'").replace('~','{').replace('$','}')+'\n')
     f.write(r["reply"][-1][:-1].replace('ndhcp','\ndhcp')+'\n')
     print('wirtten archive')
    cmdline=['/sbin/logrotate','logqueue.cfg','-f']
    subprocess.run(cmdline,stdout=subprocess.PIPE)
+   leader = get('primary/address')[0]
+   syncq(leader,myhost)
 ########## if queue ###############
  elif r["req"]=='queue':  
   with open('/root/recvqueue','w') as f:

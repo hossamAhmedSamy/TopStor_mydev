@@ -61,8 +61,6 @@ def heapthis(line):
     subprocess.run(cmdline,stdout=subprocess.PIPE)
     cmdline=['/bin/touch','/TopStordata/taskperf']
     subprocess.run(cmdline,stdout=subprocess.PIPE)
-    cmdline=['touch','/TopStordata/taskperf']
-    subprocess.run(cmdline,stdout=subprocess.PIPE)
     ctask = ''
     lenctask = 0
  return  
