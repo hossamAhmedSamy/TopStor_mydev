@@ -52,13 +52,14 @@ def heapthis(line):
     with open('/TopStordata/taskperf','a') as f:
      f.write(ctask)
     thenextlead =get('nextlead')
-    if 'dhcp' not in str(thenextlead):
-     return
-    nextlead = thenextlead[0].split('/')[1]
-    z = [ctask]
-    msg={'req': 'taskperf', 'reply':z}
-    sendhost(nextlead, str(msg),'recvreply',myhost)
-    cmdline=['logrotate','logqueue.cfg']
+    if 'dhcp' in str(thenextlead):
+     nextlead = thenextlead[0].split('/')[1]
+     z = [ctask]
+     msg={'req': 'taskperf', 'reply':z}
+     sendhost(nextlead, str(msg),'recvreply',myhost)
+    cmdline=['/sbin/logrotate','logqueue.cfg','-fv']
+    subprocess.run(cmdline,stdout=subprocess.PIPE)
+    cmdline=['/bin/touch','/TopStordata/taskperf']
     subprocess.run(cmdline,stdout=subprocess.PIPE)
     ctask = ''
     lenctask = 0
