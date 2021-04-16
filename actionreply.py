@@ -113,8 +113,8 @@ def do(body):
    with open('/TopStordata/taskperf','a') as f:
     f.write(r["reply"][-1][:-1].replace('ndhcp','\ndhcp')+'\n')
     print('wirtten archive')
-   cmdline=['/sbin/logrotate','logqueue.cfg','-f']
-   subprocess.run(cmdline,stdout=subprocess.PIPE)
+   #cmdline=['/sbin/logrotate','logqueue.cfg','-f']
+   #subprocess.run(cmdline,stdout=subprocess.PIPE)
    leader = get('primary/address')[0]
    syncq(leader,myhost)
 ########## if queue ###############
