@@ -65,17 +65,18 @@ def heapthis(line):
     lenctask = 0
  return  
 
-def syncnextlead(lastfile):
+def syncnextlead(lastfile,archive):
+ thenextlead =get('nextlead')
+ if 'dhcp' not in str(thenextlead):
+  return
  myhost=hostname()
  filelist = os.listdir('/TopStordata/')
  filelist = [ x for x in filelist if 'taskperf' in x ]
  filelist.sort()
  filetosend = [ x for x in filelist if filelist.index(x) > filelist.index(lastfile) ]
- thenextlead =get('nextlead')
- if 'dhcp' not in str(thenextlead):
-  return
  nextlead = thenextlead[0].split('/')[1]
- filetosend.append('taskperf')
+ if archive:
+  filetosend.append('taskperf')
  for filethis in filetosend:
   z=['/TopStordata/'+filethis]
   with open(z[0],'r') as f:
