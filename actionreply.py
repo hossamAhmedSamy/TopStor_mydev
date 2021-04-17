@@ -9,9 +9,10 @@ import logmsg
 from logqueueheap import heapthis, syncnextlead
 from syncq import syncq 
 
+archive = 1 
 
 def do(body):
- archive = 1 
+ global archive
  myhost=socket.gethostname()
  z=[]
  with open('/root/recv','w') as f:
