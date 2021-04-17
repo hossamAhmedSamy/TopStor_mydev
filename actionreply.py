@@ -11,7 +11,7 @@ from syncq import syncq
 
 
 def do(body):
- initsync = 1 
+ archive = 1 
  myhost=socket.gethostname()
  z=[]
  with open('/root/recv','w') as f:
@@ -117,11 +117,9 @@ def do(body):
    #cmdline=['/sbin/logrotate','logqueue.cfg','-f']
    #subprocess.run(cmdline,stdout=subprocess.PIPE)
    leader = get('primary/address')[0]
-   if initsync:
-    syncq(leader,myhost,'0')
-    initsync = 0
-   else:
-    syncq(leader,myhost,'1')
+   syncq(leader,myhost,archive)
+   if archive:
+    archive = 0
 ########## if queue ###############
  elif r["req"]=='queue':  
   with open('/root/recvqueue','w') as f:
