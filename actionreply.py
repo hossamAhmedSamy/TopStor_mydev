@@ -11,6 +11,7 @@ from syncq import syncq
 
 
 def do(body):
+ initsync = 1 
  myhost=socket.gethostname()
  z=[]
  with open('/root/recv','w') as f:
@@ -116,7 +117,11 @@ def do(body):
    #cmdline=['/sbin/logrotate','logqueue.cfg','-f']
    #subprocess.run(cmdline,stdout=subprocess.PIPE)
    leader = get('primary/address')[0]
-   syncq(leader,myhost)
+   if initsync:
+    syncq(leader,myhost,'0')
+    initsync = 0
+   else:
+    syncq(leader,myhost,'1')
 ########## if queue ###############
  elif r["req"]=='queue':  
   with open('/root/recvqueue','w') as f:
@@ -158,8 +163,8 @@ def do(body):
 ########## if syncq ###############
  elif r["req"]=='syncq':  
   with open('/root/recvsyncq','w') as f:
-   f.write('recieved request to sync:'+str(r["reply"][0]))
-  syncnextlead(r["reply"][0])
+   f.write('recieved request to sync:'+str(r["reply"]))
+  syncnextlead(r["reply"])
 ########## if syncthisfile ###############
  elif r["req"]=='syncthisfile':  
   with open('/root/recvsyncthis','a') as f:
