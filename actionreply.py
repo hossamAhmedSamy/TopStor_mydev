@@ -162,7 +162,7 @@ def do(body):
  elif r["req"]=='syncq':  
   with open('/root/recvsyncq','w') as f:
    f.write('recieved request to sync:'+str(r["reply"]))
-  syncnextlead(r["reply"])
+  syncnextlead(r["reply"][0],r["reply"][1])
 ########## if syncthisfile ###############
  elif r["req"]=='syncthisfile':  
   with open('/root/recvsyncthis','a') as f:

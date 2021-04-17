@@ -75,7 +75,7 @@ def syncnextlead(lastfile,archive):
  filelist.sort()
  filetosend = [ x for x in filelist if filelist.index(x) > filelist.index(lastfile) ]
  nextlead = thenextlead[0].split('/')[1]
- if archive:
+ if int(archive):
   filetosend.append('taskperf')
  for filethis in filetosend:
   z=['/TopStordata/'+filethis]
@@ -90,7 +90,7 @@ def syncnextlead(lastfile,archive):
  
 if __name__=='__main__':
  #heapthis(*sys.argv[1:])
- syncnextlead('taskperf-2021041522')
+ syncnextlead('taskperf-2021041522',1)
  
  x=['/TopStor/logqueue2.sh', '04/09/2021', '20:34:31', 'dhcp6517', 'selectspare.py', 'start', 'system', '1617989669']
  heapthis(x[1:])
