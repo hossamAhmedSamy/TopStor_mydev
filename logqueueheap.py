@@ -75,7 +75,7 @@ def syncnextlead(lastfile,archive):
  filelist.sort()
  filetosend = [ x for x in filelist if filelist.index(x) > filelist.index(lastfile) ]
  nextlead = thenextlead[0].split('/')[1]
- if int(archive):
+ if int(archive) or len(filetosend):
   filetosend.append('taskperf')
  for filethis in filetosend:
   z=['/TopStordata/'+filethis]
