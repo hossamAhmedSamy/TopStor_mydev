@@ -85,7 +85,7 @@ def syncnextlead(lastfile,archive):
    msg={'req': 'syncthisfile', 'reply':z}
    sendhost(nextlead, str(msg),'recvreply',myhost)
  with open('/root/syncnextleadtmp','w') as f:
-   f.write('sent to '+nextlead+' '+str(filetosend)+'\n')
+   f.write('sent to '+nextlead+' '+str(filetosend)+' archive '+str(archive)+'\n')
  return  
  
 if __name__=='__main__':
