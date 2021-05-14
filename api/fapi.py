@@ -13,6 +13,16 @@ def dict_factory(cursor, row):
         d[col[0]] = row[idx]
     return d
 
+def getgroups():
+ groupslst = etcdgetjson('usersigroup','--prefix') 
+ allgroups = []
+ gid = 0
+ for group in groupslst:
+  grpusers = group['prop'].split('/')[2]
+  groupname = group['name'].replace('usersigroup/','')
+  allgroups.append([groupname,str(gid), grpusers]) 
+  gid += 1
+ return allgroups
 
 @app.route('/', methods=['GET'])
 def home():
@@ -21,12 +31,40 @@ def home():
 
 @app.route('/api/v1/users/userlist', methods=['GET'])
 def api_users_userslist():
- return jsonify(etcdgetjson('usersinfo','--prefix'))
+ userlst = etcdgetjson('usersinfo','--prefix')
+ allgroups = getgroups()
+ userdict = dict()
+ allusers = []
+ for group in allgroups:
+  groupid = group[1]
+  grpusers = group[2].split(',')
+  for grpuser in grpusers:
+   if grpuser not in userdict:
+    userdict[grpuser] = []
+   userdict[grpuser].append(str(groupid))
+ users = []
+ for user in userlst:
+  username = user['name'].replace('usersinfo/','')
+  usersize = user['prop'].split('/')[3]
+  userpool = user['prop'].split('/')[1]
+  if username not in userdict:
+   groups = ['NoGroup']
+  else:
+   groups = userdict[username]
+  allusers.append({"name":username, "pool":userpool, "size":usersize, "groups":groups})
+ alldict = dict()
+ alldict['allusers']=allusers
+ alldict['allgroups']=allgroups
+ return jsonify(alldict)
 
 
 @app.route('/api/v1/users/grouplist', methods=['GET'])
 def api_users_grouplist():
- return jsonify(etcdgetjson('usersigroup','--prefix'))
+ allgroups = getgroups()
+ grp = []
+ for group in allgroups:
+  grp.append({'id':group[1],'text':group[0]})
+ return jsonify({'results':grp})
 
 @app.route('/api/v1/resources/books/all', methods=['GET'])
 def api_all():
