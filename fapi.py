@@ -3,10 +3,15 @@ import flask
 from flask import request, jsonify
 import sqlite3
 from etcdget2 import etcdgetjson
+from etcdget import etcdget  as get
+from sendhost import sendhost
+from socket import gethostname as hostname
 
+allgroups = []
+allusers = []
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
-
+myhost = hostname()
 def dict_factory(cursor, row):
     d = {}
     for idx, col in enumerate(cursor.description):
@@ -15,22 +20,65 @@ def dict_factory(cursor, row):
 
 def getgroups():
  groupslst = etcdgetjson('usersigroup','--prefix') 
- allgroups = []
  gid = 0
+ groups = []
  for group in groupslst:
   grpusers = group['prop'].split('/')[2]
   groupname = group['name'].replace('usersigroup/','')
-  allgroups.append([groupname,str(gid), grpusers]) 
+  groups.append([groupname,str(gid), grpusers]) 
   gid += 1
- return allgroups
+ return groups
 
 @app.route('/', methods=['GET'])
 def home():
     return '''<h1>Distant Reading Archive</h1>
 <p>A prototype API for distant reading of science fiction novels.</p>'''
 
+def getpools():
+ pools = get('pools/','--prefix')
+ poolinfo = []
+ pid = 0
+ for pool in pools:
+  poolinfo.append({'id':pid, 'text':pool[0].split('/')[1]})
+  pid += 1
+ return poolinfo
+getpools()
+ 
+@app.route('/api/v1/pools/poolsinfo', methods=['GET','POST'])
+def poolsinfo():
+ pools = getpools()
+ pools.append({'id':len(pools), 'text':'-------'})
+ return jsonify({'results':pools})
+
+
+
+@app.route('/api/v1/users/UnixAddUser', methods=['GET','POST'])
+def UnixAddUser():
+ global allgroups
+ data = request.args.to_dict()
+ grps = data.get('groups')
+ groupstr = ''
+ allgroups = getgroups()
+ if len(grps) < 1:
+  groupstr = 'NoGroup'
+ else:
+  for grp in grps.split(','):
+   groupstr += allgroups[int(grp)][0]+','
+  groupstr = groupstr[:-1]
+ cmndstring = '/TopStor/pump.sh UnixAddUser '+data.get('name')+' '+data.get('Volpool')+' groups'+groupstr+' ' \
+     +data.get('Password')+' '+data.get('Volsize')+'G '+data.get('HomeAddress')+' '+data.get('HomeSubnet')+' admin'
+ z= cmndstring.split(' ')
+ msg={'req': 'Pumpthis', 'reply':z}
+ ownerip=get('leader','--prefix')
+ print(msg,myhost)
+ sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
+ return data 
+
+
+
 @app.route('/api/v1/users/userlist', methods=['GET'])
 def api_users_userslist():
+ global allgroups
  userlst = etcdgetjson('usersinfo','--prefix')
  allgroups = getgroups()
  userdict = dict()
@@ -60,6 +108,7 @@ def api_users_userslist():
 
 @app.route('/api/v1/users/grouplist', methods=['GET'])
 def api_users_grouplist():
+ global allgroups
  allgroups = getgroups()
  grp = []
  for group in allgroups:
