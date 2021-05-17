@@ -13,7 +13,11 @@ app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 logcatalog = ''
 with open('/var/www/html/des20/msgsglobal.txt') as f:
- logcatalog = f.read()
+ logcatalog = f.read().split('\n')
+logdict = dict()
+for log in logcatalog:
+ msgcode= log.split(':')[0]
+ logdict[msgcode] = log.replace(msgcode+':','').split(' ')
 myhost = hostname()
 
 def postchange(cmndstring):
@@ -28,6 +32,16 @@ def dict_factory(cursor, row):
     for idx, col in enumerate(cursor.description):
         d[col[0]] = row[idx]
     return d
+
+def getusers():
+ userlst = etcdgetjson('usersinfo','--prefix') 
+ uid = 0
+ users = []
+ for user in userlst:
+  username = user['name'].replace('usersinfo/','')
+  users.append([username,str(uid)]) 
+  uid += 1
+ return users
 
 def getgroups():
  groupslst = etcdgetjson('usersigroup','--prefix') 
@@ -81,8 +95,18 @@ def userchange():
 
 @app.route('/api/v1/info/notification', methods=['GET','POST'])
 def getnotification():
- notif = get('notification')
- print(type(notif))
+ notifbody = get('notification')[0].split(' ')[1:]
+ msg = logdict[notifbody[3]]
+ msgbody = '.'
+ notifc = 6
+ for word in msg[4:]:
+  if word == ':':
+   msgbody = msgbody[:-1]+' '+notifbody[notifc]+'.'
+   notifc += 1
+  elif len(word) > 0:
+   msgbody = msgbody[:-1]+' '+word+'.' 
+ notif = { 'importance':msg[0].replace(':',''), 'msgcode': notifbody[3], 'date':notifbody[0], 'time':notifbody[1],
+	 'host':notifbody[2], 'type':notifbody[4], 'user': notifbody[5], 'msgbody': msgbody[1:]} 
  return jsonify(notif)
 
 
@@ -115,6 +139,35 @@ def UnixAddUser():
      +data.get('Password')+' '+data.get('Volsize')+'G '+data.get('HomeAddress')+' '+data.get('HomeSubnet')+' admin'
  postchange(cmndstring)
  return data 
+
+@app.route('/api/v1/groups/grouplist', methods=['GET'])
+def api_groups_groupslist():
+ global allusers
+ grouplst = etcdgetjson('usersig','--prefix')
+ userlist = getgroups()
+ userdict = dict()
+ allusers = []
+ for group in allgroups:
+  groupid = group[1]
+  grpusers = group[2].split(',')
+  for grpuser in grpusers:
+   if grpuser not in userdict:
+    userdict[grpuser] = []
+   userdict[grpuser].append(str(groupid))
+ users = []
+ for user in userlst:
+  username = user['name'].replace('usersinfo/','')
+  usersize = user['prop'].split('/')[3]
+  userpool = user['prop'].split('/')[1]
+  if username not in userdict:
+   groups = ['NoGroup']
+  else:
+   groups = userdict[username]
+  allusers.append({"name":username, "pool":userpool, "size":usersize, "groups":groups})
+ alldict = dict()
+ alldict['allusers']=allusers
+ alldict['allgroups']=allgroups
+ return jsonify(alldict)
 
 
 

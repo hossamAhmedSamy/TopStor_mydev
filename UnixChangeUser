@@ -15,14 +15,20 @@ myhost=`hostname -s`
 stablegrp=""
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
-if [[ $contrun == 'true' ]]
+if [[ $contrun == 'true' ]];
 then
  /TopStor/logmsg.py Unst1024 info $userreq $username
 # cgrps=`id -Gn $username | sed "s/$username//g"` 
  echo $username | grep NoUser
  if [ $? -ne 0 ];
  then
-  usermod -G $usergroups $username
+  if [[ $usergroups == 'NoGroup' ]];
+  then
+   usermod -G '' $username
+  else
+   usermod -G '' $username
+   usermod -G $usergroups $username
+  fi
   usermod -a -G Everyone $username
   cgrps=`/pace/etcdget.py usersigroup $username`
   cgrpsl=${#cgrps}
@@ -39,7 +45,7 @@ then
     cusers=`echo $usersall | awk -F'/' '{print $3}'`
     cusersleft=`echo $usersall | cut -d/ -f1-2`
     cusersright=`echo $usersall | cut -d/ -f4-`
-    newusers=`echo ${cusers} | sed "s/,$username//g" | sed "s/$username,//g"`
+    newusers=`echo ${cusers} | sed "s/,$username//g" | sed "s/$username,//g" | sed "s/$username//g" `
     resusers=${#newusers}
     if [ $resusers -le 2 ];
     then
@@ -67,28 +73,32 @@ then
    echo usrgroups=$usergroups
    echo grpsl=$grpsl
    echo stablegrp=$stablegrp
-   echo $stablegrp | grep -w $l >/dev/null
+   echo $l | grep -w NoGroup 
    if [ $? -ne 0 ];
    then
-    usersall=`/pace/etcdget.py usersigroup/$l`
-    cusers=`echo $usersall | awk -F'/' '{print $3}'`
-    cusersleft=`echo $usersall | cut -d/ -f1-2`
-    cusersright=`echo $usersall | cut -d/ -f4-`
-    echo $cusers | grep -w NoUser
+    echo $stablegrp | grep -w $l >/dev/null
     if [ $? -ne 0 ];
     then
-     newusers=${cusers}','$username
-     newop=$cusersleft'/'$newusers'/'$cusersright
-     groupres=`echo ${newop}`
-     echo appending $l to be $groupres
-     /pace/etcdput.py usersigroup/$l $groupres 
-    else 
-     echo I am here: $username
-     newusers=$username
-     newop=$cusersleft'/'$newusers'/'$cusersright
-     groupres=`echo ${newop}`
-     echo adding $l to be $groupres
-     /pace/etcdput.py usersigroup/$l $groupres 
+     usersall=`/pace/etcdget.py usersigroup/$l`
+     cusers=`echo $usersall | awk -F'/' '{print $3}'`
+     cusersleft=`echo $usersall | cut -d/ -f1-2`
+     cusersright=`echo $usersall | cut -d/ -f4-`
+     echo $cusers | grep -w NoUser
+     if [ $? -ne 0 ];
+     then
+      newusers=${cusers}','$username
+      newop=$cusersleft'/'$newusers'/'$cusersright
+      groupres=`echo ${newop}`
+      echo appending $l to be $groupres
+      /pace/etcdput.py usersigroup/$l $groupres 
+     else 
+      echo I am here: $username
+      newusers=$username
+      newop=$cusersleft'/'$newusers'/'$cusersright
+      groupres=`echo ${newop}`
+      echo adding $l to be $groupres
+      /pace/etcdput.py usersigroup/$l $groupres 
+     fi
     fi
    fi
   done

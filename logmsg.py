@@ -21,7 +21,7 @@ def sendlog(*args):
  for k in knowninfo:
   knowns.append(k[1])
  msg={'req': 'msg2', 'reply':z}
- put('notification',str(z))
+ put('notification',' '.join(z))
  sendhost(leaderip, str(msg),'recvreply',myhost)
  for k in knowninfo:
   sendhost(k[1], str(msg),'recvreply',myhost)
