@@ -6,12 +6,20 @@ from etcdget2 import etcdgetjson
 from etcdget import etcdget  as get
 from sendhost import sendhost
 from socket import gethostname as hostname
-
+allpools = 0
 allgroups = []
 allusers = []
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 myhost = hostname()
+
+def postchange(cmndstring):
+ z= cmndstring.split(' ')
+ msg={'req': 'Pumpthis', 'reply':z}
+ ownerip=get('leader','--prefix')
+ print(msg,myhost)
+ sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
+
 def dict_factory(cursor, row):
     d = {}
     for idx, col in enumerate(cursor.description):
@@ -42,20 +50,30 @@ def getpools():
   poolinfo.append({'id':pid, 'text':pool[0].split('/')[1]})
   pid += 1
  return poolinfo
-getpools()
  
-@app.route('/api/v1/pools/poolsinfo', methods=['GET','POST'])
+@app.route('/api/v1/pools/poolsinfo', methods=['GET','xDelUserPOST'])
 def poolsinfo():
- pools = getpools()
- pools.append({'id':len(pools), 'text':'-------'})
- return jsonify({'results':pools})
+ global allpools
+ allpools = getpools()
+ allpools.append({'id':len(allpools), 'text':'-------'})
+ return jsonify({'results':allpools})
 
 
+@app.route('/api/v1/users/userdel', methods=['GET','POST'])
+def userdel():
+ data = request.args.to_dict()
+ print('data',data)
+ cmndstring = '/TopStor/pump.sh UnixDelUser '+data.get('name')+' admin'
+ postchange(cmndstring)
+ return data
 
 @app.route('/api/v1/users/UnixAddUser', methods=['GET','POST'])
 def UnixAddUser():
  global allgroups
  data = request.args.to_dict()
+ pool = allpools[int(data.get('Volpool'))]['text']
+ if '--' in pool:
+  pool = 'NoHome'
  grps = data.get('groups')
  groupstr = ''
  allgroups = getgroups()
@@ -65,13 +83,9 @@ def UnixAddUser():
   for grp in grps.split(','):
    groupstr += allgroups[int(grp)][0]+','
   groupstr = groupstr[:-1]
- cmndstring = '/TopStor/pump.sh UnixAddUser '+data.get('name')+' '+data.get('Volpool')+' groups'+groupstr+' ' \
+ cmndstring = '/TopStor/pump.sh UnixAddUser '+data.get('name')+' '+pool+' groups'+groupstr+' ' \
      +data.get('Password')+' '+data.get('Volsize')+'G '+data.get('HomeAddress')+' '+data.get('HomeSubnet')+' admin'
- z= cmndstring.split(' ')
- msg={'req': 'Pumpthis', 'reply':z}
- ownerip=get('leader','--prefix')
- print(msg,myhost)
- sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
+ postchange(cmndstring)
  return data 
 
 
