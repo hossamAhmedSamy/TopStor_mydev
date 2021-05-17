@@ -11,6 +11,9 @@ allgroups = []
 allusers = []
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
+logcatalog = ''
+with open('/var/www/html/des20/msgsglobal.txt') as f:
+ logcatalog = f.read()
 myhost = hostname()
 
 def postchange(cmndstring):
@@ -57,6 +60,31 @@ def poolsinfo():
  allpools = getpools()
  allpools.append({'id':len(allpools), 'text':'-------'})
  return jsonify({'results':allpools})
+
+@app.route('/api/v1/users/userchange', methods=['GET','POST'])
+def userchange():
+ data = request.args.to_dict()
+ print('data',data)
+ grps = data.get('groups')
+ groupstr = ''
+ allgroups = getgroups()
+ if len(grps) < 1:
+  groupstr = 'NoGroup'
+ else:
+  for grp in grps.split(','):
+   groupstr += allgroups[int(grp)][0]+','
+  groupstr = groupstr[:-1]
+ cmndstring = '/TopStor/pump.sh UnixChangeUser '+data.get('name')+' groups'+groupstr+' admin'
+ postchange(cmndstring)
+ return data
+
+
+@app.route('/api/v1/info/notification', methods=['GET','POST'])
+def getnotification():
+ notif = get('notification')
+ print(type(notif))
+ return jsonify(notif)
+
 
 
 @app.route('/api/v1/users/userdel', methods=['GET','POST'])
