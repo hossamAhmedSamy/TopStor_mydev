@@ -127,6 +127,6 @@ then
    /pace/etcdput.py usersigroup/$usergroups  $groupres 
  fi
  /TopStor/broadcast.py UserChange /TopStor/pump.sh UnixChangeUser_sync -d$myhost $@ 
- /TopStor/logmsg.py Unlin1022 info $userreq $username
+ /TopStor/logmsg.py Unsu1024 info $userreq $username
 fi 
 /TopStor/logqueue.py `basename "$0"` stop $userreq 

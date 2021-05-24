@@ -1,6 +1,7 @@
 #!/bin/python3.6
 import flask
 from flask import request, jsonify
+import Hostsconfig
 import sqlite3
 from etcdget2 import etcdgetjson
 from etcdget import etcdget  as get
@@ -68,12 +69,36 @@ def getpools():
   pid += 1
  return poolinfo
  
-@app.route('/api/v1/pools/poolsinfo', methods=['GET','xDelUserPOST'])
+@app.route('/api/v1/hosts/info', methods=['GET','POST'])
+def hostsinfo():
+ allhosts = Hostsconfig.getall()
+ return jsonify(allhosts)
+
+
+@app.route('/api/v1/pools/poolsinfo', methods=['GET','POST'])
 def poolsinfo():
  global allpools
  allpools = getpools()
  allpools.append({'id':len(allpools), 'text':'-------'})
  return jsonify({'results':allpools})
+
+@app.route('/api/v1/groups/groupchange', methods=['GET','POST'])
+def groupchange():
+ data = request.args.to_dict()
+ usrs = data.get('users')
+ usrstr = ''
+ if len(usrs) < 1:
+  usrstr = 'NoUser'
+ else:
+  for usr in usrs.split(','):
+   for suser in allusers:
+    if str(suser['id']) == str(usr):
+     usrstr += suser['name']+',' 
+  usrstr = usrstr[:-1]
+ cmndstring = '/TopStor/pump.sh UnixChangeGroup '+data.get('name')+' users'+usrstr+' admin'
+ postchange(cmndstring)
+ return data
+
 
 @app.route('/api/v1/users/userchange', methods=['GET','POST'])
 def userchange():
@@ -109,7 +134,20 @@ def getnotification():
 	 'host':notifbody[2], 'type':notifbody[4], 'user': notifbody[5], 'msgbody': msgbody[1:]} 
  return jsonify(notif)
 
+@app.route('/api/v1/host/config', methods=['GET','POST'])
+def hostconifg():
+ data = request.args.to_dict()
+ print('data',data)
+ #cmndstring = '/TopStor/pump.sh UnixDelGroup '+data.get('name')+' admin'
+ #postchange(cmndstring)
+ return data
 
+@app.route('/api/v1/groups/groupdel', methods=['GET','POST'])
+def groupdel():
+ data = request.args.to_dict()
+ cmndstring = '/TopStor/pump.sh UnixDelGroup '+data.get('name')+' admin'
+ postchange(cmndstring)
+ return data
 
 @app.route('/api/v1/users/userdel', methods=['GET','POST'])
 def userdel():
@@ -118,6 +156,25 @@ def userdel():
  cmndstring = '/TopStor/pump.sh UnixDelUser '+data.get('name')+' admin'
  postchange(cmndstring)
  return data
+
+@app.route('/api/v1/groups/UnixAddgroup', methods=['GET','POST'])
+def UnixAddGroup():
+ global allusers, allgroups
+ data = request.args.to_dict()
+ usrstr = ''
+ usrs = data.get('users')
+ if len(usrs) < 1:
+  usrstr = 'NoUser'
+ else:
+  for usr in usrs.split(','):
+   for suser in allusers:
+    if str(suser['id']) == str(usr):
+     usrstr += suser['name']+',' 
+  usrstr = usrstr[:-1]
+ cmndstring = '/TopStor/pump.sh UnixAddGroup '+data.get('name')+' '+' users'+usrstr+'  admin'
+ postchange(cmndstring)
+ return data
+ 
 
 @app.route('/api/v1/users/UnixAddUser', methods=['GET','POST'])
 def UnixAddUser():
@@ -140,40 +197,28 @@ def UnixAddUser():
  postchange(cmndstring)
  return data 
 
+
+
+
+
 @app.route('/api/v1/groups/grouplist', methods=['GET'])
 def api_groups_groupslist():
- global allusers
- grouplst = etcdgetjson('usersig','--prefix')
- userlist = getgroups()
- userdict = dict()
- allusers = []
+ global allgroups, allusers
+ thegroup = [] 
+ api_users_userslist()
  for group in allgroups:
-  groupid = group[1]
-  grpusers = group[2].split(',')
-  for grpuser in grpusers:
-   if grpuser not in userdict:
-    userdict[grpuser] = []
-   userdict[grpuser].append(str(groupid))
- users = []
- for user in userlst:
-  username = user['name'].replace('usersinfo/','')
-  usersize = user['prop'].split('/')[3]
-  userpool = user['prop'].split('/')[1]
-  if username not in userdict:
-   groups = ['NoGroup']
-  else:
-   groups = userdict[username]
-  allusers.append({"name":username, "pool":userpool, "size":usersize, "groups":groups})
- alldict = dict()
- alldict['allusers']=allusers
- alldict['allgroups']=allgroups
- return jsonify(alldict)
-
-
+  groupusers = []
+  for user in allusers:
+   if user['name'] in str(group[2]):
+    groupusers.append(user['id'])
+  if len(groupusers) < 1:
+   groupusers=["NoUser"]
+  thegroup.append({'name':group[0], 'id':group[1], 'users':groupusers})
+ return jsonify({'allgroups':thegroup})
 
 @app.route('/api/v1/users/userlist', methods=['GET'])
 def api_users_userslist():
- global allgroups
+ global allgroups, allusers
  userlst = etcdgetjson('usersinfo','--prefix')
  allgroups = getgroups()
  userdict = dict()
@@ -186,6 +231,7 @@ def api_users_userslist():
     userdict[grpuser] = []
    userdict[grpuser].append(str(groupid))
  users = []
+ uid = 0
  for user in userlst:
   username = user['name'].replace('usersinfo/','')
   usersize = user['prop'].split('/')[3]
@@ -194,11 +240,21 @@ def api_users_userslist():
    groups = ['NoGroup']
   else:
    groups = userdict[username]
-  allusers.append({"name":username, "pool":userpool, "size":usersize, "groups":groups})
+  allusers.append({"name":username, 'id':uid, "pool":userpool, "size":usersize, "groups":groups})
+  uid += 1
  alldict = dict()
  alldict['allusers']=allusers
  alldict['allgroups']=allgroups
  return jsonify(alldict)
+
+@app.route('/api/v1/groups/userlist', methods=['GET'])
+def api_groups_userlist():
+ global allusers
+ usr = []
+ api_users_userslist()
+ for user in allusers:
+  usr.append({'id':user['id'],'text':user['name']})
+ return jsonify({'results':usr})
 
 
 @app.route('/api/v1/users/grouplist', methods=['GET'])

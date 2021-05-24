@@ -14,6 +14,9 @@ hostn=`/TopStor/etcdget.py alias/$hostname`
 hostip=`pcs resource show CC | grep Attributes | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 hostsubnet=`pcs resource show CC | grep Attributes | awk -F'netmask=' '{print $2}' | awk '{print $1}'`
 leader=`./etcdget.py leader --prefix`
+gw= `ip route | grep default | awk '{print $3}'`
+dns= ` tail -n 1 /etc/resolv.conf | awk '{$1="";print}'`
+
 echo $leader | grep $hostname
 if [ $? -eq 0 ];
 then
