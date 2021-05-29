@@ -12,6 +12,10 @@ os.environ['ETCDCTL_API'] = '3'
 allpools = 0
 allgroups = []
 allusers = []
+readyhosts = []
+activehosts = []
+losthosts = []
+possiblehosts = []
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 logcatalog = ''
@@ -74,8 +78,62 @@ def getpools():
  
 @app.route('/api/v1/hosts/info', methods=['GET','POST'])
 def hostsinfo():
+ global allhosts, readyhosts, activehosts, losthosts, possiblehosts
  allhosts = Hostsconfig.getall()
  return jsonify(allhosts)
+
+@app.route('/api/v1/hosts/ready', methods=['GET','POST'])
+def hostsready():
+ global allhosts, readyhosts, activehosts, losthosts, possiblehosts
+ hosts = get('ready','--prefix')
+ readyhosts = []
+ hid = 0
+ for host in hosts:
+  name = host[0].replace('ready/','')
+  ip = host[1]
+  readyhosts.append({'name':name, 'ip': ip, 'id': hid}) 
+  hid +=1
+ return jsonify(readyhosts)
+
+@app.route('/api/v1/hosts/active', methods=['GET','POST'])
+def hostsactive():
+ global allhosts, readyhosts, activehosts, losthosts, possiblehosts
+ hosts = get('ActivePartners','--prefix')
+ activehosts = []
+ hid = 0
+ for host in hosts:
+  name = host[0].replace('ActivePartners/','')
+  ip = host[1]
+  activehosts.append({'name':name, 'ip': ip, 'id': hid}) 
+  hid +=1
+ return jsonify(activehosts)
+
+@app.route('/api/v1/hosts/possible', methods=['GET','POST'])
+def hostspossible():
+ global allhosts, readyhosts, activehosts, losthosts, possiblehosts
+ hosts = get('possible','--prefix')
+ possiblehosts = []
+ hid = 0
+ for host in hosts:
+  name = host[0].replace('possible','')
+  ip = host[1]
+  possiblehosts.append({'name':name, 'ip': ip, 'id': hid}) 
+  hid +=1
+ return jsonify(possiblehosts)
+
+@app.route('/api/v1/hosts/lost', methods=['GET','POST'])
+def hostslost():
+ global allhosts, readyhosts, activehosts, losthosts, possiblehosts
+ hostsready()
+ hostsactive()
+ losthosts = []
+ hid = 0
+ for active in activehosts:
+  if active['name'] not in str(readyhosts): 
+   losthosts.append({'id': hid, 'name': active['name'], 'ip': active['ip']})
+   hid += 1
+ return jsonify(losthosts)
+
 
 
 @app.route('/api/v1/pools/poolsinfo', methods=['GET','POST'])
@@ -140,9 +198,6 @@ def getnotification():
 @app.route('/api/v1/host/config', methods=['GET','POST'])
 def hostconifg():
  data = request.args.to_dict()
- print('#####################')
- print('configdata',data)
- print('#####################')
  datastr = ''
  for ele in data:
   datastr += ele+'='+data[ele]+' '
