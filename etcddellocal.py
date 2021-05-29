@@ -1,8 +1,10 @@
 #!/bin/python3.6
-import subprocess,sys
+import subprocess,sys, os
 import json
 
 def etcddel(*argv):
+
+ os.environ['ETCDCTL_API']= '3'
  if argv[-1]=='--prefix':
   pointer=-1
  else:

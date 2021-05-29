@@ -14,7 +14,10 @@ logging='/var/www/html/des20/Data/currentinfo2.log';
 runningpools='/pacedata/pools/runningpools';
 glog='/var/www/html/des20/Data/TopStor.log';
 txtres='/TopStordata/'`basename $0`'.txt'
-tz=`ETCDCTL_API=3 ./etcdget.py tz/$hostname | awk -F'%' '{print $1}' `
+fulltz=`./etcdget.py tz/$hostname` 
+#echo 'actualfull',$fulltz
+#fulltz='Kirit%(GMT-10!00)_Hawaii'
+tz=`echo $fulltz | awk -F'%' '{print $1}' `
 tzone=`timedatectl list-timezones | grep $tz` 
 timedatectl set-timezone $tzone
 ctz=`timedatectl | grep zone | awk -F'zone:' '{print $2}' | awk '{print $1}'`
@@ -23,9 +26,12 @@ echo $tzone | grep $ctz
 if [ $? -ne 0 ];
 then 
  echo init
- tzone='Africa/Cairo'
+ fulltz='Kuw%(GMT+03!00)_Moscow^_St._Petersburg^_Volgograd'
+ tz=`echo $fulltz | awk -F'%' '{print $1}' `
+ tzone=`timedatectl list-timezones | grep $tz` 
+ echo $tz, $tzone
  timedatectl set-timezone $tzone
- ./etcdput.py tz/$hostname $tzone 
+ ./etcdput.py tz/$hostname $fulltz 
  
 fi
 echo $perfmon | grep 1

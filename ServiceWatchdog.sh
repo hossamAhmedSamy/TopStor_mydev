@@ -30,6 +30,7 @@ then
  systemctl start topstorremoteack
 fi
 sleep 2
+/usr/bin/chronyc -a makestep
 done
 
 echo it is dead >/TopStor/txt/statusremote.txt

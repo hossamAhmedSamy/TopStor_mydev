@@ -1,5 +1,5 @@
 #!/bin/python3.6
-import flask
+import flask, os
 from flask import request, jsonify
 import Hostsconfig
 import sqlite3
@@ -7,6 +7,8 @@ from etcdget2 import etcdgetjson
 from etcdget import etcdget  as get
 from sendhost import sendhost
 from socket import gethostname as hostname
+
+os.environ['ETCDCTL_API'] = '3'
 allpools = 0
 allgroups = []
 allusers = []
@@ -21,11 +23,10 @@ for log in logcatalog:
  logdict[msgcode] = log.replace(msgcode+':','').split(' ')
 myhost = hostname()
 
-def postchange(cmndstring):
+def postchange(cmndstring,host='leader'):
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
- ownerip=get('leader','--prefix')
- print(msg,myhost)
+ ownerip=get(host,'--prefix')
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
 
 def dict_factory(cursor, row):
@@ -51,6 +52,8 @@ def getgroups():
  for group in groupslst:
   grpusers = group['prop'].split('/')[2]
   groupname = group['name'].replace('usersigroup/','')
+  if groupname == 'Everyone':
+   continue
   groups.append([groupname,str(gid), grpusers]) 
   gid += 1
  return groups
@@ -137,9 +140,15 @@ def getnotification():
 @app.route('/api/v1/host/config', methods=['GET','POST'])
 def hostconifg():
  data = request.args.to_dict()
- print('data',data)
- #cmndstring = '/TopStor/pump.sh UnixDelGroup '+data.get('name')+' admin'
- #postchange(cmndstring)
+ print('#####################')
+ print('configdata',data)
+ print('#####################')
+ datastr = ''
+ for ele in data:
+  datastr += ele+'='+data[ele]+' '
+ datastr = datastr[:-1]
+ cmndstring = '/TopStor/pump.sh Hostconfig.py '+datastr+' user=admin'
+ postchange(cmndstring,'ready/'+data['name'])
  return data
 
 @app.route('/api/v1/groups/groupdel', methods=['GET','POST'])
@@ -207,6 +216,9 @@ def api_groups_groupslist():
  thegroup = [] 
  api_users_userslist()
  for group in allgroups:
+  if group[0] == 'Everyone':
+   continue
+
   groupusers = []
   for user in allusers:
    if user['name'] in str(group[2]):

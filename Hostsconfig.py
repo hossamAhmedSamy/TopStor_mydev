@@ -21,12 +21,14 @@ def getall(*bargs):
    ntp = getlocal(hostip,'ntp/'+hostname)[0]
    tz = getlocal(hostip,'tz/'+hostname)[0]
    gw = getlocal(hostip,'gw/'+hostname)[0]
+   alias = getlocal(hostip,'alias/'+hostname)[0]
   else:
    ntp = get('ntp/'+hostname)[0]
    tz = get('tz/'+hostname)[0]
    gw = get('gw/'+hostname)[0]
+   alias = get('alias/'+hostname)[0]
   mgmt = get('namespace/mgmtip')[0] 
-  allhosts.append({'name':hostname, 'ip': hostip, 'ntp':ntp, 'tz':tz, 'gw': gw, 'cluster':mgmt})
+  allhosts.append({'name':hostname,'alias':alias, 'ip': hostip, 'ntp':ntp, 'tz':tz, 'gw': gw, 'cluster':mgmt})
 
  print(allhosts)
  return allhosts 
