@@ -10,18 +10,22 @@ runningpools='/pacedata/pools/runningpools';
 glog='/var/www/html/des20/Data/TopStor.log';
 txtres='/TopStordata/'`basename $0`'.txt'
 gateway=`ETCDCTL_API=3 /TopStor/etcdget.py gw/$hostname`
+oldgateway=`ip route | grep default | awk '{print $3}'`
 echo $gateway | grep '\.'
 if [ $? -ne 0 ];
 then
- gateway=`ip route | grep default | awk '{print $3}'`
- echo $gateway | grep '\.'
+ echo $oldgateway | grep '\.'
  if [ $? -ne 0 ];
  then
-  gateway='NoGateway'
+  oldgateway='NoGateway'
  fi
- ./etcdput.py gw/$hostname $gateway
+ ./etcdput.py gw/$hostname $oldgateway
  
 else
- route del default
+ echo $oldgateway | grep '\.'
+ if [ $? -eq 0 ];
+ then
+  route del default gw $oldgateway 
+ fi
  route add default gw $gateway
 fi

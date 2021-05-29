@@ -18,7 +18,7 @@ def config(*bargs):
   arglist[barg.split('=')[0]] = barg.split('=')[1]
  with open('/root/Hostconfig','w') as f:
   f.write(str(arglist)+'\n')
- #rglist = {'name': 'dhcp32502', 'tz': 'Kirit%(GMT-10!00)_Hawaii', 'id': '0', 'user': 'mezo'} 
+ #arglist = {'name': 'dhcp32502', 'gw': '10.0.4.2', 'id': '0', 'user': 'admin'} 
  leaderinfo = get('leader','--prefix')[0]
  leader = leaderinfo[0].replace('leader/','')
  leaderip = leaderinfo[1]
@@ -45,19 +45,39 @@ def config(*bargs):
   logmsg.sendlog('HostManual1su7','info',arglist['user'],oldarg,arglist['cluster'])
 ############ changing time zone ###############
  if 'tz' in arglist:
-  print('iamhere')
   oldarg = get('tz/'+myhost)[0]
-  argtz = arglist['tz'].split('%')[1]
   logmsg.sendlog('HostManual1st10','info',arglist['user'],oldarg, argtz)
+  argtz = arglist['tz'].split('%')[1]
   allhosts = get('ActivePartner','--prefix')
   for host in allhosts:
    hostname = host[0].replace('ActivePartners/','')
-   print('host',hostname)
    put('tz/'+hostname,arglist['tz'])
    broadcasttolocal('tz/'+hostname,arglist['tz'])
   broadcast('HostManualConfigTZ','/TopStor/pump.sh','HostManualconfigTZ')
   logmsg.sendlog('HostManual1su10','info',arglist['user'], oldarg, argtz)
-######################################
+########### changing ntp server ###############
+ if 'ntp' in arglist:
+  oldarg = get('ntp/'+myhost)[0]
+  logmsg.sendlog('HostManual1st9','info',arglist['user'],oldarg, arglist['ntp'])
+  allhosts = get('ActivePartner','--prefix')
+  for host in allhosts:
+   hostname = host[0].replace('ActivePartners/','')
+   put('ntp/'+hostname,arglist['ntp'])
+   broadcasttolocal('ntp/'+hostname,arglist['ntp'])
+  broadcast('HostManualConfigNTP','/TopStor/pump.sh','HostManualconfigNTP')
+  logmsg.sendlog('HostManual1su9','info',arglist['user'],oldarg, arglist['ntp'])
+########### changing gateway  ###############
+ if 'gw' in arglist:
+  oldarg = get('gw/'+myhost)[0]
+  logmsg.sendlog('HostManual1st11','info',arglist['user'],oldarg, arglist['gw'])
+  allhosts = get('ActivePartner','--prefix')
+  for host in allhosts:
+   hostname = host[0].replace('ActivePartners/','')
+   put('gw/'+hostname,arglist['gw'])
+   broadcasttolocal('gw/'+hostname,arglist['gw'])
+  broadcast('HostManualConfigGW','/TopStor/pump.sh','HostManualconfigGW')
+  logmsg.sendlog('HostManual1su11','info',arglist['user'],oldarg, arglist['gw'])
+ #####################################
 
 
 
@@ -110,13 +130,7 @@ def config(*bargs):
   cmdline=['/TopStor/HostManualconfigDataIP',change['dataip'],change['olddataip'],subnet,oldsubnet]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   logmsg.sendlog('HostManual1su8','info',arg[-1],change['olddataip']+'/'+oldsubnet,change['dataip']+'/'+subnet)
-########## changing ntp server ###############
- if 'ntp' in change:
-  logmsg.sendlog('HostManual1st9','info',arg[-1],change['oldntp'],change['ntp'])
-  cmdline=['/TopStor/HostManualconfigNTP.py',change['ntp']]
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  logmsg.sendlog('HostManual1su9','info',arg[-1],change['oldntp'],change['ntp'])
-########### changing gateway  ###############
+########## changing gateway  ###############
  if 'gw' in change:
   logmsg.sendlog('HostManual1st11','info',arg[-1],change['oldgw'],change['gw'])
   cmdline=['/TopStor/HostManualconfigGW.py',change['gw']]
