@@ -14,6 +14,7 @@ def getall(*bargs):
  leader = get('leader', '--prefix')[0][0].replace('leader/','')
  hosts = get('ready', '--prefix')
  allhosts= [] 
+ hostsdict = dict()
  for host in hosts:
   hostname = host[0].replace('ready/','')
   hostip = host[1]
@@ -31,9 +32,10 @@ def getall(*bargs):
    configured = get('configured/'+hostname)[0]
   mgmt = get('namespace/mgmtip')[0] 
   allhosts.append({'name':hostname, 'configured':configured, 'alias':alias, 'ip': hostip, 'ntp':ntp, 'tz':tz, 'gw': gw, 'cluster':mgmt})
+  hostsdict[hostname] = { 'configured':configured, 'alias':alias, 'ip': hostip, 'ntp':ntp, 'tz':tz, 'gw': gw, 'cluster':mgmt }
 
  print(allhosts)
- return allhosts 
+ return hostsdict 
 
 if __name__=='__main__':
  getall(*sys.argv[1:])

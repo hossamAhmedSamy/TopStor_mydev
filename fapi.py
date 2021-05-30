@@ -82,6 +82,15 @@ def hostsinfo():
  allhosts = Hostsconfig.getall()
  return jsonify(allhosts)
 
+@app.route('/api/v1/hosts/allinfo', methods=['GET','POST'])
+def hostsallinfo():
+ global allhosts, readyhosts, activehosts, losthosts, possiblehosts
+ hostsinfo()
+ hostslost()  
+ hostspossible()
+ return jsonify({'all': allhosts, 'active': activehosts, 'ready':readyhosts, 'possible':possiblehosts, 'lost':losthosts})
+
+
 @app.route('/api/v1/hosts/ready', methods=['GET','POST'])
 def hostsready():
  global allhosts, readyhosts, activehosts, losthosts, possiblehosts
