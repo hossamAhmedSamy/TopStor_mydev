@@ -256,7 +256,10 @@ def UnixAddGroup():
 def UnixAddUser():
  global allgroups
  data = request.args.to_dict()
- pool = allpools[int(data.get('Volpool'))]['text']
+ if 'NoHome' in data['Volpool']:
+  pool = 'NoHome'
+ else:
+  pool = allpools[int(data.get('Volpool'))]['text']
  if '--' in pool:
   pool = 'NoHome'
  grps = data.get('groups')
@@ -269,7 +272,8 @@ def UnixAddUser():
    groupstr += allgroups[int(grp)][0]+','
   groupstr = groupstr[:-1]
  cmndstring = '/TopStor/pump.sh UnixAddUser '+data.get('name')+' '+pool+' groups'+groupstr+' ' \
-     +data.get('Password')+' '+data.get('Volsize')+'G '+data.get('HomeAddress')+' '+data.get('HomeSubnet')+' admin'
+     +data.get('Password')+' '+data.get('Volsize')+'G '+data.get('HomeAddress')+' '+data.get('HomeSubnet')+' hoststub'+' admin'
+ print('cmndstring', cmndstring)
  postchange(cmndstring)
  return data 
 
