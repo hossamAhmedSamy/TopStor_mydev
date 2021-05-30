@@ -205,9 +205,12 @@ def getnotification():
  return jsonify(notif)
 
 @app.route('/api/v1/host/config', methods=['GET','POST'])
-def hostconifg():
+def hostconfig():
  data = request.args.to_dict()
  datastr = ''
+ print('#############################')
+ print(data)
+ print('###########################')
  for ele in data:
   datastr += ele+'='+data[ele]+' '
  datastr = datastr[:-1]
