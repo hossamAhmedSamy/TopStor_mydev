@@ -1,5 +1,5 @@
 #!/bin/python3.6
-import flask, os
+import flask, os, Evacuate
 from flask import request, jsonify
 import Hostsconfig
 import sqlite3
@@ -204,7 +204,7 @@ def getnotification():
 	 'host':notifbody[2], 'type':notifbody[4], 'user': notifbody[5], 'msgbody': msgbody[1:]} 
  return jsonify(notif)
 
-@app.route('/api/v1/host/config', methods=['GET','POST'])
+@app.route('/api/v1/hosts/config', methods=['GET','POST'])
 def hostconfig():
  data = request.args.to_dict()
  datastr = ''
@@ -216,6 +216,13 @@ def hostconfig():
  datastr = datastr[:-1]
  cmndstring = '/TopStor/pump.sh Hostconfig.py '+datastr+' user=admin'
  postchange(cmndstring,'ready/'+data['name'])
+ return data
+
+@app.route('/api/v1/hosts/evacuate', methods=['GET','POST'])
+def hostevacuate():
+ data = request.args.to_dict()
+ args = data['name']+' '+data['Myname'] 
+ Evacuate.do(data['name'],'admin') 
  return data
 
 @app.route('/api/v1/groups/groupdel', methods=['GET','POST'])

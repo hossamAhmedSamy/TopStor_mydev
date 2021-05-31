@@ -34,6 +34,8 @@ def setall(*bargs):
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
    cmdline=['/TopStor/rebootme','finished']
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   
+  #elif hostn not in str(get('ready','--prefix')) and hostn not in str(get('lost','--prefix')) and myhost not in hostn and myhost in leader and hostn not in str(get('possible','--prefix')):
   elif myhost not in hostn and myhost in leader:
    put('toremovereset/'+hostn,'reset')
   hostreset=get('toremovereset/'+hostn,'reset')[0]
