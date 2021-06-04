@@ -39,7 +39,7 @@ def config(*bargs):
   oldarg = get('namespace/mgmtip')[0]
   logmsg.sendlog('HostManual1st7','info',arglist['user'],oldarg,arglist['cluster'])
   if myhost == leader:
-   updatenamespace(arglist['cluster'])
+   updatenamespace(arglist['cluster'],oldarg)
   else:
    z=['/TopStor/pump.sh','UpdateNameSpace.py', arglist['cluster'],oldarg]
    msg={'req': 'Pumpthis', 'reply':z}

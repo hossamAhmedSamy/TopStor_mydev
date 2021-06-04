@@ -8,6 +8,7 @@ from etcdget2 import etcdgetjson
 from etcdget import etcdget  as get
 from sendhost import sendhost
 from socket import gethostname as hostname
+from getlogs import getlogs
 
 os.environ['ETCDCTL_API'] = '3'
 allpools = 0
@@ -174,7 +175,6 @@ def groupchange():
 @app.route('/api/v1/users/userchange', methods=['GET','POST'])
 def userchange():
  data = request.args.to_dict()
- print('data',data)
  grps = data.get('groups')
  groupstr = ''
  allgroups = getgroups()
@@ -187,6 +187,11 @@ def userchange():
  cmndstring = '/TopStor/pump.sh UnixChangeUser '+data.get('name')+' groups'+groupstr+' admin'
  postchange(cmndstring)
  return data
+
+@app.route('/api/v1/info/logs', methods=['GET','POST'])
+def getalllogs():
+ notif = getlogs()
+ return jsonify({'alllogs': notif})
 
 
 @app.route('/api/v1/info/notification', methods=['GET','POST'])
@@ -238,7 +243,6 @@ def groupdel():
 @app.route('/api/v1/users/userdel', methods=['GET','POST'])
 def userdel():
  data = request.args.to_dict()
- print('data',data)
  cmndstring = '/TopStor/pump.sh UnixDelUser '+data.get('name')+' admin'
  postchange(cmndstring)
  return data
@@ -283,7 +287,6 @@ def UnixAddUser():
   groupstr = groupstr[:-1]
  cmndstring = '/TopStor/pump.sh UnixAddUser '+data.get('name')+' '+pool+' groups'+groupstr+' ' \
      +data.get('Password')+' '+data.get('Volsize')+'G '+data.get('HomeAddress')+' '+data.get('HomeSubnet')+' hoststub'+' admin'
- print('cmndstring', cmndstring)
  postchange(cmndstring)
  return data 
 
