@@ -2,6 +2,7 @@
 import flask, os, Evacuate
 from flask import request, jsonify
 import Hostsconfig
+from Hostconfig import config
 import sqlite3
 from etcdget2 import etcdgetjson
 from etcdget import etcdget  as get
@@ -208,14 +209,16 @@ def getnotification():
 def hostconfig():
  data = request.args.to_dict()
  datastr = ''
- print('#############################')
- print(data)
- print('###########################')
+ data['user'] = 'admin'
  for ele in data:
   datastr += ele+'='+data[ele]+' '
  datastr = datastr[:-1]
- cmndstring = '/TopStor/pump.sh Hostconfig.py '+datastr+' user=admin'
- postchange(cmndstring,'ready/'+data['name'])
+ #cmndstring = '/TopStor/pump.sh Hostconfig.py '+datastr+' user=admin'
+ #postchange(cmndstring,'ready/'+data['name'])
+ print('#############################')
+ print(data)
+ print('###########################')
+ config(data)
  return data
 
 @app.route('/api/v1/hosts/evacuate', methods=['GET','POST'])

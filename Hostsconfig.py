@@ -22,6 +22,7 @@ def getall(*bargs):
    ntp = getlocal(hostip,'ntp/'+hostname)[0]
    tz = getlocal(hostip,'tz/'+hostname)[0]
    gw = getlocal(hostip,'gw/'+hostname)[0]
+   ipaddrsubnet = getlocal(hostip,'hostipsubnet/'+hostname)[0]
    alias = getlocal(hostip,'alias/'+hostname)[0]
    configured = getlocal(hostip,'configured/'+hostname)[0]
   else:
@@ -29,10 +30,11 @@ def getall(*bargs):
    tz = get('tz/'+hostname)[0]
    gw = get('gw/'+hostname)[0]
    alias = get('alias/'+hostname)[0]
+   ipaddrsubnet = get('hostipsubnet/'+hostname)[0]
    configured = get('configured/'+hostname)[0]
   mgmt = get('namespace/mgmtip')[0] 
-  allhosts.append({'name':hostname, 'configured':configured, 'alias':alias, 'ip': hostip, 'ntp':ntp, 'tz':tz, 'gw': gw, 'cluster':mgmt})
-  hostsdict[hostname] = { 'configured':configured, 'alias':alias, 'ip': hostip, 'ntp':ntp, 'tz':tz, 'gw': gw, 'cluster':mgmt }
+  allhosts.append({'name':hostname, 'configured':configured, 'alias':alias, 'ipaddr': hostip,'ipaddrsubnet':ipaddrsubnet, 'ntp':ntp, 'tz':tz, 'gw': gw, 'cluster':mgmt})
+  hostsdict[hostname] = { 'configured':configured, 'alias':alias, 'ipaddr': hostip, 'ipaddrsubnet':ipaddrsubnet, 'ntp':ntp, 'tz':tz, 'gw': gw, 'cluster':mgmt }
 
  print(allhosts)
  return hostsdict 
