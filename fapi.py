@@ -3,21 +3,26 @@ import flask, os, Evacuate
 from flask import request, jsonify
 import Hostsconfig
 from Hostconfig import config
+from allphysicalinfo import getall 
 import sqlite3
 from etcdget2 import etcdgetjson
 from etcdget import etcdget  as get
 from sendhost import sendhost
 from socket import gethostname as hostname
 from getlogs import getlogs
+import VolumeCreateCIFS, VolumeCreateNFS, VolumeCreateHome
 
 os.environ['ETCDCTL_API'] = '3'
+alldsks = []
 allpools = 0
 allgroups = []
+allvolumes = []
 allusers = []
 readyhosts = []
 activehosts = []
 losthosts = []
 possiblehosts = []
+pooldict = dict()
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 logcatalog = ''
@@ -58,8 +63,6 @@ def getgroups():
  for group in groupslst:
   grpusers = group['prop'].split('/')[2]
   groupname = group['name'].replace('usersigroup/','')
-  if groupname == 'Everyone':
-   continue
   groups.append([groupname,str(gid), grpusers]) 
   gid += 1
  return groups
@@ -70,12 +73,14 @@ def home():
 <p>A prototype API for distant reading of science fiction novels.</p>'''
 
 def getpools():
+ global pooldict
  pools = get('pools/','--prefix')
  poolinfo = []
  pid = 0
  for pool in pools:
-  poolinfo.append({'id':pid, 'text':pool[0].split('/')[1]})
+  poolinfo.append({'id':pid, 'owner': pool[1], 'text':pool[0].split('/')[1]})
   pid += 1
+  pooldict[pool[0].split('/')[1]] = {'id': pid, 'owner': pool[1] }
  return poolinfo
  
 @app.route('/api/v1/hosts/info', methods=['GET','POST'])
@@ -145,6 +150,44 @@ def hostslost():
    hid += 1
  return jsonify(losthosts)
 
+@app.route('/api/v1/volumes/poolsinfo', methods=['GET','POST'])
+def volpoolsinfo():
+ global allpools
+ allpools = getpools()
+ return jsonify({'results':allpools})
+
+@app.route('/api/v1/volumes/CIFS/volumesinfo', methods=['GET','POST'])
+def volumesCIFSinfo():
+ global allvolumes, alldsks
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
+ allgroups = getgroups()
+ volumes = []
+ for volume in allinfo['volumes']:
+  if allinfo['volumes'][volume]['prot'] == 'CIFS':
+   volgrps = []
+   for group in allgroups:
+    print(';;;;;;;;;;;;;;;;;;;;;;;;;')
+    print(allinfo['volumes'][volume]['groups'].split(','))
+    print(group)
+    if group[0] in allinfo['volumes'][volume]['groups'].split(','):
+     volgrps.append(group[1])
+   allinfo['volumes'][volume]['groups'] = volgrps
+   volumes.append(allinfo['volumes'][volume])
+ return jsonify({'allvolumes':volumes})
+
+
+
+@app.route('/api/v1/volumes/volumesinfo', methods=['GET','POST'])
+def volumesinfo():
+ global allvolumes, alldsks
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
+ volumes = []
+ for volume in allinfo['volumes']:
+  volumes.append(allinfo['volumes'][volume])
+ return jsonify(volumes)
+
 
 
 @app.route('/api/v1/pools/poolsinfo', methods=['GET','POST'])
@@ -209,6 +252,20 @@ def getnotification():
  notif = { 'importance':msg[0].replace(':',''), 'msgcode': notifbody[3], 'date':notifbody[0], 'time':notifbody[1],
 	 'host':notifbody[2], 'type':notifbody[4], 'user': notifbody[5], 'msgbody': msgbody[1:]} 
  return jsonify(notif)
+
+
+@app.route('/api/v1/volumes/create', methods=['GET','POST'])
+def volumecreate():
+ data = request.args.to_dict()
+ datastr = ''
+ data['user'] = 'admin'
+ datastr = data['pool']+' '+data['name']+' '+data['size']+' '+data['groups']+' '+data['ipaddress']+' '+data['Subnet']+' '+data['user']+' '+data['owner']+' '+data['user']
+ print('#############################')
+ print(data)
+ print('###########################')
+ if data['type'] == 'CIFS':
+  VolumeCreateCIFS.create(datastr)
+ return data
 
 @app.route('/api/v1/hosts/config', methods=['GET','POST'])
 def hostconfig():
@@ -290,6 +347,20 @@ def UnixAddUser():
  postchange(cmndstring)
  return data 
 
+@app.route('/api/v1/volumes/grouplist', methods=['GET'])
+def api_volumes_groupslist():
+ global allgroups, allusers
+ thegroup = [] 
+ api_users_userslist()
+ for group in allgroups:
+  groupusers = []
+  for user in allusers:
+   if user['name'] in str(group[2]):
+    groupusers.append(user['id'])
+  if len(groupusers) < 1:
+   groupusers=["NoUser"]
+  thegroup.append({'text':group[0], 'id':group[1], 'users':groupusers})
+ return jsonify({'results':thegroup})
 
 
 

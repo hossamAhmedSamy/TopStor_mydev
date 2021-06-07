@@ -55,6 +55,7 @@ then
  echo here4 >> /root/volcreate
 # /TopStor/logmsg.py NFS1005 warning $userreq $name
 #  /TopStor/logqueue.py VolumeCreateCIFS stop_canceled $userreq 
+echo  /sbin/zfs create -o overlay=on -o acltype=posixacl -o aclinherit=passthrough -o xattr=sa -o redundant_metadata=most -o atime=off -o quota=$quota -o dedup=on -o compression=lz4  $DG/$name  
  /sbin/zfs create -o overlay=on -o acltype=posixacl -o aclinherit=passthrough -o xattr=sa -o redundant_metadata=most -o atime=off -o quota=$quota -o dedup=on -o compression=lz4  $DG/$name  
  if [ $? -ne 0 ];
  then

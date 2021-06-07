@@ -5,7 +5,7 @@ from etcdget import etcdget as get
 from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost
-def send(*bargs):
+def create(*bargs):
  queuethis('VolumeCreateHome.py','running',bargs[-1])
  if(len(bargs) < 3):
   args=bargs[0].split()
@@ -41,4 +41,4 @@ def send(*bargs):
  return
 
 if __name__=='__main__':
- send(*sys.argv[1:])
+ create(*sys.argv[1:])
