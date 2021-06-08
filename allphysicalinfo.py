@@ -30,7 +30,8 @@ def getall(*args):
   host = alldsk[0].split('/')[1]
   pools = mtuple(alldsk[1])
   hostpools = []
-  hostsdict[host] = hostpools
+  hostip = get('ActivePartners/'+host)[0]
+  hostsdict[host] = {'name': host,'ipaddress': hostip, 'pools': hostpools }
   for pool in pools:
    hostpools.append(pool['name'])
    thepool = pool.copy()
@@ -56,6 +57,7 @@ def getall(*args):
    for volume in pool['volumes']:
     poolvolumes.append(volume['name'])
     thevolume = volume.copy()
+    #echo /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes >> /root/volchange
     thevolume.pop('snapshots',None)
     volumesnapshots = []
     volumesnapperiods = []

@@ -157,8 +157,8 @@ def volpoolsinfo():
  return jsonify({'results':allpools})
 
 @app.route('/api/v1/volumes/CIFS/volumesinfo', methods=['GET','POST'])
-def volumesCIFSinfo():
- global allvolumes, alldsks
+def volumesinfo():
+ global allvolumes, alldsks, allinfo
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  allgroups = getgroups()
@@ -167,27 +167,11 @@ def volumesCIFSinfo():
   if allinfo['volumes'][volume]['prot'] == 'CIFS':
    volgrps = []
    for group in allgroups:
-    print(';;;;;;;;;;;;;;;;;;;;;;;;;')
-    print(allinfo['volumes'][volume]['groups'].split(','))
-    print(group)
     if group[0] in allinfo['volumes'][volume]['groups'].split(','):
      volgrps.append(group[1])
    allinfo['volumes'][volume]['groups'] = volgrps
    volumes.append(allinfo['volumes'][volume])
  return jsonify({'allvolumes':volumes})
-
-
-
-@app.route('/api/v1/volumes/volumesinfo', methods=['GET','POST'])
-def volumesinfo():
- global allvolumes, alldsks
- alldsks = get('host','current')
- allinfo = getall(alldsks)
- volumes = []
- for volume in allinfo['volumes']:
-  volumes.append(allinfo['volumes'][volume])
- return jsonify(volumes)
-
 
 
 @app.route('/api/v1/pools/poolsinfo', methods=['GET','POST'])
@@ -266,6 +250,36 @@ def volumecreate():
  if data['type'] == 'CIFS':
   VolumeCreateCIFS.create(datastr)
  return data
+
+@app.route('/api/v1/volumes/config', methods=['GET','POST'])
+def volumeconfig():
+ global allinfo
+ data = request.args.to_dict()
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
+ volume = allinfo['volumes'][data['volume']]
+ owner = volume['host']
+ ownerip = allinfo['hosts'][owner]['ipaddress']
+ datastr = ''
+ if 'groups' in data and len(data['groups']) < 1: 
+  data['groups'] = 'NoGroup'
+ data['user'] = 'admin'
+ for ele in data:
+  volume[ele] = data[ele] 
+ datastr = volume['pool']+' '+volume['name']+' '+volume['quota']+' '+volume['groups']+' '+volume['ipaddress']+' '+volume['Subnet']+' '+volume['host']+' '+volume['user']
+
+ print('#############################')
+ print(data)
+ print(datastr)
+ print('###########################')
+ cmndstring = '/TopStor/pump.sh VolumeChange'+data['type']+' '+datastr
+ z= cmndstring.split(' ')
+ msg={'req': 'Pumpthis', 'reply':z}
+ sendhost(ownerip, str(msg),'recvreply',myhost)
+ #config(data)
+ return data
+
+
 
 @app.route('/api/v1/hosts/config', methods=['GET','POST'])
 def hostconfig():
