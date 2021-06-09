@@ -10,6 +10,7 @@ from etcdget import etcdget  as get
 from sendhost import sendhost
 from socket import gethostname as hostname
 from getlogs import getlogs
+from statistics import allvolstats
 import VolumeCreateCIFS, VolumeCreateNFS, VolumeCreateHome
 
 os.environ['ETCDCTL_API'] = '3'
@@ -149,6 +150,15 @@ def hostslost():
    losthosts.append({'id': hid, 'name': active['name'], 'ip': active['ip']})
    hid += 1
  return jsonify(losthosts)
+
+@app.route('/api/v1/volumes/stats', methods=['GET','POST'])
+def volumestats():
+ global allinfo 
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
+ volstats = allvolstats(allinfo)
+ print(volstats)
+ return jsonify(volstats)
 
 @app.route('/api/v1/volumes/poolsinfo', methods=['GET','POST'])
 def volpoolsinfo():
