@@ -6,7 +6,7 @@ from Hostconfig import config
 from allphysicalinfo import getall 
 import sqlite3
 from etcdget2 import etcdgetjson
-from etcdget import etcdget  as get
+from etcdgetpy import etcdget  as get
 from sendhost import sendhost
 from socket import gethostname as hostname
 from getlogs import getlogs
@@ -157,7 +157,6 @@ def volumestats():
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  volstats = allvolstats(allinfo)
- print(volstats)
  return jsonify(volstats)
 
 @app.route('/api/v1/volumes/poolsinfo', methods=['GET','POST'])
@@ -239,7 +238,10 @@ def getnotification():
  notifc = 6
  for word in msg[4:]:
   if word == ':':
-   msgbody = msgbody[:-1]+' '+notifbody[notifc]+'.'
+   try:
+    msgbody = msgbody[:-1]+' '+notifbody[notifc]+'.'
+   except:
+    msgbody = msgbody +' '+notifbody+'parseerror.'
    notifc += 1
   elif len(word) > 0:
    msgbody = msgbody[:-1]+' '+word+'.' 
@@ -312,6 +314,26 @@ def hostevacuate():
  data = request.args.to_dict()
  args = data['name']+' '+data['Myname'] 
  Evacuate.do(data['name'],'admin') 
+ return data
+
+@app.route('/api/v1/volumes/volumedel', methods=['GET','POST'])
+def volumedel():
+ global allinfo 
+ data = request.args.to_dict()
+ data['user'] = 'admin'
+ pool = allinfo['volumes'][data['name']]['pool']
+ owner = allinfo['volumes'][data['name']]['host']
+ ownerip = allinfo['hosts'][owner]['ipaddress']
+ cmndstring = "/TopStor/pump.sh VolumeDelete"+data['type']+" "+pool+" "+data['name']+" "+data['type']+" "+data['user']
+ z= cmndstring.split(' ')
+ msg={'req': 'Pumpthis', 'reply':z}
+ print('##################################')
+ print(data)
+ print(ownerip)
+ print('reply',cmndstring)
+ print('################################333')
+ sendhost(ownerip, str(msg),'recvreply',myhost)
+        		 
  return data
 
 @app.route('/api/v1/groups/groupdel', methods=['GET','POST'])
