@@ -1,5 +1,5 @@
 #!/bin/sh
-echo $@ >/root/tmp
+echo $@ >/root/volcreatenfs
 cd /TopStor
 export ETCDCTL_API=3
 myhost=`hostname -s`

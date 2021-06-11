@@ -39,7 +39,8 @@ then
     name=` echo $registry | awk -F'/' '{print $2}'`
     ipaddr=` echo $registry | awk -F'/' '{print $8}'`
     ipsubnet=` echo $registry | awk -F'/' '{print $9}'`
-    /pace/etcdput.py volumes/CIFS/$myhost/$pool/$name $registry
+    reg=`echo $registry | sed 's/ /\,/g'`
+    /pace/etcdput.py volumes/CIFS/$myhost/$pool/$name $reg
    echo here put in etcd $pool and $name 
     cp /$pool/smb.$name /TopStordata/
     /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs

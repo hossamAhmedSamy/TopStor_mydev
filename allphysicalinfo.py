@@ -20,12 +20,22 @@ def getall(*args):
   voldict = dict()
   if len(vol[1].split('/')) < 7:
    continue
-  voldict['name'] = vol[1].split('/')[1]
-  voldict['pool'] = vol[1].split('/')[0]
-  voldict['groups'] = vol[1].split('/')[4]
-  voldict['ipaddress'] = vol[1].split('/')[7] 
-  voldict['Subnet'] = vol[1].split('/')[8]
-  volumesdict[voldict['name']] = voldict.copy()
+  if vol[0].split('/')[1] == 'CIFS':
+   voldict['name'] = vol[1].split('/')[1]
+   voldict['pool'] = vol[1].split('/')[0]
+   voldict['groups'] = vol[1].split('/')[4]
+   voldict['ipaddress'] = vol[1].split('/')[7] 
+   voldict['Subnet'] = vol[1].split('/')[8]
+   voldict['prot'] = 'CIFS'
+   volumesdict[voldict['name']] = voldict.copy()
+  elif vol[0].split('/')[1] == 'NFS':
+   voldict['name'] = vol[1].split('/')[1]
+   voldict['pool'] = vol[1].split('/')[0]
+   voldict['groups'] = vol[1].split('/')[8]
+   voldict['ipaddress'] = vol[1].split('/')[9] 
+   voldict['Subnet'] = vol[1].split('/')[10]
+   voldict['prot'] = 'NFS'
+   volumesdict[voldict['name']] = voldict.copy()
  for alldsk in alldsks:
   host = alldsk[0].split('/')[1]
   pools = mtuple(alldsk[1])
@@ -92,7 +102,6 @@ def getall(*args):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
- print('volumes',volumesdict)
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  

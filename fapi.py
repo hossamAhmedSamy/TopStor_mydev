@@ -165,22 +165,47 @@ def volpoolsinfo():
  allpools = getpools()
  return jsonify({'results':allpools})
 
-@app.route('/api/v1/volumes/CIFS/volumesinfo', methods=['GET','POST'])
-def volumesinfo():
+def volumesinfo(prot='all'):
  global allvolumes, alldsks, allinfo
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  allgroups = getgroups()
  volumes = []
+ if prot == 'all':
+   prot = 'S'
+   prot2 = 'H'
+ else:
+  prot2 = prot
  for volume in allinfo['volumes']:
-  if allinfo['volumes'][volume]['prot'] == 'CIFS':
+  if prot in allinfo['volumes'][volume]['prot'] or prot2 in allinfo['volumes'][volume]['prot']:
    volgrps = []
    for group in allgroups:
     if group[0] in allinfo['volumes'][volume]['groups'].split(','):
      volgrps.append(group[1])
    allinfo['volumes'][volume]['groups'] = volgrps
    volumes.append(allinfo['volumes'][volume])
+ return volumes
+
+@app.route('/api/v1/volumes/CIFS/volumesinfo', methods=['GET','POST'])
+def volumescifsinfo():
+ volumes = volumesinfo('CIFS') 
  return jsonify({'allvolumes':volumes})
+
+@app.route('/api/v1/volumes/NFS/volumesinfo', methods=['GET','POST'])
+def volumesnfsinfo():
+ volumes = volumesinfo('NFS') 
+ return jsonify({'allvolumes':volumes})
+
+@app.route('/api/v1/volumes/HOME/volumesinfo', methods=['GET','POST'])
+def volumeshomeinfo():
+ volumes = volumesinfo('Home') 
+ return jsonify({'allvolumes':volumes})
+
+@app.route('/api/v1/volumes/volumesinfo', methods=['GET','POST'])
+def volumesallinfo():
+ volumes = volumesinfo() 
+ return jsonify({'allvolumes':volumes})
+
 
 
 @app.route('/api/v1/pools/poolsinfo', methods=['GET','POST'])
@@ -261,6 +286,8 @@ def volumecreate():
  print('###########################')
  if data['type'] == 'CIFS':
   VolumeCreateCIFS.create(datastr)
+ if data['type'] == 'NFS':
+  VolumeCreateNFS.create(datastr)
  return data
 
 @app.route('/api/v1/volumes/config', methods=['GET','POST'])
