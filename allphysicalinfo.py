@@ -1,6 +1,6 @@
 #!/bin/python3.6
 from logqueue import queuethis
-from etcdget import etcdget as get
+from etcdgetpy import etcdget as get
 from ast import literal_eval as mtuple
 import subprocess, copy
 import sys
