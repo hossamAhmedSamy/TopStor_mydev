@@ -20,17 +20,15 @@ def getall(*args):
   voldict = dict()
   if len(vol[1].split('/')) < 7:
    continue
-  if vol[0].split('/')[1] == 'CIFS':
-   voldict['name'] = vol[1].split('/')[1]
-   voldict['pool'] = vol[1].split('/')[0]
+  voldict = {'name': vol[1].split('/')[1], 'pool': vol[1].split('/')[0], 'groups': '', 'ipaddress': '', 'Subnet': '', 'prot': '', 'fullname': '', 'host': '', 'creation': '', 'time': '', 'used': 0, 'quota': 0, 'usedbysnapshots': 0, 'refcompressratio': '1.0x', 'snapperiod': [], 'snapshots': []}
+  if vol[0].split('/')[1] == 'CIFS' or vol[0].split('/')[1] == 'HOME' :
    voldict['groups'] = vol[1].split('/')[4]
    voldict['ipaddress'] = vol[1].split('/')[7] 
    voldict['Subnet'] = vol[1].split('/')[8]
-   voldict['prot'] = 'CIFS'
+   voldict['prot'] = vol[0].split('/')[1]
+   print(voldict['prot'])
    volumesdict[voldict['name']] = voldict.copy()
   elif vol[0].split('/')[1] == 'NFS':
-   voldict['name'] = vol[1].split('/')[1]
-   voldict['pool'] = vol[1].split('/')[0]
    voldict['groups'] = vol[1].split('/')[8]
    voldict['ipaddress'] = vol[1].split('/')[9] 
    voldict['Subnet'] = vol[1].split('/')[10]
@@ -102,6 +100,7 @@ def getall(*args):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
+ print('volumes',volumesdict)
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  

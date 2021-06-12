@@ -11,7 +11,6 @@ from sendhost import sendhost
 from socket import gethostname as hostname
 from getlogs import getlogs
 from statistics import allvolstats
-import VolumeCreateCIFS, VolumeCreateNFS, VolumeCreateHome
 
 os.environ['ETCDCTL_API'] = '3'
 alldsks = []
@@ -180,8 +179,12 @@ def volumesinfo(prot='all'):
   if prot in allinfo['volumes'][volume]['prot'] or prot2 in allinfo['volumes'][volume]['prot']:
    volgrps = []
    for group in allgroups:
-    if group[0] in allinfo['volumes'][volume]['groups'].split(','):
-     volgrps.append(group[1])
+    try:
+     if group[0] in allinfo['volumes'][volume]['groups'].split(','):
+      volgrps.append(group[1])
+    except:
+      print(allinfo['volumes'][volume])
+      print('###########################################################')
    allinfo['volumes'][volume]['groups'] = volgrps
    volumes.append(allinfo['volumes'][volume])
  return volumes
@@ -198,7 +201,7 @@ def volumesnfsinfo():
 
 @app.route('/api/v1/volumes/HOME/volumesinfo', methods=['GET','POST'])
 def volumeshomeinfo():
- volumes = volumesinfo('Home') 
+ volumes = volumesinfo('HOME') 
  return jsonify({'allvolumes':volumes})
 
 @app.route('/api/v1/volumes/volumesinfo', methods=['GET','POST'])
@@ -280,14 +283,18 @@ def volumecreate():
  data = request.args.to_dict()
  datastr = ''
  data['user'] = 'admin'
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
+ ownerip = allinfo['hosts'][allinfo['pools'][data['pool']]['host']]['ipaddress']
  datastr = data['pool']+' '+data['name']+' '+data['size']+' '+data['groups']+' '+data['ipaddress']+' '+data['Subnet']+' '+data['user']+' '+data['owner']+' '+data['user']
  print('#############################')
  print(data)
+ print(datastr)
  print('###########################')
- if data['type'] == 'CIFS':
-  VolumeCreateCIFS.create(datastr)
- if data['type'] == 'NFS':
-  VolumeCreateNFS.create(datastr)
+ cmndstring = '/TopStor/pump.sh VolumeCreate'+data['type']+' '+datastr
+ z= cmndstring.split(' ')
+ msg={'req': 'Pumpthis', 'reply':z}
+ sendhost(ownerip, str(msg),'recvreply',myhost)
  return data
 
 @app.route('/api/v1/volumes/config', methods=['GET','POST'])
@@ -306,7 +313,6 @@ def volumeconfig():
  for ele in data:
   volume[ele] = data[ele] 
  datastr = volume['pool']+' '+volume['name']+' '+volume['quota']+' '+volume['groups']+' '+volume['ipaddress']+' '+volume['Subnet']+' '+volume['host']+' '+volume['user']
-
  print('#############################')
  print(data)
  print(datastr)
@@ -356,8 +362,6 @@ def volumedel():
  msg={'req': 'Pumpthis', 'reply':z}
  print('##################################')
  print(data)
- print(ownerip)
- print('reply',cmndstring)
  print('################################333')
  sendhost(ownerip, str(msg),'recvreply',myhost)
         		 
@@ -470,7 +474,8 @@ def api_users_userslist():
    if grpuser not in userdict:
     userdict[grpuser] = []
    userdict[grpuser].append(str(groupid))
- users = []
+ usersnohome = []
+ nohomeid = 0
  uid = 0
  for user in userlst:
   username = user['name'].replace('usersinfo/','')
@@ -482,9 +487,13 @@ def api_users_userslist():
    groups = userdict[username]
   allusers.append({"name":username, 'id':uid, "pool":userpool, "size":usersize, "groups":groups})
   uid += 1
+  if 'NoHome' in userpool:
+   usersnohome.append({ 'id':nohomeid, 'text': username })
+   nohomeid += 1 
  alldict = dict()
- alldict['allusers']=allusers
- alldict['allgroups']=allgroups
+ alldict['allusers'] = allusers
+ alldict['allgroups'] = allgroups
+ alldict['usersnohome'] = usersnohome
  return jsonify(alldict)
 
 @app.route('/api/v1/groups/userlist', methods=['GET'])
