@@ -26,7 +26,6 @@ def getall(*args):
    voldict['ipaddress'] = vol[1].split('/')[7] 
    voldict['Subnet'] = vol[1].split('/')[8]
    voldict['prot'] = vol[0].split('/')[1]
-   print(voldict['prot'])
    volumesdict[voldict['name']] = voldict.copy()
   elif vol[0].split('/')[1] == 'NFS':
    voldict['groups'] = vol[1].split('/')[8]
@@ -100,7 +99,7 @@ def getall(*args):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
- print('volumes',volumesdict)
+ print('snapshots',snapshotsdict)
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  

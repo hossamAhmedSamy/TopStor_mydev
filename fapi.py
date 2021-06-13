@@ -11,7 +11,7 @@ from sendhost import sendhost
 from socket import gethostname as hostname
 from getlogs import getlogs
 from statistics import allvolstats
-
+from datetime import datetime
 os.environ['ETCDCTL_API'] = '3'
 alldsks = []
 allpools = 0
@@ -158,11 +158,43 @@ def volumestats():
  volstats = allvolstats(allinfo)
  return jsonify(volstats)
 
+@app.route('/api/v1/volumes/volumelist', methods=['GET','POST'])
+def volumeslist():
+ global allinfo 
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
+ volumes = []
+ vid = 0
+ for vol in allinfo['volumes']:
+  volumes.append({'id':vid, 'text':vol.split('_')[0], 'fullname':vol,'pool':allinfo['volumes'][vol]['pool']})
+  vid += 1
+ return jsonify(volumes)
+
+
+
 @app.route('/api/v1/volumes/poolsinfo', methods=['GET','POST'])
 def volpoolsinfo():
  global allpools
  allpools = getpools()
  return jsonify({'results':allpools})
+
+@app.route('/api/v1/volumes/snapshots/snapshotsinfo', methods=['GET','POST'])
+def volumessnapshotsinfo():
+ global allvolumes, alldsks, allinfo
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
+ allgroups = getgroups()
+ alllist = []
+ oncelist = []
+ minutelist = []
+ hourlist = []
+ weeklist = []
+ for snap in allinfo['snapshots']:
+  alllist.append(allinfo['snapshots'][snap].copy())
+  allinfo['snapshots'][snap]['date'] = datetime.strptime(allinfo['snapshots'][snap]['creation'], '%a %b %d %Y').strftime('%m-%B-%Y')
+  if allinfo['snapshots'][snap]['snaptype'] == 'Once':
+   oncelist.append(allinfo['snapshots'][snap].copy()) 
+ return jsonify({'all':alllist, 'Once':oncelist, 'Hourly':hourlist, 'Weekly':weeklist, 'Minutely':minutelist })
 
 def volumesinfo(prot='all'):
  global allvolumes, alldsks, allinfo
@@ -277,6 +309,28 @@ def getnotification():
 	 'host':notifbody[2], 'type':notifbody[4], 'user': notifbody[5], 'msgbody': msgbody[1:]} 
  return jsonify(notif)
 
+@app.route('/api/v1/volumes/snapshots/create', methods=['GET','POST'])
+def volumesnapshotscreate():
+ data = request.args.to_dict()
+ datastr = ''
+ data['user'] = 'admin'
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
+ ownerip = allinfo['hosts'][data['owner']]['ipaddress']
+ datastr = data['name']+' '+data['pool']+' '+data['volume']+' '+data['user']
+ print('#############################')
+ print(data)
+ print(ownerip)
+ print('###########################')
+ cmndstring = '/TopStor/pump.sh SnapshotCreate'+data['snapsel']+' '+datastr
+ z= cmndstring.split(' ')
+ msg={'req': 'Pumpthis', 'reply':z}
+ sendhost(ownerip, str(msg),'recvreply',myhost)
+ return data
+
+
+
+
 
 @app.route('/api/v1/volumes/create', methods=['GET','POST'])
 def volumecreate():
@@ -349,11 +403,60 @@ def hostevacuate():
  Evacuate.do(data['name'],'admin') 
  return data
 
+@app.route('/api/v1/volumes/snapshots/snaprollback', methods=['GET','POST'])
+def volumesnapshotrol():
+ global allinfo 
+ data = request.args.to_dict()
+ data['user'] = 'admin'
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
+ volume = allinfo['snapshots'][data['name']]['volume']
+ pool = allinfo['snapshots'][data['name']]['pool']
+ owner = allinfo['snapshots'][data['name']]['host']
+ ownerip = allinfo['hosts'][owner]['ipaddress']
+ cmndstring = "/TopStor/pump.sh SnapShotRollback "+pool+" "+volume+" "+data['name']+" "+data['user']
+ z= cmndstring.split(' ')
+ msg={'req': 'Pumpthis', 'reply':z}
+ print('##################################')
+ print(data)
+ print('################################333')
+ sendhost(ownerip, str(msg),'recvreply',myhost)
+        		 
+ return data
+
+
+
+@app.route('/api/v1/volumes/snapshots/snapshotdel', methods=['GET','POST'])
+def volumesnapshotdel():
+ global allinfo 
+ data = request.args.to_dict()
+ data['user'] = 'admin'
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
+ volume = allinfo['snapshots'][data['name']]['volume']
+ pool = allinfo['snapshots'][data['name']]['pool']
+ owner = allinfo['snapshots'][data['name']]['host']
+ ownerip = allinfo['hosts'][owner]['ipaddress']
+ cmndstring = "/TopStor/pump.sh SnapShotDelete "+pool+" "+volume+" "+data['name']+" "+data['user']
+ z= cmndstring.split(' ')
+ msg={'req': 'Pumpthis', 'reply':z}
+ print('##################################')
+ print(data)
+ print('################################333')
+ sendhost(ownerip, str(msg),'recvreply',myhost)
+        		 
+ return data
+
+
+
+
 @app.route('/api/v1/volumes/volumedel', methods=['GET','POST'])
 def volumedel():
  global allinfo 
  data = request.args.to_dict()
  data['user'] = 'admin'
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
  pool = allinfo['volumes'][data['name']]['pool']
  owner = allinfo['volumes'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']

@@ -4,9 +4,9 @@ cd /TopStor
 web='/var/www/html/des20/Data/statusglobal.log';
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
 myhost=$myhost;
-vol=`echo $@ | awk '{print $1}'| awk -F '/' '{print $1}'`;
-name=`echo $@ | awk '{print $1}' | awk -F '/' '{print $2}'`;
-pool=`echo $@ | awk '{print $2}'`;
+pool=`echo $@ | awk '{print $1}'`;
+vol=`echo $@ | awk '{print $2}'`;
+name=`echo $@ | awk '{print $3}'` ;
 stamp=`date +%s`;
 echo /sbin/zfs snapshot $pool/$vol@${name}.$stamp
 /sbin/zfs snapshot $pool/$vol@${name}.$stamp
@@ -15,6 +15,7 @@ if [ $? -ne 0  ]; then
         exit 1;
 else 
 timenow=`/usr/bin/date`
+/sbin/zfs set snap:type=Once $pool/$vol@${name}.$stamp
 echo OK;
 exit 0
 fi;
