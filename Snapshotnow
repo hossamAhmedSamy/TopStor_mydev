@@ -21,6 +21,7 @@ echo oper1=$oper1 >> $cronout;
 echo oper2=$oper2 >> $cronout;
 echo stamp=$stamp >> $cronout
 keep=`echo $oper2 | awk -F. '{print $2}'`;
+snaptype=`echo $oper2 | awk -F. '{print $1}'`;
 echo keep=$keep >> $cronout
 declare currentsnaps=`/sbin/zfs list -t snapshot | grep -w "$realoper" | grep -w "$oper2" | awk '{print $1}'`;
 echo currentsnaps=$currentsnaps >> $cronout
@@ -59,5 +60,6 @@ err=`wc -c  ${txtres}$stamp | awk '{print $1}'`;
 if [[ $err -ge  4  ]]; then 
    /TopStor/logmsg.py Snap1028 error $userreq $newsnap
 else 
+   /sbin/zfs set snap:type=$snaptype $newsnap
    /TopStor/logmsg.py Snap1030 info $userreq $newsnap
 fi

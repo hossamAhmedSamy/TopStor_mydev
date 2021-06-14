@@ -27,7 +27,7 @@ if [ $? -ne 0  ]; then
   /TopStor/logmsg.py Snap1035 error $userreq $FileS
 else 
   /TopStor/logmsg.py Snap1036 info $userreq $Minutely.$keep.$every.na.na.$stamp $DG/$FileS
-  /pace/etcdput.py Snapperiod/$DG/$FileS/$stamp  */$every%*%*%*%*%/TopStor/Snapshotnowhost%$DG/$FileS%Minutely.$keep.$every.na.na%$stamp
+  /pace/etcdput.py Snapperiod/Minutely/$DG/$FileS/$stamp  */$every%*%*%*%*%/TopStor/Snapshotnowhost%$DG/$FileS%Minutely.$keep.$every.na.na%$stamp
  ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
 fi;
  /pace/putzpool.py

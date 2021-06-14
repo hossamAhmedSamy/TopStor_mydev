@@ -5,6 +5,26 @@ from ast import literal_eval as mtuple
 import subprocess, copy
 import sys
 
+
+def getsnapperiods(voldict):
+ periodsdict = dict()
+ snapperiods = get('Snapperiod','--prefix') 
+ for per in snapperiods:
+  leftper = per[0].split('/')
+  rightper = per[1].split('/')
+  vol = leftper[3]
+  voldict[vol]['snapperiod'].append(leftper[4])
+  periodsdict[leftper[4]] = dict()
+  periodsdict[leftper[4]]['host']=voldict[vol]['host']
+  periodsdict[leftper[4]]['pool']=voldict[vol]['pool']
+  periodsdict[leftper[4]]['volume']=vol
+  periodsdict[leftper[4]]['periodtype']=leftper[1]
+  periodsdict[leftper[4]]['id']=leftper[4]
+  if 'Minutely' in leftper[1]: 
+   periodsdict[leftper[4]]['every']=rightper[4].split('.')[1]
+   periodsdict[leftper[4]]['keep']=rightper[4].split('.')[2]
+  return (periodsdict,voldict)
+
 def getall(*args):
  alldsks = args[0]
  hostsdict = dict()
@@ -83,6 +103,8 @@ def getall(*args):
      volumesdict[volume['name']].update(thevolume) 
     volumesdict[volume['name']]['snapshots'] = volumesnapshots
     volumesdict[volume['name']]['snapperiod'] = volumesnapperiods
+ snapperiodsdict = dict()
+ snapperiodsdict, volumesdict = getsnapperiods(volumesdict) 
  '''
  print('#############')
  print('hosts',hostsdict)

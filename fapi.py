@@ -181,20 +181,21 @@ def volpoolsinfo():
 @app.route('/api/v1/volumes/snapshots/snapshotsinfo', methods=['GET','POST'])
 def volumessnapshotsinfo():
  global allvolumes, alldsks, allinfo
+ snaplist = {'Once':[], 'Minutely': [], 'Hourly': [], 'Weekly':[]}
+ periodlist = {'Minutely': [], 'Hourly': [], 'Weekly':[]}
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  allgroups = getgroups()
  alllist = []
- oncelist = []
- minutelist = []
- hourlist = []
- weeklist = []
+ snappriods = []
  for snap in allinfo['snapshots']:
-  alllist.append(allinfo['snapshots'][snap].copy())
   allinfo['snapshots'][snap]['date'] = datetime.strptime(allinfo['snapshots'][snap]['creation'], '%a %b %d %Y').strftime('%m-%B-%Y')
-  if allinfo['snapshots'][snap]['snaptype'] == 'Once':
-   oncelist.append(allinfo['snapshots'][snap].copy()) 
- return jsonify({'all':alllist, 'Once':oncelist, 'Hourly':hourlist, 'Weekly':weeklist, 'Minutely':minutelist })
+  snaplist[allinfo['snapshots'][snap]['snaptype']].append(allinfo['snapshots'][snap].copy())
+  alllist.append(allinfo['snapshots'][snap].copy())
+ for period in allinfo['snapperiods']:
+  snappriods.append(allinfo['snapperiods'][period].copy())
+  periodlist[allinfo['snapperiods'][period]['periodtype']].append(allinfo['snapperiods'][period].copy())
+ return jsonify({'allsnaps':alllist, 'Once':snaplist['Once'], 'Hourly':snaplist['Hourly'], 'Weekly':snaplist['Weekly'], 'Minutely':snaplist['Minutely'] ,'allperiods':snappriods, 'Minutelyperiod':periodlist['Minutely'], 'Hourlyperiod':periodlist['Hourly'], 'Weeklyperiod':periodlist['Weekly']})
 
 def volumesinfo(prot='all'):
  global allvolumes, alldsks, allinfo
@@ -317,12 +318,16 @@ def volumesnapshotscreate():
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  ownerip = allinfo['hosts'][data['owner']]['ipaddress']
- datastr = data['name']+' '+data['pool']+' '+data['volume']+' '+data['user']
+ switch = { 'Once':['snapsel','name','pool','volume'], 'Minutely':['snapsel', 'pool', 'volume', 'every', 'keep'] }
+ datastr = ''
+ for param in switch[data['snapsel']]:
+  datastr +=data[param]+' '
+ #datastr = data['name']+' '+data['pool']+' '+data['volume']+' '+data['user']
  print('#############################')
  print(data)
- print(ownerip)
+ print(datastr)
  print('###########################')
- cmndstring = '/TopStor/pump.sh SnapshotCreate'+data['snapsel']+' '+datastr
+ cmndstring = '/TopStor/pump.sh SnapshotCreate'+datastr+' '+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
