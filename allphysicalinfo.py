@@ -27,6 +27,16 @@ def getsnapperiods(voldict):
    periodsdict[leftper[4]]['keep']=rightper[4].split('.')[1]
    periodsdict[leftper[4]]['sminute']=rightper[4].split('.')[2]
    periodsdict[leftper[4]]['every']=rightper[4].split('.')[3]
+  elif 'Weekly' in leftper[1]: 
+   periodsdict[leftper[4]]['keep']=rightper[3].split('.')[1]
+   hr=rightper[3].split('.')[2]
+   ampm = 'AM'
+   if int(hr) > 12 :
+    hr = int(hr) - 12
+    ampm = 'PM'
+   mint=rightper[3].split('.')[3]
+   periodsdict[leftper[4]]['stime']=str(hr)+':'+str(mint)+' '+ampm
+   periodsdict[leftper[4]]['every']=rightper[3].split('.')[4].split('%')[0]
  return (periodsdict,voldict)
 
 def getall(*args):

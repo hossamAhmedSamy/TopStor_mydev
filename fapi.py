@@ -319,7 +319,8 @@ def volumesnapshotscreate():
  allinfo = getall(alldsks)
  ownerip = allinfo['hosts'][data['owner']]['ipaddress']
  switch = { 'Once':['snapsel','name','pool','volume'], 'Minutely':['snapsel', 'pool', 'volume', 'every', 'keep'],
-	'Hourly':['snapsel', 'pool', 'volume', 'sminute', 'every', 'keep'] }
+	'Hourly':['snapsel', 'pool', 'volume', 'sminute', 'every', 'keep'], 
+	'Weekly':['snapsel', 'pool', 'volume', 'stime', 'every', 'keep'] }
  datastr = ''
  for param in switch[data['snapsel']]:
   datastr +=data[param]+' '
@@ -430,6 +431,20 @@ def volumesnapshotrol():
         		 
  return data
 
+
+@app.route('/api/v1/volumes/snapshots/perioddelete', methods=['GET','POST'])
+def volumesnapshotperioddel():
+ data = request.args.to_dict()
+ data['user'] = 'admin'
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
+ owner = allinfo['snapperiods'][data['name']]['host']
+ ownerip = allinfo['hosts'][owner]['ipaddress']
+ cmndstring = "/TopStor/pump.sh SnapShotPeriodDelete "+data['name']+" "+data['user']
+ z= cmndstring.split(' ')
+ msg={'req': 'Pumpthis', 'reply':z}
+ sendhost(ownerip, str(msg),'recvreply',myhost)
+ return data  
 
 
 @app.route('/api/v1/volumes/snapshots/snapshotdel', methods=['GET','POST'])
