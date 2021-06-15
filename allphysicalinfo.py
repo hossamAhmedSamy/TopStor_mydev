@@ -21,9 +21,13 @@ def getsnapperiods(voldict):
   periodsdict[leftper[4]]['periodtype']=leftper[1]
   periodsdict[leftper[4]]['id']=leftper[4]
   if 'Minutely' in leftper[1]: 
-   periodsdict[leftper[4]]['every']=rightper[4].split('.')[1]
-   periodsdict[leftper[4]]['keep']=rightper[4].split('.')[2]
-  return (periodsdict,voldict)
+   periodsdict[leftper[4]]['keep']=rightper[4].split('.')[1]
+   periodsdict[leftper[4]]['every']=rightper[4].split('.')[2]
+  elif 'Hourly' in leftper[1]: 
+   periodsdict[leftper[4]]['keep']=rightper[4].split('.')[1]
+   periodsdict[leftper[4]]['sminute']=rightper[4].split('.')[2]
+   periodsdict[leftper[4]]['every']=rightper[4].split('.')[3]
+ return (periodsdict,voldict)
 
 def getall(*args):
  alldsks = args[0]
@@ -121,7 +125,7 @@ def getall(*args):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
- print('snapshots',snapshotsdict)
+ print('snapperiods',snapperiodsdict) 
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  

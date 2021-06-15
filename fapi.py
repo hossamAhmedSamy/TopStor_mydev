@@ -189,7 +189,7 @@ def volumessnapshotsinfo():
  alllist = []
  snappriods = []
  for snap in allinfo['snapshots']:
-  allinfo['snapshots'][snap]['date'] = datetime.strptime(allinfo['snapshots'][snap]['creation'], '%a %b %d %Y').strftime('%m-%B-%Y')
+  allinfo['snapshots'][snap]['date'] = datetime.strptime(allinfo['snapshots'][snap]['creation'], '%a %b %d %Y').strftime('%d-%B-%Y')
   snaplist[allinfo['snapshots'][snap]['snaptype']].append(allinfo['snapshots'][snap].copy())
   alllist.append(allinfo['snapshots'][snap].copy())
  for period in allinfo['snapperiods']:
@@ -318,7 +318,8 @@ def volumesnapshotscreate():
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  ownerip = allinfo['hosts'][data['owner']]['ipaddress']
- switch = { 'Once':['snapsel','name','pool','volume'], 'Minutely':['snapsel', 'pool', 'volume', 'every', 'keep'] }
+ switch = { 'Once':['snapsel','name','pool','volume'], 'Minutely':['snapsel', 'pool', 'volume', 'every', 'keep'],
+	'Hourly':['snapsel', 'pool', 'volume', 'sminute', 'every', 'keep'] }
  datastr = ''
  for param in switch[data['snapsel']]:
   datastr +=data[param]+' '
