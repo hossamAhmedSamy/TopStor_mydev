@@ -2,16 +2,9 @@
 
 from allphysicalinfo import getall 
 from etcdgetpy import etcdget as get
+from levelthis import levelthis
+
 vollisting = ['used', 'quota', 'usedbysnapshots' ]
-def levelthis(fig,power='M'):
- leveldict = {'B':1, 'K':1024, 'M':1048576, 'G':1073741824, 'T':1099511627776}
- figure = str(fig).replace(',','')
- level = figure[-1].upper()
- if level in leveldict:
-  num = float(figure[:-1])*leveldict[level]/leveldict[power]
- else:
-   num = float(figure)/leveldict[power]
- return num 
 
 def volumes(voldict):
  global vollisting

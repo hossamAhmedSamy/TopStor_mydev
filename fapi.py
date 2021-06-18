@@ -10,8 +10,10 @@ from etcdgetpy import etcdget  as get
 from sendhost import sendhost
 from socket import gethostname as hostname
 from getlogs import getlogs
-from statistics import allvolstats
+from fapistats import allvolstats, levelthis
 from datetime import datetime
+
+
 os.environ['ETCDCTL_API'] = '3'
 alldsks = []
 allpools = 0
@@ -149,6 +151,15 @@ def hostslost():
    losthosts.append({'id': hid, 'name': active['name'], 'ip': active['ip']})
    hid += 1
  return jsonify(losthosts)
+
+@app.route('/api/v1/pools/dgsinfo', methods=['GET','POST'])
+def dgsinfo():
+ global allinfo 
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
+ dgsinfo = {'raids':allinfo['raids'], 'pools':allinfo['pools'], 'disks':allinfo['disks']}
+ return jsonify(dgsinfo)
+
 
 @app.route('/api/v1/volumes/stats', methods=['GET','POST'])
 def volumestats():

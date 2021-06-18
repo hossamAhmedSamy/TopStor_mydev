@@ -3,6 +3,7 @@ from logqueue import queuethis
 from etcdgetpy import etcdget as get
 from ast import literal_eval as mtuple
 import subprocess, copy
+from levelthis import levelthis
 import sys
 
 
@@ -74,6 +75,10 @@ def getall(*args):
   hostip = get('ActivePartners/'+host)[0]
   hostsdict[host] = {'name': host,'ipaddress': hostip, 'pools': hostpools }
   for pool in pools:
+   pool['used'] = levelthis(pool['used'])
+   pool['available'] = levelthis(pool['available'])
+   pool['alloc'] = levelthis(pool['alloc'])
+   pool['empty'] = levelthis(pool['empty'])
    hostpools.append(pool['name'])
    thepool = pool.copy()
    thepool.pop('raidlist',None)
@@ -91,11 +96,15 @@ def getall(*args):
     raidsdict[raid['name']] = theraid.copy()
     raidsdict[raid['name']]['disks'] = raiddisks
     for disk in raid['disklist']:
+     disk['size'] = levelthis(disk['size'])
      raiddisks.append(disk['name'])
      disksdict[disk['name']] = disk.copy()
    poolvolumes = []
    poolsdict[pool['name']]['volumes'] = poolvolumes
    for volume in pool['volumes']:
+    volume['used'] = levelthis(volume['used'])
+    volume['quota'] = levelthis(volume['quota'])
+    volume['usedbysnapshots'] = levelthis(volume['usedbysnapshots'],'M')
     poolvolumes.append(volume['name'])
     thevolume = volume.copy()
     #echo /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes >> /root/volchange
@@ -103,6 +112,7 @@ def getall(*args):
     volumesnapshots = []
     volumesnapperiods = []
     for snapshot in volume['snapshots']:
+     snapshot['used'] = levelthis(snapshot['used'],'M')
      volumesnapshots.append(snapshot['name'])
      snapshotsdict[snapshot['name']] = snapshot.copy() 
     if 'snapperiods' in volume:
@@ -135,7 +145,6 @@ def getall(*args):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
- print('snapperiods',snapperiodsdict) 
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  
