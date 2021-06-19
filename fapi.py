@@ -12,7 +12,7 @@ from socket import gethostname as hostname
 from getlogs import getlogs
 from fapistats import allvolstats, levelthis
 from datetime import datetime
-from getallraids import newraids
+from getallraids import newraids, selectdisks
 
 
 os.environ['ETCDCTL_API'] = '3'
@@ -178,13 +178,27 @@ def dgsnewpool():
   keys.append(float(data['useable']))
   keys.sort()
   diskindx = keys.index(float(data['useable']))+1
-  if diskindx >= len(keys):
-   diskindx = len(keys) - 1
+  if diskindx == len(keys):
+   diskindx = len(keys) - 2 
+  print('keys',keys[diskindx])
+  print(dgsinfo['newraid'][data['redundancy']])
   disks =  dgsinfo['newraid'][data['redundancy']][keys[diskindx]]
-  
+ if 'single' in data['redundancy']:
+  pdisk = disks.copy()
+  disks = dict()
+  disks['diskcount'] = 1
+  disks['disk'] = allinfo['disks'][pdisk[0]]['size']
+ if 'mirror' in data['redundancy']:
+  pdisk = disks
+  disks = dict()
+  disks['disk'] = pdisk
+  disks['diskcount'] = 2 
+ disks['raiddisks'] = dgsinfo['newraid']['single'][disks['disk']]
+ disks['alldisks'] = allinfo['disks']
+ selecteddisks = selectdisks(disks['disk'],disks['diskcount'],disks['raiddisks'],disks['alldisks'])
  print('#############################3')
  print(disks)
- print(dgsinfo['newraid'][data['redundancy']])
+ print(selecteddisks)
  print('#########################333')
  return jsonify(dgsinfo)
  

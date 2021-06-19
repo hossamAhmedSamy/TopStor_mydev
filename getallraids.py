@@ -46,6 +46,24 @@ def newraids(diskdict):
   allsizes['mirror'] = theraid
  return allsizes
 
+def selectdisks(size,diskcount,possibledisks,alldisks):
+ hosts= set()
+ diskhosts = dict()
+ disks = []
+ for disk in possibledisks:
+  if alldisks[disk]['host'] not in diskhosts:
+   diskhosts[alldisks[disk]['host']] = []
+   hosts.add(alldisks[disk]['host'])
+  diskhosts[alldisks[disk]['host']].append(disk)
+ hosts = list(hosts)
+ hostscount = len(hosts) 
+ while diskcount > 0:
+  host = hosts[diskcount % hostscount ]
+  disks.append(diskhosts[host].pop())
+  diskcount -= 1
+ return disks
+
+
 if __name__=='__main__':
  alldsks = get('host','current')
  allinfo = getall(alldsks)
