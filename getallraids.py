@@ -16,7 +16,7 @@ def getraid(single,group,parity):
  theraid = dict()
  for size in single:
   dif = len(single[size]) - group
-  base = size*(group -parity )
+  base = round(size*(group -parity ),2)
   count = 0 
   while dif >= 0:
    theraid[base] = {'disk':size, 'diskcount': count+group }
