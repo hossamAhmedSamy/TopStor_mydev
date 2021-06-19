@@ -12,6 +12,7 @@ from socket import gethostname as hostname
 from getlogs import getlogs
 from fapistats import allvolstats, levelthis
 from datetime import datetime
+from getallraids import newraids
 
 
 os.environ['ETCDCTL_API'] = '3'
@@ -158,6 +159,7 @@ def dgsinfo():
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  dgsinfo = {'raids':allinfo['raids'], 'pools':allinfo['pools'], 'disks':allinfo['disks']}
+ dgsinfo['newraid'] = newraids(allinfo['disks'])
  return jsonify(dgsinfo)
 
 
