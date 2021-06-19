@@ -44,7 +44,6 @@ def newraids(diskdict):
  theraid = getmirror(single,2)
  if len(theraid) > 0:
   allsizes['mirror'] = theraid
- print(allsizes)
  return allsizes
 
 if __name__=='__main__':

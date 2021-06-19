@@ -162,6 +162,32 @@ def dgsinfo():
  dgsinfo['newraid'] = newraids(allinfo['disks'])
  return jsonify(dgsinfo)
 
+@app.route('/api/v1/pools/newpool', methods=['GET','POST'])
+def dgsnewpool():
+ global allinfo
+ data = request.args.to_dict()
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
+ keys = []
+ dgsinfo = {'raids':allinfo['raids'], 'pools':allinfo['pools'], 'disks':allinfo['disks']}
+ dgsinfo['newraid'] = newraids(allinfo['disks'])
+ if data['useable'] in dgsinfo['newraid'][data['redundancy']]:
+  disks = dgsinfo['newraid'][data['redundancy']][float(data['useable'])]
+ else:
+  keys = list(dgsinfo['newraid'][data['redundancy']].keys())
+  keys.append(float(data['useable']))
+  keys.sort()
+  diskindx = keys.index(float(data['useable']))+1
+  if diskindx >= len(keys):
+   diskindx = len(keys) - 1
+  disks =  dgsinfo['newraid'][data['redundancy']][keys[diskindx]]
+  
+ print('#############################3')
+ print(disks)
+ print(dgsinfo['newraid'][data['redundancy']])
+ print('#########################333')
+ return jsonify(dgsinfo)
+ 
 
 @app.route('/api/v1/volumes/stats', methods=['GET','POST'])
 def volumestats():
