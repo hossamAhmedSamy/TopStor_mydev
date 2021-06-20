@@ -150,7 +150,7 @@ def hostslost():
  for active in activehosts:
   if active['name'] not in str(readyhosts): 
    losthosts.append({'id': hid, 'name': active['name'], 'ip': active['ip']})
-   hid += 1
+  hid += 1
  return jsonify(losthosts)
 
 @app.route('/api/v1/pools/dgsinfo', methods=['GET','POST'])
@@ -161,6 +161,22 @@ def dgsinfo():
  dgsinfo = {'raids':allinfo['raids'], 'pools':allinfo['pools'], 'disks':allinfo['disks']}
  dgsinfo['newraid'] = newraids(allinfo['disks'])
  return jsonify(dgsinfo)
+
+@app.route('/api/v1/pools/delpool', methods=['GET','POST'])
+def dgsdelpool():
+ data = request.args.to_dict()
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
+ owner = allinfo['pools'][data['pool']]['host']
+ ownerip = allinfo['hosts'][owner]['ipaddress']
+ data['user'] = 'admin'
+ datastr = data['pool']+' '+data['user'] 
+ cmndstring = '/TopStor/pump.sh DGdestroyPool '+datastr
+ z= cmndstring.split(' ')
+ msg={'req': 'Pumpthis', 'reply':z}
+ sendhost(ownerip, str(msg),'recvreply',myhost)
+ return jsonify(data)
+
 
 @app.route('/api/v1/pools/newpool', methods=['GET','POST'])
 def dgsnewpool():
@@ -196,11 +212,20 @@ def dgsnewpool():
  disks['raiddisks'] = dgsinfo['newraid']['single'][disks['disk']]
  disks['alldisks'] = allinfo['disks']
  selecteddisks = selectdisks(disks['disk'],disks['diskcount'],disks['raiddisks'],disks['alldisks'])
+ owner = allinfo['disks'][selecteddisks[0]]['host']
+ ownerip = allinfo['hosts'][owner]['ipaddress']
+ data['user'] = 'admin'
+ if 'single' in data['redundancy']:
+  datastr = 'Single '+data['user']+' '+owner+" "+selecteddisks[0]+" "+selecteddisks[0][-5:]+" nopool "+data['user']+" "+owner
  print('#############################3')
- print(disks)
  print(selecteddisks)
+ print(datastr)
  print('#########################333')
- return jsonify(dgsinfo)
+ cmndstring = '/TopStor/pump.sh DGsetPool '+datastr+' '+data['user']
+ z= cmndstring.split(' ')
+ msg={'req': 'Pumpthis', 'reply':z}
+ sendhost(ownerip, str(msg),'recvreply',myhost)
+ return jsonify(data)
  
 
 @app.route('/api/v1/volumes/stats', methods=['GET','POST'])
