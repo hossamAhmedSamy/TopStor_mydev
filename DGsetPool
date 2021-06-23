@@ -209,7 +209,7 @@ else
    diskns=${diskns}$diskn","
   done;
    /TopStor/logmsg.py DGst12 info $userreq p${nextpool} $diskns
-  /sbin/zpool add -f  ${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
+  /sbin/zpool add -f  p${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu12 info $userreq p${nextpool} $diskns
@@ -232,9 +232,9 @@ else
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-   /TopStor/logmsg.py DGst13 info $userreq p${nextpool} $diskns
   nextpool='dhcp'${RANDOM}$RANDOM;
-  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f ${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
+   /TopStor/logmsg.py DGst13 info $userreq p${nextpool} $diskns
+  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      zfs set acltype=posixacl p$nextpool
      zfs export p$nextpool
@@ -288,8 +288,8 @@ else
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-   /TopStor/logmsg.py DGst15 info $userreq p${nextpool} $diskns
   nextpool='dhcp'${RANDOM}$RANDOM;
+   /TopStor/logmsg.py DGst15 info $userreq p${nextpool} $diskns
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz2 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      zfs set acltype=posixacl p$nextpool
@@ -397,8 +397,8 @@ else
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-   /TopStor/logmsg.py DGst21 info $userreq p${nextpool} $diskns
   nextpool='dhcp'${RANDOM}$RANDOM;
+   /TopStor/logmsg.py DGst21 info $userreq p${nextpool} $diskns
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      zfs set acltype=posixacl p$nextpool
@@ -430,8 +430,8 @@ else
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-   /TopStor/logmsg.py DGst19 info $userreq p${nextpool} $diskns
   nextpool='dhcp'${RANDOM}$RANDOM;
+   /TopStor/logmsg.py DGst19 info $userreq p${nextpool} $diskns
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} mirror ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      zfs set acltype=posixacl p$nextpool

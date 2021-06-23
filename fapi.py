@@ -187,36 +187,38 @@ def dgsnewpool():
  keys = []
  dgsinfo = {'raids':allinfo['raids'], 'pools':allinfo['pools'], 'disks':allinfo['disks']}
  dgsinfo['newraid'] = newraids(allinfo['disks'])
- if data['useable'] in dgsinfo['newraid'][data['redundancy']]:
-  disks = dgsinfo['newraid'][data['redundancy']][float(data['useable'])]
- else:
+ if data['useable'] not in dgsinfo['newraid'][data['redundancy']]:
   keys = list(dgsinfo['newraid'][data['redundancy']].keys())
   keys.append(float(data['useable']))
   keys.sort()
-  diskindx = keys.index(float(data['useable']))+1
+  diskindx = keys.index(float(data['useable'])) + 1
   if diskindx == len(keys):
    diskindx = len(keys) - 2 
-  print('keys',keys[diskindx])
-  print(dgsinfo['newraid'][data['redundancy']])
-  disks =  dgsinfo['newraid'][data['redundancy']][keys[diskindx]]
+  data['useable'] = keys[diskindx]
+ disks =  dgsinfo['newraid'][data['redundancy']][data['useable']]
  if 'single' in data['redundancy']:
-  pdisk = disks.copy()
-  disks = dict()
-  disks['diskcount'] = 1
-  disks['disk'] = allinfo['disks'][pdisk[0]]['size']
- if 'mirror' in data['redundancy']:
-  pdisk = disks
-  disks = dict()
-  disks['disk'] = pdisk
-  disks['diskcount'] = 2 
- disks['raiddisks'] = dgsinfo['newraid']['single'][disks['disk']]
- disks['alldisks'] = allinfo['disks']
- selecteddisks = selectdisks(disks['disk'],disks['diskcount'],disks['raiddisks'],disks['alldisks'])
+  selecteddisks= disks
+ else:
+  selecteddisks = selectdisks(disks,dgsinfo['newraid']['single'],allinfo['disks'])
  owner = allinfo['disks'][selecteddisks[0]]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
  data['user'] = 'admin'
+ diskstring = ''
+ for dsk in selecteddisks:
+  diskstring += dsk+":"+dsk[-5:]+" "
  if 'single' in data['redundancy']:
   datastr = 'Single '+data['user']+' '+owner+" "+selecteddisks[0]+" "+selecteddisks[0][-5:]+" nopool "+data['user']+" "+owner
+ elif 'mirror' in data['redundancy']:
+  datastr = 'mirror '+data['user']+' '+owner+" "+diskstring+"nopool "+data['user']+" "+owner
+ elif 'volset' in data['redundancy']:
+  datastr = 'stripeset '+data['user']+' '+owner+" "+diskstring+" "+data['user']+" "+owner
+ elif 'raid5' in data['redundancy']:
+  datastr = 'parity '+data['user']+' '+owner+" "+diskstring
+ elif 'raid6plus' in data['redundancy']:
+  datastr = 'parity3 '+data['user']+' '+owner+" "+diskstring+" "+data['user']+" "+owner
+ elif 'raid6' in data['redundancy']:
+  datastr = 'parity2 '+data['user']+' '+owner+" "+diskstring+" "+data['user']+" "+owner
+ print('#############################3')
  print('#############################3')
  print(selecteddisks)
  print(datastr)
