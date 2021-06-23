@@ -86,27 +86,27 @@ def newraids(diskdict):
  return allsizes
 
 def selectdisks(disks,singles, disksinfo):
- print('#########disks',disks)
- print('#########singles',singles)
+ #print('#########disks',disks)
+ #print('#########singles',singles)
  thedisks = []
  others = disks['others']
  others.sort(reverse=True)
  diskgroups = others 
  diskgroups.append(disks['disk'] )
  diskcount = disks['diskcount']
- print('---------diskcount',diskcount)
+ #print('---------diskcount',diskcount)
  while diskcount > 0:
   nextgroup = diskgroups.pop()
   hostdisks = dict()
   hosts = set()
   disks = singles[nextgroup] 
-  print('------------diskcount2,',diskcount)
+  #print('------------diskcount2,',diskcount)
   for dsk in disks:
    hosts.add(disksinfo[dsk]['host'])
    if disksinfo[dsk]['host'] not in hostdisks:
     hostdisks[disksinfo[dsk]['host']] = []
    hostdisks[disksinfo[dsk]['host']].append(dsk)
-  print('-----------hostdisks',hostdisks)
+  #print('-----------hostdisks',hostdisks)
   diskc = min(diskcount, len(disks))
   hosts = list(hosts)
   hostcount = len(hosts)
@@ -118,7 +118,7 @@ def selectdisks(disks,singles, disksinfo):
    else:
     hostcount -= 1
   diskcount -= len(disks)
- print('thehththeheh',thedisks)
+ #print('thehththeheh',thedisks)
  return thedisks
 
 

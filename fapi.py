@@ -219,9 +219,7 @@ def dgsnewpool():
  elif 'raid6' in data['redundancy']:
   datastr = 'parity2 '+data['user']+' '+owner+" "+diskstring+" "+data['user']+" "+owner
  print('#############################3')
- print('#############################3')
  print(selecteddisks)
- print(datastr)
  print('#########################333')
  cmndstring = '/TopStor/pump.sh DGsetPool '+datastr+' '+data['user']
  z= cmndstring.split(' ')
