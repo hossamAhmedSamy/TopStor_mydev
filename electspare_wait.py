@@ -3,12 +3,68 @@ from allphysicalinfo import getall
 import sys
 from etcdget2 import etcdgetjson
 from etcdgetpy import etcdget  as get
+from etcdput import etcdput  as put
 from sendhost import sendhost
 from socket import gethostname as hostname
 from getlogs import getlogs
 from fapistats import allvolstats, levelthis
 from datetime import datetime
 from getallraids import newraids, selectdisks
+alltemplate = {'hosts':{}, 'pools':{ 'changeop', 'status', 'host'}, 'raids': {'changeop', 'status','host'},'disks':{'changeop' , 'status', 'raid', 'pool', 'id', 'host', 'size', 'devname'},  'volumes':{ 'groups', 'ipaddress', 'Subnet', 'host', 'quota'}}
+allinfo = dict()
+alllastinfo = dict()
+changepot = dict() 
+def allcompare(last,current):
+ print(allinfo.keys())
+ for key in current:
+  if key not in alltemplate:
+    continue
+  tocompare = alltemplate[key]
+  for identity in current[key]:
+   if identity not in last[key]:
+    if key not in changepot:
+     changepot[key] = dict()
+    changepot[key][identity] = ('None',identity)
+   else:
+    for comp in tocompare:
+     if last[key][identity][comp] != current[key][identity][comp]:
+      if key not in changepot:
+       changepot[key] = dict()
+      if identity not in changepot[key]:
+       changepot[key][identity] = dict() 
+      changepot[key][identity][comp] = (last[key][identity][comp], current[key][identity][comp])
+    last[key].pop(identity,None)
+  if key not in changepot:
+   last.pop(key)
+ for key in last:
+  if key not in alltemplate:
+    continue
+  for identity in last[key]:
+    if key not in changepot:
+     changepot[key] = dict()
+    changepot[key][identity] = (identity,'None')
+ print(changepot)  
+ return changepot 
+
+def checkhosts():
+ global allinfo, alllastinfo
+ alldsks = get('host','current')
+ lastalldsks = get('host','last')
+ if lastalldsks[0] == -1:
+  for hostinfo in alldsks:
+   leftside = hostinfo[0].replace('current','last')
+   put(leftside, hostinfo[1])
+  return
+ allinfo = getall(alldsks)
+ alllastinfo = getall(lastalldsks)
+ alllastinfo['pools']['inlast']= { 'name': 'inlast', 'status':'ONLINE' }
+ allinfo['pools']['incurrent']= { 'name': 'incurrent','status':'ONLINE' }
+ allinfo['pools']['inboth']= { 'name':'inboth','status': 'ONLINE' }
+ alllastinfo['pools']['inboth']= { 'name':'inboth', 'status': 'DEGRADED' }
+ allchange = allcompare(alllastinfo,allinfo) 
+ print(allchange)
+ return allchange
+
 
 def electspare(data):
  alldsks = get('host','current')
@@ -58,4 +114,5 @@ def electspare(data):
 if __name__=='__main__':
  if len(sys.argv) > 1: 
   electspare(*sys.argv[1:])
+ data = checkhosts()
  

@@ -150,4 +150,5 @@ def getall(*args):
  
 if __name__=='__main__':
  alldsks = get('host','current')
+ print('hihihih')
  getall(alldsks, *sys.argv[1:])
