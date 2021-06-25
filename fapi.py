@@ -451,7 +451,7 @@ def volumeconfig():
  data['user'] = 'admin'
  for ele in data:
   volume[ele] = data[ele] 
- datastr = volume['pool']+' '+volume['name']+' '+volume['quota']+' '+volume['groups']+' '+volume['ipaddress']+' '+volume['Subnet']+' '+volume['host']+' '+volume['user']
+ datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+volume['groups']+' '+volume['ipaddress']+' '+str(volume['Subnet'])+' '+volume['host']+' '+volume['user']
  print('#############################')
  print(data)
  print(datastr)

@@ -1,6 +1,7 @@
 #!/bin/python3.6
 from allphysicalinfo import getall 
 import sys
+from ast import literal_eval as mtuple
 from etcdget2 import etcdgetjson
 from etcdgetpy import etcdget  as get
 from etcdput import etcdput  as put
@@ -10,61 +11,119 @@ from getlogs import getlogs
 from fapistats import allvolstats, levelthis
 from datetime import datetime
 from getallraids import newraids, selectdisks
-alltemplate = {'hosts':{}, 'pools':{ 'changeop', 'status', 'host'}, 'raids': {'changeop', 'status','host'},'disks':{'changeop' , 'status', 'raid', 'pool', 'id', 'host', 'size', 'devname'},  'volumes':{ 'groups', 'ipaddress', 'Subnet', 'host', 'quota'}}
+import logmsg
+
+faultydisks = []
+alltemplate = {'hosts':{}, 'pools':{ 'status', 'host'}, 'raids': {'status'},'disks':{'status'},  'volumes':{ 'groups', 'ipaddress', 'Subnet', 'quota'}}
+parsetemplate = {'hosts':{'identity': { '__added__':('Sys01','the host :: is registered in the system'), '__removed__':('Sys02','the host :: is removed from the system')}}, 
+                 'pools':{'identity':{'__added__':('Sys03',' the pool :: is registered in the system'), '__removed__': ('Sys04','the host :: is removed from the system')}, 'status':('Sys05',':: status is changed from :: to ::'), 'host': ('Sys06','the pool ownership is transferred from host :: to host ::.')},
+                'raids':{'identity':{'__added__':('Sys07',' the raid :: is registered in the system'), '__removed__': ('Sys08','the raid :: is removed from the system')}, 'status':('Sys09',':: status is change from :: to ::')},
+                'disks':{'identity':{'__added__':('Sys10',' the disk :: is registered in the system'), '__removed__': ('Sys11','the disk :: is removed from the system')}, 'status':('Sys12',':: status is change from :: to ::')},
+                'volumes':{'identity':{'__added__':('Sys13',' the volume :: is registered in the system'), '__removed__': ('Sys14','the volume :: is removed from the system')},'groups':('Sys15', ' this volume ::  allowed groups are changed'), 'ipaddress':('Sys16',' the volume :: ipaddress is changed from :: to ::.'),  'Subnet':('Sys17', ' the volume :: ip subnet is changed from :: to ::.'), 'quota':('Sys18',' the volume :: maximum size is changed from :: to ::.')}
+                }
 allinfo = dict()
 alllastinfo = dict()
 changepot = dict() 
-def allcompare(last,current):
- print(allinfo.keys())
+def parsechange():
+ global changepot
+ print('changepot',changepot)
+ allmsgs = []
+ parser = [] 
+ for key in changepot:
+  for element in changepot[key]:
+   for change in changepot[key][element]:
+    parser = [element]
+    if isinstance(changepot[key][element][change],dict):
+     for chng in changepot[key][element][change]:
+      msgtext = parsetemplate[key][change][chng][1]
+      msgcode = parsetemplate[key][change][chng][0]
+      parser.append(changepot[key][element][change][chng])
+    else:
+     msgtext = parsetemplate[key][change][1]
+     msgcode = parsetemplate[key][change][0]
+     parser += list(changepot[key][element][change])
+    fixedparser = parser.copy()
+    parser.reverse()
+    while '::' in msgtext:
+     msgtext = msgtext.replace('::',parser.pop(),1)
+    allmsgs.append((msgcode,*fixedparser))
+ print(allmsgs)
+ return allmsgs
+
+def takedecision(allmsgs):
+ global allinfo, faultydisks
+ for msg in allmsgs:
+  print('msg',*msg[1:])
+  if any(x in msg[-1] for x in ['DEGRADED','FAULT','OFFLINE','__removed']):
+   logmsg.sendlog(msg[0],'warning','system',*msg[1:])
+  else:
+   logmsg.sendlog(msg[0],'info','system',*msg[1:])
+ faultydisks = get('disks','FAULT')
+ for disk in allinfo['disks']:
+  if disk in str(faultydisks):
+   continue
+  if all(x not in allinfo['disks'][disk]['status'] for x in ['ONLINE','free']):
+   put('disks/FAULT/'+disk, allinfo['disks'][disk]['status'])
+ return
+
+def allcompare():
+ global alllastinfo, allinfo, changepot
+ last = alllastinfo.copy()
+ current = allinfo.copy()
  for key in current:
   if key not in alltemplate:
     continue
   tocompare = alltemplate[key]
-  for identity in current[key]:
-   if identity not in last[key]:
+  for element in current[key]:
+   if element not in last[key]:
     if key not in changepot:
      changepot[key] = dict()
-    changepot[key][identity] = ('None',identity)
+    changepot[key][element] = {'identity':{'__added__':element}}
    else:
-    for comp in tocompare:
-     if last[key][identity][comp] != current[key][identity][comp]:
+    for feature in tocompare:
+     if last[key][element][feature] != current[key][element][feature]:
       if key not in changepot:
        changepot[key] = dict()
-      if identity not in changepot[key]:
-       changepot[key][identity] = dict() 
-      changepot[key][identity][comp] = (last[key][identity][comp], current[key][identity][comp])
-    last[key].pop(identity,None)
+      if element not in changepot[key]:
+       changepot[key][element] = dict() 
+      changepot[key][element][feature] = (last[key][element][feature], current[key][element][feature])
+    last[key].pop(element,None)
   if key not in changepot:
    last.pop(key)
  for key in last:
   if key not in alltemplate:
     continue
-  for identity in last[key]:
+  for element in last[key]:
     if key not in changepot:
      changepot[key] = dict()
-    changepot[key][identity] = (identity,'None')
- print(changepot)  
+    changepot[key][element] = {'identity':{identity,'__removed__'}}
  return changepot 
+
+def replacedisks():
+ global allinfo, faultydisks
+ for disk in faultydisks:
+  diskname = disk[0].split('/')[2]
+  raid = allinfo['disks'][diskname]['raid']
+  raidinfo = allinfo['raids'][raid]
+  print(raid)
+  print(raidinfo)
+ return
 
 def checkhosts():
  global allinfo, alllastinfo
  alldsks = get('host','current')
+ allinfo = getall(alldsks)
  lastalldsks = get('host','last')
  if lastalldsks[0] == -1:
-  for hostinfo in alldsks:
-   leftside = hostinfo[0].replace('current','last')
-   put(leftside, hostinfo[1])
+  put('hosts/last',str(allinfo) )
   return
- allinfo = getall(alldsks)
- alllastinfo = getall(lastalldsks)
- alllastinfo['pools']['inlast']= { 'name': 'inlast', 'status':'ONLINE' }
- allinfo['pools']['incurrent']= { 'name': 'incurrent','status':'ONLINE' }
- allinfo['pools']['inboth']= { 'name':'inboth','status': 'ONLINE' }
- alllastinfo['pools']['inboth']= { 'name':'inboth', 'status': 'DEGRADED' }
- allchange = allcompare(alllastinfo,allinfo) 
- print(allchange)
+ alllastinfo = mtuple(lastalldsks[0][1])
+ allchange = allcompare() 
+ allmsgs = parsechange()
+ takedecision(allmsgs)
+ put('hosts/last',str(allinfo))
+ replacedisks()
  return allchange
-
 
 def electspare(data):
  alldsks = get('host','current')

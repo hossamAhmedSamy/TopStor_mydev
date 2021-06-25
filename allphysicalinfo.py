@@ -127,6 +127,12 @@ def getall(*args):
      volumesdict[volume['name']].update(thevolume) 
     volumesdict[volume['name']]['snapshots'] = volumesnapshots
     volumesdict[volume['name']]['snapperiod'] = volumesnapperiods
+ toremove=[]
+ for volume in volumesdict:
+  if volume not in str(pools):
+   toremove.append(volume)
+ for volume in toremove:
+  volumesdict.pop(volume)
  snapperiodsdict = dict()
  snapperiodsdict, volumesdict = getsnapperiods(volumesdict) 
  '''
@@ -150,5 +156,4 @@ def getall(*args):
  
 if __name__=='__main__':
  alldsks = get('host','current')
- print('hihihih')
  getall(alldsks, *sys.argv[1:])
