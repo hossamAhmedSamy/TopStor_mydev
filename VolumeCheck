@@ -12,12 +12,16 @@ rm -rf $txtres 2>/dev/null
 dockern=`docker ps | grep 445 | wc -l`
 pcsn=`pcs resource | grep pdhcp | wc -l`
 etcdn=`./etcdget.py vol --prefix | grep -v NFS | wc -l`
+echo $dockern, $pcsn, $etcdn
 if [[ $dockern == $pcsn ]];
 then
  if [[ $etcdn == $pcsn ]];
  then
-  echo all is good
-  exit
+  if [[ $pcsn != '0' ]];
+  then
+   echo all is good
+   exit
+  fi
  fi
 fi
 myhost=`hostname -s`
@@ -33,13 +37,14 @@ do
   docker ps | grep $ip  >/dev/null
   if [ $? -ne 0 ];
   then
-   ./etcddel.py vol $ip
-   /sbin/pcs resource delete cifs-$pool-$ip 
-   /sbin/pcs resource delete Home-$pool-$ip 
+   echo $ip
+   #./etcddel.py vol $ip
+   #/sbin/pcs resource delete cifs-$pool-$ip 
+   #/sbin/pcs resource delete Home-$pool-$ip 
    echo '############' deleted $ip '##############'
   fi
  done
-  sleep 20
+  sleep 2
   echo activatinggggggggggggggggggggggg
   /TopStor/VolumeActivateCIFSImport pool=$pool user=system
   /TopStor/VolumeActivateHomeImport pool=$pool user=system

@@ -50,6 +50,7 @@ def getall(*args):
  snapshotsdict = dict()
  snapperiodsdict = dict()
  allvols = []
+ availability = get('balance','--prefix')
  vols = get('volumes','--prefix')
  for vol in vols:
   voldict = dict()
@@ -87,6 +88,10 @@ def getall(*args):
    poolsdict[pool['name']] = dict()
    poolsdict[pool['name']] = thepool.copy() 
    poolsdict[pool['name']]['raids'] = poolraids
+   if pool['name'] in str(availability):
+    poolsdict[pool['name']]['Availability'] = 'Availability'
+   else:
+    poolsdict[pool['name']]['Availability'] = 'None'
    for raid in pool['raidlist']:
     if 'free' not in raid['name']:
      raidname = raid['name']+'_'+pool['name']
