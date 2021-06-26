@@ -182,11 +182,11 @@ else
     /TopStor/logmsg.py DG1fa6 error $userreq ${nextpool} $diskn1 
   else 
      zfs set acltype=posixacl p$nextpool
+     zfs set avail:type=single p$nextpool
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool
      ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
-     ETCDCTL_API=3 /pace/etcdput.py balancetype/p$nextpool Availability 
      ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
      ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
      ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
@@ -237,6 +237,7 @@ else
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      zfs set acltype=posixacl p$nextpool
+     zfs set avail:type=Availbility p$nextpool
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool
@@ -293,6 +294,7 @@ else
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz2 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      zfs set acltype=posixacl p$nextpool
+     zfs set avail:type=Availbility p$nextpool
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool
@@ -357,6 +359,7 @@ else
   if [ $? -eq 0 ]; then
      echo itisdone >> /root/tmp2
      zfs set acltype=posixacl p$nextpool
+     zfs set avail:type=Availbility p$nextpool
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool
@@ -402,11 +405,11 @@ else
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      zfs set acltype=posixacl p$nextpool
+     zfs set avail:type=volset p$nextpool
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool
      ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
-     ETCDCTL_API=3 /pace/etcdput.py balancetype/p$nextpool Availability 
      ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
      ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
      ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
@@ -435,6 +438,7 @@ else
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} mirror ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      zfs set acltype=posixacl p$nextpool
+     zfs set avail:type=Availability p$nextpool
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool

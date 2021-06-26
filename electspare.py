@@ -1,18 +1,19 @@
 #!/bin/python3.6
 from allphysicalinfo import getall 
-import sys
+import sys, subprocess
 from ast import literal_eval as mtuple
 from etcdget2 import etcdgetjson
 from etcdgetpy import etcdget  as get
+from etcddel import etcddel  as dels
 from etcdput import etcdput  as put
 from sendhost import sendhost
-from socket import gethostname as hostname
+from socket import gethostname
 from getlogs import getlogs
 from fapistats import allvolstats, levelthis
 from datetime import datetime
-from getallraids import newraids, selectdisks
+from getallraids import newraids, selectdisks, selectnewmirror
 import logmsg
-
+myhost = ''
 faultydisks = []
 alltemplate = {'hosts':{}, 'pools':{ 'status', 'host'}, 'raids': {'status'},'disks':{'status'},  'volumes':{ 'groups', 'ipaddress', 'Subnet', 'quota'}}
 parsetemplate = {'hosts':{'identity': { '__added__':('Sys01','the host :: is registered in the system'), '__removed__':('Sys02','the host :: is removed from the system')}}, 
@@ -26,7 +27,6 @@ alllastinfo = dict()
 changepot = dict() 
 def parsechange():
  global changepot
- print('changepot',changepot)
  allmsgs = []
  parser = [] 
  for key in changepot:
@@ -47,18 +47,37 @@ def parsechange():
     while '::' in msgtext:
      msgtext = msgtext.replace('::',parser.pop(),1)
     allmsgs.append((msgcode,*fixedparser))
- print(allmsgs)
  return allmsgs
+
+def mirrorattach(pool,cdisk,ndisk,raid):
+ global myhost
+ logmsg.sendlog('Dist6','info','system', ndisk,raid,pool,myhost)
+ cmd = ['/sbin/zpool', 'attach', '-f', pool, cdisk, ndisk]
+ print(pool,cdisk,ndisk)
+ logmsg.sendlog('Dist2','info','system', cdisk, ndisk,myhost)
+ cmdline3=['/sbin/zpool', 'labelclear', ndisk]
+ subprocess.run(cmdline3,stdout=subprocess.PIPE)
+ try: 
+  subprocess.check_call(cmd)
+  if 'attach' in cmd:
+   logmsg.sendlog('Disu6','info','system', ndisk,raid,pool,myhost)
+   put('fixpool/'+pool,'1')
+  else:
+   logmsg.sendlog('Disu2','info','system', cdisk, ndisk,myhost)
+ except subprocess.CalledProcessError:
+  print('attach problem')
+  return 'fault'
 
 def takedecision(allmsgs):
  global allinfo, faultydisks
  for msg in allmsgs:
-  print('msg',*msg[1:])
   if any(x in msg[-1] for x in ['DEGRADED','FAULT','OFFLINE','__removed']):
    logmsg.sendlog(msg[0],'warning','system',*msg[1:])
   else:
    logmsg.sendlog(msg[0],'info','system',*msg[1:])
  faultydisks = get('disks','FAULT')
+ if '-1' in str(faultydisks):
+  faultydisks = [] 
  for disk in allinfo['disks']:
   if disk in str(faultydisks):
    continue
@@ -81,12 +100,15 @@ def allcompare():
     changepot[key][element] = {'identity':{'__added__':element}}
    else:
     for feature in tocompare:
-     if last[key][element][feature] != current[key][element][feature]:
-      if key not in changepot:
-       changepot[key] = dict()
-      if element not in changepot[key]:
-       changepot[key][element] = dict() 
-      changepot[key][element][feature] = (last[key][element][feature], current[key][element][feature])
+     try:
+      if last[key][element][feature] != current[key][element][feature]:
+       if key not in changepot:
+        changepot[key] = dict()
+       if element not in changepot[key]:
+        changepot[key][element] = dict() 
+       changepot[key][element][feature] = (last[key][element][feature], current[key][element][feature])
+     except:
+      dels('host','last')
     last[key].pop(element,None)
   if key not in changepot:
    last.pop(key)
@@ -96,17 +118,41 @@ def allcompare():
   for element in last[key]:
     if key not in changepot:
      changepot[key] = dict()
-    changepot[key][element] = {'identity':{identity,'__removed__'}}
+    changepot[key][element] = {'identity':{'__removed__':element}}
  return changepot 
+
+def getoptimaldisk(fdisk,raidinfo):
+ global myhost,allinfo
+ if 'mirror' in raidinfo['name'] or 'stripe' in raidinfo['name']:
+  newdisk = selectnewmirror(fdisk, allinfo['disks'], raidinfo)
+  ndisk = allinfo['disks'][newdisk[0]]['name']
+  pool = raidinfo['pool']
+  raid = raidinfo['name'].split('_')[0]
+  for disk in raidinfo['disks']:
+   if disk != ndisk  and disk != fdisk:
+    cdisk = disk
+  print(pool,cdisk,ndisk,raid)
+  mirrorattach(pool,cdisk,ndisk,raid)
+ return
+
 
 def replacedisks():
  global allinfo, faultydisks
+ myhost=gethostname()
+ availability = get('balance','--prefix')
+ print(faultydisks)
  for disk in faultydisks:
   diskname = disk[0].split('/')[2]
+  if diskname not in allinfo['disks']:
+   dels('disks/FAULT', diskname)
+   continue
   raid = allinfo['disks'][diskname]['raid']
   raidinfo = allinfo['raids'][raid]
-  print(raid)
-  print(raidinfo)
+  if allinfo['raids'][raid]['host'] in myhost:
+   getoptimaldisk(diskname,raidinfo)
+ for raid in allinfo['raids']:
+  if allinfo['raids'][raid]['status'] !='ONLINE' and allinfo['raids'][raid]['pool'] in str(availability):
+   getoptimaldisk('NA',allinfo['raids'][raid])
  return
 
 def checkhosts():
@@ -125,53 +171,9 @@ def checkhosts():
  replacedisks()
  return allchange
 
-def electspare(data):
- alldsks = get('host','current')
- allinfo = getall(alldsks)
- keys = []
- dgsinfo = {'raids':allinfo['raids'], 'pools':allinfo['pools'], 'disks':allinfo['disks']}
- dgsinfo['newraid'] = newraids(allinfo['disks'])
- if data['useable'] not in dgsinfo['newraid'][data['redundancy']]:
-  keys = list(dgsinfo['newraid'][data['redundancy']].keys())
-  keys.append(float(data['useable']))
-  keys.sort()
-  diskindx = keys.index(float(data['useable'])) + 1
-  if diskindx == len(keys):
-   diskindx = len(keys) - 2 
-  data['useable'] = keys[diskindx]
- disks =  dgsinfo['newraid'][data['redundancy']][data['useable']]
- if 'single' in data['redundancy']:
-  selecteddisks= disks
- else:
-  selecteddisks = selectdisks(disks,dgsinfo['newraid']['single'],allinfo['disks'])
- owner = allinfo['disks'][selecteddisks[0]]['host']
- ownerip = allinfo['hosts'][owner]['ipaddress']
- data['user'] = 'admin'
- diskstring = ''
- for dsk in selecteddisks:
-  diskstring += dsk+":"+dsk[-5:]+" "
- if 'single' in data['redundancy']:
-  datastr = 'Single '+data['user']+' '+owner+" "+selecteddisks[0]+" "+selecteddisks[0][-5:]+" nopool "+data['user']+" "+owner
- elif 'mirror' in data['redundancy']:
-  datastr = 'mirror '+data['user']+' '+owner+" "+diskstring+"nopool "+data['user']+" "+owner
- elif 'volset' in data['redundancy']:
-  datastr = 'stripeset '+data['user']+' '+owner+" "+diskstring+" "+data['user']+" "+owner
- elif 'raid5' in data['redundancy']:
-  datastr = 'parity '+data['user']+' '+owner+" "+diskstring
- elif 'raid6plus' in data['redundancy']:
-  datastr = 'parity3 '+data['user']+' '+owner+" "+diskstring+" "+data['user']+" "+owner
- elif 'raid6' in data['redundancy']:
-  datastr = 'parity2 '+data['user']+' '+owner+" "+diskstring+" "+data['user']+" "+owner
- print('#############################3')
- print(selecteddisks)
- print('#########################333')
- cmndstring = '/TopStor/pump.sh DGsetPool '+datastr+' '+data['user']
- z= cmndstring.split(' ')
- msg={'req': 'Pumpthis', 'reply':z}
- #sendhost(ownerip, str(msg),'recvreply',myhost)
  
 if __name__=='__main__':
  if len(sys.argv) > 1: 
-  electspare(*sys.argv[1:])
+  checkhosts(*sys.argv[1:])
  data = checkhosts()
  

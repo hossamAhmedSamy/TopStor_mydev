@@ -9,6 +9,17 @@ txtres='/TopStordata/'`basename $0`'.txt'
 rm -rf $txtres 2>/dev/null
 #pool=`echo $@ | awk -F'pool=' '{print $2}' | awk '{print $1}'`;
 #userreq=`echo $@ | awk -F'user=' '{print $2}' | awk '{print $1}'`;
+dockern=`docker ps | grep 445 | wc -l`
+pcsn=`pcs resource | grep pdhcp | wc -l`
+etcdn=`./etcdget.py vol --prefix | grep -v NFS | wc -l`
+if [[ $dockern == $pcsn ]];
+then
+ if [[ $etcdn == $pcsn ]];
+ then
+  echo all is good
+  exit
+ fi
+fi
 myhost=`hostname -s`
 ips='0'
 pools=`ls -1 / | grep pdhcp `

@@ -88,13 +88,18 @@ def getall(*args):
    poolsdict[pool['name']] = thepool.copy() 
    poolsdict[pool['name']]['raids'] = poolraids
    for raid in pool['raidlist']:
-    poolraids.append(raid['name'])
+    if 'free' not in raid['name']:
+     raidname = raid['name']+'_'+pool['name']
+    else:
+      raidname = raid['name']
+    poolraids.append(raidname)
     theraid = raid.copy()
     theraid.pop('disklist',None)
     raiddisks = []
-    raidsdict[raid['name']] = dict()
-    raidsdict[raid['name']] = theraid.copy()
-    raidsdict[raid['name']]['disks'] = raiddisks
+    raidsdict[raidname] = dict()
+    raidsdict[raidname] = theraid.copy()
+    raidsdict[raidname]['disks'] = raiddisks
+    raidsdict[raidname]['name'] = raidname 
     for disk in raid['disklist']:
      disk['size'] = levelthis(disk['size'])
      raiddisks.append(disk['name'])
@@ -135,6 +140,11 @@ def getall(*args):
   volumesdict.pop(volume)
  snapperiodsdict = dict()
  snapperiodsdict, volumesdict = getsnapperiods(volumesdict) 
+ for disk in disksdict:
+  diskraids = []
+  diskpool = disksdict[disk]['pool']
+  if 'pdhcp' in diskpool:
+   disksdict[disk]['raid'] = disksdict[disk]['raid']+'_'+diskpool
  '''
  print('#############')
  print('hosts',hostsdict)

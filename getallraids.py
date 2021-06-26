@@ -3,6 +3,67 @@
 from allphysicalinfo import getall 
 from etcdgetpy import etcdget as get
 from levelthis import levelthis
+from copy import deepcopy 
+
+def selectnewmirror(fdisk, diskdict, fmirror):
+ single = newraids(diskdict)['single']
+ fmdisks = [x for x in fmirror['disks'] if x != fdisk]
+ size = float('inf')
+ fmhosts = set()
+ for disk in fmdisks:
+  size = min(diskdict[disk]['size'],size)
+  fmhosts.add(diskdict[disk]['host'])
+ group = len(fmdisks) + 1
+ mirror = dict() 
+ possizes = [x for x in single if float(x) >= float(size)]
+ possizes.sort(reverse=True)
+ hostdisks = dict()
+ hosts = set()
+ for syz in possizes:
+  for dsk in single[syz]:
+   if dsk == fdisk or dsk in fmdisks:
+    continue
+   if diskdict[dsk]['host'] not in hostdisks:
+    hostdisks[diskdict[dsk]['host']] = []
+   hostdisks[diskdict[dsk]['host']].append(dsk)
+   hosts.add(diskdict[dsk]['host'])
+ pool = fmirror['pool']
+ balance = get('balance', pool)[0][1]
+ hostdiskcopy = deepcopy(hostdisks)
+ hosts = list(hosts)
+ finishedhosts = set() 
+ posdisks = []
+ if 'Availability' in balance:
+  notdone = 1 
+  hostcount = len(hosts)
+  while notdone:
+   chost = hosts[(notdone-1) % hostcount] 
+   if len(hostdiskcopy[chost]):
+    cdisk = hostdiskcopy[chost].pop(); 
+    notdone += 1
+    if chost not in fmhosts:
+     posdisks.append[cdisk]
+   else:
+    finishedhosts.add(chost)
+   if len(finishedhosts) == hostcount: 
+    notdone = 0
+ if not len(posdisks) or 'Availability' not in balance:
+  hostdiskcopy = deepcopy(hostdisks)
+  notdone = 1 
+  while notdone:
+   chost = hosts[(notdone-1) % hostcount] 
+   if len(hostdiskcopy[chost]):
+    cdisk = hostdiskcopy[chost].pop(); 
+    notdone += 1
+    posdisks.append(cdisk)
+   else:
+    finishedhosts.add(chost)
+   if len(finishedhosts) == hostcount: 
+    notdone = 0
+
+ if not len(posdisks):
+  posdisks = 'Nodisk'
+ return posdisks 
 
 
 def getmirror(single,group,diskdict):
