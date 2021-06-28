@@ -12,17 +12,11 @@ rm -rf $txtres 2>/dev/null
 dockern=`docker ps | grep 445 | wc -l`
 pcsn=`pcs resource | grep pdhcp | wc -l`
 etcdn=`./etcdget.py vol --prefix | grep -v NFS | wc -l`
-echo $dockern, $pcsn, $etcdn
-if [[ $dockern == $pcsn ]];
+smbs=` ls /pdhcp*/smb.* | grep _ | wc -l`
+if [[ $dockern$pcsn$etcdn == $smbs$smbs$smbs ]];
 then
- if [[ $etcdn == $pcsn ]];
- then
-  if [[ $pcsn != '0' ]];
-  then
-   echo all is good
-   exit
-  fi
- fi
+  echo all is good
+  exit
 fi
 myhost=`hostname -s`
 ips='0'

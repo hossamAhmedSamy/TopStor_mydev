@@ -168,7 +168,7 @@ def checkhosts():
  allmsgs = parsechange()
  takedecision(allmsgs)
  put('hosts/last',str(allinfo))
- replacedisks()
+ #replacedisks()
  return allchange
 
  

@@ -25,7 +25,7 @@ contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
  echo starting Volume CIFS activation for the pool $pool >> /root/volactivateImportparam
- ls /$pool | grep 'smb\.' 
+ ls /$pool | grep 'smb\.' | grep '\_'
  if [ $? -eq 0 ];
  then
   echo there is metadata about volumes in the  $pool.
