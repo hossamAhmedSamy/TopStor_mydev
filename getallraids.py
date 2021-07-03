@@ -86,20 +86,6 @@ def getmirror(single,group,diskdict):
    mirror[size] = {'disk':size, 'diskcount':group, 'others':otherslist, 'hosts': list(hosts), 'othershosts': list(othershosts)} 
  return mirror
 
-def oldgetraid(single,group,parity):
- theraid = dict()
- for size in single:
-  dif = len(single[size]) - group
-  base = round(size*(group -parity ),2)
-  count = 0 
-  while dif >= 0:
-   theraid[base] = {'disk':size, 'diskcount': count+group }
-   base += size
-   dif -= 1 
-   count += 1
- return theraid
-
-
 def getraid(single,group,parity,diskdict):
  theraid = dict()
  for size in single:
@@ -187,5 +173,6 @@ if __name__=='__main__':
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  disks = allinfo['disks']
- newraids(disks)
+ raids = newraids(disks)
+ print(raids)
  

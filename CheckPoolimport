@@ -1,7 +1,7 @@
 #!/bin/sh
 export ETCDCTL_API=3
 cd /TopStor/
-echo $@ > /root/dgset
+echo $@ > /root/checkpool
 importpools=` zpool import | grep 'pool:' | awk -F': ' '{print $2}'`;   
  echo "${importpools[@]}" | while read  l;
  do 
