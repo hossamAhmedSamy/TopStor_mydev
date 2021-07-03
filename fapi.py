@@ -177,6 +177,54 @@ def dgsdelpool():
  sendhost(ownerip, str(msg),'recvreply',myhost)
  return jsonify(data)
 
+@app.route('/api/v1/pools/addtopool', methods=['GET','POST'])
+def dgsaddtopool():
+ global allinfo
+ data = request.args.to_dict()
+ alldsks = get('host','current')
+ allinfo = getall(alldsks)
+ keys = []
+ dgsinfo = {'raids':allinfo['raids'], 'pools':allinfo['pools'], 'disks':allinfo['disks']}
+ dgsinfo['newraid'] = newraids(allinfo['disks'])
+ if data['useable'] not in dgsinfo['newraid'][data['redundancy']]:
+  keys = list(dgsinfo['newraid'][data['redundancy']].keys())
+  keys.append(float(data['useable']))
+  keys.sort()
+  diskindx = keys.index(float(data['useable'])) + 1
+  if diskindx == len(keys):
+   diskindx = len(keys) - 2 
+  data['useable'] = keys[diskindx]
+ disks =  dgsinfo['newraid'][data['redundancy']][data['useable']]
+ if 'single' in data['redundancy']:
+  selecteddisks= disks
+ else:
+  selecteddisks = selectdisks(disks,dgsinfo['newraid']['single'],allinfo['disks'])
+ owner = allinfo['disks'][selecteddisks[0]]['host']
+ ownerip = allinfo['hosts'][owner]['ipaddress']
+ data['user'] = 'admin'
+ diskstring = ''
+ for dsk in selecteddisks:
+  diskstring += dsk+":"+dsk[-5:]+" "
+ if 'mirror' in data['redundancy']:
+  datastr = 'addmirror '+data['user']+' '+owner+" "+diskstring+data['pool']
+ elif 'volset' in data['redundancy']:
+  datastr = 'addstripeset '+data['user']+' '+owner+" "+diskstring+data['pool']
+ elif 'raid5' in data['redundancy']:
+  datastr = 'addparity '+data['user']+' '+owner+" "+diskstring+data['pool']
+ elif 'raid6plus' in data['redundancy']:
+  datastr = 'addparity3 '+data['user']+' '+owner+" "+diskstring+data['pool']
+ elif 'raid6' in data['redundancy']:
+  datastr = 'addparity2 '+data['user']+' '+owner+" "+diskstring+data['pool']
+ print('#############################3')
+ print(selecteddisks)
+ print(datastr)
+ print('#########################333')
+ cmndstring = '/TopStor/pump.sh DGsetPool '+datastr
+ z= cmndstring.split(' ')
+ msg={'req': 'Pumpthis', 'reply':z}
+ sendhost(ownerip, str(msg),'recvreply',myhost)
+ return jsonify(data)
+ 
 
 @app.route('/api/v1/pools/newpool', methods=['GET','POST'])
 def dgsnewpool():
