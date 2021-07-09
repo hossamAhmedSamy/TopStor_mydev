@@ -12,6 +12,7 @@ from getlogs import getlogs
 from fapistats import allvolstats, levelthis
 from datetime import datetime
 from getallraids import newraids, selectdisks, selectnewmirror
+from copy import deepcopy 
 import logmsg
 myhost = ''
 faultydisks = []
@@ -42,7 +43,7 @@ def parsechange():
      msgtext = parsetemplate[key][change][1]
      msgcode = parsetemplate[key][change][0]
      parser += list(changepot[key][element][change])
-    fixedparser = parser.copy()
+    fixedparser = deepcopy(parser)
     parser.reverse()
     while '::' in msgtext:
      msgtext = msgtext.replace('::',parser.pop(),1)
@@ -87,8 +88,8 @@ def takedecision(allmsgs):
 
 def allcompare():
  global alllastinfo, allinfo, changepot
- last = alllastinfo.copy()
- current = allinfo.copy()
+ last = deepcopy(alllastinfo)
+ current = deepcopy(allinfo)
  for key in current:
   if key not in alltemplate:
     continue
@@ -108,7 +109,7 @@ def allcompare():
         changepot[key][element] = dict() 
        changepot[key][element][feature] = (last[key][element][feature], current[key][element][feature])
      except:
-      dels('host','last')
+      dels('host','lasit')
     last[key].pop(element,None)
   if key not in changepot:
    last.pop(key)
@@ -159,12 +160,25 @@ def checkhosts():
  global allinfo, alllastinfo
  alldsks = get('host','current')
  allinfo = getall(alldsks)
- lastalldsks = get('host','last')
+ lastalldsks = get('hosts','last')
  if lastalldsks[0] == -1:
   put('hosts/last',str(allinfo) )
   return
  alllastinfo = mtuple(lastalldsks[0][1])
  allchange = allcompare() 
+ if allchange:
+  changec = int(get('hosts/change')[0])
+  if changec not in [1,2,3,4,5]:
+   changec = 0 
+  if changec < 5:
+   changec += 1
+   put('hosts/change',str(changec))
+   return
+  put('hosts/change','0')
+  with open('/root/electtmp','w') as f:
+   f.write(str(alllastinfo))
+   f.write('\n'+str(len(allinfo['hosts'])))
+  print('found a change')
  allmsgs = parsechange()
  takedecision(allmsgs)
  put('hosts/last',str(allinfo))

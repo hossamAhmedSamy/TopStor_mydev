@@ -1,6 +1,6 @@
 #!/bin/python3.6
 import flask, os, Evacuate
-from flask import request, jsonify
+from flask import request, jsonify, render_template, redirect, url_for
 import Hostsconfig
 from Hostconfig import config
 from allphysicalinfo import getall 
@@ -483,6 +483,15 @@ def volumecreate():
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
  return data
+
+@app.route('/api/v1/login', methods=['GET','POST'])
+def login():
+ data = request.args.to_dict()
+ print('#######################')
+ print(data)
+ print('#######################')
+ return jsonify({'token':'329304usdlfkjaljfa093effjl'})
+ 
 
 @app.route('/api/v1/volumes/config', methods=['GET','POST'])
 def volumeconfig():
