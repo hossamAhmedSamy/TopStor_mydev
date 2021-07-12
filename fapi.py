@@ -1,21 +1,27 @@
 #!/bin/python3.6
 import flask, os, Evacuate
-from flask import request, jsonify, render_template, redirect, url_for
+from functools import wraps
+from flask import request, jsonify, render_template, redirect, url_for, g
 import Hostsconfig
 from Hostconfig import config
 from allphysicalinfo import getall 
 import sqlite3
 from etcdget2 import etcdgetjson
 from etcdgetpy import etcdget  as get
+from etcdput import etcdput  as put 
+from etcddel import etcddel  as dels 
 from sendhost import sendhost
 from socket import gethostname as hostname
 from getlogs import getlogs
 from fapistats import allvolstats, levelthis
 from datetime import datetime
 from getallraids import newraids, selectdisks
+from secrets import token_hex
+from time import time as timestamp
 
 
 os.environ['ETCDCTL_API'] = '3'
+loggedusers = {}
 alldsks = []
 allpools = 0
 allgroups = []
@@ -36,6 +42,17 @@ for log in logcatalog:
  msgcode= log.split(':')[0]
  logdict[msgcode] = log.replace(msgcode+':','').split(' ')
 myhost = hostname()
+
+def login_required(f):
+ @wraps(f)
+ def decorated_function(*args, **kwargs):
+  data = request.args.to_dict()
+  if data['token'] in loggedusers:
+   if loggedusers[data['token']]['timestamp'] > timestamp():
+    return f({'response':'Ok', 'token': data['token']})
+  return f({'response':'baduser'})
+ return decorated_function
+
 
 def postchange(cmndstring,host='leader'):
  z= cmndstring.split(' ')
@@ -417,8 +434,22 @@ def getalllogs():
  return jsonify({'alllogs': notif})
 
 
+@app.route('/api/v1/login/renewtoken', methods=['GET','POST'])
+@login_required
+def renewtoken(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
+ user = loggedusers[data['token']]['user']
+ setlogin(user,data['token'])
+ return data
+
+
+
 @app.route('/api/v1/info/notification', methods=['GET','POST'])
-def getnotification():
+@login_required
+def getnotification(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  notifbody = get('notification')[0].split(' ')[1:]
  msg = logdict[notifbody[3]]
  msgbody = '.'
@@ -433,7 +464,7 @@ def getnotification():
   elif len(word) > 0:
    msgbody = msgbody[:-1]+' '+word+'.' 
  notif = { 'importance':msg[0].replace(':',''), 'msgcode': notifbody[3], 'date':notifbody[0], 'time':notifbody[1],
-	 'host':notifbody[2], 'type':notifbody[4], 'user': notifbody[5], 'msgbody': msgbody[1:]} 
+	 'host':notifbody[2], 'type':notifbody[4], 'user': notifbody[5], 'msgbody': msgbody[1:], 'response':'Ok'}
  return jsonify(notif)
 
 @app.route('/api/v1/volumes/snapshots/create', methods=['GET','POST'])
@@ -484,13 +515,49 @@ def volumecreate():
  sendhost(ownerip, str(msg),'recvreply',myhost)
  return data
 
+def setlogin(user,token=0):
+ if token == 0:
+  token = token_hex(16)
+ stamp = int(timestamp() + 360)
+ put('login/'+user,token+'/'+str(stamp))
+ loggedusers[token] = {'user':user, 'timestamp':stamp}
+ return token
+ 
+def getlogin(token):
+ logindata = get('login',token)[0]
+ if logindata == -1:
+  return 'baduser'
+ oldtimestamp = logindata[1].split('/')[1]
+ user = logindata[0].split('/')[1]
+ if int(oldtimestamp) < int(timestamp()):
+  dels('login',token)
+  loggedusers.pop(token, None)
+  return 'baduser'
+ else:
+  setlogin(user,token) 
+  return token 
+
+@app.route('/api/v1/logout', methods=['GET','POST'])
+def logout():
+ data = request.args.to_dict()
+ dels('login',data['token'])
+ loggedusers.pop(data['token'], None)
+ return data
+
+@app.route('/api/v1/login/test', methods=['GET','POST'])
+def testlogin():
+ data = request.args.to_dict()
+ loginresponse = getlogin(data['token'])
+ return { 'response': loginresponse }
+
 @app.route('/api/v1/login', methods=['GET','POST'])
 def login():
  data = request.args.to_dict()
  print('#######################')
  print(data)
  print('#######################')
- return jsonify({'token':'329304usdlfkjaljfa093effjl'})
+ token = setlogin('admin')
+ return jsonify({'token':token})
  
 
 @app.route('/api/v1/volumes/config', methods=['GET','POST'])
