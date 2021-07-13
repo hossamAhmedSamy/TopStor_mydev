@@ -559,6 +559,14 @@ def login():
  token = setlogin('admin')
  return jsonify({'token':token})
  
+@app.route('/api/v1/users/usersauth', methods=['GET','POST'])
+def usersauth():
+ global allinfo
+ data = request.args.to_dict()
+ print('#######################')
+ print(data)
+ print('#######################')
+ return data
 
 @app.route('/api/v1/volumes/config', methods=['GET','POST'])
 def volumeconfig():

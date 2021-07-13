@@ -33,16 +33,16 @@ then
  echo name=$name
  myhost=`hostname -s`
  older=`ETCDCTL_API=3 /pace/etcdget.py volumes $name `
- echo /pace/etcdput.py volumes/Home/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes >> /root/volchange
+ echo /pace/etcdput.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes >> /root/volchange
  ETCDCTL_API=3 /pace/etcddel.py volumes $name
- ETCDCTL_API=3 /pace/etcdput.py volumes/Home/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
+ ETCDCTL_API=3 /pace/etcdput.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
  oldipaddr=`zfs get -H ip:addr $DG/$name | awk '{print $3}'`
  oldipsubnet=`zfs get -H ip:subnet $DG/$name | awk '{print $3}'`
  sed -i "s/$oldipaddr/$ipaddr/g" /$DG/smb.$name
  sed -i "s/$oldisubnet/$ipsubnet/g" /$DG/smb.$name
  /sbin/zfs set ip:addr=$ipaddr $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
- /pace/broadcasttolocal.py volumes/Home/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet 
+ /pace/broadcasttolocal.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet 
  /TopStor/VolumeActivateHome vol=$name user=$userreq
  /pace/putzpool.py 
  /TopStor/logmsg.py VolCsu01 info $userreq $name

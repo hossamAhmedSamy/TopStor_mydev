@@ -63,6 +63,7 @@ def getall(*args):
    voldict['Subnet'] = vol[1].split('/')[8]
    voldict['prot'] = vol[0].split('/')[1]
    volumesdict[voldict['name']] = voldict.copy()
+   print(vol) 
   elif vol[0].split('/')[1] == 'NFS':
    voldict['groups'] = vol[1].split('/')[8]
    voldict['ipaddress'] = vol[1].split('/')[9] 

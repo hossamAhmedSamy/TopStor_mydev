@@ -32,7 +32,7 @@ then
   vols=`ls /$pool | grep 'smb\.' `
   echo "${vols[@]}" | while read l;
   do
-   registry=`cat /$pool/$l | grep Home | grep SUMMARY | awk '{print $NF}'`
+   registry=`cat /$pool/$l | grep HOME | grep SUMMARY | awk '{print $NF}'`
    regn=`echo $registry | wc -c`
    if [ $regn -gt 10 ];
    then
