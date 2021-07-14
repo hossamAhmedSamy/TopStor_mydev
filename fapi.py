@@ -564,8 +564,10 @@ def usersauth():
  global allinfo
  data = request.args.to_dict()
  print('#######################')
- print(data)
+ cmndstring = '/TopStor/pump.sh Priv.py '+data['user']+' '+data['auths']
+ print(cmndstring)
  print('#######################')
+ postchange(cmndstring)
  return data
 
 @app.route('/api/v1/volumes/config', methods=['GET','POST'])
@@ -815,11 +817,12 @@ def api_users_userslist():
   username = user['name'].replace('usersinfo/','')
   usersize = user['prop'].split('/')[3]
   userpool = user['prop'].split('/')[1]
+  priv = '/'.join(user['prop'].split('/')[4:])
   if username not in userdict:
    groups = ['NoGroup']
   else:
    groups = userdict[username]
-  allusers.append({"name":username, 'id':uid, "pool":userpool, "size":usersize, "groups":groups})
+  allusers.append({"name":username, 'id':uid, "pool":userpool, "size":usersize, "groups":groups, 'priv':priv})
   uid += 1
   if 'NoHome' in userpool:
    usersnohome.append({ 'id':nohomeid, 'text': username })
