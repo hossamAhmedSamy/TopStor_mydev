@@ -44,6 +44,16 @@ then
  newipsubnet=`echo $@ | awk '{ print $5 }'`;
  /TopStor/HostManualconfigCC $@
 fi
+echo $whyreboot | grep QS 
+if [ $? -eq 0 ];
+then
+ cd /TopStor
+ git checkout $whyreboot
+ cd /pace
+ git checkout $whyreboot
+ cd /var/www/html/des20/
+ git checkout $whyreboot
+fi
 pkill httpd
 echo shuttingdown 8 >> /root/HostCC2
 sync

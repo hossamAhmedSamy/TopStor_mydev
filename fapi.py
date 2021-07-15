@@ -1,5 +1,5 @@
 #!/bin/python3.6
-import flask, os, Evacuate
+import flask, os, Evacuate, subprocess
 from functools import wraps
 from flask import request, jsonify, render_template, redirect, url_for, g
 import Hostsconfig
@@ -42,6 +42,21 @@ for log in logcatalog:
  msgcode= log.split(':')[0]
  logdict[msgcode] = log.replace(msgcode+':','').split(' ')
 myhost = hostname()
+
+def getversions():
+ cmdline='git branch'
+ versions = []
+ verdict = dict()
+ result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+ id = 0
+ for res in result.decode('utf-8').split('\n'):
+  if 'QS' in res:
+   if '*' in res:
+    cversion = res.split('QS')[1]
+   versions.append({'id': id, 'text':res.split('QS')[1]})
+   id += 1
+ verdict = { 'versions': versions, 'current': cversion } 
+ return verdict 
 
 def login_required(f):
  @wraps(f)
@@ -103,6 +118,19 @@ def getpools():
   pooldict[pool[0].split('/')[1]] = {'id': pid, 'owner': pool[1] }
  return poolinfo
  
+@app.route('/api/v1/software/setversion', methods=['GET','POST'])
+def setversion():
+ data = request.args.to_dict()
+ versions = getversions()
+ if data['version'] in versions['versions'] and data['version'] not in versions['current']:
+  cmdline = '/TopStor/updateversion '+data['version']
+  postchange(cmdline)
+ return data 
+
+@app.route('/api/v1/software/versions', methods=['GET','POST'])
+def versions():
+ return getversions()
+
 @app.route('/api/v1/hosts/info', methods=['GET','POST'])
 def hostsinfo():
  global allhosts, readyhosts, activehosts, losthosts, possiblehosts
