@@ -6,6 +6,7 @@ from flask import request, jsonify, render_template, redirect, url_for, g
 import Hostsconfig
 from Hostconfig import config
 from allphysicalinfo import getall 
+from UnixChkUser import setlogin
 import sqlite3
 from etcdget2 import etcdgetjson
 from etcdgetpy import etcdget  as get
@@ -467,7 +468,7 @@ def renewtoken(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  user = loggedusers[data['token']]['user']
- setlogin(user,data['token'])
+ setlogin(user,'!',data['token'])
  return data
 
 
@@ -544,14 +545,6 @@ def volumecreate(data):
  sendhost(ownerip, str(msg),'recvreply',myhost)
  return data
 
-def setlogin(user,token=0):
- if token == 0:
-  token = token_hex(16)
- stamp = int(timestamp() + 360)
- put('login/'+user,token+'/'+str(stamp))
- loggedusers[token] = {'user':user, 'timestamp':stamp}
- return token
- 
 def getlogin(token):
  logindata = get('login',token)[0]
  if logindata == -1:
@@ -561,10 +554,15 @@ def getlogin(token):
  if int(oldtimestamp) < int(timestamp()):
   dels('login',token)
   loggedusers.pop(token, None)
+  print('isssss######ss##########33','baduser')
   return 'baduser'
- else:
-  setlogin(user,token) 
-  return token 
+ userdict, token = setlogin(user,'!',token) 
+ if token == 0:
+  print('#################33','baduser')
+  return 'baduser'
+ loggedusers[token] = userdict.copy()
+ print('iamokkkkkkkkkkkkkkkkkk')
+ return token 
 
 @app.route('/api/v1/logout', methods=['GET','POST'])
 def logout():
@@ -585,7 +583,13 @@ def login():
  print('#######################')
  print(data)
  print('#######################')
- token = setlogin(data['user'])
+ userdict, token = setlogin(data['user'],data['pass'])
+ if token != 0:
+  loggedusers[token] = userdict.copy()
+  print('login okkkkkkk',loggedusers)
+ else:
+  print('login faileddddddddddddddddddd')
+  token = 'baduser'
  return jsonify({'token':token})
  
 @app.route('/api/v1/users/usersauth', methods=['GET','POST'])

@@ -17,7 +17,13 @@ sleep 1;
 done
 rm -rf /pacedata/forzfsping
 rm -rf /pacedata/forstartzfs
-sleep 240
+systemctl status etcd
+while [ $? -ne 0 ];
+do
+ sleep 5
+done
+/TopStor/initfactory.sh
+sleep 220
 /sbin/pcs resource delete --force IPinit
 /sbin/ip addr del 10.11.11.254/24 dev $nic
 /TopStor/factory.sh
