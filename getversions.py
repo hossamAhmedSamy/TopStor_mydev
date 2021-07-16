@@ -7,11 +7,13 @@ def getversions():
  versions = []
  verdict = dict()
  result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
+ id = 0
  for res in result.decode('utf-8').split('\n'):
   if 'QS' in res:
    if '*' in res:
     cversion = res.split('QS')[1]
-   versions.append(res.split('QS')[1])
+   versions.append({'id': id, 'text':res.split('QS')[1]})
+   id += 1
  verdict = { 'versions': versions, 'current': cversion } 
  return verdict 
 

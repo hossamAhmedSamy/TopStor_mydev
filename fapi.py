@@ -1,5 +1,6 @@
 #!/bin/python3.6
 import flask, os, Evacuate, subprocess
+from getversions import getversions
 from functools import wraps
 from flask import request, jsonify, render_template, redirect, url_for, g
 import Hostsconfig
@@ -43,28 +44,15 @@ for log in logcatalog:
  logdict[msgcode] = log.replace(msgcode+':','').split(' ')
 myhost = hostname()
 
-def getversions():
- cmdline='git branch'
- versions = []
- verdict = dict()
- result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
- id = 0
- for res in result.decode('utf-8').split('\n'):
-  if 'QS' in res:
-   if '*' in res:
-    cversion = res.split('QS')[1]
-   versions.append({'id': id, 'text':res.split('QS')[1]})
-   id += 1
- verdict = { 'versions': versions, 'current': cversion } 
- return verdict 
-
 def login_required(f):
  @wraps(f)
  def decorated_function(*args, **kwargs):
   data = request.args.to_dict()
   if data['token'] in loggedusers:
    if loggedusers[data['token']]['timestamp'] > timestamp():
-    return f({'response':'Ok', 'token': data['token']})
+    data['user'] = loggedusers[data['token']]['user']
+    data['response'] = 'Ok'
+    return f(data)
   return f({'response':'baduser'})
  return decorated_function
 
@@ -119,8 +107,10 @@ def getpools():
  return poolinfo
  
 @app.route('/api/v1/software/setversion', methods=['GET','POST'])
-def setversion():
- data = request.args.to_dict()
+@login_required
+def setversion(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  versions = getversions()
  if data['version'] in versions['versions'] and data['version'] not in versions['current']:
   cmdline = '/TopStor/updateversion '+data['version']
@@ -208,13 +198,14 @@ def dgsinfo():
  return jsonify(dgsinfo)
 
 @app.route('/api/v1/pools/delpool', methods=['GET','POST'])
-def dgsdelpool():
- data = request.args.to_dict()
+@login_required
+def dgsdelpool(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  owner = allinfo['pools'][data['pool']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- data['user'] = 'admin'
  datastr = data['pool']+' '+data['user'] 
  cmndstring = '/TopStor/pump.sh DGdestroyPool '+datastr
  z= cmndstring.split(' ')
@@ -223,8 +214,11 @@ def dgsdelpool():
  return jsonify(data)
 
 @app.route('/api/v1/pools/addtopool', methods=['GET','POST'])
-def dgsaddtopool():
+@login_required
+def dgsaddtopool(data):
  global allinfo
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  data = request.args.to_dict()
  alldsks = get('host','current')
  allinfo = getall(alldsks)
@@ -246,7 +240,6 @@ def dgsaddtopool():
   selecteddisks = selectdisks(disks,dgsinfo['newraid']['single'],allinfo['disks'])
  owner = allinfo['disks'][selecteddisks[0]]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- data['user'] = 'admin'
  diskstring = ''
  for dsk in selecteddisks:
   diskstring += dsk+":"+dsk[-5:]+" "
@@ -272,8 +265,11 @@ def dgsaddtopool():
  
 
 @app.route('/api/v1/pools/newpool', methods=['GET','POST'])
+@login_required
 def dgsnewpool():
  global allinfo
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  data = request.args.to_dict()
  alldsks = get('host','current')
  allinfo = getall(alldsks)
@@ -295,7 +291,6 @@ def dgsnewpool():
   selecteddisks = selectdisks(disks,dgsinfo['newraid']['single'],allinfo['disks'])
  owner = allinfo['disks'][selecteddisks[0]]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- data['user'] = 'admin'
  diskstring = ''
  for dsk in selecteddisks:
   diskstring += dsk+":"+dsk[-5:]+" "
@@ -423,8 +418,10 @@ def poolsinfo():
  return jsonify({'results':allpools})
 
 @app.route('/api/v1/groups/groupchange', methods=['GET','POST'])
-def groupchange():
- data = request.args.to_dict()
+@login_required
+def groupchange(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  usrs = data.get('users')
  usrstr = ''
  if len(usrs) < 1:
@@ -435,14 +432,16 @@ def groupchange():
     if str(suser['id']) == str(usr):
      usrstr += suser['name']+',' 
   usrstr = usrstr[:-1]
- cmndstring = '/TopStor/pump.sh UnixChangeGroup '+data.get('name')+' users'+usrstr+' admin'
+ cmndstring = '/TopStor/pump.sh UnixChangeGroup '+data.get('name')+' users'+usrstr+' '+data['user']
  postchange(cmndstring)
  return data
 
 
 @app.route('/api/v1/users/userchange', methods=['GET','POST'])
-def userchange():
- data = request.args.to_dict()
+@login_required
+def userchange(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  grps = data.get('groups')
  groupstr = ''
  allgroups = getgroups()
@@ -452,7 +451,7 @@ def userchange():
   for grp in grps.split(','):
    groupstr += allgroups[int(grp)][0]+','
   groupstr = groupstr[:-1]
- cmndstring = '/TopStor/pump.sh UnixChangeUser '+data.get('name')+' groups'+groupstr+' admin'
+ cmndstring = '/TopStor/pump.sh UnixChangeUser '+data.get('name')+' groups'+groupstr+' '+data['user'] 
  postchange(cmndstring)
  return data
 
@@ -496,10 +495,11 @@ def getnotification(data):
  return jsonify(notif)
 
 @app.route('/api/v1/volumes/snapshots/create', methods=['GET','POST'])
-def volumesnapshotscreate():
- data = request.args.to_dict()
+@login_required
+def volumesnapshotscreate(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  datastr = ''
- data['user'] = 'admin'
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  ownerip = allinfo['hosts'][data['owner']]['ipaddress']
@@ -525,10 +525,11 @@ def volumesnapshotscreate():
 
 
 @app.route('/api/v1/volumes/create', methods=['GET','POST'])
-def volumecreate():
- data = request.args.to_dict()
+@login_required
+def volumecreate(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  datastr = ''
- data['user'] = 'admin'
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  ownerip = allinfo['hosts'][allinfo['pools'][data['pool']]['host']]['ipaddress']
@@ -584,24 +585,28 @@ def login():
  print('#######################')
  print(data)
  print('#######################')
- token = setlogin('admin')
+ token = setlogin(data['user'])
  return jsonify({'token':token})
  
 @app.route('/api/v1/users/usersauth', methods=['GET','POST'])
-def usersauth():
+@login_required
+def usersauth(data):
  global allinfo
- data = request.args.to_dict()
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  print('#######################')
- cmndstring = '/TopStor/pump.sh Priv.py '+data['user']+' '+data['auths']
+ cmndstring = '/TopStor/pump.sh Priv.py '+data['tochange']+' '+data['auths'].replace(',','/')+' '+data['user']
  print(cmndstring)
  print('#######################')
  postchange(cmndstring)
  return data
 
 @app.route('/api/v1/volumes/config', methods=['GET','POST'])
-def volumeconfig():
+@login_required
+def volumeconfig(data):
  global allinfo
- data = request.args.to_dict()
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  volume = allinfo['volumes'][data['volume']]
@@ -610,7 +615,6 @@ def volumeconfig():
  datastr = ''
  if 'groups' in data and len(data['groups']) < 1: 
   data['groups'] = 'NoGroup'
- data['user'] = 'admin'
  for ele in data:
   volume[ele] = data[ele] 
  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+volume['groups']+' '+volume['ipaddress']+' '+str(volume['Subnet'])+' '+volume['host']+' '+volume['user']
@@ -628,15 +632,14 @@ def volumeconfig():
 
 
 @app.route('/api/v1/hosts/config', methods=['GET','POST'])
-def hostconfig():
- data = request.args.to_dict()
+@login_required
+def hostconfig(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  datastr = ''
- data['user'] = 'admin'
  for ele in data:
   datastr += ele+'='+data[ele]+' '
  datastr = datastr[:-1]
- #cmndstring = '/TopStor/pump.sh Hostconfig.py '+datastr+' user=admin'
- #postchange(cmndstring,'ready/'+data['name'])
  print('#############################')
  print(data)
  print('###########################')
@@ -644,17 +647,20 @@ def hostconfig():
  return data
 
 @app.route('/api/v1/hosts/evacuate', methods=['GET','POST'])
-def hostevacuate():
- data = request.args.to_dict()
+@login_required
+def hostevacuate(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  args = data['name']+' '+data['Myname'] 
- Evacuate.do(data['name'],'admin') 
+ Evacuate.do(data['name'], data['user']) 
  return data
 
 @app.route('/api/v1/volumes/snapshots/snaprollback', methods=['GET','POST'])
-def volumesnapshotrol():
+@login_required
+def volumesnapshotrol(data):
  global allinfo 
- data = request.args.to_dict()
- data['user'] = 'admin'
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  volume = allinfo['snapshots'][data['name']]['volume']
@@ -673,9 +679,10 @@ def volumesnapshotrol():
 
 
 @app.route('/api/v1/volumes/snapshots/perioddelete', methods=['GET','POST'])
-def volumesnapshotperioddel():
- data = request.args.to_dict()
- data['user'] = 'admin'
+@login_required
+def volumesnapshotperioddel(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  owner = allinfo['snapperiods'][data['name']]['host']
@@ -688,10 +695,11 @@ def volumesnapshotperioddel():
 
 
 @app.route('/api/v1/volumes/snapshots/snapshotdel', methods=['GET','POST'])
-def volumesnapshotdel():
+@login_required
+def volumesnapshotdel(data):
  global allinfo 
- data = request.args.to_dict()
- data['user'] = 'admin'
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  volume = allinfo['snapshots'][data['name']]['volume']
@@ -712,10 +720,11 @@ def volumesnapshotdel():
 
 
 @app.route('/api/v1/volumes/volumedel', methods=['GET','POST'])
-def volumedel():
+@login_required
+def volumedel(data):
  global allinfo 
- data = request.args.to_dict()
- data['user'] = 'admin'
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  pool = allinfo['volumes'][data['name']]['pool']
@@ -732,25 +741,31 @@ def volumedel():
  return data
 
 @app.route('/api/v1/groups/groupdel', methods=['GET','POST'])
-def groupdel():
- data = request.args.to_dict()
- cmndstring = '/TopStor/pump.sh UnixDelGroup '+data.get('name')+' admin'
+@login_required
+def groupdel(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
+ cmndstring = '/TopStor/pump.sh UnixDelGroup '+data.get('name')+' '+data['user'] 
  postchange(cmndstring)
  return data
 
 @app.route('/api/v1/users/userdel', methods=['GET','POST'])
-def userdel():
- data = request.args.to_dict()
- cmndstring = '/TopStor/pump.sh UnixDelUser '+data.get('name')+' admin'
+@login_required
+def userdel(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
+ cmndstring = '/TopStor/pump.sh UnixDelUser '+data.get('name')+' '+data['user']
  postchange(cmndstring)
  return data
 
 @app.route('/api/v1/groups/UnixAddgroup', methods=['GET','POST'])
-def UnixAddGroup():
+@login_required
+def UnixAddGroup(data):
  global allusers, allgroups
- data = request.args.to_dict()
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  usrstr = ''
- usrs = data.get('users')
+ usrs = data['users']
  if len(usrs) < 1:
   usrstr = 'NoUser'
  else:
@@ -759,15 +774,20 @@ def UnixAddGroup():
     if str(suser['id']) == str(usr):
      usrstr += suser['name']+',' 
   usrstr = usrstr[:-1]
- cmndstring = '/TopStor/pump.sh UnixAddGroup '+data.get('name')+' '+' users'+usrstr+'  admin'
+ print('##########################33333')
+ print(data)
+ print('##########################33333')
+ cmndstring = '/TopStor/pump.sh UnixAddGroup '+data['name']+' '+' users'+usrstr+' '+data['user']
  postchange(cmndstring)
  return data
  
 
 @app.route('/api/v1/users/UnixAddUser', methods=['GET','POST'])
-def UnixAddUser():
+@login_required
+def UnixAddUser(data):
  global allgroups
- data = request.args.to_dict()
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
  if 'NoHome' in data['Volpool']:
   pool = 'NoHome'
  else:
@@ -784,7 +804,7 @@ def UnixAddUser():
    groupstr += allgroups[int(grp)][0]+','
   groupstr = groupstr[:-1]
  cmndstring = '/TopStor/pump.sh UnixAddUser '+data.get('name')+' '+pool+' groups'+groupstr+' ' \
-     +data.get('Password')+' '+data.get('Volsize')+'G '+data.get('HomeAddress')+' '+data.get('HomeSubnet')+' hoststub'+' admin'
+     +data.get('Password')+' '+data.get('Volsize')+'G '+data.get('HomeAddress')+' '+data.get('HomeSubnet')+' hoststub'+' '+data['user']
  postchange(cmndstring)
  return data 
 
