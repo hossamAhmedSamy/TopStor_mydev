@@ -49,6 +49,7 @@ def login_required(f):
  @wraps(f)
  def decorated_function(*args, **kwargs):
   data = request.args.to_dict()
+  data['response'] = 'baduser'
   if data['token'] in loggedusers:
    if loggedusers[data['token']]['timestamp'] > timestamp():
     data['user'] = loggedusers[data['token']]['user']
@@ -847,6 +848,23 @@ def api_groups_groupslist():
    groupusers=["NoUser"]
   thegroup.append({'name':group[0], 'id':group[1], 'users':groupusers})
  return jsonify({'allgroups':thegroup})
+
+@app.route('/api/v1/users/userauths', methods=['GET'])
+@login_required
+def userauths(data):
+ global allgroups, allusers
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
+ if  data['username'] == 'admin':
+  return {'auths':'true','response':data['response']}
+ userlst = etcdgetjson('usersinfo','--prefix')
+ for user in userlst:
+  username = user['name'].replace('usersinfo/','')
+  if username == data['username']:
+   priv = '/'.join(user['prop'].split('/')[4:])
+   break
+ return jsonify({'auths':priv, 'response':data['response']})
+
 
 @app.route('/api/v1/users/userlist', methods=['GET'])
 def api_users_userslist():

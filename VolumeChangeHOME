@@ -21,7 +21,7 @@ ipaddr=`echo $@ | awk '{print $5}'`;
 ipsubnet=`echo $@ | awk '{print $6}'`;
 userreq=` echo $@ | awk '{print $8}'`;
 DG=`echo $pDG `;
-privilege="CIFS";
+privilege="HOME";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then

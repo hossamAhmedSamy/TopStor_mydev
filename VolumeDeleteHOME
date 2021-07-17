@@ -20,7 +20,7 @@ DG=`echo $pDG `;
 myhost=`hostname -s`
 txtres='/TopStordata/'`basename $0`$userreq
 rm -rf $txtres &>/dev/null
-privilege=$pro;
+privilege='HOME';
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then

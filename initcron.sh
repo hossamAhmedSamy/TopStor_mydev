@@ -21,6 +21,7 @@ systemctl status etcd
 while [ $? -ne 0 ];
 do
  sleep 5
+ systemctl status etcd
 done
 /TopStor/initfactory.sh
 sleep 220

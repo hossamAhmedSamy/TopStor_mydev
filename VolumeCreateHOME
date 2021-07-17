@@ -21,7 +21,7 @@ echo start $hi $userreq > /root/volcreate
 ETCDCTL_API=3 /TopStor/logqueue.py VolumeCreateHome running $userreq 
 echo queuedrunning >> /root/volcreate
 
-privilege="CIFS";
+privilege="HOME";
 ./privthis.sh $privilege $userreq | grep true ;
 if [ $? -eq 0 ];
 then

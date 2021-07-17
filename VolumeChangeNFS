@@ -23,7 +23,7 @@ DG=`echo $pDG `;
 echo $@ > /root/VolChange
 txtres='/TopStordata'`basename $0`'.txt'
 rm -rf $txtres 2>/dev.null
-privilege="CIFS";
+privilege="NFS";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then

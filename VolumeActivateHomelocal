@@ -15,7 +15,7 @@ pool=`echo $@ | awk -F'pool=' '{print $2}' | awk '{print $1}'`;
 userreq=`echo $@ | awk -F'user=' '{print $2}' | awk '{print $1}'`;
 myhost=`hostname -s`
 
-privilege="Box_Users";
+privilege="HOME";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then

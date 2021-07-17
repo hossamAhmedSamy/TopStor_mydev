@@ -20,7 +20,7 @@ run=`echo $@ | awk -F'run=' '{print $2}' | awk '{print $1}'`;
 #fi
 
 echo $@ > /root/volactivateImportparamHome
-privilege="CIFS";
+privilege="HOME";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
