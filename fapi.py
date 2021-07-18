@@ -268,11 +268,10 @@ def dgsaddtopool(data):
 
 @app.route('/api/v1/pools/newpool', methods=['GET','POST'])
 @login_required
-def dgsnewpool():
+def dgsnewpool(data):
  global allinfo
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- data = request.args.to_dict()
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  keys = []
