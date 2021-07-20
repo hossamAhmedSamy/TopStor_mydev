@@ -14,12 +14,13 @@ from etcdput import etcdput  as put
 from etcddel import etcddel  as dels 
 from sendhost import sendhost
 from socket import gethostname as hostname
-from getlogs import getlogs
+from getlogs import getlogs, onedaylog
 from fapistats import allvolstats, levelthis
 from datetime import datetime
 from getallraids import newraids, selectdisks
 from secrets import token_hex
 from time import time as timestamp
+import logmsg
 
 
 os.environ['ETCDCTL_API'] = '3'
@@ -55,6 +56,10 @@ def login_required(f):
     data['user'] = loggedusers[data['token']]['user']
     data['response'] = 'Ok'
     return f(data)
+   else:
+    logmsg.sendlog('Lognsa0','warning','system',loggedusers[data['token']]['user'])
+  else:
+   logmsg.sendlog('Lognno0','warning','system',data['token'])
   return f({'response':'baduser'})
  return decorated_function
 
@@ -478,6 +483,12 @@ def userchange(data):
  postchange(cmndstring)
  return data
 
+ 
+@app.route('/api/v1/info/onedaylog', methods=['GET','POST'])
+def getonedaylog():
+ result = onedaylog() 
+ return result 
+
 @app.route('/api/v1/info/logs', methods=['GET','POST'])
 def getalllogs():
  notif = getlogs()
@@ -570,17 +581,21 @@ def volumecreate(data):
 def getlogin(token):
  logindata = get('login',token)[0]
  if logindata == -1:
+  logmsg.sendlog('Lognno0','warning','system',token)
   return 'baduser'
  oldtimestamp = logindata[1].split('/')[1]
  user = logindata[0].split('/')[1]
  if int(oldtimestamp) < int(timestamp()):
   dels('login',token)
   loggedusers.pop(token, None)
+  logmsg.sendlog('Lognsa0','warning','system',user)
   print('isssss######ss##########33','baduser')
   return 'baduser'
  userdict, token = setlogin(user,'!',token) 
  if token == 0:
+  logmsg.sendlog('Lognsa0','warning','system',user)
   print('#################33','baduser')
+   
   return 'baduser'
  loggedusers[token] = userdict.copy()
  print('iamokkkkkkkkkkkkkkkkkk')
@@ -608,9 +623,11 @@ def login():
  userdict, token = setlogin(data['user'],data['pass'])
  if token != 0:
   loggedusers[token] = userdict.copy()
+  logmsg.sendlog('Lognsu0','info','system',data['user'])
   print('login okkkkkkk',loggedusers)
  else:
   print('login faileddddddddddddddddddd')
+  logmsg.sendlog('Lognfa0','error','system',data['user'])
   token = 'baduser'
  return jsonify({'token':token})
  

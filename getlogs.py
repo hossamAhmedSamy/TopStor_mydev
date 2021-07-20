@@ -1,6 +1,7 @@
 #!/bin/python3.6
 from logqueue import queuethis
 import subprocess
+from time import time
 import sys
 
 with open('/var/www/html/des20/msgsglobal.txt') as f:
@@ -10,6 +11,24 @@ for log in logcatalog:
  msgcode= log.split(':')[0]
  logdict[msgcode] = log.replace(msgcode+':','').split(' ')
 
+def onedaylog():
+ severity = ('info','warning','error')
+ unsuclogon = 'Lognfa0'
+ onedaylog = {'failedlogon': []} 
+ for sev in severity:
+  onedaylog[sev] = []
+  nowis = int(time())
+  nowfixed = str(nowis)[:4]
+  cmdline='./grepthis.sh '+nowfixed+' '+sev+' /var/www/html/des20/Data/TopStorglobal.log'
+  result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split('\n')
+  for res in result:
+   if len(res.split()) < 4:
+    continue
+   if int(res.split()[-1]) > (nowis-(60*60*24*7)):
+    onedaylog[sev].append(res)
+    if 'Lognfa0' in res:
+     onedaylog['failedlogon'].append(res)
+ return onedaylog
 
 def notifthis(notifbody,loc=3):
  msg = logdict[notifbody[loc]]
