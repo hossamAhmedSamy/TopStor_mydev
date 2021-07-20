@@ -31,7 +31,7 @@ resname=`echo $rightip | awk -F'/' '{print $1}'`
 echo $rightip | grep -w '\-1' 
 if [ $? -eq 0 ];
 then
- resname=$vtype-$pool-$ipaddr
+ resname=$vtype-$pool-$vol-$ipaddr
  echo resname=$resname
  /pace/etcdput.py ipaddr/$ipaddr/$ipsubnet $resname/$vol
  /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 

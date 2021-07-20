@@ -10,7 +10,7 @@ rm -rf $txtres 2>/dev/null
 #pool=`echo $@ | awk -F'pool=' '{print $2}' | awk '{print $1}'`;
 #userreq=`echo $@ | awk -F'user=' '{print $2}' | awk '{print $1}'`;
 dockern=`docker ps | grep 445 | wc -l`
-pcsn=`pcs resource | grep pdhcp | wc -l`
+pcsn=`pcs resource | grep pdhcp | grep -v nfs | wc -l`
 etcdn=`./etcdget.py vol --prefix | grep -v NFS | wc -l`
 smbs=` ls /pdhcp*/smb.* | grep _ | wc -l`
 if [[ $dockern$pcsn$etcdn == $smbs$smbs$smbs ]];

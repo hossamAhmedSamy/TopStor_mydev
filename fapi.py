@@ -107,7 +107,29 @@ def getpools():
   pid += 1
   pooldict[pool[0].split('/')[1]] = {'id': pid, 'owner': pool[1] }
  return poolinfo
- 
+
+@app.route('/api/v1/volumes/connections', methods=['GET','POST'])
+@login_required
+def getconns(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
+ conns = get('connections/user','--prefix')
+ devs = get('connections/dev','--prefix')
+ zippedconns = zip(conns,devs)
+ conndict =  {}
+ conndict['connections'] = []
+ tconns = 0
+ for conn in zippedconns:
+  volume = conn[0][0].split('/')[3]
+  subconns =  conn[0][1].split('/')
+  subdevs =  conn[1][1].split('/')
+  zippedsubconns = zip(subconns,subdevs)
+  for subcon in zippedsubconns:
+   conndict['connections'].append({"volume": volume, 'user': subcon[0], 'device':subcon[1] })
+ conndict['response'] = data['response']
+ return conndict 
+
+
 @app.route('/api/v1/software/setversion', methods=['GET','POST'])
 @login_required
 def setversion(data):

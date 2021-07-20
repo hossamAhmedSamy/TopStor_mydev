@@ -35,7 +35,7 @@ fi
 rightip=`/pace/etcdget.py ipaddr/$ipaddr/$ipsubnet`
 resname=`echo $rightip | awk -F'/' '{print $1}'`
  echo iam here 2
- resname=nfs-$pool-$ipaddr
+ resname=nfs-$pool-$vol-$ipaddr
  /pace/etcdput.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
  /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
  #yes | cp /etc/{passwd,group,shadow} /etc
@@ -47,3 +47,4 @@ resname=`echo $rightip | awk -F'/' '{print $1}'`
  /sbin/pcs resource delete --force $resname  2>/dev/null
  /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
  /sbin/pcs resource group add ip-all $resname
+systemctl start nfs-server
