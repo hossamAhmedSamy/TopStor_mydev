@@ -70,6 +70,7 @@ then
  /pace/broadcasttolocal.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet 
  ./VolumeActivateHome vol=$name user=$userreq
  /pace/putzpool.py 
+ /TopStor/SnapshotCreateHourlytrend $DG $name 0 24 7 system 
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
 fi
 /TopStor/logqueue.py `basename "$0"` stop $userreq 

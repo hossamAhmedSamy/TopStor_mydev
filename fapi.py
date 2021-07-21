@@ -376,7 +376,7 @@ def volpoolsinfo():
 def volumessnapshotsinfo():
  global allvolumes, alldsks, allinfo
  snaplist = {'Once':[], 'Minutely': [], 'Hourly': [], 'Weekly':[]}
- periodlist = {'Minutely': [], 'Hourly': [], 'Weekly':[]}
+ periodlist = {'Minutely': [], 'Hourly': [], 'Weekly':[], 'Trend': []}
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  allgroups = getgroups()

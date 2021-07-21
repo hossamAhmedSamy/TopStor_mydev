@@ -76,4 +76,5 @@ echo  /sbin/zfs create -o overlay=on -o acltype=posixacl -o aclinherit=passthrou
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
  echo ready ;
 fi
+/TopStor/SnapshotCreateHourlytrend $DG $name 0 24 7 system 
 /TopStor/logqueue.py `basename "$0"` stop $userreq 
