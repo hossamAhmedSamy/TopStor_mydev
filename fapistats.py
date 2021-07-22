@@ -13,6 +13,30 @@ def volumes(voldict):
    voldict[vol][vollist] = levelthis(voldict[vol][vollist])
  return voldict
 
+def cpuperf():
+ perfs = get('cpuperf', '--prefix')
+ perfslst = []
+ for perf in perfs:
+  host = perf[0].replace('cpuperf/','')
+  perfdict = {'host': host, 'cpu': perf[1] }
+  perfslst.append(perfdict)
+
+ return perfslst
+
+
+def dskperf():
+ perfs = get('dskperf','--prefix')
+ perfslst = []
+ for perf in perfs:
+  host = perf[0].split('/')[1]
+  diskname = perf[0].split('/')[2]
+  dsk = perf[1].split('/')
+  perfdict = { 'host':host, 'diskname':diskname, 'disklun':dsk[-1], 'tps':dsk[0], 
+               'thr':dsk[1], 'readpercent':dsk[2]
+             }
+  perfslst.append(perfdict)
+ return perfslst
+
 def statsvol(voldict, limit=3):
  global vollisting
  statsdict = dict()
@@ -65,5 +89,7 @@ if __name__=='__main__':
  alldsks = get('host','current')
  allinfo = getall(alldsks)
  vols = volumes(allinfo['volumes'])
- statsvol(vols)
+ #statsvol(vols)
+ dskperf()
+ 
  

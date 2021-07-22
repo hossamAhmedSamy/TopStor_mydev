@@ -15,10 +15,11 @@ from etcddel import etcddel  as dels
 from sendhost import sendhost
 from socket import gethostname as hostname
 from getlogs import getlogs, onedaylog
-from fapistats import allvolstats, levelthis
+from fapistats import allvolstats, levelthis, dskperf, cpuperf
 from datetime import datetime
 from getallraids import newraids, selectdisks
 from secrets import token_hex
+from ioperf import ioperf
 from time import time as timestamp
 import logmsg
 
@@ -371,6 +372,11 @@ def volpoolsinfo():
  global allpools
  allpools = getpools()
  return jsonify({'results':allpools})
+
+@app.route('/api/v1/stats/dskperf', methods=['GET','POST'])
+def dskperfs():
+ ioperf()
+ return jsonify({'dsk':dskperf(), 'cpu':cpuperf()})
 
 @app.route('/api/v1/volumes/snapshots/snapshotsinfo', methods=['GET','POST'])
 def volumessnapshotsinfo():
