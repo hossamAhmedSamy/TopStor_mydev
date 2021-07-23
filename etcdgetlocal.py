@@ -7,7 +7,7 @@ def etcdget(thehost,key, prefix=''):
  z=[]
  endpoints=''
  endpoints='http://'+thehost+':2378'
- cmdline=['etcdctl','--endpoints='+endpoints,'get',key,prefix]
+ cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key,prefix]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  if(result.stdout==b''):
    print('-1')
