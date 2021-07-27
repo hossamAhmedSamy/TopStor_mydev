@@ -12,6 +12,7 @@ def ioperf():
  cpures = result[:4][-1].split()[:-1]
  tcpu = 0
  tcpu = round(float(cpures[0])+float(cpures[2]),2)
+ put('cpuperf/'+myhost,str(tcpu))
  diskres = result[6:]
  diskresdict = {}
  for dsk in diskres:
@@ -32,7 +33,6 @@ def ioperf():
  for dsk in disks:
   thedsk = disks[dsk]
   put('dskperf/'+myhost+'/'+thedsk['name'], str(thedsk['tps'])+'/'+str(thedsk['throuput'])+'/'+str(thedsk['read'])+'/'+dsk)
-  put('cpuperf/'+myhost,str(tcpu))
   with open('/pacedata/perfmon') as f:
    perfmon = f.readline()
   #if '1' in perfmon:
