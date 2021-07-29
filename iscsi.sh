@@ -12,7 +12,7 @@ chapuser=`echo $@ | awk '{print $7}'`
 chappas=`echo $@ | awk '{print $8}'`
 vtype='iscsi'
 echo $@ > /root/iscsiparam
-pcs resource | grep $ipaddr
+pcs resource | grep $ipaddr | grep -v iscsi
 if [ $? -eq 0 ];
 then
   /TopStor/logmsg.py ISCSIwa01 warning $userreq $ipaddr 
@@ -25,8 +25,15 @@ resname=$vtype-$pool-$vol-$ipaddr
 echo resname=$resname
 /pace/etcdput.py ipaddr/$ipaddr/$ipsubnet $resname/$vol
 /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
-/sbin/pcs resource delete --force $resname  2>/dev/null
-/sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
-/sbin/pcs resource group add ip-all $resname 
+pcs resource | grep $ipaddr | grep iscsi
+if [ $? -ne 0 ];
+then
+ echo creating the ip
+ /sbin/pcs resource delete --force $resname  2>/dev/null
+ /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
+ /sbin/pcs resource group add ip-all $resname 
+fi
+echo continue
 cat /TopStordata/iscsi.${vol}>> /TopStordata/iscsi.$ipaddr
-/pace/addzfsvolumeastarget.sh $pool'/'${vol} $ipaddr $portalport $targetiqn $chapuser $chappas
+echo /pace/addzfsvolumeastarget.sh $pool ${vol} $ipaddr $portalport $targetiqn $chapuser $chappas
+/pace/addzfsvolumeastarget.sh $pool ${vol} $ipaddr $portalport $targetiqn $chapuser $chappas

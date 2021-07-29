@@ -145,10 +145,8 @@ then
     sed -i "s/CHAPPAS/$chappas/g" /TopStordata/iscsi.${name}
    echo running iscsi.sh=$pool $name $ipaddr $ipsubnet  $targetiqn $chapuser $chappas >> /root/volactivateparam
    echo /TopStor/iscsi.sh $pool $name $ipaddr $ipsubnet $targetiqn $chapuser $chappas
- 
-   yes | cp /TopStordata/iscsi.$name /$pool/
+   yes | cp /TopStordata/iscsi.${name} /$pool/
    /TopStor/iscsi.sh $pool $name $ipaddr $ipsubnet $portalport $targetiqn $chapuser $chappas
-
    echo finished iscsi.sh >> /root/volactivateparam
   done
  fi
