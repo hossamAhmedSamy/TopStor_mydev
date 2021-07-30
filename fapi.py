@@ -588,7 +588,13 @@ def volumecreate(data):
  datastr = ''
  getalltime()
  ownerip = allinfo['hosts'][allinfo['pools'][data['pool']]['host']]['ipaddress']
- datastr = data['pool']+' '+data['name']+' '+data['size']+' '+data['groups']+' '+data['ipaddress']+' '+data['Subnet']+' '+data['user']+' '+data['owner']+' '+data['user']
+ data['owner'] = allinfo['hosts'][allinfo['pools'][data['pool']]['host']]['name']
+ if 'ISCSI' in data['type']:
+  data['chapuser']='MoatazNegm'
+  data['chappas']='MezoAdmin'
+  datastr = data['pool']+' '+data['name']+' '+data['size']+' '+data['ipaddress']+' '+data['Subnet']+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+data['user']+' '+data['owner']+' '+data['user']
+ else:
+  datastr = data['pool']+' '+data['name']+' '+data['size']+' '+data['groups']+' '+data['ipaddress']+' '+data['Subnet']+' '+data['user']+' '+data['owner']+' '+data['user']
  print('#############################')
  print(data)
  print(datastr)
