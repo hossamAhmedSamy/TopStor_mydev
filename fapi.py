@@ -2,6 +2,7 @@
 import flask, os, Evacuate, subprocess
 from getversions import getversions
 from functools import wraps
+from copy import deepcopy
 from flask import request, jsonify, render_template, redirect, url_for, g
 import Hostsconfig
 from Hostconfig import config
@@ -15,7 +16,7 @@ from etcddel import etcddel  as dels
 from sendhost import sendhost
 from socket import gethostname as hostname
 from getlogs import getlogs, onedaylog
-from fapistats import allvolstats, levelthis, dskperf, cpuperf
+from fapistats import allvolstats, dskperf, cpuperf
 from datetime import datetime
 from getallraids import newraids, selectdisks
 from secrets import token_hex
@@ -23,6 +24,7 @@ from ioperf import ioperf
 from time import time as timestamp
 import logmsg
 
+getalltimestamp = 0
 
 os.environ['ETCDCTL_API'] = '3'
 loggedusers = {}
@@ -46,6 +48,16 @@ for log in logcatalog:
  msgcode= log.split(':')[0]
  logdict[msgcode] = log.replace(msgcode+':','').split(' ')
 myhost = hostname()
+allinfo = 0
+
+def getalltime():
+ global allinfo,alldsks, getalltimestamp
+ if (getalltimestamp+30) < timestamp():
+  alldsks = deepcopy(get('host','current'))
+  allinfo = deepcopy(getall(alldsks))
+  getalltimestamp = timestamp()
+ return
+getalltime()
 
 def login_required(f):
  @wraps(f)
@@ -221,8 +233,7 @@ def hostslost():
 @app.route('/api/v1/pools/dgsinfo', methods=['GET','POST'])
 def dgsinfo():
  global allinfo 
- alldsks = get('host','current')
- allinfo = getall(alldsks)
+ getalltime()
  dgsinfo = {'raids':allinfo['raids'], 'pools':allinfo['pools'], 'disks':allinfo['disks']}
  dgsinfo['newraid'] = newraids(allinfo['disks'])
  return jsonify(dgsinfo)
@@ -230,10 +241,10 @@ def dgsinfo():
 @app.route('/api/v1/pools/delpool', methods=['GET','POST'])
 @login_required
 def dgsdelpool(data):
+ global allinfo
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- alldsks = get('host','current')
- allinfo = getall(alldsks)
+ getalltime()
  owner = allinfo['pools'][data['pool']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
  datastr = data['pool']+' '+data['user'] 
@@ -249,9 +260,7 @@ def dgsaddtopool(data):
  global allinfo
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- data = request.args.to_dict()
- alldsks = get('host','current')
- allinfo = getall(alldsks)
+ getalltime()
  keys = []
  dgsinfo = {'raids':allinfo['raids'], 'pools':allinfo['pools'], 'disks':allinfo['disks']}
  dgsinfo['newraid'] = newraids(allinfo['disks'])
@@ -300,8 +309,7 @@ def dgsnewpool(data):
  global allinfo
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- alldsks = get('host','current')
- allinfo = getall(alldsks)
+ getalltime()
  keys = []
  dgsinfo = {'raids':allinfo['raids'], 'pools':allinfo['pools'], 'disks':allinfo['disks']}
  dgsinfo['newraid'] = newraids(allinfo['disks'])
@@ -348,16 +356,14 @@ def dgsnewpool(data):
 @app.route('/api/v1/volumes/stats', methods=['GET','POST'])
 def volumestats():
  global allinfo 
- alldsks = get('host','current')
- allinfo = getall(alldsks)
- volstats = allvolstats(allinfo)
+ getalltime()
+ volstats = allvolstats(deepcopy(allinfo))
  return jsonify(volstats)
 
 @app.route('/api/v1/volumes/volumelist', methods=['GET','POST'])
 def volumeslist():
  global allinfo 
- alldsks = get('host','current')
- allinfo = getall(alldsks)
+ getalltime()
  volumes = []
  vid = 0
  for vol in allinfo['volumes']:
@@ -383,8 +389,7 @@ def volumessnapshotsinfo():
  global allvolumes, alldsks, allinfo
  snaplist = {'Once':[], 'Minutely': [], 'Hourly': [], 'Weekly':[]}
  periodlist = {'Minutely': [], 'Hourly': [], 'Weekly':[], 'Trend': []}
- alldsks = get('host','current')
- allinfo = getall(alldsks)
+ getalltime()
  allgroups = getgroups()
  alllist = []
  snappriods = []
@@ -399,8 +404,7 @@ def volumessnapshotsinfo():
 
 def volumesinfo(prot='all'):
  global allvolumes, alldsks, allinfo
- alldsks = get('host','current')
- allinfo = getall(alldsks)
+ getalltime()
  allgroups = getgroups()
  volumes = []
  if prot == 'all':
@@ -411,20 +415,29 @@ def volumesinfo(prot='all'):
  for volume in allinfo['volumes']:
   if prot in allinfo['volumes'][volume]['prot'] or prot2 in allinfo['volumes'][volume]['prot']:
    volgrps = []
-   for group in allgroups:
-    try:
-     if group[0] in allinfo['volumes'][volume]['groups'].split(','):
-      volgrps.append(group[1])
-    except:
-      print(allinfo['volumes'][volume])
-      print('###########################################################')
-   allinfo['volumes'][volume]['groups'] = volgrps
+   if prot in ['CIFS','NFS']:
+    if type( allinfo['volumes'][volume]['groups']) != list:
+      allinfo['volumes'][volume]['groups'] =  allinfo['volumes'][volume]['groups'].split(',')
+    for group in allgroups:
+     try:
+      if group in allinfo['volumes'][volume]['groups']:
+       volgrps.append(group[1])
+     except:
+       print('volumes info exception',group, volume,allinfo['volumes'])
+       print('###########################################################')
+    allinfo['volumes'][volume]['groups'] = deepcopy(volgrps)
    volumes.append(allinfo['volumes'][volume])
  return volumes
+
 
 @app.route('/api/v1/volumes/CIFS/volumesinfo', methods=['GET','POST'])
 def volumescifsinfo():
  volumes = volumesinfo('CIFS') 
+ return jsonify({'allvolumes':volumes})
+
+@app.route('/api/v1/volumes/ISCSI/volumesinfo', methods=['GET','POST'])
+def volumesiscsiinfo():
+ volumes = volumesinfo('ISCSI') 
  return jsonify({'allvolumes':volumes})
 
 @app.route('/api/v1/volumes/NFS/volumesinfo', methods=['GET','POST'])
@@ -527,6 +540,8 @@ def getnotification(data):
     msgbody = msgbody[:-1]+' '+notifbody[notifc]+'.'
    except:
     msgbody = msgbody +' '+notifbody+'parseerror.'
+    print('notification parse error')
+    print('############################')
    notifc += 1
   elif len(word) > 0:
    msgbody = msgbody[:-1]+' '+word+'.' 
@@ -537,11 +552,11 @@ def getnotification(data):
 @app.route('/api/v1/volumes/snapshots/create', methods=['GET','POST'])
 @login_required
 def volumesnapshotscreate(data):
+ global allinfo
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  datastr = ''
- alldsks = get('host','current')
- allinfo = getall(alldsks)
+ getalltime()
  ownerip = allinfo['hosts'][data['owner']]['ipaddress']
  switch = { 'Once':['snapsel','name','pool','volume'], 'Minutely':['snapsel', 'pool', 'volume', 'every', 'keep'],
 	'Hourly':['snapsel', 'pool', 'volume', 'sminute', 'every', 'keep'], 
@@ -567,11 +582,11 @@ def volumesnapshotscreate(data):
 @app.route('/api/v1/volumes/create', methods=['GET','POST'])
 @login_required
 def volumecreate(data):
+ global allinfo
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  datastr = ''
- alldsks = get('host','current')
- allinfo = getall(alldsks)
+ getalltime()
  ownerip = allinfo['hosts'][allinfo['pools'][data['pool']]['host']]['ipaddress']
  datastr = data['pool']+' '+data['name']+' '+data['size']+' '+data['groups']+' '+data['ipaddress']+' '+data['Subnet']+' '+data['user']+' '+data['owner']+' '+data['user']
  print('#############################')
@@ -656,8 +671,7 @@ def volumeconfig(data):
  global allinfo
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- alldsks = get('host','current')
- allinfo = getall(alldsks)
+ getalltime()
  volume = allinfo['volumes'][data['volume']]
  owner = volume['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
@@ -710,8 +724,7 @@ def volumesnapshotrol(data):
  global allinfo 
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- alldsks = get('host','current')
- allinfo = getall(alldsks)
+ getalltime()
  volume = allinfo['snapshots'][data['name']]['volume']
  pool = allinfo['snapshots'][data['name']]['pool']
  owner = allinfo['snapshots'][data['name']]['host']
@@ -730,10 +743,10 @@ def volumesnapshotrol(data):
 @app.route('/api/v1/volumes/snapshots/perioddelete', methods=['GET','POST'])
 @login_required
 def volumesnapshotperioddel(data):
+ global allinfo
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- alldsks = get('host','current')
- allinfo = getall(alldsks)
+ getalltime()
  owner = allinfo['snapperiods'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
  cmndstring = "/TopStor/pump.sh SnapShotPeriodDelete "+data['name']+" "+data['user']
@@ -749,8 +762,7 @@ def volumesnapshotdel(data):
  global allinfo 
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- alldsks = get('host','current')
- allinfo = getall(alldsks)
+ getalltime()
  volume = allinfo['snapshots'][data['name']]['volume']
  pool = allinfo['snapshots'][data['name']]['pool']
  owner = allinfo['snapshots'][data['name']]['host']
@@ -771,11 +783,10 @@ def volumesnapshotdel(data):
 @app.route('/api/v1/volumes/volumedel', methods=['GET','POST'])
 @login_required
 def volumedel(data):
- global allinfo 
+ global allinfo
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- alldsks = get('host','current')
- allinfo = getall(alldsks)
+ getalltime()
  pool = allinfo['volumes'][data['name']]['pool']
  owner = allinfo['volumes'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']

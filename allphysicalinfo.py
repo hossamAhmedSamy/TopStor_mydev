@@ -63,12 +63,21 @@ def getall(*args):
    voldict['Subnet'] = vol[1].split('/')[8]
    voldict['prot'] = vol[0].split('/')[1]
    volumesdict[voldict['name']] = voldict.copy()
-   print(vol) 
   elif vol[0].split('/')[1] == 'NFS':
    voldict['groups'] = vol[1].split('/')[8]
    voldict['ipaddress'] = vol[1].split('/')[9] 
    voldict['Subnet'] = vol[1].split('/')[10]
    voldict['prot'] = 'NFS'
+   volumesdict[voldict['name']] = voldict.copy()
+  elif vol[0].split('/')[1] == 'ISCSI':
+   voldict['groups'] = 'Everyone'
+   voldict['ipaddress'] = vol[1].split('/')[2] 
+   voldict['Subnet'] = vol[1].split('/')[3]
+   voldict['portalport'] = vol[1].split('/')[4]
+   voldict['initiators'] = vol[1].split('/')[5]
+   voldict['chapuser'] = vol[1].split('/')[6]
+   voldict['chappas'] = vol[1].split('/')[7]
+   voldict['prot'] = 'ISCSI'
    volumesdict[voldict['name']] = voldict.copy()
  for alldsk in alldsks:
   host = alldsk[0].split('/')[1]
@@ -114,7 +123,10 @@ def getall(*args):
    poolsdict[pool['name']]['volumes'] = poolvolumes
    for volume in pool['volumes']:
     volume['used'] = levelthis(volume['used'])
-    volume['quota'] = levelthis(volume['quota'])
+    if volume['prot'] == 'ISCSI':
+     volume['quota'] = volume['used'] 
+    else:
+     volume['quota'] = levelthis(volume['quota'])
     volume['usedbysnapshots'] = levelthis(volume['usedbysnapshots'],'M')
     poolvolumes.append(volume['name'])
     thevolume = volume.copy()

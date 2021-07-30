@@ -45,7 +45,6 @@ def statsvol(voldict, limit=3):
   pairing = []
   for vol in voldict:
    statsdict['trends'][vol] = get('sizevol/'+voldict[vol]['pool']+'/'+vol)[0]
-   print('trend',statsdict['trends'])
    pairing.append([vol.split('_')[0], vol, voldict[vol][vollist]])
   pairing.sort(key=lambda x:x[2],reverse=True)
   finalpairing = []

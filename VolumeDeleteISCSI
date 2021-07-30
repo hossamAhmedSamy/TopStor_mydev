@@ -28,8 +28,8 @@ then
  echo $DG/$volname
  disk=`ls -l /dev/zvol/$DG/$volname | awk -F'/' '{print $NF}'`
  echo $disk
- echo targetcli backstores/block delete ${disk}-${myhost} 
- targetcli backstores/block delete ${disk}-${myhost} 
+ echo targetcli backstores/block delete ${disk}-${myhost}-$volname
+ targetcli backstores/block delete ${disk}-${myhost}-$volname
  /sbin/zfs destroy -rf $DG/$volname 
  if [ $? -ne 0  ]; then
    /TopStor/logmsg.py NFS1001 error $userreq $volname
