@@ -1,5 +1,5 @@
 ;;;;;;;;         startNAMEISCSI_only
-;;;;;;;; SUMMARY Vtype Rpool/Rname/Ripadd/Ripsub/TARGETIQN/CHAPUSER/CHAPPAS
+;;;;;;;; SUMMARY Vtype Rpool/Rname/Ripadd/Ripsub/PORTALPORT/TARGETIQN/CHAPUSER/CHAPPAS
 [SHORTNAME]
 ;ipaddress = IPADDRESS
 ;ipsubnet = IPSUBNET

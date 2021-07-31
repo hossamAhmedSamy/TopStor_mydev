@@ -39,13 +39,7 @@ echo /pace/addzfsvolumeastarget.sh $pool ${vol} $ipaddr $portalport $targetiqn $
  for i in $(echo $targetiqn | sed "s/,/ /g")
  do
 #pdhcp2524812990 pool1is_250024055 10.11.11.11 3263 iqn.1991-05.com.microsoft:desktop-jckvhk3 MoatazNegm MezoAdmin
-  x=`./etcdget.py vol $i`
-  c=-1;
-  for h in $(echo $x | sed "s/ //g" | sed "s/('volumes/ /g")
-  do
-   c=$((c+1))
-  done
-  /pace/addzfsvolumeastarget.sh $pool $vol $ipaddr $portalport $i $chapuser $chappas $c
+  /pace/addzfsvolumeastarget.sh $pool $vol $ipaddr $portalport $i $chapuser $chappas 
 
     # call your procedure/other scripts here below
  done
