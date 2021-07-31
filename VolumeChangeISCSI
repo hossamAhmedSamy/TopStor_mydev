@@ -1,0 +1,81 @@
+#!/bin/sh
+export ETCDCTL_API=3
+cd /TopStor/
+echo $@ > /root/volchange
+perfmon=`cat /pacedata/perfmon`
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py VolumeChangeCIFS start system 
+fi
+name=`echo $@ | awk '{print $2}'`;
+pDG=`echo $@ | awk '{print $1}'`;
+quota=`echo $@ | awk '{print $3}'`;
+ipaddr=`echo $@ | awk '{print $4}'`;
+ipsubnet=`echo $@ | awk '{print $5}'`;
+portalport=`echo $@ | awk '{print $6}'`;
+initiators=`echo $@ | awk '{print $7}'`;
+chapuser=`echo $@ | awk '{print $8}'`;
+chappas=`echo $@ | awk '{print $9}'`;
+myhost=`hostname -s`;
+userreq=` echo $@ | awk '{print $10}'`;
+DG=`echo $pDG `;
+privilege="ISCSI";
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]]
+then
+ /TopStor/logmsg.py VolCst01 info $userreq $name
+ echo name=$name
+ myhost=`hostname -s`
+ older=`ETCDCTL_API=3 /pace/etcdget.py volumes $name `
+ echo /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas 
+ /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas
+ /pace/broadcasttolocal.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas
+ oldipaddr=`zfs get -H ip:addr $DG/$name | awk '{print $3}'`
+ echo got ip $ipaddr
+ oldipsubnet=`zfs get -H ip:subnet $DG/$name | awk '{print $3}'`
+ sed -i "s/$oldipaddr/$ipaddr/g" /$DG/iscsi.$name
+ sed -i "s/$oldipsubnet/$ipsubnet/g" /$DG/iscsi.$name
+ /sbin/zfs set ip:addr=$ipaddr $DG/$name
+ /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
+ /sbin/zfs set ip:portalport=$portalport $DG/$name
+#pdhcp2524812990 pool1is 3G 10.11.11.11 24 3263 iqn.1991-05.com.microsoft:desktop-jckvhk3 MoatazNegm MezoAdmin admin dhcp19503 admin
+ yes | cp shareiscsi.txt /TopStordata/iscsi.${name}
+ shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
+ sed -i "s/Vtype/ISCSI/g"  /TopStordata/iscsi.${name}
+ sed -i "s/Rpool/$DG/g"  /TopStordata/iscsi.${name}
+ sed -i "s/Rname/$name/g"  /TopStordata/iscsi.${name}
+ sed -i "s/Ripadd/$ipaddr/g"  /TopStordata/iscsi.${name}
+ sed -i "s/Ripsub/$ipsubnet/g"  /TopStordata/iscsi.${name}
+ sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/iscsi.${name}
+ sed -i "s/NAMECIFS/$name/g"  /TopStordata/iscsi.${name}
+ sed -i "s/POOL/$DG/g" /TopStordata/iscsi.${name}
+ sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/iscsi.${name}
+ sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/iscsi.${name}
+ sed -i "s/PORTALPORT/$portalport/g" /TopStordata/iscsi.${name}
+ sed -i "s/TARGETIQN/$initiators/g" /TopStordata/iscsi.${name}
+ sed -i "s/CHAPUSER/$chapuser/g" /TopStordata/iscsi.${name}
+ sed -i "s/CHAPPAS/$chappas/g" /TopStordata/iscsi.${name}
+ yes | cp /TopStordata/iscsi.${name} /$DG/
+ /pace/delzfsvolumetarget $DG $name $userreq
+ for i in $(echo $initiators | sed "s/,/ /g")
+ do
+#pdhcp2524812990 pool1is_250024055 10.11.11.11 3263 iqn.1991-05.com.microsoft:desktop-jckvhk3 MoatazNegm MezoAdmin
+  x=`./etcdget.py vol $i`
+  c=0; 
+  for h in $(echo $x | sed "s/ //g" | sed "s/('volumes/ /g")
+  do 
+   c=$((c+1))
+  done 
+  echo /pace/addzfsvolumeastarget.sh $DG $name $ipaddr $portalport $i $chapuser $chappas $c
+  /pace/addzfsvolumeastarget.sh $DG $name $ipaddr $portalport $i $chapuser $chappas $c
+  
+    # call your procedure/other scripts here below
+ done
+ /pace/putzpool.py 
+ /TopStor/logmsg.py VolCsu01 info $userreq $name
+ echo ready ;
+fi
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py VolumeChangeCIFS stop system 
+fi

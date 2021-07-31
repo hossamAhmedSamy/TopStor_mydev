@@ -682,11 +682,23 @@ def volumeconfig(data):
  owner = volume['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
  datastr = ''
- if 'groups' in data and len(data['groups']) < 1: 
-  data['groups'] = 'NoGroup'
- for ele in data:
-  volume[ele] = data[ele] 
- datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+volume['groups']+' '+volume['ipaddress']+' '+str(volume['Subnet'])+' '+volume['host']+' '+volume['user']
+ data['owner'] = allinfo['hosts'][allinfo['pools'][volume['pool']]['host']]['name']
+ if 'ISCSI' in data['type']:
+  data['chapuser']='MoatazNegm'
+  data['chappas']='MezoAdmin'
+  if 'ipaddress' not in data:
+   data['ipaddress'] = volume['ipaddress']
+  if 'initiators' not in data:
+   data['initiators'] = volume['initiators']
+  if 'portalport' not in data:
+   data['portalport'] = volume['portalport']
+  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+data['ipaddress']+' '+str(volume['Subnet'])+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+data['user']+' '+data['owner']+' '+data['user']
+ else:
+  if 'groups' in data and len(data['groups']) < 1: 
+   data['groups'] = 'NoGroup'
+  for ele in data:
+   volume[ele] = data[ele] 
+  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+volume['groups']+' '+volume['ipaddress']+' '+str(volume['Subnet'])+' '+volume['host']+' '+volume['user']
  print('#############################')
  print(data)
  print(datastr)
