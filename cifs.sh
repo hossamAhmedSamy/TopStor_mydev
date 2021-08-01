@@ -8,10 +8,11 @@ ipaddr=`echo $@ | awk '{print $3}'`
 ipsubnet=`echo $@ | awk '{print $4}'`
 vtype=`echo $@ | awk '{print $5}'`
 echo $@ > /root/cifsparam
-docker rm -f `docker ps -a | grep -v Up | grep $ipaddr | awk '{print $1}'` 2>/dev/null
+#docker rm -f `docker ps -a | grep -v Up | grep $ipaddr | awk '{print $1}'` 2>/dev/null
 clearvol=`./prot.py clearvol $vol | awk -F'result=' '{print $2}'`
 if [ $clearvol != '-1' ];
 then
+ clearvol=$vtype'-'$ipaddr
  docker stop $clearvol 
  docker container rm $clearvol 
  /sbin/pcs resource delete --force $clearvol  2>/dev/null
@@ -28,11 +29,10 @@ fi
 rightip=`/pace/etcdget.py ipaddr/$ipaddr/$ipsubnet`
 echo  rightip=$rightip
 resname=`echo $rightip | awk -F'/' '{print $1}'`
+resname=$vtype'-'$ipaddr
 echo $rightip | grep -w '\-1' 
-if [ $? -eq 0 ];
+if [ 0 -eq 0 ];
 then
- resname=$vtype-$pool-$vol-$ipaddr
- echo resname=$resname
  /pace/etcdput.py ipaddr/$ipaddr/$ipsubnet $resname/$vol
  /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
  docker stop $resname  2>/dev/null

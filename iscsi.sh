@@ -21,7 +21,7 @@ fi
 rightip=`/pace/etcdget.py ipaddr/$ipaddr/$ipsubnet`
 echo  rightip=$rightip
 resname=`echo $rightip | awk -F'/' '{print $1}'`
-resname=$vtype-$pool-$vol-$ipaddr
+resname=$vtype-$ipaddr
 echo resname=$resname
 /pace/etcdput.py ipaddr/$ipaddr/$ipsubnet $resname/$vol
 /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
