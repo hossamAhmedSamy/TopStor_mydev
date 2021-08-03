@@ -35,7 +35,7 @@ then
  rightvols=$vol
 else
  echo found other vols
- rightvols=`/pace/etcdget.py ipaddr/$myhost/$ipaddr | sed "s/$resname\///g"`'/'$vol
+ rightvols=`/pace/etcdget.py ipaddr/$myhost/$ipaddr/$ipsubnet | sed "s/$resname\///g"`'/'$vol
 fi
  /pace/etcdput.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
  /pace/broadcasttolocal.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols 
