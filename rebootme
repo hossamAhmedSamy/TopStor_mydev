@@ -21,9 +21,9 @@ mkdir /tmp/cpools 2>/dev/null
 rm -rf /tmp/cpools/*
 pkill zfsping
 docker stop $(docker ps -aq)
-cp /TopStordata/pdhc* /tmp/cpools/
-/sbin/zpool export -a ;
-cp /tmp/cpools/* /TopStordata/
+targetcli iscsi/ delete iqn.2016-03.com.${myhost}:data
+#cp /TopStordata/pdhc* /tmp/cpools/
+#cp /tmp/cpools/* /TopStordata/
 echo shuttingdown 2 >> /root/HostCC2
 echo shuttingdown 2
 #/pace/keysend.sh $hostip
@@ -63,4 +63,5 @@ echo shuttingdown 8 >> /root/HostCC2
 sync
 sync
 sync
+/sbin/zpool export -a &
 /sbin/reboot
