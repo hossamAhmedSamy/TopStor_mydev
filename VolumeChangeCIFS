@@ -47,6 +47,7 @@ then
  /sbin/zfs set ip:addr=$ipaddr $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
  /pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet 
+ /TopStor/VolumeDockerChange.py /$DG/$name $ipaddr
  /TopStor/VolumeActivateCIFS vol=$name user=$userreq
  /pace/putzpool.py 
  /TopStor/logmsg.py VolCsu01 info $userreq $name

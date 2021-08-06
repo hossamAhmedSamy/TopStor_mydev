@@ -406,6 +406,7 @@ def volumesinfo(prot='all'):
  global allvolumes, alldsks, allinfo
  getalltime()
  allgroups = getgroups()
+ volgrouplist = []
  volumes = []
  if prot == 'all':
    prot = 'S'
@@ -416,17 +417,14 @@ def volumesinfo(prot='all'):
   if prot in allinfo['volumes'][volume]['prot'] or prot2 in allinfo['volumes'][volume]['prot']:
    volgrps = []
    if prot in ['CIFS','NFS']:
-    if type( allinfo['volumes'][volume]['groups']) != list:
-      allinfo['volumes'][volume]['groups'] =  allinfo['volumes'][volume]['groups'].split(',')
+    volgrouplist =  deepcopy(allinfo['volumes'][volume]['groups'])
+    if type(volgrouplist) != list:
+      volgrouplist = volgrouplist.split(',')
     for group in allgroups:
-     try:
-      if group in allinfo['volumes'][volume]['groups']:
-       volgrps.append(group[1])
-     except:
-       print('volumes info exception',group, volume,allinfo['volumes'])
-       print('###########################################################')
-    allinfo['volumes'][volume]['groups'] = deepcopy(volgrps)
-   volumes.append(allinfo['volumes'][volume])
+     if group[0] in volgrouplist:
+      volgrps.append(group[1])
+   volumes.append(deepcopy(allinfo['volumes'][volume]))
+   volumes[-1]['groups'] = deepcopy(volgrps)
  return volumes
 
 
@@ -910,8 +908,8 @@ def api_groups_groupslist():
  thegroup = [] 
  api_users_userslist()
  for group in allgroups:
-  if group[0] == 'Everyone':
-   continue
+ # if group[0] == 'Everyone':
+ #  continue
 
   groupusers = []
   for user in allusers:
