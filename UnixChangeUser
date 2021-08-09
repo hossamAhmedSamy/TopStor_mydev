@@ -129,4 +129,4 @@ then
  /TopStor/broadcast.py UserChange /TopStor/pump.sh UnixChangeUser_sync -d$myhost $@ 
  /TopStor/logmsg.py Unsu1024 info $userreq $username
 fi 
-/TopStor/logqueue.py `basename "$0"` stop $userreq 
+/TopStor/logqueue.py `basename "$0"` finish $userreq 

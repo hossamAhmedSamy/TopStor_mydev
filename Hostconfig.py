@@ -13,7 +13,7 @@ import logmsg
 def config(*bargs):
  arglist = bargs[0]
  #arglist = {'ipaddr': '10.11.11.123', 'ipaddrsubnet': '24', 'id': '0', 'user': 'admin', 'name': 'dhcp32502'}
- queuethis('Hostconfig.py','running',arglist['user'])
+ queuethis('Hostconfig','running',arglist['user'])
  enpdev='enp0s8'
  needreboot=False
  sendip = get('ready/'+arglist['name'])[0]
@@ -28,14 +28,17 @@ def config(*bargs):
  myhost=socket.gethostname()
  ######### changing alias ###############
  if 'alias' in arglist:
+  queuethis('Hostconfig_alias','running',arglist['user'])
   oldarg = get('alias/'+myhost)[0]
   if arglist['alias'] != oldarg:
    logmsg.sendlog('HostManual1st5','info',arglist['user'],oldarg,arglist['alias'])
    put('alias/'+arglist['name'],arglist['alias'])
    broadcasttolocal('alias/'+arglist['name'],arglist['alias'])
    logmsg.sendlog('HostManual1su5','info',arglist['user'],oldarg,arglist['alias'])
+  queuethis('Hostconfig_alias','finish',arglist['user'])
 ######### changing cluster address ###############
  if 'cluster' in arglist:
+  queuethis('Hostconfig_cluster','running',arglist['user'])
   oldarg = get('namespace/mgmtip')[0]
   logmsg.sendlog('HostManual1st7','info',arglist['user'],oldarg,arglist['cluster'])
   if myhost == leader:
@@ -46,8 +49,10 @@ def config(*bargs):
    sendhost(leaderip, str(msg),'recvreply',myhost)
   broadcasttolocal('namespace/mgmtip',arglist['cluster'])
   logmsg.sendlog('HostManual1su7','info',arglist['user'],oldarg,arglist['cluster'])
+  queuethis('Hostconfig_cluster','finish',arglist['user'])
 ############ changing time zone ###############
  if 'tz' in arglist:
+  queuethis('Hostconfig_tzone','running',arglist['user'])
   oldarg = get('tz/'+myhost)[0]
   argtz = arglist['tz'].split('%')[1]
   logmsg.sendlog('HostManual1st10','info',arglist['user'],oldarg, argtz)
@@ -58,8 +63,10 @@ def config(*bargs):
    broadcasttolocal('tz/'+hostname,arglist['tz'])
   broadcast('HostManualConfigTZ','/TopStor/pump.sh','HostManualconfigTZ')
   logmsg.sendlog('HostManual1su10','info',arglist['user'], oldarg, argtz)
+  queuethis('Hostconfig_tzone','finish',arglist['user'])
 ########### changing ntp server ###############
  if 'ntp' in arglist:
+  queuethis('Hostconfig_ntp','running',arglist['user'])
   oldarg = get('ntp/'+myhost)[0]
   logmsg.sendlog('HostManual1st9','info',arglist['user'],oldarg, arglist['ntp'])
   allhosts = get('ActivePartner','--prefix')
@@ -69,8 +76,10 @@ def config(*bargs):
    broadcasttolocal('ntp/'+hostname,arglist['ntp'])
   broadcast('HostManualConfigNTP','/TopStor/pump.sh','HostManualconfigNTP')
   logmsg.sendlog('HostManual1su9','info',arglist['user'],oldarg, arglist['ntp'])
+  queuethis('Hostconfig_ntp','finish',arglist['user'])
 ########### changing gateway  ###############
  if 'gw' in arglist:
+  queuethis('Hostconfig_gw','running',arglist['user'])
   oldarg = get('gw/'+myhost)[0]
   logmsg.sendlog('HostManual1st11','info',arglist['user'],oldarg, arglist['gw'])
   allhosts = get('ActivePartner','--prefix')
@@ -80,8 +89,10 @@ def config(*bargs):
    broadcasttolocal('gw/'+hostname,arglist['gw'])
   broadcast('HostManualConfigGW','/TopStor/pump.sh','HostManualconfigGW')
   logmsg.sendlog('HostManual1su11','info',arglist['user'],oldarg, arglist['gw'])
+  queuethis('Hostconfig_gw','finish',arglist['user'])
  ############# changing configured  ###############
  if 'configured' in arglist:
+  queuethis('Hostconfig_cf','running',arglist['user'])
   if 'yes' in arglist['configured']:
    logmsg.sendlog('HostManual1st12','info',arglist['user'])
   else:
@@ -96,8 +107,10 @@ def config(*bargs):
   z=['/TopStor/pump.sh','rebootme', 'now']
   msg={'req': 'Pumpthis', 'reply':z}
   sendhost(sendip, str(msg),'recvreply',myhost)
+  queuethis('Hostconfig_cf','finish',arglist['user'])
  ########## changing box address ###############
  if 'ipaddr' in arglist:
+  queuethis('Hostconfig_ip','running',arglist['user'])
   oldipaddr = get('ready/'+arglist['name'])[0]
   oldipsubnet=get('ipaddrsubnet/'+arglist['name'])[0]
   logmsg.sendlog('HostManual1st6','info',arglist['user'],str(oldipaddr)+'/'+str(oldipsubnet),arglist['ipaddr']+'/'+arglist['ipaddrsubnet'])
@@ -108,8 +121,9 @@ def config(*bargs):
   msg={'req': 'Pumpthis', 'reply':z}
   sendhost(sendip, str(msg),'recvreply',myhost)
   logmsg.sendlog('HostManual1su6','info',arglist['user'], str(oldipaddr)+'/'+str(oldipsubnet),arglist['ipaddr']+'/'+arglist['ipaddrsubnet'])
+  queuethis('Hostconfig_ip','finish',arglist['user'])
 ######################################
- queuethis('LocalManualConfig.py','stop',bargs[-1])
+ queuethis('Hostconfig','finish',arglist['user'])
 
  return 1
 

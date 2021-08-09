@@ -2,11 +2,17 @@
 import sys, datetime
 from time import time
 from etcdget import etcdget as get
+from etcdput import etcdput as put
 from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost
+from socket import gethostname as hostname
+
+myhost = hostname()
 def queuethis(*args):
+ global myhost
  z=[]
+ put('request/'+args[0]+'/'+myhost,args[1])
  myhost=hostname()
  dt=datetime.datetime.now().strftime("%m/%d/%Y")
  tm=datetime.datetime.now().strftime("%H:%M:%S")

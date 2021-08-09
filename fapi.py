@@ -529,6 +529,15 @@ def getnotification(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  notifbody = get('notification')[0].split(' ')[1:]
+ requests = get('request','--prefix')
+ requestdict = {}
+ for req in requests:
+  reqname = req[0].split('/')[1]
+  reqhost = req[0].split('/')[2]
+  reqstatus = req[1]
+  if reqname not in requestdict:
+   requestdict[reqname] = {}
+  requestdict[reqname][reqhost] = reqstatus
  msg = logdict[notifbody[3]]
  msgbody = '.'
  notifc = 6
@@ -544,7 +553,7 @@ def getnotification(data):
   elif len(word) > 0:
    msgbody = msgbody[:-1]+' '+word+'.' 
  notif = { 'importance':msg[0].replace(':',''), 'msgcode': notifbody[3], 'date':notifbody[0], 'time':notifbody[1],
-	 'host':notifbody[2], 'type':notifbody[4], 'user': notifbody[5], 'msgbody': msgbody[1:], 'response':'Ok'}
+	 'host':notifbody[2], 'type':notifbody[4], 'user': notifbody[5], 'msgbody': msgbody[1:],'requests':requestdict, 'response':'Ok'}
  return jsonify(notif)
 
 @app.route('/api/v1/volumes/snapshots/create', methods=['GET','POST'])
