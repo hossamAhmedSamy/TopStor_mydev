@@ -16,7 +16,6 @@ def config(*bargs):
  queuethis('Hostconfig','running',arglist['user'])
  enpdev='enp0s8'
  needreboot=False
- sendip = get('ready/'+arglist['name'])[0]
  for key in arglist:
   if arglist[key] == -1:
    arglist[key] = '-1'
@@ -36,6 +35,7 @@ def config(*bargs):
    broadcasttolocal('alias/'+arglist['name'],arglist['alias'])
    logmsg.sendlog('HostManual1su5','info',arglist['user'],oldarg,arglist['alias'])
   queuethis('Hostconfig_alias','finish',arglist['user'])
+
 ######### changing cluster address ###############
  if 'cluster' in arglist:
   queuethis('Hostconfig_cluster','running',arglist['user'])
@@ -50,6 +50,13 @@ def config(*bargs):
   broadcasttolocal('namespace/mgmtip',arglist['cluster'])
   logmsg.sendlog('HostManual1su7','info',arglist['user'],oldarg,arglist['cluster'])
   queuethis('Hostconfig_cluster','finish',arglist['user'])
+
+############ changing user password ###############
+ if 'password' in arglist:
+  queuethis('ChangeUserPass','running',arglist['user'])
+  #broadcasttolocal('userhash/'+arglist['username'],arglist['password'])
+  broadcast('UserPassChange','/TopStor/pump.sh','UnixChangePass',arglist['password'],arglist['username'],arglist['user'])
+  queuethis('ChangeUserPass','finish',arglist['user'])
 ############ changing time zone ###############
  if 'tz' in arglist:
   queuethis('Hostconfig_tzone','running',arglist['user'])
@@ -106,6 +113,7 @@ def config(*bargs):
   queuethis('LocalManualConfig.py','stop',bargs[-1])
   z=['/TopStor/pump.sh','rebootme', 'now']
   msg={'req': 'Pumpthis', 'reply':z}
+  sendip = get('ready/'+arglist['name'])[0]
   sendhost(sendip, str(msg),'recvreply',myhost)
   queuethis('Hostconfig_cf','finish',arglist['user'])
  ########## changing box address ###############
@@ -119,6 +127,7 @@ def config(*bargs):
   z=['/TopStor/pump.sh','rebootme', 'ipchange', oldipaddr, oldipsubnet, arglist['ipaddr'], arglist['ipaddrsubnet']]
   print('zzzzzzzzzzzzzz',z)
   msg={'req': 'Pumpthis', 'reply':z}
+  sendip = get('ready/'+arglist['name'])[0]
   sendhost(sendip, str(msg),'recvreply',myhost)
   logmsg.sendlog('HostManual1su6','info',arglist['user'], str(oldipaddr)+'/'+str(oldipsubnet),arglist['ipaddr']+'/'+arglist['ipaddrsubnet'])
   queuethis('Hostconfig_ip','finish',arglist['user'])

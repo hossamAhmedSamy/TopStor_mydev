@@ -67,7 +67,7 @@ def login_required(f):
   if data['token'] in loggedusers:
    if loggedusers[data['token']]['timestamp'] > timestamp():
     data['user'] = loggedusers[data['token']]['user']
-    data['response'] = 'Ok'
+    data['response'] = data['user'] 
     return f(data)
    else:
     logmsg.sendlog('Lognsa0','warning','system',loggedusers[data['token']]['user'])
@@ -633,7 +633,7 @@ def getlogin(token):
   return 'baduser'
  loggedusers[token] = userdict.copy()
  print('iamokkkkkkkkkkkkkkkkkk')
- return token 
+ return user 
 
 @app.route('/api/v1/logout', methods=['GET','POST'])
 def logout():
@@ -715,6 +715,18 @@ def volumeconfig(data):
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
  #config(data)
+ return data
+
+@app.route('/api/v1/user/changepass', methods=['GET','POST'])
+@login_required
+def changepass(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
+ data['user'] = data['response']
+ print('#############################')
+ print(data)
+ print('###########################')
+ config(data)
  return data
 
 
