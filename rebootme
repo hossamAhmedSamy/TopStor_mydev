@@ -38,30 +38,36 @@ whyreboot=`echo $@ | awk '{ print $1 }'`;
 echo $whyreboot | grep ipchange
 if [ $? -eq 0 ];
 then
+ echo shuttingdown 7 >> /root/HostCC2
  oldip=`echo $@ | awk '{ print $2 }'`;
  oldipsubnet=`echo $@ | awk '{ print $3 }'`;
  newips=`echo $@ | awk '{ print $4 }'`;
  newipsubnet=`echo $@ | awk '{ print $5 }'`;
  /TopStor/HostManualconfigCC $@
+ echo shuttingdown 8 >> /root/HostCC2
  targetcli iscsi/iqn.2016-03.com.$myhost:t1/tpg1/portals delete 0.0.0.0 3260
  targetcli iscsi/iqn.2016-03.com.$myhost:t1/tpg1/portals delete $oldip 3266
  targetcli iscsi/iqn.2016-03.com.$myhost:t1/tpg1/portals create $newips 3266
  targetcli saveconfig /pacedata/targetconfig
+ echo shuttingdown 9 >> /root/HostCC2
 fi
 echo $whyreboot | grep QS 
 if [ $? -eq 0 ];
 then
+ echo shuttingdown 7_QS >> /root/HostCC2
  cd /TopStor
  git checkout $whyreboot
  cd /pace
  git checkout $whyreboot
  cd /var/www/html/des20/
  git checkout $whyreboot
+ echo shuttingdown 8_QS >> /root/HostCC2
 fi
 pkill httpd
-echo shuttingdown 8 >> /root/HostCC2
+echo shuttingdown 10 >> /root/HostCC2
 sync
 sync
 sync
 /sbin/zpool export -a &
+echo shuttingdown 11 >> /root/HostCC2
 /sbin/reboot
