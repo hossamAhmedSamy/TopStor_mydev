@@ -114,8 +114,11 @@ def config(*bargs):
   z=['/TopStor/pump.sh','rebootme', 'now']
   msg={'req': 'Pumpthis', 'reply':z}
   sendip = get('ready/'+arglist['name'])[0]
-  sendhost(sendip, str(msg),'recvreply',myhost)
   queuethis('Hostconfig_cf','finish',arglist['user'])
+  for x in range(10):
+   x =+1
+   sendhost(sendip, str(msg),'recvreply',myhost)
+   sleep 10
  ########## changing box address ###############
  if 'ipaddr' in arglist:
   queuethis('Hostconfig_ip','running',arglist['user'])
@@ -128,9 +131,12 @@ def config(*bargs):
   print('zzzzzzzzzzzzzz',z)
   msg={'req': 'Pumpthis', 'reply':z}
   sendip = get('ready/'+arglist['name'])[0]
-  sendhost(sendip, str(msg),'recvreply',myhost)
   logmsg.sendlog('HostManual1su6','info',arglist['user'], str(oldipaddr)+'/'+str(oldipsubnet),arglist['ipaddr']+'/'+arglist['ipaddrsubnet'])
   queuethis('Hostconfig_ip','finish',arglist['user'])
+  for x in range(10):
+   x =+1
+   sendhost(sendip, str(msg),'recvreply',myhost)
+   sleep 10
 ######################################
  queuethis('Hostconfig','finish',arglist['user'])
 
