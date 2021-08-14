@@ -1,5 +1,6 @@
 #!/bin/python3.6
 import socket, subprocess,sys, datetime
+from time import sleep
 from logqueue import queuethis
 from etcdget import etcdget as get
 from etcdput import etcdput as put
@@ -118,7 +119,7 @@ def config(*bargs):
   for x in range(10):
    x =+1
    sendhost(sendip, str(msg),'recvreply',myhost)
-   sleep 10
+   sleep(10)
  ########## changing box address ###############
  if 'ipaddr' in arglist:
   queuethis('Hostconfig_ip','running',arglist['user'])
@@ -136,7 +137,7 @@ def config(*bargs):
   for x in range(10):
    x =+1
    sendhost(sendip, str(msg),'recvreply',myhost)
-   sleep 10
+   sleep(10)
 ######################################
  queuethis('Hostconfig','finish',arglist['user'])
 
