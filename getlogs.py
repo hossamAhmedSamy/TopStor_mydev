@@ -56,6 +56,7 @@ def getlogs(lines=100, *args):
     continue
    notifbody[3],notifbody[4],notifbody[5] = notifbody[5],notifbody[3],notifbody[4]
    notiflist.append(notifthis(notifbody=notifbody))
+ print(notiflist)
  return notiflist  
 
  
