@@ -152,7 +152,7 @@ def getall(*args):
     volumesdict[volume['name']]['snapperiod'] = volumesnapperiods
  toremove=[]
  for volume in volumesdict:
-  if volume not in str(pools):
+  if volume not in str(poolsdict):
    toremove.append(volume)
  for volume in toremove:
   volumesdict.pop(volume)
