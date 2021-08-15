@@ -1,5 +1,5 @@
 #!/bin/python3.6
-import flask, os, Evacuate, subprocess
+import flask, os, Evacuate, subprocess, Joincluster
 from getversions import getversions
 from functools import wraps
 from copy import deepcopy
@@ -746,12 +746,22 @@ def hostconfig(data):
  config(data)
  return data
 
+@app.route('/api/v1/hosts/joincluster', methods=['GET','POST'])
+@login_required
+def hostjoincluster(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
+ data['user'] = data['response']
+ Joincluster.do(data) 
+ return data
+
+
 @app.route('/api/v1/hosts/evacuate', methods=['GET','POST'])
 @login_required
 def hostevacuate(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- args = data['name']+' '+data['Myname'] 
+ data['user'] = data['response']
  Evacuate.do(data['name'], data['user']) 
  return data
 
