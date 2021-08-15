@@ -21,6 +21,7 @@ echo ctz=$ctz  tzone=$tzone etcdtz=$tz
 echo $tzone | grep $ctz
 if [ $? -ne 0 ];
 then 
+ echo I am here
  tzone='Africa/Cairo'
- timedatectl set-timezone $tzone
+ #timedatectl set-timezone $tzone
 fi
