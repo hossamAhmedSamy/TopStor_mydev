@@ -2,6 +2,7 @@
 import subprocess,sys, datetime
 from logqueue import queuethis
 from etcdput import etcdput as put 
+from time import sleep
 from etcdputlocal import etcdput as putlocal
 from etcdget import etcdget as get 
 from etcddel import etcddel as deli 
@@ -32,8 +33,11 @@ def setall(*bargs):
    put('toremovereset/'+hostn,'reset')
    cmdline=['/pace/removetargetdisks.sh', hostn, hostip]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-   cmdline=['/TopStor/rebootme','finished']
-   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   while True:
+    cmdline=['/TopStor/rebootme','reset']
+    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+    sleep(10)
+   
    
   #elif hostn not in str(get('ready','--prefix')) and hostn not in str(get('lost','--prefix')) and myhost not in hostn and myhost in leader and hostn not in str(get('possible','--prefix')):
   elif myhost not in hostn and myhost in leader:
