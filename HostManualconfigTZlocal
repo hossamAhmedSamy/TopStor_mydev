@@ -11,11 +11,12 @@ txtres='/TopStordata/'`basename $0`'.txt'
 hostname=`hostname -s `
 myip=`echo $@ | awk '{print $1}'`
 leader=`echo $@ | awk '{print $2}'`
-tz=`ETCDCTL_API=3 ./etcdget.py tz/$leader | awk -F'%' '{print $1}' `
+fulltz=`ETCDCTL_API=3 ./etcdget.py tz/$leader  `
+tz=`echo $fulltz | awk -F'%' '{print $1}' `
+./etcdputlocal.py $myip tz/$hostname $fulltz 
+./etcdput.py tz/$hostname $fulltz 
 tzone=`timedatectl list-timezones | grep $tz` 
 timedatectl set-timezone $tzone
-./etcdput.py tz/$hostname $tzone 
-./etcdputlocal.py $myip tz/$hostname $tzone 
 ctz=`date +%Z`
 echo ctz=$ctz  tzone=$tzone etcdtz=$tz
 echo $tzone | grep $ctz
