@@ -2,6 +2,7 @@
 export ETCDCTL_API=3
 cd /TopStor/
 echo $@ > /root/rebootme
+echo $@ > /TopStordata/rebootstatus
 web='/var/www/html/des20/Data/HostManualconfigstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log';
 runningpools='/pacedata/pools/runningpools';
@@ -19,11 +20,12 @@ echo shuttingdown 1 >> /root/HostCC2
 echo shuttingdown 1 
 mkdir /tmp/cpools 2>/dev/null
 rm -rf /tmp/cpools/*
-pkill zfsping
 docker stop $(docker ps -aq)
-targetcli iscsi/ delete iqn.2016-03.com.${myhost}:data
-#cp /TopStordata/pdhc* /tmp/cpools/
-#cp /tmp/cpools/* /TopStordata/
+targetcli iscsi/ ls | grep ${myhost}
+if [ $? -eq 0 ];
+then
+ targetcli iscsi/ delete iqn.2016-03.com.${myhost}:data
+fi
 echo shuttingdown 2 >> /root/HostCC2
 echo shuttingdown 2
 #/pace/keysend.sh $hostip
@@ -63,6 +65,17 @@ then
  git checkout $whyreboot
  echo shuttingdown 8_QS >> /root/HostCC2
 fi
+echo $whyreboot | grep reset 
+if [ $? -eq 0 ];
+then
+ users=`cat /etc/passwd | grep TopStor | grep -v Everyone | awk -F':' '{print $1}'`
+ for user in $users
+ do 
+  /TopStor/UnixDelUser $user system 
+ done
+ systemctl stop etcd
+ rm -rf /var/lib/etcd/member/*
+fi
 pkill httpd
 echo shuttingdown 10 >> /root/HostCC2
 sync
@@ -70,4 +83,6 @@ sync
 sync
 /sbin/zpool export -a &
 echo shuttingdown 11 >> /root/HostCC2
+#pkill zfsping
+echo finish > /TopStordata/rebootstatus
 /sbin/reboot
