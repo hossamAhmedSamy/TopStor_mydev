@@ -47,6 +47,8 @@ def getall(*args):
  raidsdict = dict()
  volumesdict = dict()
  disksdict = dict()
+ freedisks = dict()
+ busydisks = dict()
  snapshotsdict = dict()
  snapperiodsdict = dict()
  allvols = []
@@ -117,8 +119,18 @@ def getall(*args):
     raidsdict[raidname]['name'] = raidname 
     for disk in raid['disklist']:
      disk['size'] = levelthis(disk['size'])
-     raiddisks.append(disk['name'])
-     disksdict[disk['name']] = disk.copy()
+     if 'free' in raid['name']:
+      if disk['name'] not in busydisks:
+       freedisks[disk['name']] = disk.copy()
+       disksdict[disk['name']] = disk.copy()
+       raiddisks.append(disk['name'])
+     else:
+      busydisks[disk['name']] = disk.copy()
+      disksdict[disk['name']] = disk.copy()
+      raiddisks.append(disk['name'])
+      if disk['name'] in freedisks:
+       raidsdict['free']['disks'].remove(disk['name'])
+  
    poolvolumes = []
    poolsdict[pool['name']]['volumes'] = poolvolumes
    for volume in pool['volumes']:
@@ -163,6 +175,9 @@ def getall(*args):
   diskpool = disksdict[disk]['pool']
   if 'pdhcp' in diskpool:
    disksdict[disk]['raid'] = disksdict[disk]['raid']+'_'+diskpool
+ if 'free' in raidsdict:
+  if len(raidsdict['free']['disks']) == 0:
+   raidsdict.pop('free',None) 
  '''
  print('#############')
  print('hosts',hostsdict)
@@ -179,7 +194,7 @@ def getall(*args):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
- print('disks',disksdict)
+ print('raids',raidsdict)
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  
