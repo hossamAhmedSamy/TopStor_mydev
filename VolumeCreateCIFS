@@ -73,4 +73,4 @@ then
  /TopStor/SnapshotCreateHourlytrend $DG $name 0 24 7 system 
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
 fi
-/TopStor/logqueue.py `basename "$0"` stop $userreq 
+ETCDCTL_API=3 /TopStor/logqueue.py VolumeCreateCIFS finish $userreq 
