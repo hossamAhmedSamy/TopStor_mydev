@@ -96,4 +96,7 @@ then
  /TopStor/broadcast.py GroupChange /TopStor/pump.sh UnixChangeGroup_sync -d$myhost $@ 
  /TopStor/logmsg.py Unsu1025 info $userreq $groupname
 fi 
+./etcdput.py sync/group/$myhost `date +%s%N`
+./broadcasttolocal.py sync/group/$myhost `date +%s%N`
+./broadcasttolocal.py modified/group/$groupname $myhost 
 /TopStor/logqueue.py `basename "$0"` stop $userreq 

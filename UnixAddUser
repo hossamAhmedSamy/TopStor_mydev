@@ -81,7 +81,7 @@ echo useradd \-c"TopStor"$pas $homebase \-p $userpass \-s /usr/sbin/nologin $use
   userhash=`echo $userline | awk -F':' '{print $5}' | awk -F'TopStor' '{print $2}'`
   /TopStor/etcdput.py 'usersinfo/'$username $userid':'$usergd':/'$homePool'/'$username'/'$size'/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no'
   /TopStor/etcdput.py 'usershash/'$username $userhash
-  /TopStor/broadcast.py UserAdd /TopStor/pump.sh UnixAddUser_sync -d$myhost $username $userhash $userid $usergd $userhome
+  #/TopStor/broadcast.py UserAdd /TopStor/pump.sh UnixAddUser_sync -d$myhost $username $userhash $userid $usergd $userhome
   /TopStor/UnixChangeUser $username $usergroups $userreq
   /TopStor/logmsg.py Unlin1022 info $userreq $username
  fi 
@@ -89,4 +89,8 @@ fi
 ln -f /etc/passwd  /opt/passwds/passwd
 ln -f /etc/group  /opt/passwds/group
 ln -f /etc/shadow  /opt/passwds/shadow
+./etcdput.py sync/user/$myhost `date +%s%N`
+./broadcasttolocal.py sync/user/$myhost `date +%s%N`
+./etcdput.py modified/user/$username $myhost 
+./broadcasttolocal.py modified/user/$username $myhost 
 /TopStor/logqueue.py `basename "$0"` finish $userreq 

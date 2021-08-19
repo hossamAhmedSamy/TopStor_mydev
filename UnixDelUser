@@ -66,4 +66,8 @@ then
   /TopStor/logmsg.py Unlin1010 info $userreq $username
  fi;
 fi
+./etcdput.py sync/user/$myhost `date +%s%N`
+./broadcasttolocal.py sync/user/$myhost `date +%s%N`
+./etcdput.py modified/user/$username $myhost 
+./broadcasttolocal.py modified/user/$username $myhost 
 /TopStor/logqueue.py `basename "$0"` stop $userreq 
