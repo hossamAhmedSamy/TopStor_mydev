@@ -7,11 +7,15 @@ import socket
 
 def ioperf():
  myhost=socket.gethostname()
+ cmdline="./loadavg.sh"
+ cores=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split(' ')
+ print( 'cores',100*float(cores[1])/float(cores[0]))
  cmdline='iostat -k'
  result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split('\n')
  cpures = result[:4][-1].split()[:-1]
  tcpu = 0
  tcpu = round(float(cpures[0])+float(cpures[2]),2)
+ tcpu = 100*float(cores[1])/float(cores[0])
  put('cpuperf/'+myhost,str(tcpu))
  diskres = result[6:]
  diskresdict = {}
