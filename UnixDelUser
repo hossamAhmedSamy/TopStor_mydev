@@ -27,7 +27,7 @@ then
  if [ $? -eq 0 ]; then
    /TopStor/logmsg.py Unlin11001 error $userreq $myhost
  else
-  /TopStor/broadcast.py UserDel /TopStor/pump.sh UnixDelUser_sync -d$myhost $username $userreq
+  #/TopStor/broadcast.py UserDel /TopStor/pump.sh UnixDelUser_sync -d$myhost $username $userreq
   echo usename=$username
   ETCDCTL_API=3 /pace/etcdget.py usersinfo $username 
   cgrps=`/pace/etcdget.py usersigroup $username`

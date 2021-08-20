@@ -93,7 +93,7 @@ then
  else
    /TopStor/UnixChangeUser NoUser groups$groupname $userreq 2&>/root/UnixChangeUser
  fi 
- /TopStor/broadcast.py GroupChange /TopStor/pump.sh UnixChangeGroup_sync -d$myhost $@ 
+ #/TopStor/broadcast.py GroupChange /TopStor/pump.sh UnixChangeGroup_sync -d$myhost $@ 
  /TopStor/logmsg.py Unsu1025 info $userreq $groupname
 fi 
 ./etcdput.py sync/group/$myhost `date +%s%N`
