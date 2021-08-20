@@ -40,8 +40,9 @@ else
  /TopStor/logmsg.py Unlin1110 info $userreq $username
 fi;
 fi
-./etcdput.py sync/group/$myhost `date +%s%N`
-./broadcasttolocal.py sync/group/$myhost `date +%s%N`
+stamp=`date +%s%N`
+./etcdput.py sync/group/$myhost $stamp 
+./broadcasttolocal.py sync/group/$myhost $stamp
 ./etcdput.py modified/group/$username $myhost 
 ./broadcasttolocal.py modified/group/$username $myhost 
 /TopStor/logqueue.py `basename "$0"` stop $userreq 

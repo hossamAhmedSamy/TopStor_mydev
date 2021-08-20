@@ -90,8 +90,9 @@ fi
 ln -f /etc/passwd  /opt/passwds/passwd
 ln -f /etc/group  /opt/passwds/group
 ln -f /etc/shadow  /opt/passwds/shadow
-./etcdput.py sync/user/$myhost `date +%s%N`
-./broadcasttolocal.py sync/user/$myhost `date +%s%N`
+stamp=`date +%s%N`
+./etcdput.py sync/user/$myhost $stamp 
+./broadcasttolocal.py sync/user/$myhost $stamp 
 ./etcdput.py modified/user/$username $myhost 
 ./broadcasttolocal.py modified/user/$username $myhost 
 /TopStor/logqueue.py `basename "$0"` finish $userreq 

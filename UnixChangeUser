@@ -129,8 +129,9 @@ then
  #/TopStor/broadcast.py UserChange /TopStor/pump.sh UnixChangeUser_sync -d$myhost $@ 
  /TopStor/logmsg.py Unsu1024 info $userreq $username
 fi 
-./etcdput.py sync/user/$myhost `date +%s%N`
-./broadcasttolocal.py sync/user/$myhost `date +%s%N`
+stamp=`date +%s%N`
+./etcdput.py sync/user/$myhost $stamp 
+./broadcasttolocal.py sync/user/$myhost $stamp 
 ./etcdput.py modified/user/$username $myhost 
 ./broadcasttolocal.py modified/user/$username $myhost 
 /TopStor/logqueue.py `basename "$0"` finish $userreq 
