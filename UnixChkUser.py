@@ -12,7 +12,9 @@ def setlogin(user,passw,token=0):
   pass1=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
   oldpass = str(get('usershash/'+user)[0])
   if oldpass not in pass1:
-   return ({},0)
+   oldpass = str(get('usershashadm/'+user)[0])
+   if oldpass not in pass1:
+    return ({},0)
   token = token_hex(16)
  stamp = int(timestamp() + 360)
  put('login/'+user,token+'/'+str(stamp))
