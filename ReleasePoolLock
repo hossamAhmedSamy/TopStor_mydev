@@ -1,0 +1,9 @@
+#!/bin/sh
+export ETCDCTL_API=3
+echo $@ >/root/ReleasePoolLock
+pgrep Zpool | grep Zpool
+if [ $? -ne 0 ];
+then
+ pool=`echo $@ | awk '{print $1}'`
+ ETCDCTL_API=3 /pace/etcddel.py lockedpools/$pool
+fi

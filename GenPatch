@@ -1,0 +1,66 @@
+#!/usr/local/bin/zsh
+export ETCDCTL_API=3
+#cd /root/scripts
+echo $@ > ~/tmp
+TopStor='TopStor'
+tmpdir='/root'
+pace='pace'
+web='var/www/html/des20/'
+logging='/var/www/html/des20/Data/currentinfo2.log';
+glog='/var/www/html/des20/Data/TopStor.log';
+currentfw=`git branch | grep \* | awk '{print $2}'`
+webfile='/var/www/html/des20/Data';
+cd /$TopStor
+newfw=`echo $@ | awk '{print $1}'`;
+realfw=`echo $newfw | awk -F'.' '{print $1"."$2}'`;
+userreq=`echo $@ | awk '{print $2}'`;
+/TopStor/logqueue.py `basename "$0"` running $userreq 
+privilege="Uploadch";
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]]
+then
+ gpg --list-keys | grep Fwkey
+ if [[ $? -ne 0 ]]; then
+  cp /TopStor/key/*.gpg /root/.gnupg/
+  gpg --import-ownertrust /TopStor/key/gpgowner.txt
+ fi
+ newd=$tmpdir/${newfw}.d
+ mkdir $newd
+ chmod 700 $newd
+ gpg --batch --passphrase YousefNadody -d  $webfile/$newfw > ${newd}/${newfw}.tar.gz
+ if [ $? -ne 0 ]; then 
+  cd /$TopStor
+   /TopStor/logmsg.py Upnv1010 error $userreq
+  exit
+ fi
+  cd /$TopStor
+   /TopStor/logmsg.py Upsa1010 info $userreq $currentfw $realfw
+ echo newfw=$newfw
+ cd $newd
+ tar -xvzf ${newfw}.tar.gz
+ if [ $? -eq 0 ];
+ then
+  cd /$TopStor
+  #git commit -am "prep to apply fw ${newfw}"
+  #git checkout master
+  #git checkout -b ${newfw}
+  #git apply ${newd}/TopStordata/TopStor.p 
+  rm -rf /$TopStor/.git
+  rm -rf /$pace/.git
+  rm -rf /$web/.git
+  rsync -rt ${newd}/$TopStor/ /$TopStor/
+  rsync -rt ${newd}/$pace/ /$pace/
+  rsync -rt ${newd}/$web/ /$web/
+  git checkout $newfw
+  cd /$pace
+  git checkout $newfw
+  cd /$web
+  git commit -am "changing to new fw" && git checkout $newfw
+  cd /$TopStor
+   /TopStor/logmsg.py Upsu1010 info $userreq $currentfw $realfw
+ else
+   /TopStor/logmsg.py Upfa1010 error $userreq $currentfw $realfw
+ fi
+ # rm -rf $newd
+fi
+/TopStor/logqueue.py `basename "$0"` stop $userreq 

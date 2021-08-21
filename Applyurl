@@ -1,0 +1,34 @@
+#!/bin/sh
+export ETCDCTL_API=3
+echo $@  > /root/applyurl
+cd /TopStor
+TopStor='/TopStor'
+tmpdir='/root'
+pace='/pace'
+web='/var/www/html/des20/'
+logging='/var/www/html/des20/Data/currentinfo2.log';
+glog='/var/www/html/des20/Data/TopStor.log';
+currentfw=`git branch | grep \* | awk '{print $2}'`
+newsite=`echo $@ | awk '{print $2}'`;
+userreq=`echo $@ | awk '{print $1}'`;
+/TopStor/logqueue.py `basename "$0"` running $userreq 
+privilege="Uploadch";
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]]
+then
+ if [[ $newsite == "" ]]; then
+  urlis=`cat $TopStor/fw.txt`
+  cd $web/Data
+  echo wget $urlis\/current\/QS\* 
+  rm -rf QS*
+  wget $urlis/current/QS* 2> /root/tmp
+  echo tmp is 
+  thefile=`cat /root/tmp | grep ftp | grep QS | grep -v \* | head -1 | awk -F'/' '{print $NF}'`
+  echo thefile=$thefile
+  cd $TopStor
+  ./GenPatch $thefile admin
+   /pace/putzpool.py 
+   /TopStor/logmsg.py Upfe1010 info $userreq
+ fi
+fi
+/TopStor/logqueue.py `basename "$0"` stop $userreq 

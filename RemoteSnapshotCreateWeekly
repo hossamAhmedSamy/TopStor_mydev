@@ -1,0 +1,40 @@
+#!/usr/local/bin/zsh
+export ETCDCTL_API=3
+cd /TopStor
+web='/var/www/html/des20/Data/Replicatestatus.log';
+logging='/var/www/html/des20/Data/currentinfo2.log';
+glog='/var/www/html/des20/Data/TopStor.log';
+runningpools='/pacedata/pools/runningpools'
+cronthis='/TopStordata/cronthis.txt'
+stime=`echo $@ | awk '{print $1}'`;
+hr=`echo $stime | awk -F: '{print $1}'`;
+min=`echo $stime | awk -F: '{print $2}'`;
+every=`echo $@ | awk '{print $2}'` ;
+k=0; keep=`echo $@ | awk '{print $3}'`; keep=$(($keep+$k)); if (($keep < 1)); then keep=1; fi
+pDG=` echo $@ | awk '{print $4}'`; 
+FileS=` echo $@ | awk '{print $5}'`;
+partner=` echo $@ | awk '{print $6}'`;
+userreq=` echo $@ | awk '{print $7}'`;
+txtres='/TopStordata/'`basename $0`$userreq'.txt'
+rm $txtres 2>/dev/null
+DG=`echo $pDG | awk -F_ '{print $2}'`;
+hostnam=`echo $pDG | awk -F_ '{print $1}'`;
+sshost=`echo $pDG | awk -F_ '{print $1}'`;
+#sshost=`cat $runningpools | grep $hostnam | awk '{print $1}'`;
+privilege="Replication";
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]]
+then
+  /TopStor/logmsg.py Replica1030 info $userreq
+crontab -l > $cronthis
+stamp=`date +%s`
+echo $min  $hr "*" "*" $every  /TopStor/pump.sh RemoteSnapshotnowOnce $sshost $hostnam $DG/$FileS Weekly.$keep.$hr.$min.$every $partner ${txtres}.$stamp  >> $cronthis
+crontab $cronthis 2>> $txtres
+if [ $? -ne 0 ]; then
+  /TopStor/logmsg.py Replica1031 error $userreq
+else 
+  /TopStor/logmsg.py Replica1032 info $userreq Weekly.$hr.$min.$every.$keep $partner $hostnam/$DG/$FileS
+fi;
+./RemoteGetPoolperiodlist 
+fi
+rm -rf ${txtres}.$stamp &>/dev/null

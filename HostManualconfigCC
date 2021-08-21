@@ -1,0 +1,36 @@
+#!/bin/sh
+export ETCDCTL_API=3
+cd /TopStor/
+echo $@ > /root/HostCCtmp
+myhost=`hostname -s`
+oldip=`echo $@ | awk '{ print $2 }'`;
+oldsubnet=` echo $@ | awk '{ print $3 }'`;
+hostip=` echo $@ | awk '{ print $4 }'`;
+#oldip=`pcs resource show CC | grep Attribute | awk -F'ip=' '{print $2}' | awk '{print $1 }'`
+subnet=` echo $@ | awk '{ print $5 }'`;
+sed -e "s/HOSTY/$hostip/g" /TopStor/sshhttp.conf > /etc/httpd/conf.d/sshhttp.conf
+sed -e "s/HOSTY/$hostip/g" /TopStor/sshhttp.conf > /etc/httpd/conf.d/sshhttp.conf
+#dev=`/sbin/pcs resource show CC | grep Attrib | awk -F'nic=' '{print $2}' | awk '{print $1}'`
+echo hi > /root/HostCC
+echo shuttingdown 1 $hostip,$myhost, $subnet >> /root/HostCC
+docker stop $(docker ps -a -q) 
+mkdir /tmp/cpools 2>/dev/null
+rm -rf /tmp/cpools
+cp /TopStordata/pdhc* /tmp/cpools/
+#/sbin/zpool export -a ;
+cp /tmp/cpools/* /TopStordata/
+/pace/etcdget.py leader --prefix | grep $myhost
+if [ $? -eq 0 ];
+then
+ /pace/etcdput.py leader/$myhost $hostip
+else
+ /pace/etcdput.py known/$myhost $hostip
+fi
+/pace/etcdput.py ActivePartners/$myhost $hostip
+/pace/etcdput.py hostipsubnet/$myhost $subnet
+/pace/etcdput.py ready/$myhost $hostip
+configured=`./etcdput.py configured/$myhost yes`
+./UpdateHosts $myhost $hostip
+/sbin/pcs resource update CC cidr_netmask=$subnet ip=$hostip
+/pace/keysend.sh $hostip
+#fi

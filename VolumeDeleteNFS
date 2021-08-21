@@ -1,0 +1,70 @@
+#!/bin/sh
+cd /TopStor
+export ETCDCTL_API=3
+perfmon=`cat /pacedata/perfmon`
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py VolumeDeleteNFS start system 
+fi
+web='/var/www/html/des20/Data/CIFSstatus.log';
+logging='/var/www/html/des20/Data/currentinfo2.log'
+glog='/var/www/html/des20/Data/TopStor.log';
+runningpools='/pacedata/pools/runningpools'
+datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
+volname=`echo $@ | awk '{print $2}'`;
+pDG=`echo $@ | awk '{print $1}'`;
+pro=`echo $@ | awk '{print $3}'`;
+userreq=` echo $@ | awk '{print $4}'`;
+DG=`echo $pDG `;
+hostnam=`echo $pDG `;
+privilege='CIFS';
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]]
+then
+ echo $@ > /root/VolumeDestroy
+ /TopStor/logmsg.py NFS1000 info $userreq $volname
+ cat /etc/exports | grep -v $volname > /TopStordata/exports 
+ cp /TopStordata/exports /etc/exports
+ systemctl reload nfs
+ clearvol=`./prot.py clearvol $volname | awk -F'result=' '{print $2}'`
+ if [ $clearvol != '-1' ];
+ then
+  docker stop $clearvol 
+  docker container rm $clearvol 
+  /sbin/pcs resource delete --force $clearvol  2>/dev/null
+  rm /etc/samba/exports.$ipaddr;
+ fi
+ redvol=`./prot.py redvol $volname | awk -F'result=' '{print $2}'`
+ if [ $redvol != '-1' ];
+ then
+  redipaddr=`echo $redvol | awk -F'/' '{print $1}' | awk -F'-' '{print $NF}'`
+  /TopStor/delblock.py ${volname} ${volname} /TopStordata/exports.${redipaddr}  ;
+  cp /TopStordata/smb.${redipaddr}.new /TopStordata/smb.${redipaddr};
+  echo redvol=$redvol
+  resname=`echo $redvol | awk -F'/' '{print $1}'`
+  newright=$redvol 
+  mounts=`echo $newright |sed 's/\// /g'| awk '{$1=""; print}'`
+  mount=''
+  for x in $mounts; 
+  do
+   mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
+  done
+ fi  
+ rm -rf /etc/exports.$volname
+ /sbin/zfs destroy -r $DG/$volname
+ if [ $? -ne 0  ]; then
+  /TopStor/logmsg.py NFS1001 error $userreq $volname
+ else 
+  /pace/etcddel.py volumes $volname
+  /pace/delbroadcastlocal.py volumes $volname
+  /TopStor/SnapShotPeriodDelete $volname $userreq
+  /TopStor/logmsg.py NFS1002 info $userreq $volname
+  rm -rf /$DG/exports.$volname
+ fi
+ rm -rf /$DG/exports.$volname
+fi
+ /pace/putzpool.py &
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py VolumeDeleteNFS stop system 
+fi

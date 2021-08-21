@@ -1,0 +1,35 @@
+#!/usr/local/bin/zsh
+export ETCDCTL_API=3
+cd /TopStor
+web='/var/www/html/des20/Data/Replicatestatus.log';
+logging='/var/www/html/des20/Data/currentinfo2.log';
+runningpools='/pacedata/pools/runningpools'
+glog='/var/www/html/des20/Data/TopStor.log';
+echo Replica1012: > $web;
+name=`echo $@ | awk '{print $1}'`;
+pDG=`echo $@ | awk '{print $2}'`;
+FileS=` echo $@ | awk '{print $3}'`;
+partner=` echo $@ | awk '{print $4}'`;
+userreq=` echo $@ | awk '{print $5}'`;
+txtres='/TopStordata/'`basename $0`$userreq'.txt'
+rm $txtres 2>/dev/null
+DG=`echo $pDG | awk -F_ '{print $2}'`;
+hostnam=`echo $pDG | awk -F_ '{print $1}'`;
+sshost=`echo $pDG | awk -F_ '{print $1}'`;
+#sshost=`cat $runningpools | grep $hostnam | awk '{print $1}'`;
+privilege="Replication";
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]];
+then
+  /TopStor/logmsg.py Replica1033 info $userreq $hostnam/$DG/$FileS $partner
+ echo ./RemoteSnapshotnowOnce $sshost $hostnam $DG/$FileS $name. $partner  $txtres 
+ ./RemoteSnapshotnowOnce $sshost $hostnam $DG/$FileS $name. $partner  $txtres; 
+ datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
+ cat $txtres | grep success &>/dev/null
+ if [ $? -ne 0 ]; then
+   /TopStor/logmsg.py Replica1034 error $userreq $hostnam/$DG/$FileS $partner $txtres
+ else 
+   /TopStor/logmsg.py Replica1035 info $userreq $hostnam/$DG/$FileS $partner
+ fi;
+fi
+./GetPoolVollist

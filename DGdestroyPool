@@ -1,0 +1,89 @@
+#!/bin/sh
+export ETCDCTL_API=3
+cd /TopStor/
+echo $@ > /root/tmp
+web="/var/www/html/des20/Data/DGstatus.log";
+logging='/var/www/html/des20/Data/currentinfo2.log'
+glog='/var/www/html/des20/Data/TopStor.log'
+pool=` echo $@ | awk '{print $1}'`;
+userreq=` echo $@ | awk '{print $2}'`;
+privilege="DiskGroups";
+echo hi=$privilege > /root/tmp2
+contrun=`./privthis.sh $privilege $userreq`;
+echo hi=$contrun >> /root/tmp2
+echo $contrun | grep 'true'
+if [ $? -eq 0  ]
+then
+echo iam in >> /root/tmp2
+ myhost=`hostname -s`
+ waiting=1
+ waitingc=1
+ while [ $waiting -eq 1 ];
+ do
+  echo to frst while >> /root/tmp2
+  currentreq=`/pace/etcdget.py requests/DGdestroypool --prefix`'currentreq'
+  echo currentre=$currentreq  >> /root/tmp2
+  echo $currentreq | grep $myhost
+  if [ $? -ne 0 ];
+  then
+  echo to continue >> /root/tmp2
+   break
+  fi
+  echo to continue 0 >> /root/tmp2
+  waitingc=$((waitingc+1))
+  echo to continue 1, $waitingc >> /root/tmp2
+  if [ $waitingc -eq 20 ];
+  then
+   echo to continue 2 >> /root/tmp2
+   break
+  fi
+   echo to continue 3 >> /root/tmp2
+  sleep 1
+ done
+ echo Iam her2 >> /root/tmp2
+ zpool status | grep $pool 
+ if [ $? -ne 0 ];
+ then
+  exit
+ fi
+ /pace/etcdput.py requests/DGdestroypool/$myhost $myhost/$userreq
+ /TopStor/logqueue.py `basename "$0"` running $userreq 
+ /TopStor/logmsg.py DGst5 info $userreq $pool
+ waiting=1
+ while [ $waiting -eq 1 ];
+ do
+  sleep 1
+  pgrep zpool
+  if [ $? -ne 0 ];
+  then
+   waiting=0
+  fi
+ done
+ echo iam here2 >> /root/tmp2
+ /sbin/zpool export -f $pool
+ sleep 1
+ /sbin/zpool import $pool
+ sleep 1
+ /sbin/zpool destroy -f $pool 2>/root/dgdestroyerror
+ if [ $? -ne 0 ]; then
+   /TopStor/logmsg.py DGfa5 error $userreq $pool
+ else
+  ETCDCTL_API=3 /pace/etcddel.py pools $pool
+  ETCDCTL_API=3 /TopStor/deltolocal.py pools $pool
+  ETCDCTL_API=3 /pace/etcddel.py fixpool/$pool
+  ETCDCTL_API=3 /pace/etcddel.py activepool/$pool 
+  ETCDCTL_API=3 /TopStor/deltolocal.py activepool/$pool activepool
+  pkill $pool
+  crontab -l | grep -v Snap > /TopStordata/cronfile
+  crontab -r 
+  crontab /TopStordata/cronfile
+  ETCDCTL_API=3 /pace/etcddel.py balance $pool
+  ETCDCTL_API=3 /pace/etcddel.py vol $pool
+
+  echo > /etc/exports
+   /TopStor/logmsg.py DGsu5 info $userreq $pool
+ fi 
+fi
+/pace/etcddel.py requests/DGdestroypool/$myhost $myhost/$userreq
+ /pace/putzpool.py
+/TopStor/logqueue.py `basename "$0"` stop $userreq 

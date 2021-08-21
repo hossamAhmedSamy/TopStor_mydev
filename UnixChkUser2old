@@ -1,0 +1,34 @@
+#!/bin/sh
+cd /TopStor/key;
+export ETCDCTL_API=3
+echo $@ > /root/UnixchkUser2
+web='/var/www/html/des20/Data/isuser.txt';
+resulting="not found";
+username=`echo $@ | awk '{print $1}'`;
+perfmon=`cat /pacedata/perfmon`
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py UnixChkUser2 start system 
+fi
+stamp=`date +%s`;
+x=`/pace/etcdget.py logged/$username`
+updx=`/pace/etcdget.py updlogged/$username`
+echo x=$x
+if [ $x -ge 100 ];
+then
+ diffx=$((stamp-updx))
+ echo diff $diffx
+ if [ $diffx -lt 600 ];
+ then
+  /pace/etcdput.py updlogged/$username $stamp
+  /pace/broadcasttolocal.py updlogged/$username $stamp 
+  x=$stamp
+ else
+  /pace/etcdput.py logged/$username 1 
+  /pace/broadcasttolocal.py logged/$username 1 &
+ fi  
+fi
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py UnixChkUser2 stop system 
+fi

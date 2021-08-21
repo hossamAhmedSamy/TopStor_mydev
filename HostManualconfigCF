@@ -1,0 +1,27 @@
+#!/bin/sh
+export ETCDCTL_API=3
+cd /TopStor/
+echo $@ > ~/cftmp
+cf=`echo $@ | awk '{print $1}'`
+myhost=`hostname`
+myip=`./etcdget.py ready/$myhost`
+leader=`./etcdget.py leader --prefix`
+echo $leader | grep $myip 
+if [ $? -eq 0 ];
+then
+ actives=`./etcdget.py Active --prefix | wc -l`
+ if [ $actives -ge 2 ];
+ then
+  echo it is clustered with other nodes >> ~/cftmp
+ else
+  ./etcdput.py configured/$myhost $cf
+ fi
+else
+ actives=`./etcdgetlocal.py $myip Active --prefix | wc -l`
+ if [ $actives -ge 2 ];
+ then
+  echo it is clustered with other nodes >> ~/cftmp
+ else
+  ./etcdputlocal.py $myip configured/$myhost $cf
+ fi
+fi

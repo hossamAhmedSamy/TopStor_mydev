@@ -1,0 +1,114 @@
+#!/bin/sh
+export ETCDCTL_API=3
+cd /TopStor/
+echo $@ > /root/volactivate 
+web='/var/www/html/des20/Data/CIFSstatus.log';
+logging='/var/www/html/des20/Data/currentinfo2.log'
+glog='/var/www/html/des20/Data/TopStor.log';
+runningpools='/pacedata/pools/runningpools'
+txtres='/TopStordata/'`basename $0`'.txt'
+rm -rf $txtres 2>/dev/null
+myip=`echo $@ | awk '{print $1}'`;
+host=`echo $@ | awk -F'host=' '{print $2}' | awk '{print $1}'`;
+vol=`echo $@ | awk -F'vol=' '{print $2}' | awk '{print $1}'`;
+pool=`echo $@ | awk -F'pool=' '{print $2}' | awk '{print $1}'`;
+userreq=`echo $@ | awk -F'user=' '{print $2}' | awk '{print $1}'`;
+myhost=`hostname -s`
+
+privilege="HOME";
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]]
+then
+ stathost=`echo $host | wc -c`
+ if [ $stathost -le 1 ]; then host=$myhost; fi
+ statpool=`echo $pool | wc -c`
+ if [ $statpool -le 1 ]; then statpool=0; else statpool=1; fi
+ statvol=`echo $vol | wc -c`
+ if [ $statvol -le 1 ]; then statvol=0; else statvol=1; fi
+ stat=${statpool}${statvol}
+ case $stat in
+  01)
+   echo volume only  for  $vol
+    declare  vols=`/pace/etcdgetlocal.py $myip volumes/HOME $vol`
+   ;;
+  10)
+   echo pool only $pool
+    declare  ips=`/pace/etcdgetlocal.py $myip ipaddr $pool`
+    declare  vols=`/pace/etcdgetlocal.py $myip volumes/HOME  $pool`
+   ;;
+  11)
+   echo 'volume and pool only'
+    declare  vols=`/pace/etcdgetlocal.py $myip volumes/HOME/$host/$pool/$vol`
+   ;;
+  00)
+   echo 'host only'
+   declare  vols=`/pace/etcdgetlocal.py $myip volumes/HOME/$host --prefix`
+ esac
+ echo vols="${vols[@]}"
+ volsc=`echo $vols | wc -c`
+ if [ $volsc -le 2 ];
+ then
+  echo No Volumes
+  exit
+ fi
+ echo "${vols[@]}" |  grep "\-1"
+ if [ $? -eq 0 ];
+ then
+  echo No Volumes -1
+  exit
+ fi
+ echo "${ips[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read i;
+ do
+  ip=`echo $i | awk -F'-' '{print $3}' | awk -F'/' '{print $1}'`
+  rm -rf /TopStordata/smb.$ip
+  declare ipvol=`echo $i |  cut -d/ -f2-`
+  echo "${ipvol[@]}" | sed 's/\//\n/g' | while read v;
+  do
+   l=`echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | grep $v` 
+   lc=`echo $l | wc -c `
+   if [ $lc -lt 3 ];
+   then
+    continue
+   fi
+   pool=`echo $l | awk -F'/' '{print $1}'`
+   name=`echo $l | awk -F'/' '{print $2}'`
+   path='/'${pool}'/'${name}
+   readv=`echo $l | awk -F'/' '{print $3}'`
+   browsable=`echo $l | awk -F'/' '{print $4}'`
+   writev=`echo $l | awk -F'/' '{print $5}'`
+   admin=`echo $l | awk -F'/' '{print $6}'`
+   writeable=`echo $l | awk -F'/' '{print $7}'`
+   homeprop=`ETCDCTL_API=3 /pace/etcdgetlocal.py $myip ipaddr/HOME` 
+   if [ $homeprop -eq '-1' ];
+   then
+    ipaddr='10.11.11.20'
+    ipsubnet='24';
+   else
+    ipaddr=`echo $homeprop | awk -F'/' '{print $1}'` 
+    ipsubnet=`echo $homeprop | awk -F'/' '{print $2}'` 
+   fi
+   yes | cp homecifs.txt /TopStordata/smb.${name}
+   sed -i "s/USER/$name/g"  /TopStordata/smb.${name}
+   sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
+   cat /TopStordata/smb.${name} >> /TopStordata/smb.$ip
+  done
+  ipc=`cat /TopStordata/smb.$ip | wc -l`
+  if [ $ipc -lt 4 ];
+  then
+    continue
+  fi
+  /TopStor/cifslocal.sh $myip $pool $i $ip $ipsubnet
+ done
+ echo "${vols[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read l;
+ do
+  pool=`echo $l | awk -F'/' '{print $1}'`
+  name=`echo $l | awk -F'/' '{print $2}'`
+  volhost=`/pace/etcdgetlocal.py $myip volumes/HOME/ $name | awk -F'/' '{print $3}'`
+  volsvalue=`/pace/etcdgetlocal.py $myip volumes/HOME/$volhost/$pool/$name`
+  /pace/etcdputlocal.py $myip volumes/HOME/$myhost/$pool/$name $volsvalue
+  if [ $volhost != $myhost ];
+  then
+   /pace/etcddellocal.py $myip volumes/HOME/$volhost/$pool/$name
+  fi
+ done
+fi

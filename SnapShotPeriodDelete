@@ -1,0 +1,32 @@
+#!/bin/sh
+export ETCDCTL_API=3
+cd /TopStor
+echo $@ > /root/tmpperioddel
+web='/var/www/html/des20/Data/Snapsstatus.log'
+logging='/var/www/html/des20/Data/currentinfo2.log'
+glog='/var/www/html/des20/Data/TopStor.log';
+periodel=` echo $@ | awk '{print $1}'`;
+userreq=` echo $@ | awk '{print $2}'`;
+/TopStor/logqueue.py `basename "$0"` running $userreq 
+txtres='/TopStordata/'`basename $0`$userreq'.txt'
+myhost=`hostname -s`
+myip=`/sbin/pcs resource show CC | grep Attributes | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+rm $txtres 2>/dev/null
+privilege="SnapShots";
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]]
+then
+  /TopStor/logmsg.py Snap1043 info $userreq $periodel
+ /bin/crontab -l | grep -v "$periodel"
+ if [ $? -ne  0  ]; then
+   /TopStor/logmsg.py Snap1044 error $userreq $periodel
+ else
+ /bin/crontab -l | grep -v "$periodel" > /TopStordata/thiscron
+ /bin/crontab /TopStordata/thiscron
+ /pace/etcddel.py Snapperiod $periodel 
+ ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
+ /TopStor/logmsg.py Snap1045 info $userreq $periodel
+fi;
+/pace/putzpool.py & 
+fi
+/TopStor/logqueue.py `basename "$0"` stop $userreq 
