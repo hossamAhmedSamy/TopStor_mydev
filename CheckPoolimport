@@ -17,5 +17,6 @@ importpools=` zpool import | grep 'pool:' | awk -F': ' '{print $2}'`;
      /TopStor/ioperf.py performance
     fi
    /TopStor/etcdput.py poolfound/$l $myhost
+   /TopStor/broadcasttolocal.py poolfound/$l $myhost
   fi
  done

@@ -6,6 +6,7 @@ from etcdput import etcdput as put
 from etcdgetpy import etcdget as get 
 from etcddel import etcddel as deli 
 from broadcast import broadcast as broadcast 
+from broadcasttolocal import broadcasttolocal
 from os import listdir as listdir
 from os import remove as remove
 from putzpoolimport import putzpoolimport as putz, listpools
