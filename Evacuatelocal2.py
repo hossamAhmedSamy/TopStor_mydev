@@ -13,7 +13,7 @@ def setall(*bargs):
   perfmon = f.readline()
  if '1' in perfmon:
   queuethis('Evacuate','running','system')
- thehosts=get('toremove','start')
+ thehosts=get('modified','evacuatehost')
  if thehosts[0]==-1:
   if '1' in perfmon:
    queuethis('Evacuate','stop_cancel','system')
@@ -21,23 +21,22 @@ def setall(*bargs):
  leader=get('leader','--prefix')[0][0].replace('leader/','')
  myhost=hostname()
  myip=get('ready',myhost)[0][1]
- print(myip,myhost,leader,str(thehosts))
  for host in thehosts:
-  hostn=host[0].replace('toremove/','')
-  hostip=get('ActivePartners/'+hostn)[0]
-  if myhost in hostn and myhost in leader:
-   cmdline=['/TopStor/Converttolocal.sh',myip]
-   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  elif myhost in hostn and myhost not in leader:
-   putlocal(myip,'toreset','yes')
-   put('toremovereset/'+hostn,'reset')
-   cmdline=['/pace/removetargetdisks.sh', hostn, hostip]
+  hostn=host[0].split('/')[2]
+  hostip=host[1]
+  print('iiiiiiiiiiiiiiiii',hostn,myhost, hostip)
+  if myhost in hostn:
+   if myhost in leader:
+    cmdline=['/TopStor/Converttolocal.sh',myip]
+    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   cmdline=['/TopStor/resettarget.sh',myhost]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
    while True:
     cmdline=['/TopStor/rebootme','reset']
     result=subprocess.run(cmdline,stdout=subprocess.PIPE)
     sleep(10)
   if myhost not in hostn : 
+     print('iam here', hostn, hostip)
      cmdline=['/pace/removetargetdisks.sh', hostn, hostip]
      result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   logmsg.sendlog('Evacuaesu01','info','system',hostn)

@@ -7,7 +7,7 @@ from etcddel import etcddel as dels
 from deltolocal import deltolocal
 from socket import gethostname as hostname
 from broadcasttolocal import broadcasttolocal as broadcasttolocal 
-from Evacuatelocal import setall()
+from Evacuatelocal2 import setall
 from etcdget import etcdget as get 
 import logmsg
 def do(*args):

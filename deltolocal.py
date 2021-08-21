@@ -10,8 +10,8 @@ def deltolocal(*args):
  knowns=[]
  knowninfo=get('known','--prefix')
  for k in knowninfo:
-  print('param',k[1],args[0],args[1])
-  dellocal(k[1],args[0],args[1])
+  print('param',k[1],*args)
+  dellocal(k[1],*args)
 
 if __name__=='__main__':
  deltolocal(*sys.argv[1:])
