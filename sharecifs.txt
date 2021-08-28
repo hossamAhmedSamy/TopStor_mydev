@@ -1,8 +1,6 @@
 ;;;;;;;;         startNAMECIFS_only
-;;;;;;;; SUMMARY Vtype Rpool/Rname/Rreadv/Rbrows/Rwritev/Radmin/Rwritea/Ripadd/Ripsub 
-[SHORTNAME]
-;ipaddress = IPADDRESS
-;ipsubnet = IPSUBNET
+;;;;;;;; SUMMARY Vtype Rpool/Rname/Rreadv/Rbrows/Rwritev/Radmin/Rwritea/Ripadd/Ripsub
+[NAMECIFS]
 path = /POOL/NAMECIFS
 read only = no
 browsable = yes

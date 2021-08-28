@@ -92,9 +92,9 @@ if __name__=='__main__':
  #heapthis(*sys.argv[1:])
  syncnextlead('taskperf-2021041522',1)
  
- x=['/TopStor/logqueue2.sh', '04/09/2021', '20:34:31', 'dhcp6517', 'selectspare.py', 'start', 'system', '1617989669']
+ x=['/TopStor/logqueue2.sh', '04/09/2021', '20:34:31', 'dhcp6517', 'testlogqueue2.py', 'start', 'system', '1617989669']
  heapthis(x[1:])
- x=['/TopStor/logqueue2.sh', '04/09/2021', '20:34:32', 'dhcp6517', 'addknown.py', 'running', 'system', '1617989671']
+ x=['/TopStor/logqueue2.sh', '04/09/2021', '20:34:32', 'dhcp6517', 'test2loguque2.py', 'running', 'system', '1617989671']
  heapthis(x[1:])
- x=['/TopStor/logqueue2.sh', '04/09/2021', '20:34:34', 'dhcp6517', 'selectspare.py', 'stop', 'system', '1617989671']
+ x=['/TopStor/logqueue2.sh', '04/09/2021', '20:34:34', 'dhcp6517', 'test3logqueue2.py', 'stop', 'system', '1617989671']
  heapthis(x[1:])

@@ -1,7 +1,8 @@
 #!/bin/sh
 export ETCDCTL_API=3
 cd /TopStor/
-echo $@ > /root/dgset
+echo $@ > /root/checkpool
+myhost=`hostname`
 importpools=` zpool import | grep 'pool:' | awk -F': ' '{print $2}'`;   
  echo "${importpools[@]}" | while read  l;
  do 
@@ -9,6 +10,13 @@ importpools=` zpool import | grep 'pool:' | awk -F': ' '{print $2}'`;
   if [ $? -eq 0 ];
   then
    echo $preimport $l > /root/Checkpoolimport
-   /TopStor/etcdput.py activepool/$l preimport
+   #/TopStor/etcdput.py activepool/$l preimport
+    ./etcdget.py cpu $myhost | grep '\-1'
+    if [ $? -eq 0 ];
+    then
+     /TopStor/ioperf.py performance
+    fi
+   /TopStor/etcdput.py poolfound/$l $myhost
+   /TopStor/broadcasttolocal.py poolfound/$l $myhost
   fi
  done

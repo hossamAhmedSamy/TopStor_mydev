@@ -8,14 +8,18 @@ logging='/var/www/html/des20/Data/currentinfo2.log';
 runningpools='/pacedata/pools/runningpools';
 glog='/var/www/html/des20/Data/TopStor.log';
 txtres='/TopStordata/'`basename $0`'.txt'
+hostname=`hostname -s`
 myip=`echo $@ | awk '{print $1}'`
-ntp=`ETCDCTL_API=3 ./etcdgetlocal.py $myip ntp`
+leader=`echo $@ | awk '{print $2}'`
+ntp=`ETCDCTL_API=3 ./etcdget.py ntp/$leader`
 rm -rf /etc/chrony.conf
 cp /TopStor/chrony.conf /etc/
 echo $ntp | grep '\.'
 if [ $? -eq 0 ];
 then
  sed -i "s/MASTERSERVER/$ntp/g" /etc/chrony.conf
+ ./etcdput.py ntp/$hostname $ntp
+ ./etcdputlocal.py $myhip ntp/$hostname $ntp
 else
  sed -i '/MASTERSERVER/,+1 d' /etc/chrony.conf
 fi

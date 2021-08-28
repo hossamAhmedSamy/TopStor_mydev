@@ -13,7 +13,7 @@ userreq=`echo $@ | awk -F'user=' '{print $2}' | awk '{print $1}'`;
 myhost=`hostname -s`
 ips='0'
 
-privilege="CIFS";
+privilege="NFS";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
@@ -57,6 +57,7 @@ then
  fi
  modprobe nfs
  modprobe nfsd
+ systemctl start nfs-server
  ispoolonly=`echo $ips | wc -c `
  if [ $ispoolonly -gt 5 ];
  then
@@ -113,6 +114,7 @@ then
   do
    modprobe nfs
    modprobe nfsd
+   systemctl start nfs-server
    echo l=$l;
    pool=`echo $l | awk -F'/' '{print $1}'`
    name=`echo $l | awk -F'/' '{print $2}'`

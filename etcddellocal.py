@@ -1,8 +1,10 @@
 #!/bin/python3.6
-import subprocess,sys
+import subprocess,sys, os
 import json
 
 def etcddel(*argv):
+
+ os.environ['ETCDCTL_API']= '3'
  if argv[-1]=='--prefix':
   pointer=-1
  else:
@@ -11,9 +13,9 @@ def etcddel(*argv):
  data=json.load(open('/pacedata/runningetcdnodes.txt'));
  endpoints='http://'+argv[0]+':2378'
  if len(argv) > 2:
-  cmdline=['etcdctl','--endpoints='+endpoints,'get',argv[1],'--prefix']
+  cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',argv[1],'--prefix']
  else:
-  cmdline=['etcdctl','--endpoints='+endpoints,'get',argv[1]]
+  cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',argv[1]]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  mylist=str(result.stdout)[2:][:-3].split('\\n')
  zipped=zip(mylist[0::2],mylist[1::2])
@@ -34,7 +36,7 @@ def etcddel(*argv):
   return
  count=0
  for key in todel:
-  cmdline=['etcdctl','--endpoints='+endpoints,'del',key]
+  cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'del',key]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   reslist=str(result.stdout)[2:][:-3]
   if '1' in reslist:

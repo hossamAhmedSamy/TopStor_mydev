@@ -20,5 +20,5 @@ echo code=$code
 echo logcode=$logcode
 echo $logcode > ${logging}2
 #dt=${datenow}'T'${timenow}; 
-dtn=`date +%s -d ${dt}'T'$tm`;
+dtn=`date +%s `;
 echo $dt $tm $fromhost $msgtype $msguser $code $dtn>> $glog

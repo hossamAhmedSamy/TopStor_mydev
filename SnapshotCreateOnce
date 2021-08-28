@@ -1,5 +1,5 @@
-#!/usr/local/bin/zsh
-echo $@> /root/tmp
+#!/usr/bin/sh
+echo $@> /root/snapshotonce
 export ETCDCTL_API=3
 cd /TopStor/
 web='/var/www/html/des20/Data/Snapsstatus.log';
@@ -14,13 +14,13 @@ userreq=` echo $@ | awk '{print $4}'`;
 /TopStor/logqueue.py `basename "$0"` running $userreq 
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
 rm $txtres 2>/dev/null
-DG=$pDG 
 privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
   /TopStor/logmsg.py Snap1026 info $userreq $FileS/$name 
-/TopStor/SnapshotnowOnce $DG/$FileS $name > $txtres
+echo /TopStor/SnapshotnowOnce $pDG $FileS $name 
+/TopStor/SnapshotnowOnce $pDG $FileS $name > $txtres
 if [ $? -ne 0  ]; then
   /TopStor/logmsg.py Snap1028 error $userreq $FileS/$name 
 else 

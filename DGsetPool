@@ -56,26 +56,34 @@ if [[ $raid == "import" ]];
 then
  echo to import only $disk1
  nextpool=$disk1 
- /TopStor/logmsg.py DGst22 info $userreq ${nextpool} 
- zpool import $nextpool 
- sleep 1
- /sbin/zpool status | grep $nextpool >> /root/tmp2
- if [ $? -ne 0 ]; then
+ zpool import | grep $nextpool
+ if [ $? -eq 0 ];
+ then
+  /TopStor/logmsg.py DGst22 info $userreq ${nextpool} 
+  zpool import $nextpool 
+  sleep 1
+  /sbin/zpool status | grep $nextpool >> /root/tmp2
+  if [ $? -ne 0 ]; then
    echo something woring in the import of $nextpool >> /root/tmp2
    /TopStor/logmsg.py DGfa22 error $userreq ${nextpool} 
- else 
+  else 
    echo success importing  of $nextpool >> /root/tmp2
     ETCDCTL_API=3 /pace/etcdput.py balancetype/$nextpool Availability 
     ETCDCTL_API=3 /pace/etcdput.py activepool/$nextpool imported 
     ETCDCTL_API=3 /pace/broadcasttolocal.py pactivepool/$nextpool imported 
     ETCDCTL_API=3 /pace/etcdput.py fixpool/$nextpool imported 
    /TopStor/logmsg.py DGsu22 info $userreq ${nextpool} 
+  fi
+ else
+  /pace/etcddel.py active $nextpool
  fi
 else
  echo not to import
  diskargs=${#params[@]};
  diskargs=$((diskargs-1));
  nextpool=${params[$diskargs]};
+ echo ';;;;;;;;;;;;;;;;;;;;;;;;'
+ echo $nextpool
  msgraid=$raid
  if [[ $raid == "readcache" ]]; then msgraid="readcache"; fi;
  if [[ $raid == "readwritecache" ]]; then msgraid="readwritecache"; fi;
@@ -100,11 +108,13 @@ else
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-    echo $disk1, $diskns, $p${nextpool}
+    echo '#############################'
+    echo disk1:$disk1, disk2:$diskns, pool:${nextpool}
+    echo '#############################'
    /TopStor/logmsg.py DGst20 info $userreq ${nextpool} $diskns .
   /sbin/zpool add -f ${nextpool} mirror ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/' $nextpool $myhost
     /TopStor/logmsg.py DGsu20 info $userreq ${nextpool} $diskns .
   else
     /TopStor/logmsg.py DGfa20 error $userreq ${nextpool} $diskns .
@@ -182,11 +192,11 @@ else
     /TopStor/logmsg.py DG1fa6 error $userreq ${nextpool} $diskn1 
   else 
      zfs set acltype=posixacl p$nextpool
+     zfs set avail:type=single p$nextpool
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool
      ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
-     ETCDCTL_API=3 /pace/etcdput.py balancetype/p$nextpool Availability 
      ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
      ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
      ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
@@ -209,7 +219,7 @@ else
    diskns=${diskns}$diskn","
   done;
    /TopStor/logmsg.py DGst12 info $userreq p${nextpool} $diskns
-  /sbin/zpool add -f  ${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
+  /sbin/zpool add -f  p${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
     /TopStor/logmsg.py DGsu12 info $userreq p${nextpool} $diskns
@@ -232,11 +242,12 @@ else
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-   /TopStor/logmsg.py DGst13 info $userreq p${nextpool} $diskns
   nextpool='dhcp'${RANDOM}$RANDOM;
-  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f ${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
+   /TopStor/logmsg.py DGst13 info $userreq p${nextpool} $diskns
+  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      zfs set acltype=posixacl p$nextpool
+     zfs set avail:type=Availbility p$nextpool
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool
@@ -288,11 +299,12 @@ else
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-   /TopStor/logmsg.py DGst15 info $userreq p${nextpool} $diskns
   nextpool='dhcp'${RANDOM}$RANDOM;
+   /TopStor/logmsg.py DGst15 info $userreq p${nextpool} $diskns
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz2 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      zfs set acltype=posixacl p$nextpool
+     zfs set avail:type=Availbility p$nextpool
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool
@@ -357,6 +369,7 @@ else
   if [ $? -eq 0 ]; then
      echo itisdone >> /root/tmp2
      zfs set acltype=posixacl p$nextpool
+     zfs set avail:type=Availbility p$nextpool
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool
@@ -397,16 +410,16 @@ else
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-   /TopStor/logmsg.py DGst21 info $userreq p${nextpool} $diskns
   nextpool='dhcp'${RANDOM}$RANDOM;
+   /TopStor/logmsg.py DGst21 info $userreq p${nextpool} $diskns
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      zfs set acltype=posixacl p$nextpool
+     zfs set avail:type=volset p$nextpool
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool
      ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
-     ETCDCTL_API=3 /pace/etcdput.py balancetype/p$nextpool Availability 
      ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
      ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
      ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
@@ -430,11 +443,12 @@ else
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-   /TopStor/logmsg.py DGst19 info $userreq p${nextpool} $diskns
   nextpool='dhcp'${RANDOM}$RANDOM;
+   /TopStor/logmsg.py DGst19 info $userreq p${nextpool} $diskns
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} mirror ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
      zfs set acltype=posixacl p$nextpool
+     zfs set avail:type=Availability p$nextpool
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool

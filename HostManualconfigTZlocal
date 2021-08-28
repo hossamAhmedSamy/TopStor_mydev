@@ -8,7 +8,21 @@ logging='/var/www/html/des20/Data/currentinfo2.log';
 runningpools='/pacedata/pools/runningpools';
 glog='/var/www/html/des20/Data/TopStor.log';
 txtres='/TopStordata/'`basename $0`'.txt'
+hostname=`hostname -s `
 myip=`echo $@ | awk '{print $1}'`
-tz=`ETCDCTL_API=3 ./etcdgetlocal.py $myip tz | awk -F'%' '{print $1}' `
+leader=`echo $@ | awk '{print $2}'`
+fulltz=`ETCDCTL_API=3 ./etcdget.py tz/$leader  `
+tz=`echo $fulltz | awk -F'%' '{print $1}' `
+./etcdputlocal.py $myip tz/$hostname $fulltz 
+./etcdput.py tz/$hostname $fulltz 
 tzone=`timedatectl list-timezones | grep $tz` 
 timedatectl set-timezone $tzone
+ctz=`date +%Z`
+echo ctz=$ctz  tzone=$tzone etcdtz=$tz
+echo $tzone | grep $ctz
+if [ $? -ne 0 ];
+then 
+ echo I am here
+ tzone='Africa/Cairo'
+ #timedatectl set-timezone $tzone
+fi

@@ -26,23 +26,23 @@ privilege="CIFS";
 if [ $? -eq 0 ];
 then
  echo privileged $name >> /root/volcreate
- /pace/etcdget.py volumes --prefix | grep $shortname
- if [ $? -eq 0 ];
- then
-  echo here >> /root/volcreate
-  /TopStor/logmsg.py Unlin1021vv warning $userreq $shortname
-  /TopStor/logqueue.py `basename "$0"` stop_canceled $userreq 
-  exit
- fi
-  echo aftervolumes >> /root/volcreate
- /pace/etcdget.py usersinfo --prefix | grep $shortname
- if [ $? -eq 0 ];
- then
-  echo here2 >> /root/volcreate
-  /TopStor/logmsg.py Unlin1021vu warning $userreq $shrotname
-  /TopStor/logqueue.py VolumeCreateCIFS stop_canceled $userreq 
-  exit
- fi
+# /pace/etcdget.py volumes --prefix | grep $shortname
+# if [ $? -eq 0 ];
+# then
+#  echo here >> /root/volcreate
+#  /TopStor/logmsg.py Unlin1021vv warning $userreq $shortname
+#  /TopStor/logqueue.py `basename "$0"` stop_canceled $userreq 
+#  exit
+# fi
+#  echo aftervolumes >> /root/volcreate
+# /pace/etcdget.py usersinfo --prefix | grep $shortname
+# if [ $? -eq 0 ];
+# then
+#  echo here2 >> /root/volcreate
+#  /TopStor/logmsg.py Unlin1021vu warning $userreq $shrotname
+#  /TopStor/logqueue.py VolumeCreateCIFS stop_canceled $userreq 
+#  exit
+# fi
  echo afterusersinfo >> /root/volcreate
  echo name=$name
  /sbin/zfs list | grep  "$shortname" 
@@ -53,8 +53,6 @@ then
  echo afterzfslist info $userreq $DG/$name >> /root/volcreate
  /TopStor/logmsg.py NFS1004 info $userreq $DG/$name
  echo here4 >> /root/volcreate
-# /TopStor/logmsg.py NFS1005 warning $userreq $name
-#  /TopStor/logqueue.py VolumeCreateCIFS stop_canceled $userreq 
  /sbin/zfs create -o overlay=on -o acltype=posixacl -o aclinherit=passthrough -o xattr=sa -o redundant_metadata=most -o atime=off -o quota=$quota -o dedup=on -o compression=lz4  $DG/$name  
  if [ $? -ne 0 ];
  then
@@ -72,7 +70,7 @@ then
  /pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet 
  ./VolumeActivateCIFS vol=$name user=$userreq
  /pace/putzpool.py 
+ /TopStor/SnapshotCreateHourlytrend $DG $name 0 24 7 system 
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
- echo ready ;
 fi
-/TopStor/logqueue.py `basename "$0"` stop $userreq 
+ETCDCTL_API=3 /TopStor/logqueue.py VolumeCreateCIFS finish $userreq 

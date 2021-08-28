@@ -2,6 +2,7 @@
 import subprocess,sys, datetime
 from logqueue import queuethis
 from etcdput import etcdput as put 
+from time import sleep
 from etcdputlocal import etcdput as putlocal
 from etcdget import etcdget as get 
 from etcddel import etcddel as deli 
@@ -12,7 +13,7 @@ def setall(*bargs):
   perfmon = f.readline()
  if '1' in perfmon:
   queuethis('Evacuate','running','system')
- thehosts=get('toremove','start')
+ thehosts=get('modified','evacuatehost')
  if thehosts[0]==-1:
   if '1' in perfmon:
    queuethis('Evacuate','stop_cancel','system')
@@ -20,47 +21,25 @@ def setall(*bargs):
  leader=get('leader','--prefix')[0][0].replace('leader/','')
  myhost=hostname()
  myip=get('ready',myhost)[0][1]
- print(myip,myhost,leader,str(thehosts))
  for host in thehosts:
-  hostn=host[0].replace('toremove/','')
-  hostip=get('ActivePartners/'+hostn)[0]
-  if myhost in hostn and myhost in leader:
-   cmdline=['/TopStor/Converttolocal.sh',myip]
+  hostn=host[0].split('/')[2]
+  hostip=host[1]
+  print('iiiiiiiiiiiiiiiii',hostn,myhost, hostip)
+  if myhost in hostn:
+   if myhost in leader:
+    cmdline=['/TopStor/Converttolocal.sh',myip]
+    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+   cmdline=['/TopStor/resettarget.sh',myhost]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  elif myhost in hostn and myhost not in leader:
-   putlocal(myip,'toreset','yes')
-   put('toremovereset/'+hostn,'reset')
-   cmdline=['/pace/removetargetdisks.sh', hostn, hostip]
-   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-   cmdline=['/TopStor/rebootme','finished']
-   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  elif myhost not in hostn and myhost in leader:
-   put('toremovereset/'+hostn,'reset')
-  hostreset=get('toremovereset/'+hostn,'reset')[0]
-  if hostn in str(hostreset): 
-   if myhost not in hostn : 
-    hosts=get('toremove/'+hostn,'done')
-    if myhost not in str(hosts):
-     put('toremove/'+hostn+'/'+myhost,'done')
+   while True:
+    cmdline=['/TopStor/rebootme','reset']
+    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+    sleep(10)
+  if myhost not in hostn : 
+     print('iam here', hostn, hostip)
      cmdline=['/pace/removetargetdisks.sh', hostn, hostip]
      result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-   if myhost not in hostn and myhost in leader:
-    actives=get('Active','--prefix')
-    dones=get('toremove/'+hostn,'done')
-    doneall=1
-    for active in actives:
-     activen=active[0].replace('ActivePartners/','')
-     if activen not in str(dones) and activen not in str(thehosts): 
-      print(activen,str(dones),str(thehosts))
-      doneall=0
-      break
-    if doneall==1:
-     frstnode=get('frstnode')[0]
-     newnode=frstnode.replace('/'+hostn,'').replace(hostn+'/','')
-     put('frstnode',newnode)
-     deli("", hostn)
-     put('tosync','yes')
-     logmsg.sendlog('Evacuaesu01','info','system',hostn)
+  logmsg.sendlog('Evacuaesu01','info','system',hostn)
  if '1' in perfmon:
   queuethis('Evacuate','stop','system')
  return

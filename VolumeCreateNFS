@@ -1,5 +1,5 @@
 #!/bin/sh
-echo $@ >/root/tmp
+echo $@ >/root/volcreatenfs
 cd /TopStor
 export ETCDCTL_API=3
 myhost=`hostname -s`
@@ -58,6 +58,7 @@ then
  who=$oct1'.'$oct2'.'$oct3'.*'
  ETCDCTL_API=3 /pace/etcdput.py volumes/NFS/$myhost/$DG/$name $DG/$name/$who/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet
  ETCDCTL_API=3 /pace/broadcasttolocal.py volumes/NFS/$myhost/$DG/$name $DG/$name/$who/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet
+ /TopStor/SnapshotCreateHourlytrend $DG $name 0 24 7 system 
  /TopStor/VolumeActivateNFS vol=$name user=$userreq
  ls /$DG/ | grep $name
  if [ $? -ne 0 ];

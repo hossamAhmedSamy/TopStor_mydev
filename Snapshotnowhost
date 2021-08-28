@@ -9,13 +9,14 @@ pDG=`echo $@ | awk '{print $1}'`;
 DG=`echo $@ | awk -F/ '{print $1}'`;
 echo $pDG
 myhost=`hostname -s`
-pp=`/sbin/zpool list `
+pp=`/sbin/zpool list | grep $DG`
+echo pp=$pp
 echo $pp | grep $DG
 if [ $? -ne 0 ]; 
 then
  echo host not owner
  /TopStor/logqueue.py `basename "$0"` stop_cancel system 
-else:
+else
  /TopStor/logqueue.py `basename "$0"` running system 
   res=`./Snapshotnow $@`
 #  /TopStor/logmsg.py Snap1045 error $userreq $newsnap 

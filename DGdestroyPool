@@ -41,6 +41,11 @@ echo iam in >> /root/tmp2
   sleep 1
  done
  echo Iam her2 >> /root/tmp2
+ zpool status | grep $pool 
+ if [ $? -ne 0 ];
+ then
+  exit
+ fi
  /pace/etcdput.py requests/DGdestroypool/$myhost $myhost/$userreq
  /TopStor/logqueue.py `basename "$0"` running $userreq 
  /TopStor/logmsg.py DGst5 info $userreq $pool

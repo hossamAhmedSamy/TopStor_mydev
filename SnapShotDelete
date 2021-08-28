@@ -1,6 +1,6 @@
 #!/usr/local/bin/zsh
 export ETCDCTL_API=3
-echo $@ > /root/tmp
+echo $@ > /root/snapshotdelete
 cd /TopStor
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 web='/var/www/html/des20/Data/Snapsstatus.log';

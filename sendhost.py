@@ -5,7 +5,7 @@ from ast import literal_eval as mtuple
 def sendhost(host, req, que, frmhst, port=5672):
  msg={'host': frmhst, 'req': req }
  with open('/root/sendhostparam','w') as f:
-  f.write(host+' '+req+' '+que+' '+frmhst)
+  f.write(host+' '+str(req)+' '+str(que)+' '+str(frmhst))
 # creds=pika.PlainCredentials('rabb_'+frmhst,'YousefNadody')
  creds=pika.PlainCredentials('rabbmezo','HIHIHI')
  param=pika.ConnectionParameters(host, port, '/', creds)

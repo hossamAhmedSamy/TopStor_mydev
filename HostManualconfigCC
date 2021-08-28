@@ -2,69 +2,35 @@
 export ETCDCTL_API=3
 cd /TopStor/
 echo $@ > /root/HostCCtmp
-hostname=`hostname -s`
-hostip=`echo $@ | awk '{ print $1 }'`;
-subnet=` echo $@ | awk '{ print $3 }'`;
-oldip=` echo $@ | awk '{ print $2 }'`;
+myhost=`hostname -s`
+oldip=`echo $@ | awk '{ print $2 }'`;
+oldsubnet=` echo $@ | awk '{ print $3 }'`;
+hostip=` echo $@ | awk '{ print $4 }'`;
 #oldip=`pcs resource show CC | grep Attribute | awk -F'ip=' '{print $2}' | awk '{print $1 }'`
-oldsubnet=` echo $@ | awk '{ print $4 }'`;
+subnet=` echo $@ | awk '{ print $5 }'`;
 sed -e "s/HOSTY/$hostip/g" /TopStor/sshhttp.conf > /etc/httpd/conf.d/sshhttp.conf
 sed -e "s/HOSTY/$hostip/g" /TopStor/sshhttp.conf > /etc/httpd/conf.d/sshhttp.conf
 #dev=`/sbin/pcs resource show CC | grep Attrib | awk -F'nic=' '{print $2}' | awk '{print $1}'`
 echo hi > /root/HostCC
-echo shuttingdown 1 $hostip,$hostname, $subnet >> /root/HostCC
+echo shuttingdown 1 $hostip,$myhost, $subnet >> /root/HostCC
+docker stop $(docker ps -a -q) 
 mkdir /tmp/cpools 2>/dev/null
 rm -rf /tmp/cpools
 cp /TopStordata/pdhc* /tmp/cpools/
-/sbin/zpool export -a ;
+#/sbin/zpool export -a ;
 cp /tmp/cpools/* /TopStordata/
-/pace/etcdget.py leader --prefix | grep $hostname
+/pace/etcdget.py leader --prefix | grep $myhost
 if [ $? -eq 0 ];
 then
- /pace/etcdput.py leader/$hostname $hostip
+ /pace/etcdput.py leader/$myhost $hostip
 else
- /pace/etcdput.py known/$hostname $hostip
+ /pace/etcdput.py known/$myhost $hostip
 fi
-configured=`ETCDCTL_API=3 ./etcdget.py configured`
-echo $configured  | grep no 
-if [ $? -eq 0 ];
-then
- ./etcdput.py configured semiCC
-else
- echo $configured | grep semi | grep -v CC
- if [ $? -eq 0 ];
- then
-  ./etcdput.py configured yes
-  echo $hostname $hostip > /TopStordata/members 
-  ./etcdget.py frstnode | grep dhcp
-  if [ $? -ne 0 ];
-  then
-   ./etcdget.py frstnode $hostname
-  fi
- fi
-fi
-echo $configured | grep yes 
-if [ $? -eq 0 ];
-then
- ./UpdateHosts $hostname $hostip
-fi
-
-echo shuttingdown 2 >> /root/HostCC
+/pace/etcdput.py ActivePartners/$myhost $hostip
+/pace/etcdput.py hostipsubnet/$myhost $subnet
+/pace/etcdput.py ready/$myhost $hostip
+configured=`./etcdput.py configured/$myhost yes`
+./UpdateHosts $myhost $hostip
+/sbin/pcs resource update CC cidr_netmask=$subnet ip=$hostip
 /pace/keysend.sh $hostip
-/sbin/rabbitmqctl stop_app;
-echo shuttingdown 3 >> /root/HostCC
-/sbin/iscsiadm --mode node --logoutall=all;
-echo shuttingdown 4 >> /root/HostCC
-echo shuttingdown 5 for ip=$hostip mask=$subnet >> /root/HostCC
-/sbin/pcs resource update CC ip=$hostip cidr_netmask=$subnet 2>/root/err
-echo shuttingdown 6 >> /root/HostCC
-#/bin/systemctl stop httpd;
-pkill httpd
-#/bin/systemctl status httpd >>/root/HostCC
-echo shuttingdown 7 >> /root/HostCC
-echo 127.0.0.1 localhost > /etc/hosts
-echo $hostip $hostname >> /etc/hosts
-echo 127.0.0.1 $hostname >> /etc/hosts
-#/sbin/ip addr del ${oldip}/$oldsubnet dev $dev
-echo shuttingdown 8 >> /root/HostCC
-/sbin/reboot
+#fi

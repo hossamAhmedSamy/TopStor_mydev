@@ -10,10 +10,14 @@ perfmon=`cat /pacedata/perfmon`
   /TopStor/logqueue.py HostgetIPs running $user
  fi
 hostname=`hostname`
+myhost=`hostname`
 hostn=`/TopStor/etcdget.py alias/$hostname`
 hostip=`pcs resource show CC | grep Attributes | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 hostsubnet=`pcs resource show CC | grep Attributes | awk -F'netmask=' '{print $2}' | awk '{print $1}'`
 leader=`./etcdget.py leader --prefix`
+gw=`ip route | grep default | awk '{print $3}'`
+dns=` tail -n 1 /etc/resolv.conf | awk '{$1="";print}'`
+
 echo $leader | grep $hostname
 if [ $? -eq 0 ];
 then
@@ -32,17 +36,17 @@ if [ -z $hostdns ]; then hostdns='0'; fi
 #ntpserver=`cat /etc/chrony.conf | grep server | grep -v servers | head -1 | awk '{print $2}'`;
 if [ $isleader -eq 1 ];
 then
- gwserver=`ETCDCTL_API=3 ./etcdget.py gw`;
- ntpserver=`ETCDCTL_API=3 ./etcdget.py ntp`;
- configured=`ETCDCTL_API=3 ./etcdget.py configured`;
- tzone=`ETCDCTL_API=3 ./etcdget.py tz`;
+ gwserver=`ETCDCTL_API=3 ./etcdget.py gw/$hostname`;
+ ntpserver=`ETCDCTL_API=3 ./etcdget.py ntp/$hostname`;
+ configured=`ETCDCTL_API=3 ./etcdget.py configured/$hostname`;
+ tzone=`ETCDCTL_API=3 ./etcdget.py tz/$hostname`;
  mgmtip=`ETCDCTL_API=3 ./etcdget.py namespace/mgmtip | awk -F'/' '{print $1}'`
  mgmtsubnet=`ETCDCTL_API=3 ./etcdget.py namespace/mgmtip | awk -F'/' '{print $2}'`
 else
- gwserver=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip gw`;
- ntpserver=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip ntp`;
- configured=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip configured`;
- tzone=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip tz`;
+ gwserver=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip gw/$hostname`;
+ ntpserver=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip ntp/$hostname`;
+ configured=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip configured/$hostname`;
+ tzone=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip tz/$hostname`;
  mgmtip=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip namespace/mgmtip | awk -F'/' '{print $1}'`
  echo $hostip namespace/mgmtip 
  mgmtsubnet=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip namespace/mgmtip | awk -F'/' '{print $2}'`

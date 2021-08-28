@@ -14,7 +14,7 @@ then
  then
   echo it is clustered with other nodes >> ~/cftmp
  else
-  ./etcdput.py configured $cf
+  ./etcdput.py configured/$myhost $cf
  fi
 else
  actives=`./etcdgetlocal.py $myip Active --prefix | wc -l`
@@ -22,6 +22,6 @@ else
  then
   echo it is clustered with other nodes >> ~/cftmp
  else
-  ./etcdputlocal.py $myip configured $cf
+  ./etcdputlocal.py $myip configured/$myhost $cf
  fi
 fi

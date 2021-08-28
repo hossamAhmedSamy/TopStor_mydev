@@ -21,7 +21,7 @@ echo start $hi $userreq > /root/volcreate
 ETCDCTL_API=3 /TopStor/logqueue.py VolumeCreateHome running $userreq 
 echo queuedrunning >> /root/volcreate
 
-privilege="CIFS";
+privilege="HOME";
 ./privthis.sh $privilege $userreq | grep true ;
 if [ $? -eq 0 ];
 then
@@ -61,15 +61,16 @@ then
   /TopStor/logqueue.py `basename "$0"` stop_canceled $userreq 
   exit
  fi
- /sbin/zfs set prot:kind=Home $DG/$name
+ /sbin/zfs set prot:kind=HOME $DG/$name
  /sbin/zfs set ip:addr=$ipaddr $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
  myhost=`hostname -s`
- echo /pace/etcdput.py volumes/Home/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes >> /root/volcreate
- ETCDCTL_API=3 /pace/etcdput.py volumes/Home/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
- /pace/broadcasttolocal.py volumes/Home/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet 
+ echo /pace/etcdput.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes >> /root/volcreate
+ ETCDCTL_API=3 /pace/etcdput.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
+ /pace/broadcasttolocal.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet 
  ./VolumeActivateHome vol=$name user=$userreq
  /pace/putzpool.py 
+ /TopStor/SnapshotCreateHourlytrend $DG $name 0 24 7 system 
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
 fi
 /TopStor/logqueue.py `basename "$0"` stop $userreq 

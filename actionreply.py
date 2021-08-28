@@ -101,6 +101,12 @@ def do(body):
    f.write('received msg from parnter :'+str(r["reply"])+'\n')
    f.write('type of message :'+str(type(r["reply"]))+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########### if Pumpthis ###############
+ elif r["req"]=='Pumpthis':  
+  with open('/root/recvpump','w') as f:
+   f.write('received a pump from parnter :'+str(r["reply"])+'\n')
+   f.write('type of message :'+str(type(r["reply"]))+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########### if synq ###############
  elif r["req"]=='synq':  
   with open('/root/recv','a') as f:
@@ -138,6 +144,11 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received msg2 from parnter :'+str(r["reply"])+'\n')
    f.write('type of message :'+str(type(r["reply"]))+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if UserPass ###############
+ elif r["req"]=='UserPassChange':  
+  with open('/root/recv','a') as f:
+   f.write('received user password from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if DGsetPool ###############
  elif r["req"]=='DGsetPool':  
