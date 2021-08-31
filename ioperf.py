@@ -7,7 +7,7 @@ import socket
 
 def ioperf():
  myhost=socket.gethostname()
- cmdline="./loadavg.sh"
+ cmdline="/TopStor/loadavg.sh"
  cores=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split(' ')
  print( 'cores',100*float(cores[1])/float(cores[0]))
  cmdline='iostat -k'
