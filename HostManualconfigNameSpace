@@ -40,5 +40,8 @@ if [ $? -eq 0 ];
 then
  ./UpdateHosts $myhost $hostip
 fi
+stamp=`date +%s%N`
+./etcdput.py sync/namespace/$myhost $stamp 
+./broadcasttolocal.py sync/namespace/$myhost $stamp 
 
 #/sbin/reboot
