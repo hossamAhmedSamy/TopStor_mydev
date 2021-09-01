@@ -20,3 +20,7 @@ then
 fi
 sed -i "s/MASTERSERVER/$ntp/g" /etc/chrony.conf
 systemctl restart chronyd
+myhost=$hostname
+stamp=`date +%s%N`
+./etcdput.py sync/ntp/$myhost $stamp 
+./broadcasttolocal.py sync/ntp/$myhost $stamp 

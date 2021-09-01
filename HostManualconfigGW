@@ -29,3 +29,7 @@ else
  fi
  route add default gw $gateway
 fi
+myhost=$hostname
+stamp=`date +%s%N`
+./etcdput.py sync/gw/$myhost $stamp 
+./broadcasttolocal.py sync/gw/$myhost $stamp 
