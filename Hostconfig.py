@@ -69,7 +69,9 @@ def config(*bargs):
    hostname = host[0].replace('ActivePartners/','')
    put('tz/'+hostname,arglist['tz'])
    broadcasttolocal('tz/'+hostname,arglist['tz'])
-  broadcast('HostManualConfigTZ','/TopStor/pump.sh','HostManualconfigTZ')
+  z=['/TopStor/pump.sh','HostManualconfigTZ']
+  msg={'req': 'Pumpthis', 'reply':z}
+  sendhost(leaderip, str(msg),'recvreply',myhost)
   logmsg.sendlog('HostManual1su10','info',arglist['user'], oldarg, argtz)
   queuethis('Hostconfig_tzone','finish',arglist['user'])
 ########### changing ntp server ###############
