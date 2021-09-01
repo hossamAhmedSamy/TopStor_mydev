@@ -14,8 +14,11 @@ logging='/var/www/html/des20/Data/currentinfo2.log';
 runningpools='/pacedata/pools/runningpools';
 glog='/var/www/html/des20/Data/TopStor.log';
 txtres='/TopStordata/'`basename $0`'.txt'
+leader=`./etcdget.py leader --prefix | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
 myip=`./etcdget.py ready/$hostname`
-fulltz=`./etcdgetlocal.py $myip tz/$hostname` 
+fulltz=`./etcdget.py tz/$leader` 
+./etcdput.py tz/$hostname $fulltz
+./broadcasttolocal.py tz/$hostname $fulltz
 #echo 'actualfull',$fulltz
 #fulltz='Kirit%(GMT-10!00)_Hawaii'
 tz=`echo $fulltz | awk -F'%' '{print $1}' `
