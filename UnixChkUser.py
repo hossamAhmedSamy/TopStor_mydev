@@ -16,7 +16,7 @@ def setlogin(user,passw,token=0):
    if oldpass not in pass1:
     return ({},0)
   token = token_hex(16)
- stamp = int(timestamp() + 360)
+ stamp = int(timestamp() + 3600)
  put('login/'+user,token+'/'+str(stamp))
  userdict = {'user':user, 'timestamp':stamp}
  return (userdict, token)
