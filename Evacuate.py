@@ -25,7 +25,9 @@ def do(*args):
  put('modified/evacuatehost/'+args[-2], evacip)
  broadcasttolocal('sync/evacuatehost/', str(stamp))
  broadcasttolocal('modified/evacuatehost/'+args[-2], evacip)
- setall()
+ leader=get('leader','--prefix')[0].replace('leader/','')
+ if myhost == leader:
+  setall()
 
 if __name__=='__main__':
  do(*sys.argv[1:])
