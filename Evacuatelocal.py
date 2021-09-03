@@ -15,14 +15,22 @@ def setall(*bargs):
   perfmon = f.readline()
  if '1' in perfmon:
   queuethis('Evacuate','running','system')
- thehosts=get('modified','evacuatehost')
+ myhost=hostname()
+ cmdline=['/pace/getmyip.sh']
+ myip=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode('utf-8').replace('\n','')
+ print('myip',myip)
+ thehosts=getlocal(myip,'modified','evacuatehost')
+ print('hihih',thehosts)
  if thehosts[0]==-1:
   if '1' in perfmon:
    queuethis('Evacuate','stop_cancel','system')
   return
+<<<<<<< HEAD
  myhost=hostname()
  cmdline=['/pace/getmyip.sh']
  myip=subprocess.run(cmdline,stdout=subprocess.PIPE).decode('utf-8')
+=======
+>>>>>>> 685fbb750e901ef48f6208c32f43d4586c0fe28a
  leader=get('primary/name')[0]
  for host in thehosts:
   hostn=host[0].split('/')[2]
