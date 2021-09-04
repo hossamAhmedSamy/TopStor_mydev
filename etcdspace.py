@@ -2,6 +2,8 @@
 import subprocess,sys, os
 import json
 from ast import literal_eval as mtuple
+from time import sleep
+
 def space(*args):
  os.environ['ETCDCTL_API']= '3'
  endpoints=''
@@ -10,20 +12,45 @@ def space(*args):
   endpoints=endpoints+str(x['clientURLs'])[2:][:-2]+','
  endpoints = endpoints[:-1]
  cmdline=['/bin/etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'--write-out=table','endpoint','status']
- result=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode('utf-8')
+ err = 2
+ while err == 2:
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode('utf-8')
+  err = result.returncode
+  if err == 2:
+   sleep(2)
  print(result)
  cmdline=['/bin/etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'--write-out=json','endpoint','status']
- result=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode('utf-8')
+ err = 2
+ while err == 2:
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode('utf-8')
+  err = result.returncode
+  if err == 2:
+   sleep(2)
  res = mtuple(result)[0]
  print(res['Status']['header']['revision'])
  cmdline=['/bin/etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'compact',str(res['Status']['header']['revision'])]
- result=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode('utf-8')
+ err = 2
+ while err == 2:
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode('utf-8')
+  err = result.returncode
+  if err == 2:
+   sleep(2)
  print(result)
  cmdline=['/bin/etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'defrag']
- result=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode('utf-8')
+ err = 2
+ while err == 2:
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode('utf-8')
+  err = result.returncode
+  if err == 2:
+   sleep(2)
  print(result)
  cmdline=['/bin/etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'--write-out=table','endpoint','status']
- result=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode('utf-8')
+ err = 2
+ while err == 2:
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode('utf-8')
+  err = result.returncode
+  if err == 2:
+   sleep(2)
  print(result)
  
 if __name__=='__main__':

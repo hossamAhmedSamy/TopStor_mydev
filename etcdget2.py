@@ -1,6 +1,7 @@
 #!/bin/python3.6
 import subprocess,sys
 import json
+from time import sleep
 
 def etcdgetjson(*argv):
  key=argv[0]
@@ -18,7 +19,12 @@ def etcdgetjson(*argv):
   cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key]
  else: 
   cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key,'--prefix']
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ err = 2
+ while err == 2:
+  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  err = result.returncode
+  if err == 2:
+   sleep(2)
  ilist=[]
  try:
   if(prefix !='nothing'):
