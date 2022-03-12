@@ -1,6 +1,6 @@
 #!/usr/local/bin/zsh
 export ETCDCTL_API=3
-echo $@ > /root/tmp
+echo $@ > /root/snapshotdelete
 cd /TopStor
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 web='/var/www/html/des20/Data/Snapsstatus.log';
@@ -12,7 +12,7 @@ vol=` echo $@ | awk '{print $2}'`;
 pDG=$DG;
 snapdel=` echo $@ | awk '{print $3}'`;
 userreq=` echo $@ | awk '{print $4}'`;
- /TopStor/queuethis.sh `basename "$0"` running $userreq &
+ /TopStor/logqueue.py `basename "$0"` running $userreq 
 sshost=`hostname -s`
 privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
@@ -28,4 +28,4 @@ then
  fi;
 fi
    /pace/putzpool.py 
-/TopStor/queuethis.sh `basename "$0"` finished $userreq &
+/TopStor/logqueue.py `basename "$0"` stop $userreq 

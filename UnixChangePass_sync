@@ -22,6 +22,9 @@ then
 else
  usermod $username -c"TopStor"$pas
 fi
+cp /TopStor/smbuserfix.sh /etc/
+ currentcifs=`pcs resource | grep cifs | awk '{print $1}'`
+ echo "$currentcifs" | while read y; do docker exec $y  sh /hostetc/smbuserfix.sh  e $username $userpass;  done; 
 ( echo $userpass; echo $userpass) | /bin/smbpasswd -s -a $username 2>> $txtres
 cat $txtres >> $passchange 
 cat $txtres 

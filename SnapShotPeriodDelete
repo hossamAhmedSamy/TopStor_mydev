@@ -7,7 +7,7 @@ logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStor.log';
 periodel=` echo $@ | awk '{print $1}'`;
 userreq=` echo $@ | awk '{print $2}'`;
-/TopStor/queuethis.sh `basename "$0"` running $userreq &
+/TopStor/logqueue.py `basename "$0"` running $userreq 
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
 myhost=`hostname -s`
 myip=`/sbin/pcs resource show CC | grep Attributes | awk -F'ip=' '{print $2}' | awk '{print $1}'`
@@ -29,4 +29,4 @@ then
 fi;
 /pace/putzpool.py & 
 fi
-/TopStor/queuethis.sh `basename "$0"` finished $userreq &
+/TopStor/logqueue.py `basename "$0"` stop $userreq 

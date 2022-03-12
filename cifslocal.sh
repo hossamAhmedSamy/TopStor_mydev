@@ -10,7 +10,7 @@ newright=`echo $i | cut -d/ -f2-`
 echo newright=$newright
 ipaddr=`echo $@ | awk '{print $4}'`
 ipsubnet=`echo $@ | awk '{print $5}'`
-echo $@ > /root/cifsparam
+echo $@ > /root/cifslocalparam
 mounts=`echo $newright |sed 's/\// /g'| cut -f2-`
 mount=''
 rm -rf /TopStordata/tempsmb.$ipaddr
@@ -34,9 +34,7 @@ docker run -d $mount --privileged \
  -p $ipaddr:445:445 \
  -v /etc/localtime:/etc/localtime:ro \
  -v /TopStordata/smb.${ipaddr}:/config/smb.conf:rw \
- -v /etc/passwd:/etc/passwd:rw \
- -v /etc/group:/etc/group:rw \
- -v /etc/shadow:/etc/shadow:rw \
+  -v /etc:/hostetc/    \
  -v /var/lib/samba/private:/var/lib/samba/private:rw \
  --name $resname 10.11.11.124:5000/smb
 

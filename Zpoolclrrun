@@ -1,6 +1,11 @@
 #!/bin/sh
 export ETCDCTL_API=3
 echo $@ > /root/Zpoolclrrun
+perfmon=`cat /pacedata/perfmon`
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py Zpoolclrrun start system 
+fi
 x=` ETCDCTL_API=3 /pace/etcget.py cleareddisk/$@`
 y=`ETCDCTL_API=3 /pace/etcget.py clearplsdisk/$@`
 echo $x | grep $y 
@@ -10,4 +15,8 @@ then
  /sbin/zpool  labelclear -f $@
  /pace/etcdput.py cleareddisk/$@ $myhost
 #/pace/etcddel.py clearplsdisk/$@ 
+fi
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py Zpoolclrrun stop system 
 fi

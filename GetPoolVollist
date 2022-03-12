@@ -1,13 +1,26 @@
 #!/usr/local/bin/zsh
+export ETCDCTL_API=3
 cd /TopStor/;
 COMMAND=$0
 RUNNING=`ps --no-headers -C${COMMAND} | wc -l`
-if [ $RUNNING -gt 1 ]; then exit 0; fi
 websnaps='/var/www/html/des20/Data/Vollist.txt';
 resweb='/var/www/html/des20/Data/Vollist.txtupdated';
 runningpools='/pacedata/pools/runningpools'
 iscsimapping='/pacedata/iscsimapping'
 allprops='/TopStordata/allprops'
+perfmon=`cat /pacedata/perfmon`
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py GetPoolVollist start system 
+fi
+if [ $RUNNING -gt 1 ]; 
+then
+ echo $perfmon | grep 1
+ if [ $? -eq 0 ]; then
+  /TopStor/logqueue.py GetPoolVollist stop system 
+ fi
+ exit 0;
+fi
 stamp=`date +%s`
  rm -rf $allprops &>/dev/null
  hostns=(`cat $iscsimapping | grep -v notconn | awk '{print $1}' | uniq`)
@@ -67,4 +80,7 @@ if [[ $? -ne 0 ]]; then
  res=` ./jsonthis3.sh updated $tstamp `;
  echo $res > $resweb;
 fi
-echo ready;
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ /TopStor/logqueue.py GetPoolVollist stop system 
+fi

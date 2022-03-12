@@ -17,9 +17,22 @@ sleep 1;
 done
 rm -rf /pacedata/forzfsping
 rm -rf /pacedata/forstartzfs
-sleep 240
+systemctl status etcd
+while [ $? -ne 0 ];
+do
+ sleep 5
+ systemctl status etcd
+done
+/TopStor/initfactory.sh
+sleep 220
 /sbin/pcs resource delete --force IPinit
-/sbin/ip addr del 10.11.11.254/24 dev enp0s8 
+/sbin/ip addr del 10.11.11.254/24 dev $nic
 /TopStor/factory.sh
+crontab -l | grep -v Initialization | grep -v performance > /TopStordata/cronthis
+echo "0" "0" "1" "*" "*"  sh /TopStor/clearlog.sh Initialization >> /TopStordata/cronthis
+echo "*/5 * * * * /TopStor/ioperf.py performance" >> /TopStordata/cronthis
+echo "0" "*/2" "*" "*" "*"  sh /TopStor/initcleandb.sh  Initialization >> /TopStordata/cronthis
+crontab /TopStordata/cronthis
+
 
 

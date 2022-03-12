@@ -6,12 +6,20 @@ from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 import subprocess, socket
 import logmsg
+from logqueueheap import heapthis, syncnextlead
+from syncq import syncq 
+
+archive = 1 
+
 def do(body):
+ global archive
  myhost=socket.gethostname()
  z=[]
  with open('/root/recv','w') as f:
   f.write('Recevied a reply:'+str(body[2:][:-1])+'\n')
  y=body[2:][:-1].replace('\\','').replace("'{",'"{').replace("}'",'}"').replace('"b\'',"'b;").replace('\n','').replace('"]','\\"]')
+ with open('/root/recv','w') as f:
+   f.write('Received '+y)
  t=mtuple(y)
  yy=t['req'].replace("'b;",'"b\'')
  with open('/root/recv','w') as f:
@@ -93,10 +101,42 @@ def do(body):
    f.write('received msg from parnter :'+str(r["reply"])+'\n')
    f.write('type of message :'+str(type(r["reply"]))+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########### if Pumpthis ###############
+ elif r["req"]=='Pumpthis':  
+  with open('/root/recvpump','w') as f:
+   f.write('received a pump from parnter :'+str(r["reply"])+'\n')
+   f.write('type of message :'+str(type(r["reply"]))+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########### if synq ###############
+ elif r["req"]=='synq':  
+  with open('/root/recv','a') as f:
+   f.write('received msg from parnter :'+str(r["reply"])+'\n')
+   f.write('type of message :'+str(type(r["reply"]))+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if taskperf ###############
+ elif r["req"]=='taskperf':  
+   with open('/root/recvtaskperf','w') as f:
+    f.write('received queue from parnter :'+str(r["reply"])+'\n')
+    f.write('type of message :'+str(type(r["reply"]))+'\n')
+   with open('/TopStordata/taskperf','a') as f:
+    f.write(r["reply"][-1][:-1].replace('ndhcp','\ndhcp')+'\n')
+    print('wirtten archive')
+   #cmdline=['/sbin/logrotate','logqueue.cfg','-f']
+   #subprocess.run(cmdline,stdout=subprocess.PIPE)
+   leader = get('primary/address')[0]
+   syncq(leader,myhost,archive)
+   if archive:
+    archive = 0
 ########## if queue ###############
  elif r["req"]=='queue':  
-  with open('/root/recv','a') as f:
+  with open('/root/recvqueue','w') as f:
    f.write('received queue from parnter :'+str(r["reply"])+'\n')
+   f.write('type of message :'+str(type(r["reply"]))+'\n')
+  heapthis(r["reply"][1:])
+########## if evacuate ###############
+ elif r["req"]=='Evacuate':  
+  with open('/root/recv','a') as f:
+   f.write('received evacuate from parnter :'+str(r["reply"])+'\n')
    f.write('type of message :'+str(type(r["reply"]))+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if msg2 ###############
@@ -104,6 +144,11 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received msg2 from parnter :'+str(r["reply"])+'\n')
    f.write('type of message :'+str(type(r["reply"]))+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if UserPass ###############
+ elif r["req"]=='UserPassChange':  
+  with open('/root/recv','a') as f:
+   f.write('received user password from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if DGsetPool ###############
  elif r["req"]=='DGsetPool':  
@@ -125,6 +170,19 @@ def do(body):
   with open('/root/recv','a') as f:
    f.write('received SnapshotDelete from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if syncq ###############
+ elif r["req"]=='syncq':  
+  with open('/root/recvsyncq','w') as f:
+   f.write('recieved request to sync:'+str(r["reply"]))
+  syncnextlead(r["reply"][0],r["reply"][1])
+########## if syncthisfile ###############
+ elif r["req"]=='syncthisfile':  
+  with open('/root/recvsyncthis','a') as f:
+   f.write('receivee here file from parnter :'+str(r["reply"][0])+'\n')
+  print(r["reply"][0])
+  print(r["reply"][1].replace('ndhcp','\ndhcp')+'\n')
+  with open(r["reply"][0],'w') as f:
+   f.write(r["reply"][1].replace('ndhcp','\ndhcp')+'\n')
 ########## if SnapshotCreate ###############
  elif r["req"]=='SnapshotCreate':  
   with open('/root/recv','a') as f:
@@ -200,6 +258,14 @@ def do(body):
    f.write('received ReleasePoolLock from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
 ########## if GroupChange ##############
+ elif r["req"]=='RemoveTargets':  
+  with open('/root/recvtmp2','w') as f:
+   f.write('received RemoveTarget from parnter :'+str(r["reply"])+'\n')
+  torun=['/pace/removetargetdisks.sh',r["reply"][0]]
+  with open('/root/recvtmp2','a') as f:
+   f.write('received RemoveTarget from parnter :'+str(torun)+'\n')
+  result=subprocess.run(torun,stdout=subprocess.PIPE)
+########## if GroupChange ##############
  elif r["req"]=='GroupChange':  
   with open('/root/recv2','a') as f:
    f.write('received GroupChange from parnter :'+str(r["reply"])+'\n')
@@ -229,6 +295,26 @@ def do(body):
   with open('/root/recv2','a') as f:
    f.write('received GroupDel from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+########## if NTP  ##############
+ elif r["req"]=='HostManualConfigNTP':  
+  with open('/root/recv2','a') as f:
+   f.write('received HostManualConfigNTP from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+ ########## if TZ  ##############
+ elif r["req"]=='HostManualConfigTZ':  
+  with open('/root/recv2','a') as f:
+   f.write('received HostManualConfigTZ from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+  ########## if GW  ##############
+ elif r["req"]=='HostManualConfigGW':  
+  with open('/root/recv2','a') as f:
+   f.write('received HostManualConfigGW from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+ ########## if UpdateHosts  ##############
+ elif r["req"]=='UpdateHosts':  
+  with open('/root/recv2','a') as f:
+   f.write('received UpdateHosts from parnter :'+str(r["reply"])+'\n')
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
  
 
 
@@ -236,4 +322,3 @@ if __name__=='__main__':
  import sys
  msg=str({'host': 'localhost', 'req': sys.argv[1]})
  do('b"'+msg+'"') 
- exit()

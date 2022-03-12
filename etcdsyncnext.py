@@ -2,6 +2,7 @@
 import subprocess,sys
 from ast import literal_eval as mtuple
 from etcdget import etcdget as get
+from etcdputlocal import etcdputlocal
 
 
 thehost=sys.argv[1]
@@ -19,6 +20,4 @@ for item in result:
    adding='';
  else:
    adding='/'+x
- print('mez',thehost,tokey+adding,item[1])
- cmdline=['/pace/etcdputlocal.py',thehost, tokey+adding, item[1]]
- result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ etcdputlocal(thehost, tokey+adding, item[1])

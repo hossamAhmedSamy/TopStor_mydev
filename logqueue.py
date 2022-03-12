@@ -1,33 +1,34 @@
 #!/bin/python3.6
-import subprocess,sys, datetime
-import json
+import sys, datetime
+from time import time
 from etcdget import etcdget as get
+from etcdput import etcdput as put
 from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost
-def sendlog(*args):
+from socket import gethostname as hostname
+
+myhost = hostname()
+def queuethis(*args):
+ global myhost
  z=[]
- knowns=[]
+ put('request/'+args[0]+'/'+myhost,args[1])
  myhost=hostname()
  dt=datetime.datetime.now().strftime("%m/%d/%Y")
  tm=datetime.datetime.now().strftime("%H:%M:%S")
  z=['/TopStor/logqueue2.sh', dt, tm, myhost ]
  for arg in args:
   z.append(arg)
- print('z=',z)
+ z.append(int(time()*1000))
+ with open('/root/logqueuetmp','w') as f:
+  f.write(str(z))
  leaderinfo=get('leader','--prefix')
- knowninfo=get('known','--prefix')
- leaderip=leaderinfo[0][1]
- for k in knowninfo:
-  knowns.append(k[1])
+ leaderip = leaderinfo[0][1]
  print('leader',leaderip) 
- print('knowns',knowns) 
  msg={'req': 'queue', 'reply':z}
  print('sending', leaderip, str(msg),'recevreply',myhost)
  sendhost(leaderip, str(msg),'recvreply',myhost)
- for k in knowninfo:
-  sendhost(k[1], str(msg),'recvreply',myhost)
-  knowns.append(k[1])
-
+ 
 if __name__=='__main__':
- sendlog(*sys.argv[1:])
+ #queuethis('ddlrt.py','start','system')
+ queuethis(*sys.argv[1:])

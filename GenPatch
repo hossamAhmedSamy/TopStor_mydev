@@ -14,7 +14,7 @@ cd /$TopStor
 newfw=`echo $@ | awk '{print $1}'`;
 realfw=`echo $newfw | awk -F'.' '{print $1"."$2}'`;
 userreq=`echo $@ | awk '{print $2}'`;
-/TopStor/queuethis.sh `basename "$0"` running $userreq &
+/TopStor/logqueue.py `basename "$0"` running $userreq 
 privilege="Uploadch";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
@@ -63,4 +63,4 @@ then
  fi
  # rm -rf $newd
 fi
-/TopStor/queuethis.sh `basename "$0"` finished $userreq &
+/TopStor/logqueue.py `basename "$0"` stop $userreq 

@@ -1,5 +1,6 @@
 ;;;;;;;;         startNAMECIFS_only
-[SHORTNAME]
+;;;;;;;; SUMMARY Vtype Rpool/Rname/Rreadv/Rbrows/Rwritev/Radmin/Rwritea/Ripadd/Ripsub
+[NAMECIFS]
 path = /POOL/NAMECIFS
 read only = no
 browsable = yes

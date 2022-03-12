@@ -1,0 +1,4 @@
+#!/bin/sh
+export ETCDCTL_API=3
+cd /TopStor/
+iscsiadm -m node -R

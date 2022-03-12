@@ -1,7 +1,8 @@
 #!/bin/python3.6
-import nmap
+import nmap, os
 import sys, subprocess
 
+os.environ['ETCDCTL_API']= '3'
 ip=sys.argv[1].split('.')
 hostrange=ip[0]+'.'+ip[1]+'.'+ip[2]+'.0'
 nm=nmap.PortScanner()

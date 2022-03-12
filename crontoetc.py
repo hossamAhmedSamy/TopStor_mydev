@@ -9,7 +9,7 @@ def crontoetc(*bargs):
  crons=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
  crons=str(crons).split('\\n')
  crons=[x.replace(' ','%') for x in crons if 'host' in str(x)]
- crons=[('Snapperiod/'+x.split('nowhost')[1].split('%')[1]+'/'+x.split('nowhost')[1].split('%')[-1],x) for x in crons ]
+ crons=[('Snapperiod/'+x.split('%')[-2].split('.')[0]+'/'+x.split('nowhost')[1].split('%')[1]+'/'+x.split('nowhost')[1].split('%')[-1],x) for x in crons ]
  dels('Snapperiod','--prefix')
  for x in crons:
   put(x[0],x[1])

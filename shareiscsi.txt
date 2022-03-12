@@ -1,0 +1,13 @@
+;;;;;;;;         startNAMEISCSI_only
+;;;;;;;; SUMMARY Vtype Rpool/Rname/Ripadd/Ripsub/PORTALPORT/TARGETIQN/CHAPUSER/CHAPPAS
+[SHORTNAME]
+;ipaddress = IPADDRESS
+;ipsubnet = IPSUBNET
+path = /POOL/NAMECIFS
+read only = no
+browsable = yes
+write list = @everyone
+admin users = administrator
+writeable = Yes
+;;;;;;;;;;;;;;;;;;;;   stopNAMEISCSI_only
+

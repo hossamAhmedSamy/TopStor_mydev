@@ -92,6 +92,7 @@ then
    sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
    sed -i "s/\@everyone/$writev/g" /TopStordata/smb.${name}
    cat /TopStordata/smb.${name} >> /TopStordata/smb.$ip
+   yes | cp /TopStordata/smb.$name /$pool/
   done
   ipc=`cat /TopStordata/smb.$ip | wc -l`
   if [ $ipc -lt 4 ];

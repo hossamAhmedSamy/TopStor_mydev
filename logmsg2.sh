@@ -1,6 +1,7 @@
 #!/bin/sh
 logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStorglobal.log'
+echo $@ > /root/logmsg2tmp
 dt=` echo $@ | awk '{print $1}'`;
 tm=` echo $@ | awk '{print $2}'`;
 fromhost=` echo $@ | awk '{print $3}'`;
@@ -19,5 +20,5 @@ echo code=$code
 echo logcode=$logcode
 echo $logcode > ${logging}2
 #dt=${datenow}'T'${timenow}; 
-dtn=`date +%s -d ${dt}'T'$tm`;
+dtn=`date +%s `;
 echo $dt $tm $fromhost $msgtype $msguser $code $dtn>> $glog

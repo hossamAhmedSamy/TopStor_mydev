@@ -17,6 +17,7 @@ TopStor_start()
 {
 	echo "$TopStor_msg"
 	/TopStor/Topstor.sh &
+        /TopStor/api/fapi.py &
 }
 TopStor_stop()
 {

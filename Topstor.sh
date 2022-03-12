@@ -6,6 +6,7 @@ rm /tmp2/msgfile 2>/dev/null
 mkdir /tmp2 &>/dev/null
 chown apache /tmp2 &>/dev/null
 mkfifo -m 660 /tmp2/msgfile 2>/dev/null
+
 export REMOTE=Topstor
 export ETCDCTL_API=3
 #chgrp root /tmp/msgfile; 
@@ -41,7 +42,11 @@ read line < /tmp2/msgfile
 echo $line > /TopStordata/tmpline
 request=`echo $line | awk '{print $1}'`
 reqparam=`echo $line | awk '{$1="";print}'`
-./queuethis.sh $request request `echo $line | awk '{print $NF}'` &
+perfmon=`cat /pacedata/perfmon`
+echo $perfmon | grep 1
+if [ $? -eq 0 ]; then
+ ./logqueue.py $request request `echo $line | awk '{print $NF}'` 
+fi
 rm -rf /root/$request.txt 2>/dev/null
 #./$request $reqparam >/dev/null 2>&1  & 
 ./$request $reqparam >/dev/null 2>/root/$request.txt  & 

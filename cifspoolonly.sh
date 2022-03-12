@@ -22,6 +22,7 @@ echo mount=$mount
 /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
 /sbin/pcs resource group add ip-all $resname 
 cp /TopStordata/tempsmb.$ipaddr  /TopStordata/smb.$ipaddr
+cp /TopStor/VolumeCIFSupdate.sh /etc/
 docker stop $resname
 docker rm $resname
 docker run -d $mount --privileged \
@@ -32,9 +33,9 @@ docker run -d $mount --privileged \
  -p $ipaddr:445:445 \
  -v /etc/localtime:/etc/localtime:ro \
  -v /TopStordata/smb.${ipaddr}:/config/smb.conf:rw \
- -v /etc/passwd:/etc/passwd:rw \
- -v /etc/group:/etc/group:rw \
- -v /etc/shadow:/etc/shadow:rw \
+ -v /etc:/hostetc/    \
  -v /var/lib/samba/private:/var/lib/samba/private:rw \
  --name $resname 10.11.11.124:5000/smb
+sleep 3
+docker exec $resname sh /hostetc/VolumeCIFSupdate.sh
 

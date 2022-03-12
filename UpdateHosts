@@ -1,0 +1,11 @@
+#!/bin/sh
+export ETCDCTL_API=3
+cd /TopStor/
+echo $@ > /root/Updatehosts
+hostname=`hostname -s`
+hostname=`echo $@ | awk '{ print $1 }'`;
+hostip=`echo $@ | awk '{ print $2 }'`;
+echo $hostname $hostip > /TopStordata/members 
+old=`cat /TopStordata/members | grep -v $hostname`
+echo $hostname $hostip > /TopStordata/members 
+echo $old >> /TopStordata/members

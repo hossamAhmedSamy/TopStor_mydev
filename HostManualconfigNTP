@@ -1,0 +1,26 @@
+#!/bin/sh
+export ETCDCTL_API=3
+cd /TopStor/
+echo $@ > ~/tmp
+dev='enp0s8'
+web='/var/www/html/des20/Data/HostManualconfigstatus.log';
+logging='/var/www/html/des20/Data/currentinfo2.log';
+runningpools='/pacedata/pools/runningpools';
+glog='/var/www/html/des20/Data/TopStor.log';
+txtres='/TopStordata/'`basename $0`'.txt'
+hostname=`hostname -s`
+ntp=`ETCDCTL_API=3 ./etcdget.py ntp/$hostname`
+rm -rf /etc/chrony.conf
+cp /TopStor/chrony.conf /etc/
+echo $ntp | grep '\.'
+if [ $? -ne 0 ];
+then
+ ntp='0.pool.ntp.org' 
+ ./etcdput.py ntp/$hostname $ntp
+fi
+sed -i "s/MASTERSERVER/$ntp/g" /etc/chrony.conf
+systemctl restart chronyd
+myhost=$hostname
+stamp=`date +%s%N`
+./etcdput.py sync/ntp/$myhost $stamp 
+./broadcasttolocal.py sync/ntp/$myhost $stamp 

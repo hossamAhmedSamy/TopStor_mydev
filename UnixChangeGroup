@@ -17,7 +17,7 @@ then
  groupusers='NoUser'
 fi
 userreq=`echo $@  | awk '{print $3}'`;
-/TopStor/queuethis.sh `basename "$0"` running $userreq &
+/TopStor/logqueue.py `basename "$0"` running $userreq 
 myhost=`hostname -s`
 stableuser="na"
 privilege="Box_Users";
@@ -93,7 +93,12 @@ then
  else
    /TopStor/UnixChangeUser NoUser groups$groupname $userreq 2&>/root/UnixChangeUser
  fi 
- /TopStor/broadcast.py GroupChange /TopStor/pump.sh UnixChangeGroup_sync -d$myhost $@ 
- /TopStor/logmsg.py Unsu1025 info $userreq $username
+ #/TopStor/broadcast.py GroupChange /TopStor/pump.sh UnixChangeGroup_sync -d$myhost $@ 
+ /TopStor/logmsg.py Unsu1025 info $userreq $groupname
 fi 
-/TopStor/queuethis.sh `basename "$0"` finished $userreq &
+stamp=`date +%s%N`
+./etcdput.py sync/group/$myhost $stamp 
+./broadcasttolocal.py sync/group/$myhost $stamp 
+./etcdput.py modified/group/$groupname $myhost 
+./broadcasttolocal.py modified/group/$groupname $myhost 
+/TopStor/logqueue.py `basename "$0"` stop $userreq 

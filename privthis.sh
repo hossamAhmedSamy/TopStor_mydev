@@ -15,14 +15,7 @@ else
  echo $priv | grep 'true' >/dev/null
  if [ $? -eq 0 ];
  then
-  ./UnixChkUser2 $userreq 'cheking'
-  x=`./etcdget.py logged/$userreq | wc -c`
-  if [ x -gt 5 ];
-  then
    echo $priv;
-  else
-   echo 'false'
-  fi
  else
   echo 'false'
  fi

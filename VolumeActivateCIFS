@@ -86,8 +86,19 @@ then
     writev=`echo $writev | sed 's/\,/ /g' `;
     admin=`echo $l | awk -F'/' '{print $6}'`
     writeable=`echo $l | awk -F'/' '{print $7}'`
+    echo $ipsubnet > /TopStordata/CIFStmp
     yes | cp sharecifs.txt /TopStordata/smb.${name}
     shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
+    sed -i "s/Vtype/CIFS/g"  /TopStordata/smb.${name}
+    sed -i "s/Rpool/$pool/g"  /TopStordata/smb.${name}
+    sed -i "s/Rname/$name/g"  /TopStordata/smb.${name}
+    sed -i "s/Rreadv/$readv/g"  /TopStordata/smb.${name}
+    sed -i "s/Rbrows/$browsable/g"  /TopStordata/smb.${name}
+    sed -i "s/Rwritev/$writev/g"  /TopStordata/smb.${name}
+    sed -i "s/Radmin/$admin/g"  /TopStordata/smb.${name}
+    sed -i "s/Rwritea/$writeable/g"  /TopStordata/smb.${name}
+    sed -i "s/Ripadd/$ipaddr/g"  /TopStordata/smb.${name}
+    sed -i "s/Ripsub/$ipsubnet/g"  /TopStordata/smb.${name}
     sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/smb.${name}
     sed -i "s/NAMECIFS/$name/g"  /TopStordata/smb.${name}
     sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
@@ -96,13 +107,18 @@ then
     sed -i "s/administrator/$admin/g" /TopStordata/smb.${name}
     sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
     sed -i "s/\@everyone/$writev/g" /TopStordata/smb.${name}
+    sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/smb.${name}
+    sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/smb.${name}
     cat /TopStordata/smb.${name} >> /TopStordata/smb.$ip
+    yes | cp /TopStordata/smb.$name /$pool/
    done
    ipc=`cat /TopStordata/smb.$ip | wc -l`
    if [ $ipc -lt 4 ];
    then
     continue
    fi
+   ipsubnet=`cat /TopStordata/CIFStmp`
+   rm -rf /TopStordata/CIFStmp
    echo i=$i
    echo ipc=$ipc for $ip
    echo ipvol=$ipvol
@@ -127,6 +143,16 @@ then
    writeable=`echo $l | awk -F'/' '{print $7}'`
    yes | cp sharecifs.txt /TopStordata/smb.${name}
    shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
+   sed -i "s/Vtype/CIFS/g"  /TopStordata/smb.${name}
+   sed -i "s/Rpool/$pool/g"  /TopStordata/smb.${name}
+   sed -i "s/Rname/$name/g"  /TopStordata/smb.${name}
+   sed -i "s/Rreadv/$readv/g"  /TopStordata/smb.${name}
+   sed -i "s/Rbrows/$browsable/g"  /TopStordata/smb.${name}
+   sed -i "s/Rwritev/$writev/g"  /TopStordata/smb.${name}
+   sed -i "s/Radmin/$admin/g"  /TopStordata/smb.${name}
+   sed -i "s/Rwritea/$writeable/g"  /TopStordata/smb.${name}
+   sed -i "s/Ripadd/$ipaddr/g"  /TopStordata/smb.${name}
+   sed -i "s/Ripsub/$ipsubnet/g"  /TopStordata/smb.${name}
    sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/smb.${name}
    sed -i "s/NAMECIFS/$name/g"  /TopStordata/smb.${name}
    sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
@@ -135,10 +161,13 @@ then
    sed -i "s/\@everyone/$writev/g" /TopStordata/smb.${name}
    sed -i "s/administrator/$admin/g" /TopStordata/smb.${name}
    sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
+   sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/smb.${name}
+   sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/smb.${name}
    chmod 770 /$pool/$name
-   echo running cifs.sh=$pool $name $ipaddr $ipsubnet >> /root/volactivateparam
-   echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
-   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet
+   echo running cifs.sh=$pool $name $ipaddr $ipsubnet cifs >> /root/volactivateparam
+   echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
+   yes | cp /TopStordata/smb.$name /$pool/
+   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    echo finished cifs.sh >> /root/volactivateparam
    echo writve=$writev
    setfacl -b /$pool/$name
