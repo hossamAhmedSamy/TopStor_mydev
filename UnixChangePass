@@ -7,6 +7,7 @@ resweb='/var/www/html/des20/Data/userpass.txtupdated';
 logthis='/TopStordata/logthis.log'
 glog='/var/www/html/des20/Data/TopStor.log';
 passchange='/TopStordata/passchange'
+myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 txtres='/TopStordata/'`basename $0`'.txt'
 cd /TopStor
 rm -rf $txtres 2>/dev/null
@@ -19,19 +20,30 @@ myhost=`hostname -s`
 cp $logthis $logging 2>/dev/null ; rm -rf $logthis 2>/dev/null;
 usermod  -p $userpass $username
 pas=`echo $userpass | openssl enc -e -base64 -aes-256-ctr -nopad -nosalt -k '#skMe22'$username`
-/TopStor/etcdput.py 'usershash/'$username $pas
-myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
-/TopStor/etcdputlocal.py $myip 'usershash/'$username $pas 2>/dev/null
+echo __1
+/TopStor/etcdget.py prim --prefix | grep address | grep $myip
+if [ $? -eq 0 ];
+then
+ echo __1.5
+ /TopStor/etcdput.py 'usershash/'$username $pas
+else
+ echo __1.6
+ /TopStor/etcdputlocal.py $myip 'usershash/'$username $pas 2>/dev/null
+fi
+echo __3
 echo $username | grep -w admin
 if [ $? -eq 0 ];
 then
+ echo __3.5
  usermod $username -c"AdminStor"$pas
 else
+ echo __3.6
  usermod $username -c"TopStor"$pas
 fi
+echo __4
 cp /TopStor/smbuserfix.sh /etc/
 currentcifs=`pcs resource | grep cifs | awk '{print $1}'`
-echo "$currentcifs" | while read y; do docker exec $y  sh /hostetc/smbuserfix.sh  e $username $userpass;  done; 
+echo "$currentcifs" | while read y; do echo __4.5 $y; docker exec $y  sh /hostetc/smbuserfix.sh  e $username $userpass;  done; 
 ( echo $userpass; echo $userpass) | /bin/smbpasswd -s -a $username 2>> $txtres
 cat $txtres >> $passchange 
 cat $txtres 
