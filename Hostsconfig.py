@@ -32,6 +32,8 @@ def getall(*bargs):
    alias = get('alias/'+hostname)[0]
    ipaddrsubnet = get('hostipsubnet/'+hostname)[0]
    configured = get('configured/'+hostname)[0]
+  if ipaddrsubnet == -1:
+   ipaddrsubnet = 24
   mgmt = get('namespace/mgmtip')[0] 
   allhosts.append({'name':hostname, 'configured':configured, 'alias':alias, 'ipaddr': hostip,'ipaddrsubnet':ipaddrsubnet, 'ntp':ntp, 'tz':tz, 'gw': gw, 'cluster':mgmt})
   hostsdict[hostname] = { 'configured':configured, 'alias':alias, 'ipaddr': hostip, 'ipaddrsubnet':ipaddrsubnet, 'ntp':ntp, 'tz':tz, 'gw': gw, 'cluster':mgmt }
