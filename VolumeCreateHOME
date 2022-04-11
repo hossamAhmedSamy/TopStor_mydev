@@ -18,7 +18,7 @@ userreq=` echo $@ | awk '{print $7}'`;
 DG=$pDG;
 hi=`whoami`
 echo start $hi $userreq > /root/volcreate
-ETCDCTL_API=3 /TopStor/logqueue.py VolumeCreateHome running $userreq 
+/TopStor/logqueue.py `basename "$0"` running $userreq 
 echo queuedrunning >> /root/volcreate
 
 privilege="HOME";
@@ -58,7 +58,7 @@ then
  then
   echo here5 >> /root/volcreate
   /TopStor/logmsg.py NFS1006 error $userreq $DG/$name
-  /TopStor/logqueue.py `basename "$0"` stop_canceled $userreq 
+  /TopStor/logqueue.py `basename "$0"` stop $userreq 
   exit
  fi
  /sbin/zfs set prot:kind=HOME $DG/$name
