@@ -31,6 +31,27 @@ def cifs(*args):
    cmdline='/TopStor/cifs.sh '+reslist[0]+' '+reslist[1]+' '+reslist[7]+' '+reslist[8]+' cifs'
    result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
    print(result)
+
+def homes(*args):
+  global myhost, etcds, pcss
+  cmdline = 'docker ps'
+  dockers = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8') 
+  cmdline = '/TopStor/getvols.sh home'
+  result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split('\n')
+  result = [x for x in result if 'pdhc' in x]
+  print('###############3')
+  for res in result:
+   reslist=res.split('/')
+   if reslist[1] not in str(etcds):
+    left='volumes/HOME/'+myhost+'/'+'/'.join(reslist[0:2])
+    put(left,res)
+    broadcasttolocal(left,res)
+   if reslist[7] not in dockers or reslist[7] not in pcss:
+    print(reslist)
+    cmdline='/TopStor/cifs.sh '+reslist[0]+' '+reslist[1]+' '+reslist[7]+' '+reslist[8]+' home'
+    result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
+    print(result)
+    
    
 def iscsi(*args):
  global myhost, etcds, pcss
@@ -55,4 +76,5 @@ def iscsi(*args):
    
 if __name__=='__main__':
  cifs(*sys.argv[1:])
+ homes(*sys.argv[1:])
  iscsi(*sys.argv[1:])
