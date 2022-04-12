@@ -944,8 +944,12 @@ def api_groups_groupslist():
 
   groupusers = []
   for user in allusers:
-   if user['name'] in str(group[2]):
-    groupusers.append(user['id'])
+   grpusrs = str(group[2]).split(',')
+   for grp  in grpusrs:
+    if user['name'] == grp:
+     groupusers.append(user['id'])
+#   if user['name'] in str(group[2]) :
+#    groupusers.append(user['id'])
   if len(groupusers) < 1:
    groupusers=["NoUser"]
   thegroup.append({'name':group[0], 'id':group[1], 'users':groupusers})

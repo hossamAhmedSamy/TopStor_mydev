@@ -58,7 +58,7 @@ then
  then
   echo here5 >> /root/volcreate
   /TopStor/logmsg.py NFS1006 error $userreq $DG/$name
-  /TopStor/logqueue.py `basename "$0"` stop_canceled $userreq 
+  /TopStor/logqueue.py `basename "$0"` stop $userreq 
   exit
  fi
  /sbin/zfs set prot:kind=CIFS $DG/$name
@@ -74,3 +74,4 @@ then
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
 fi
 ETCDCTL_API=3 /TopStor/logqueue.py VolumeCreateCIFS finish $userreq 
+/TopStor/logqueue.py `basename "$0"` stop $userreq 
