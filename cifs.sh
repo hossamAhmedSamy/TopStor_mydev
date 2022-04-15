@@ -51,7 +51,7 @@ fi
  rm -rf /TopStortempsmb.$ipaddr
  for x in $mounts; 
  do
-  mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
+  mount=$mount' -v /'$pool'/'$x':/'$pool'/'$x':rw '
   cat /TopStordata/smb.$x >> /TopStordata/tempsmb.$ipaddr
  done
  echo mount=$mount

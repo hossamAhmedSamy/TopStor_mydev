@@ -13,13 +13,16 @@ myhost=`hostname -s`
 /TopStor/etcddel.py size $vol 
 /TopStor/deltolocal.py size $vol 
 /TopStor/deltolocal.py vol $vol 
+/TopStor/crondelete $vol
 rm -rf /TopStordata/smb.${volip}.new
+echo vol = $vol
 /TopStor/delblock.py start${vol}_only stop${vol}_only /TopStordata/smb.$volip  ;
 rm -rf /TopStordata/smb.$vol
 rm -rf /$pool/smb.$vol
 rm -rf /TopStordata/tempsmb.$volip
 rm -rf /TopStordata/smb.$volip
-cat /TopStordata/smb.${volip}.new >> /TopStordata/smb.${volip}
+cat /TopStordata/smb.${volip}.new
+cat /TopStordata/smb.${volip}.new > /TopStordata/smb.${volip}
 resname=$vtype'-'$volip
 docker stop $resname
 docker container rm $resname 
@@ -57,5 +60,6 @@ else
   --name $resname 10.11.11.124:5000/smb
   sleep 3
   docker exec $resname sh /hostetc/VolumeCIFSupdate.sh
+  /TopStor/logqueue.py `basename "$0"` stop $userreq
 fi
 /TopStor/logqueue.py `basename "$0"` stop $userreq
