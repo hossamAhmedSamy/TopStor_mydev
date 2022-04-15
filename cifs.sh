@@ -14,15 +14,18 @@ echo cifs $@
 rightip=`/pace/etcdget.py ipaddr/$myhost $vtype-$ipaddr | grep -v $vol`
 otherip=`/pace/etcdget.py ipaddr $vtype-$ipaddr | grep -v $myhost | wc -c`
 othervtype=`/pace/etcdget.py ipaddr $ipaddr | grep -v $vtype | wc -c` 
+/TopStor/logqueue.py `basename "$0"` running $userreq
 if [ $otherip -ge 5 ];
 then 
  echo another host is holding the ip
  echo otherip=$otherip
+ /TopStor/logqueue.py `basename "$0"` stop $userreq
  exit
 fi
 if [ $othervtype -ge 5 ];
 then 
  echo the ip is used by another protocol 
+ /TopStor/logqueue.py `basename "$0"` stop $userreq
  exit
 fi
 #clearvol=`./prot.py clearvol $vol | awk -F'result=' '{print $2}'`
@@ -75,3 +78,4 @@ fi
   sleep 3
   docker exec $resname sh /hostetc/VolumeCIFSupdate.sh
 
+/TopStor/logqueue.py `basename "$0"` stop $userreq

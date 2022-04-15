@@ -837,7 +837,7 @@ def volumedel(data):
  pool = allinfo['volumes'][data['name']]['pool']
  owner = allinfo['volumes'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/pump.sh VolumeDelete"+data['type']+" "+pool+" "+data['name']+" "+data['type']+" "+data['user']
+ cmndstring = "/TopStor/pump.sh VolumeDelete"+data['type']+" "+pool+" "+data['name']+" "+data['type']+" "+allinfo['volumes'][data['name']]['ipaddress']+" "+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  print('##################################')
