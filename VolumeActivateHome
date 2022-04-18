@@ -163,9 +163,9 @@ then
    sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
    chmod 770 /$pool/$name
    echo running cifs.sh=$pool $name $ipaddr $ipsubnet home >> /root/volactivateparamHome
-   echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet home 
+   echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs 
    yes | cp /TopStordata/smb.$name /$pool/
-   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet Home 
+   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs 
    echo finished cifs.sh >> /root/volactivateparamHome
    echo writve=$writev
    setfacl -b /$pool/$name
