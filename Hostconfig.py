@@ -90,6 +90,25 @@ def config(*bargs):
   sendhost(leaderip, str(msg),'recvreply',myhost)
   logmsg.sendlog('HostManual1su9','info',arglist['user'],oldarg, arglist['ntp'])
   queuethis('Hostconfig_ntp','finish',arglist['user'])
+########### changing dns  ###############
+ if 'dnsname' in arglist:
+  queuethis('Hostconfig_dns','running',arglist['user'])
+  oldargname = get('dnsname/'+myhost)[0]
+  oldargsearch = get('dnssearch/'+myhost)[0]
+  logmsg.sendlog('HostManual1st13','info',arglist['user'],oldargname, oldargsearch, arglist['dnsname'],arglist['dnssearch'])
+  allhosts = get('ActivePartner','--prefix')
+  for host in allhosts:
+   hostname = host[0].replace('ActivePartners/','')
+   put('dnsname/'+leader,arglist['dnsname'])
+   put('dnssearch/'+leader,arglist['dnssearch'])
+   broadcasttolocal('dnsname/'+leader,arglist['dnsname'])
+   broadcasttolocal('dnssearch/'+leader,arglist['dnssearch'])
+  z=['/TopStor/pump.sh','HostManualconfigDNS']
+  msg={'req': 'Pumpthis', 'reply':z}
+  sendhost(leaderip, str(msg),'recvreply',myhost)
+  logmsg.sendlog('HostManual1su13','info',arglist['user'],oldargname, oldargsearch, arglist['dnsname'],arglist['dnssearch'])
+  queuethis('Hostconfig_dns','finish',arglist['user'])
+ 
 ########### changing gateway  ###############
  if 'gw' in arglist:
   queuethis('Hostconfig_gw','running',arglist['user'])

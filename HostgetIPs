@@ -17,6 +17,8 @@ hostsubnet=`pcs resource show CC | grep Attributes | awk -F'netmask=' '{print $2
 leader=`./etcdget.py leader --prefix`
 gw=`ip route | grep default | awk '{print $3}'`
 dns=` tail -n 1 /etc/resolv.conf | awk '{$1="";print}'`
+dnsname=`cat /etc/resolve.conf | grep name | head -1 | awk '{print $2}'`
+dnssearch=`cat /etc/resolve.conf | grep search | head -1 | awk '{print $2}'`
 
 echo $leader | grep $hostname
 if [ $? -eq 0 ];
@@ -37,6 +39,8 @@ if [ -z $hostdns ]; then hostdns='0'; fi
 if [ $isleader -eq 1 ];
 then
  gwserver=`ETCDCTL_API=3 ./etcdget.py gw/$hostname`;
+ dnsname=`ETCDCTL_API=3 ./etcdget.py dnsname/$hostname`;
+ dnssearch=`ETCDCTL_API=3 ./etcdget.py dnssearch/$hostname`;
  ntpserver=`ETCDCTL_API=3 ./etcdget.py ntp/$hostname`;
  configured=`ETCDCTL_API=3 ./etcdget.py configured/$hostname`;
  tzone=`ETCDCTL_API=3 ./etcdget.py tz/$hostname`;
@@ -44,6 +48,8 @@ then
  mgmtsubnet=`ETCDCTL_API=3 ./etcdget.py namespace/mgmtip | awk -F'/' '{print $2}'`
 else
  gwserver=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip gw/$hostname`;
+ dnsname=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip dnsname/$hostname`;
+ dnssearch=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip dnssearch/$hostname`;
  ntpserver=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip ntp/$hostname`;
  configured=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip configured/$hostname`;
  tzone=`ETCDCTL_API=3 ./etcdgetlocal.py $hostip tz/$hostname`;
@@ -59,9 +65,9 @@ then
  if [ -z $dataip ]; then dataip='0'; fi
  dataipsubnet=`pcs resource show dataip | grep Attributes | awk -F'netmask=' '{print $2}' | awk '{print $1}'`
  if [ -z $dataipsubnet ]; then dataipsubnet='0'; fi
-jsonips=`/usr/local/bin/zsh jsonthis3.sh hostname $hostname name $hostn addr $hostip addrsubnet $hostsubnet rout $hostrout dns $hostdns mgmtip $mgmtip mgmtsubnet $mgmtsubnet dataip $dataip dataipsubnet $dataipsubnet ntp $ntpserver tz $tzone gw $gwserver configured $configured`;
+jsonips=`/usr/local/bin/zsh jsonthis3.sh hostname $hostname name $hostn addr $hostip addrsubnet $hostsubnet rout $hostrout dns $hostdns mgmtip $mgmtip mgmtsubnet $mgmtsubnet dataip $dataip dataipsubnet $dataipsubnet ntp $ntpserver tz $tzone gw $gwserver dnsname $dnsname dnssearch $dnssearch configured $configured`;
 else
-jsonips=`/usr/local/bin/zsh jsonthis3.sh hostname $hostname name $hostn addr $hostip addrsubnet $hostsubnet rout $hostrout dns $hostdns mgmtip $mgmtip mgmtsubnet $mgmtsubnet ntp $ntpserver tz $tzone gw $gwserver configured $configured`;
+jsonips=`/usr/local/bin/zsh jsonthis3.sh hostname $hostname name $hostn addr $hostip addrsubnet $hostsubnet rout $hostrout dns $hostdns mgmtip $mgmtip mgmtsubnet $mgmtsubnet ntp $ntpserver tz $tzone gw $gwserver dnsname $dnsname dnssearch $dnssearch configured $configured`;
 echo $jsonips
 fi
 ETCDCTL_API=3 /pace/etcdput.py prop/$hostname $jsonips
