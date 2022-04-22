@@ -95,6 +95,10 @@ def config(*bargs):
   queuethis('Hostconfig_dns','running',arglist['user'])
   oldargname = get('dnsname/'+myhost)[0]
   oldargsearch = get('dnssearch/'+myhost)[0]
+  if arglist['dnsname'] == "":
+   arglist['dnsname'] = oldargname
+  if arglist['dnssearch'] == "":
+   arglist['dnssearch'] = oldargsearch
   logmsg.sendlog('HostManual1st13','info',arglist['user'],oldargname, oldargsearch, arglist['dnsname'],arglist['dnssearch'])
   allhosts = get('ActivePartner','--prefix')
   for host in allhosts:
