@@ -18,12 +18,14 @@ then
  ./etcdput.py dns/$hostname $olddns
 else
  echo 'supersede domain-name-server '$dns';' > /etc/dhcp/dhclient.conf
+ echo nameserver $dns > /etc/resolv.conf
  echo $searchdns | grep '\-1'
  if [ $? -ne 0 ];
  then
   echo 'supersede domain-search "'$searchdns'";' >> /etc/dhcp/dhclient.conf
+  echo search $searchdns >> /etc/resolv.conf
  fi
- systemctl restart network
+ #systemctl restart network
 fi
 myhost=$hostname
 stamp=`date +%s%N`
