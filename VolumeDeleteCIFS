@@ -21,7 +21,7 @@ if [[ $contrun == 'true' ]]
 then
  /TopStor/logmsg.py NFS1000 info $userreq $pDG/$volname
  /TopStor/logqueue.py `basename "$0"` running $userreq
- /TopStor/cifsremove.sh $pDG $volname $volip cifs
+ /TopStor/cifsremove.sh $pDG $volname $volip cifs 2>/root/errcifsremove
  /sbin/zfs destroy -rf $pDG/$volname 
  if [ $? -ne 0  ]; then
    /TopStor/logmsg.py NFS1001 error $userreq $volname
