@@ -6,5 +6,6 @@ logging='/usr/local/www/apache24/data/des19/Data/currentinfo2.log'
 myhost=`hostname -s`
 rm txt/cronthis.txt;
 oper1=` echo $@ | awk '{print $1}'`;
+crontab -l > txt/cronthis.txt;
 cat txt/cronthis.txt | grep -v $per1 > /TopStordata/cronthis.txt
 crontab /TopStordata/cronthis.txt 
