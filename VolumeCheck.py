@@ -48,7 +48,7 @@ def homes(*args):
     broadcasttolocal(left,res)
    if reslist[7] not in dockers or reslist[7] not in pcss:
     print(reslist)
-    cmdline='/TopStor/cifs.sh '+reslist[0]+' '+reslist[1]+' '+reslist[7]+' '+reslist[8]+' home'
+    cmdline='/TopStor/cifs.sh '+reslist[0]+' '+reslist[1]+' '+reslist[7]+' '+reslist[8]+' cifs'
     result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
     print(result)
     

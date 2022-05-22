@@ -52,6 +52,7 @@ then
    cat /TopStordata/smb.$x >>  /TopStordata/tempsmb.$redipaddr
   done
   cp /TopStordata/tempsmb.$redipaddr  /TopStordata/smb.$redipaddr
+  rm -rf /TopStordata/tempsmb.$redipaddr
   docker stop $resname
   docker rm $resname
   docker run -d $mount --privileged \

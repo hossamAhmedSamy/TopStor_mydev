@@ -1,0 +1,33 @@
+#!/bin/sh
+export ETCDCTL_API=3
+cd /TopStor/
+echo $@ > ~/`basename "$0"`
+hostname=`hostname -s`
+dev='enp0s8'
+dns=`ETCDCTL_API=3 /TopStor/etcdget.py dnsname/$hostname`
+searchdns=`ETCDCTL_API=3 /TopStor/etcdget.py dnssearch/$hostname`
+olddns=`cat /etc/resolv.conf | grep nameserver | head -1 | awk '{print $2}'`
+echo $dns | grep '\.'
+if [ $? -ne 0 ];
+then
+ echo $olddns | grep '\.'
+ if [ $? -ne 0 ];
+ then
+  olddns='NoDNS'
+ fi
+ ./etcdput.py dns/$hostname $olddns
+else
+ echo 'supersede domain-name-server '$dns';' > /etc/dhcp/dhclient.conf
+ echo nameserver $dns > /etc/resolv.conf
+ echo $searchdns | grep '\-1'
+ if [ $? -ne 0 ];
+ then
+  echo 'supersede domain-search "'$searchdns'";' >> /etc/dhcp/dhclient.conf
+  echo search $searchdns >> /etc/resolv.conf
+ fi
+ #systemctl restart network
+fi
+myhost=$hostname
+stamp=`date +%s%N`
+./etcdput.py sync/gw/$myhost $stamp 
+./broadcasttolocal.py sync/gw/$myhost $stamp 

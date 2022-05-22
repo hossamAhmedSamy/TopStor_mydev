@@ -40,7 +40,7 @@ then
     ipaddr=` echo $registry | awk -F'/' '{print $8}'`
     ipsubnet=` echo $registry | awk -F'/' '{print $9}'`
     /pace/etcdput.py volumes/HOME/$myhost/$pool/$name $registry
-    /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet Home 
+    /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs 
    fi
   done
  fi

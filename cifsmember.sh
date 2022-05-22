@@ -7,6 +7,10 @@ vol=`echo $@ | awk '{print $2}'`
 ipaddr=`echo $@ | awk '{print $3}'`
 ipsubnet=`echo $@ | awk '{print $4}'`
 vtype=`echo $@ | awk '{print $5}'`
+domain=`echo $@ | awk '{print $6}'`
+domadmin=`echo $@ | awk '{print $7}'`
+adminpass=`echo $@ | awk '{print $8}'`
+domainsrv=`echo $@ | awk '{print $9}'`
 echo $@ > /root/cifsparam
 myhost=`hostname`
 #docker rm -f `docker ps -a | grep -v Up | grep $ipaddr | awk '{print $1}'` 2>/dev/null
@@ -64,18 +68,18 @@ fi
   docker stop $resname 
   docker rm -f $resname
  fi
- docker run -d $mount --privileged \
-  -e "HOSTIP=$ipaddr"  \
-  -p $ipaddr:135:135 \
-  -p $ipaddr:137-138:137-138/udp \
-  -p $ipaddr:139:139 \
-  -p $ipaddr:445:445 \
-  -v /etc/localtime:/etc/localtime:ro \
-  -v /TopStordata/smb.${ipaddr}:/config/smb.conf:rw \
-  -v /etc/:/hostetc/   \
-  -v /var/lib/samba/private:/var/lib/samba/private:rw \
-  --name $resname 10.11.11.124:5000/smb
-  sleep 3
-  docker exec $resname sh /hostetc/VolumeCIFSupdate.sh
+ docker run -it $mount --privileged \
+  --rm --add-host "${vol}.$domain ${vol}":$ipaddr  \
+  --hostname ${vol} \
+  -e TZ=Etc/UTC \
+  -e DOMAIN_NAME=$domain \
+  -e ADMIN_SERVER=$domainsrv 
+  -e WORKGROUP=`echo $domain | awk -F'\.' '{print $1}'` 
+  -e AD_USERNAME=$domadmin
+  -e AD_PASSWORD='$adminpass' 
+  -p 10.11.11.12:137:137/udp 
+  -p 10.11.11.12:138:138/udp 
+  -p 10.11.11.12:139:139/tcp 
+  -p 10.11.11.12:445:445/tcp 10.11.11.124:5000/membersmb 
 
 /TopStor/logqueue.py `basename "$0"` stop $userreq

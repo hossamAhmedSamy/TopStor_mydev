@@ -109,7 +109,12 @@ then
     sed -i "s/\@everyone/$writev/g" /TopStordata/smb.${name}
     sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/smb.${name}
     sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/smb.${name}
-    cat /TopStordata/smb.${name} >> /TopStordata/smb.$ip
+
+    rm -rf /TopStordata/smb.${ipaddr}.new
+    /TopStor/delblock.py start${name}_only stop${name}_only /TopStordata/smb.$ipaddr  ;
+    cat /TopStordata/smb.${name} >> /TopStordata/smb.$ipaddr
+    rm -rf /TopStordata/smb.$ipaddr
+    cp  /TopStordata/smb.${ipaddr}.new  /TopStordata/smb.${ipaddr}
     yes | cp /TopStordata/smb.$name /$pool/
    done
    ipc=`cat /TopStordata/smb.$ip | wc -l`
