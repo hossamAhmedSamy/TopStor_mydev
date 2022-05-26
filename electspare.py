@@ -82,8 +82,8 @@ def takedecision(allmsgs):
  for disk in allinfo['disks']:
   if disk in str(faultydisks):
    continue
-  if all(x not in allinfo['disks'][disk]['status'] for x in ['ONLINE','free']):
-   put('disks/FAULT/'+disk, allinfo['disks'][disk]['status'])
+  #if all(x not in allinfo['disks'][disk]['status'] for x in ['ONLINE','free']):
+  # put('disks/FAULT/'+disk, allinfo['disks'][disk]['status'])
  return
 
 def allcompare():
@@ -109,7 +109,8 @@ def allcompare():
         changepot[key][element] = dict() 
        changepot[key][element][feature] = (last[key][element][feature], current[key][element][feature])
      except:
-      dels('host','lasit')
+      #dels('host','lasit')
+      pass
     last[key].pop(element,None)
   if key not in changepot:
    last.pop(key)
@@ -145,7 +146,7 @@ def replacedisks():
  for disk in faultydisks:
   diskname = disk[0].split('/')[2]
   if diskname not in allinfo['disks']:
-   dels('disks/FAULT', diskname)
+   #dels('disks/FAULT', diskname)
    continue
   raid = allinfo['disks'][diskname]['raid']
   raidinfo = allinfo['raids'][raid]
