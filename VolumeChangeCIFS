@@ -46,21 +46,26 @@ then
  then
   extraparms=''
  else
-  extraparms='/'$domain'/'$domainsrvn'/'$domainsrvi'/'$domadm'/'$dompass
+  isparams=`echo $domain | wc -3`
+  if [ isparams -ge 3 ];
+  then 
+   extraparms='/'$domain'/'$domainsrvn'/'$domainsrvi'/'$domadm'/'$dompass
+  else
+    extraparms=`echo $older | awk -F'/' '{for(i=NF-4;i<=NF;i++) printf $i"/"; print ""}' | sed "s/')\///g"`
+  fi
  fi
- older=`ETCDCTL_API=3 /pace/etcdget.py volumes $name `
- echo /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$oldipaddr/${oldipsubnet}$extraparms >> /root/volchange
+ echo /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$oldipaddr/${oldipsubnet}/$extraparms >> /root/volchange
  oldipaddr=`zfs get -H ip:addr $DG/$name | awk '{print $3}'`
  oldipsubnet=`zfs get -H ip:subnet $DG/$name | awk '{print $3}'`
- /TopStor/VolumeDeleteCIFS $pDG $name CIFS $oldipaddr $userreq 
+ /TopStor/VolumefixChangeCIFS $pDG $name CIFS $oldipaddr $userreq 
+ /TopStor/VolumeDockerChange.py /$DG/$name $ipaddr
  ETCDCTL_API=3 /pace/etcddel.py volumes $name
- ETCDCTL_API=3 /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/${ipsubnet}$extraparms
+ ETCDCTL_API=3 /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/${ipsubnet}/$extraparms
  sed -i "s/$oldipaddr/$ipaddr/g" /$DG/smb.$name
  sed -i "s/$oldipsubnet/$ipsubnet/g" /$DG/smb.$name
  /sbin/zfs set ip:addr=$ipaddr $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
- /pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/${ipsubnet}$extraparms
-# /TopStor/VolumeDockerChange.py /$DG/$name $ipaddr
+ /pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/${ipsubnet}/$extraparms
  echo $writev | grep DOMAIN
  if [ $? ne 0 ];
  then

@@ -85,6 +85,9 @@ fi
  cp /etc/resolv.conf /TopStordata/ 
  echo nameserver $domainsrvi > /etc/resolv.conf
 #  -e TZ=Etc/UTC \
+ #adminpass=`echo $adminpass | sed 's/\@\@sep/\//g' | sed ':a;N;$!ba;s/\n/ /g'`
+ adminpass=`echo $adminpass | sed 's/\@\@sep/\//g'`
+ adminpass=`./decthis.sh $adminpass `
  docker run -d  $mount --privileged --rm --add-host "${membername}.$domain ${membername}":$ipaddr  \
   --hostname ${membername} \
   -v /etc/localtime:/etc/localtime:ro \

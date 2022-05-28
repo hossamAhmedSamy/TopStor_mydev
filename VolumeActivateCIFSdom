@@ -185,7 +185,6 @@ then
    echo running cifs.sh=$pool $name $ipaddr $ipsubnet cifs >> /root/volactivateparam
    echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    yes | cp /TopStordata/smb.$name /$pool/
-   exit
    /TopStor/cifsmember.sh $pool $name $ipaddr $ipsubnet cifs $domain $adwinn $adwini $winadm $winpass
    echo finished cifs.sh >> /root/volactivateparam
    echo writve=$writev

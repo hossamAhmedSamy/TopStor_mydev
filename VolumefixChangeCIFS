@@ -1,0 +1,23 @@
+#!/bin/sh
+cd /TopStor
+echo $@ > ~/`basename "$0"`
+web='/var/www/html/des20/Data/CIFSstatus.log';
+logging='/var/www/html/des20/Data/currentinfo2.log'
+glog='/var/www/html/des20/Data/TopStor.log';
+runningpools='/pacedata/pools/runningpools'
+datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
+volname=`echo $@ | awk '{print $2}'`;
+pDG=`echo $@ | awk '{print $1}'`;
+pro=`echo $@ | awk '{print $3}'`;
+volip=`echo $@ | awk '{print $4}'`;
+userreq=` echo $@ | awk '{print $5}'`;
+DG=pDG;
+hostnam=`hostname -s`;
+sshost=hostnam;
+#sshost=`cat $runningpools | grep $hostnam | awk '{print $1}'`;
+privilege=$pro;
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]]
+then
+ /TopStor/cifsremove.sh $pDG $volname $volip cifs 2>/root/errcifsremove
+fi

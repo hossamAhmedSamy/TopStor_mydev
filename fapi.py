@@ -405,6 +405,8 @@ def volumessnapshotsinfo():
 def volumesinfo(prot='all'):
  global allvolumes, alldsks, allinfo
  getalltime()
+ alldsks = deepcopy(get('host','current'))
+ allinfo = deepcopy(getall(alldsks))
  allgroups = getgroups()
  volgrouplist = []
  volumes = []
@@ -417,6 +419,9 @@ def volumesinfo(prot='all'):
   if prot in allinfo['volumes'][volume]['prot'] or prot2 in allinfo['volumes'][volume]['prot']:
    volgrps = []
    if prot in ['CIFS','NFS']:
+    print('##################')
+    print(allinfo['volumes'][volume])
+    print('##################')
     volgrouplist =  deepcopy(allinfo['volumes'][volume]['groups'])
     if type(volgrouplist) != list:
       volgrouplist = volgrouplist.split(',')
@@ -601,6 +606,9 @@ def volumecreate(data):
   data['chappas']='MezoAdmin'
   datastr = data['pool']+' '+data['name']+' '+data['size']+' '+data['ipaddress']+' '+data['Subnet']+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+data['user']+' '+data['owner']+' '+data['user']
  elif 'CIFSdom' in data['type']:
+  cmdline=['./encthis.sh',data["dompass"]]
+  data["dompass"]=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode().replace('/','@@sep')[:-1]
+
   datastr = data['pool']+' '+data['name']+' '+data['size']+' '+' '+data['ipaddress']+' '+data['Subnet']+' '+data['user']+' '+data['owner']+' '+data['user']+' '+ data["domname"]+' '+ data["domsrv"]+' '+ data["domip"]+' '+ data["domadmin"]+' '+ data["dompass"] 
  else:
   datastr = data['pool']+' '+data['name']+' '+data['size']+' '+data['groups']+' '+data['ipaddress']+' '+data['Subnet']+' '+data['user']+' '+data['owner']+' '+data['user']
