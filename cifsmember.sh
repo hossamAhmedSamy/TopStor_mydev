@@ -8,9 +8,11 @@ ipaddr=`echo $@ | awk '{print $3}'`
 ipsubnet=`echo $@ | awk '{print $4}'`
 vtype=`echo $@ | awk '{print $5}'`
 domain=`echo $@ | awk '{print $6}'`
-domadmin=`echo $@ | awk '{print $7}'`
-adminpass=`echo $@ | awk '{print $8}'`
-domainsrv=`echo $@ | awk '{print $9}'`
+domainsrvn=`echo $@ | awk '{print $7}'`
+domainsrvi=`echo $@ | awk '{print $8}'`
+domadmin=`echo $@ | awk '{print $9}'`
+adminpass=`echo $@ | awk '{print $10}'`
+echo $@ > /root/cifsmember
 echo $@ > /root/cifsparam
 myhost=`hostname`
 #docker rm -f `docker ps -a | grep -v Up | grep $ipaddr | awk '{print $1}'` 2>/dev/null
@@ -52,15 +54,13 @@ fi
  echo rightvol=$rightvols
  echo mounts=$mounts
  mount=''
- rm -rf /TopStortempsmb.$ipaddr
+ rm -rf /TopStordata/tempsmb.$ipaddr
  for x in $mounts; 
  do
   mount=$mount' -v /'$pool'/'$x':/'$pool'/'$x':rw '
   cat /TopStordata/smb.$x >> /TopStordata/tempsmb.$ipaddr
  done
- echo mount=$mount
  cp /TopStordata/tempsmb.$ipaddr  /TopStordata/smb.$ipaddr
- cp /TopStor/VolumeCIFSupdate.sh /etc/
  dockers=`docker ps -a`
  echo $dockers | grep $resname
  if [ $? -eq 0 ];
@@ -68,18 +68,43 @@ fi
   docker stop $resname 
   docker rm -f $resname
  fi
- docker run -it $mount --privileged \
-  --rm --add-host "${vol}.$domain ${vol}":$ipaddr  \
-  --hostname ${vol} \
-  -e TZ=Etc/UTC \
+ membername=`echo $vol | awk -F'_' '{print $1}'`
+ wrkgrp=`echo $domain | awk -F'\.' '{print $1}'`  
+ echo -e 'notyet=1 \nwhile [ $notyet -eq 1 ];\ndo\nsleep 3' > /etc/smb${vol}.sh
+ echo -e 'cat /etc/samba/smb.conf | grep' "'\[public\]'" >> /etc/smb${vol}.sh
+ echo -e 'if [ $? -eq 0 ];\nthen' >> /etc/smb${vol}.sh
+ echo -e ' cat /etc/samba/smb.conf | grep' "'\[private\]'" >> /etc/smb${vol}.sh
+ echo -e ' if [ $? -eq 0 ];\nthen' >> /etc/smb${vol}.sh
+ echo -e '  cat /etc/samba/smb.conf | grep' "'\[home\]'" >> /etc/smb${vol}.sh
+ echo -e '  if [ $? -eq 0 ];\nthen\nnotyet=0\nfi\nfi\nfi\ndone' >> /etc/smb${vol}.sh
+ echo  "sed -i -e '51,1000d' /etc/samba/smb.conf"  >> /etc/smb${vol}.sh
+ echo  "cat /etc/smb.conf >> /etc/samba/smb.conf"  >> /etc/smb${vol}.sh
+ echo  "service samba --full-restart"  >> /etc/smb${vol}.sh
+ chmod +w /etc/smb${vol}.sh
+ sync
+ cp /etc/resolv.conf /TopStordata/ 
+ echo nameserver $domainsrvi > /etc/resolv.conf
+#  -e TZ=Etc/UTC \
+ #adminpass=`echo $adminpass | sed 's/\@\@sep/\//g' | sed ':a;N;$!ba;s/\n/ /g'`
+ adminpass=`echo $adminpass | sed 's/\@\@sep/\//g'`
+ adminpass=`./decthis.sh $adminpass `
+ docker run -d  $mount --privileged --rm --add-host "${membername}.$domain ${membername}":$ipaddr  \
+  --hostname ${membername} \
+  -v /etc/localtime:/etc/localtime:ro \
+  -v /etc/:/hostetc/   \
+  -v /TopStordata/smb.${ipaddr}:/etc/smb.conf:rw \
   -e DOMAIN_NAME=$domain \
-  -e ADMIN_SERVER=$domainsrv 
-  -e WORKGROUP=`echo $domain | awk -F'\.' '{print $1}'` 
-  -e AD_USERNAME=$domadmin
-  -e AD_PASSWORD='$adminpass' 
-  -p 10.11.11.12:137:137/udp 
-  -p 10.11.11.12:138:138/udp 
-  -p 10.11.11.12:139:139/tcp 
-  -p 10.11.11.12:445:445/tcp 10.11.11.124:5000/membersmb 
+  -e ADMIN_SERVER=$domainsrvi \
+  -e WORKGROUP=$wrkgrp  \
+  -e AD_USERNAME=$domadmin \
+  -e AD_PASSWORD=$adminpass \
+  -p $ipaddr:137:137/udp \
+  -p $ipaddr:138:138/udp \
+  -p $ipaddr:139:139/tcp \
+  -p $ipaddr:445:445/tcp \
+  --name $resname 10.11.11.124:5000/membersmb 
+cat /TopStordata/resolv.conf > /etc/resolv.conf
+docker exec $resname sh /hostetc/smb${vol}.sh &
+
 
 /TopStor/logqueue.py `basename "$0"` stop $userreq

@@ -86,6 +86,12 @@ then
     writev=`echo $writev | sed 's/\,/ /g' `;
     admin=`echo $l | awk -F'/' '{print $6}'`
     writeable=`echo $l | awk -F'/' '{print $7}'`
+    echo $writev | grep DOMAIN
+    if [ $? -eq 0 ];
+    then
+     ./VolumeActivateCIFSdom vol=$name user=$userreq
+     continue
+    fi
     echo $ipsubnet > /TopStordata/CIFStmp
     yes | cp sharecifs.txt /TopStordata/smb.${name}
     shortname=`echo ${name} | rev | cut -d_ -f2- | rev`

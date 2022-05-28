@@ -62,6 +62,11 @@ def getall(*args):
   voldict = {'name': vol[1].split('/')[1], 'pool': vol[1].split('/')[0], 'groups': '', 'ipaddress': '', 'Subnet': '', 'prot': '', 'fullname': '', 'host': '', 'creation': '', 'time': '', 'used': 0, 'quota': 0, 'usedbysnapshots': 0, 'refcompressratio': '1.0x', 'snapperiod': [], 'snapshots': []}
   if vol[0].split('/')[1] == 'CIFS' or vol[0].split('/')[1] == 'HOME' :
    voldict['groups'] = vol[1].split('/')[4]
+   if 'DOMAIN' in voldict['groups']:
+    voldict['groups']= 'Everyone'
+    voldict['type']='DOMAIN'
+   else:
+    voldict['type']='WorkGroup'
    voldict['ipaddress'] = vol[1].split('/')[7] 
    voldict['Subnet'] = vol[1].split('/')[8]
    voldict['prot'] = vol[0].split('/')[1]
@@ -84,6 +89,7 @@ def getall(*args):
    volumesdict[voldict['name']] = voldict.copy()
  for alldsk in alldsks:
   host = alldsk[0].split('/')[1]
+  #print(alldsk[1])
   pools = mtuple(alldsk[1])
   hostpools = []
   hostip = get('ActivePartners/'+host)[0]

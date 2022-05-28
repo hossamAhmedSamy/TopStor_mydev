@@ -1,6 +1,7 @@
 #!/bin/sh
 export ETCDCTL_API=3
 cd /TopStor/
+echo $@ > /root/volactivate
 echo $@ > /root/volactivateparam
 web='/var/www/html/des20/Data/CIFSstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log'
@@ -75,6 +76,10 @@ then
     then
      continue
     fi
+    echo '############################################'
+    echo $l
+    echo '############################################'
+    exit
     pool=`echo $l | awk -F'/' '{print $1}'`
     name=`echo $l | awk -F'/' '{print $2}'`
     path='/'${pool}'/'${name}
@@ -106,7 +111,6 @@ then
     sed -i "s/yes/$browsable/g" /TopStordata/smb.${name}
     sed -i "s/administrator/$admin/g" /TopStordata/smb.${name}
     sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
-    sed -i "s/\@everyone/$writev/g" /TopStordata/smb.${name}
     sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/smb.${name}
     sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/smb.${name}
 
@@ -146,7 +150,12 @@ then
    writev=`echo $writev | sed 's/\,/ /g' `;
    admin=`echo $l | awk -F'/' '{print $6}'`
    writeable=`echo $l | awk -F'/' '{print $7}'`
-   yes | cp sharecifs.txt /TopStordata/smb.${name}
+   domain=`echo $l | awk -F'/' '{print $10}'`
+   adwinn=`echo $l | awk -F'/' '{print $11}'`
+   adwini=`echo $l | awk -F'/' '{print $12}'`
+   winadm=`echo $l | awk -F'/' '{print $13}'`
+   winpass=`echo $l | awk -F'/' '{print $14}'`
+   yes | cp sharecifsdom.txt /TopStordata/smb.${name}
    shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
    sed -i "s/Vtype/CIFS/g"  /TopStordata/smb.${name}
    sed -i "s/Rpool/$pool/g"  /TopStordata/smb.${name}
@@ -163,16 +172,20 @@ then
    sed -i "s/POOL/$pool/g" /TopStordata/smb.${name}
    sed -i "s/no/$readv/g" /TopStordata/smb.${name}
    sed -i "s/yes/$browsable/g" /TopStordata/smb.${name}
-   sed -i "s/\@everyone/$writev/g" /TopStordata/smb.${name}
    sed -i "s/administrator/$admin/g" /TopStordata/smb.${name}
    sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
    sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/smb.${name}
    sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/smb.${name}
+   sed -i "s/DOMNAME/$domain/g" /TopStordata/smb.${name}
+   sed -i "s/DOMSRVN/$adwinn/g" /TopStordata/smb.${name}
+   sed -i "s/DOMSRVI/$adwini/g" /TopStordata/smb.${name}
+   sed -i "s/DOMADM/$winadm/g" /TopStordata/smb.${name}
+   sed -i "s/DOMPASS/$winpass/g" /TopStordata/smb.${name}
    chmod 770 /$pool/$name
    echo running cifs.sh=$pool $name $ipaddr $ipsubnet cifs >> /root/volactivateparam
    echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    yes | cp /TopStordata/smb.$name /$pool/
-   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
+   /TopStor/cifsmember.sh $pool $name $ipaddr $ipsubnet cifs $domain $adwinn $adwini $winadm $winpass
    echo finished cifs.sh >> /root/volactivateparam
    echo writve=$writev
    setfacl -b /$pool/$name
