@@ -21,7 +21,11 @@ ipaddr=`echo $@ | awk '{print $5}'`;
 ipsubnet=`echo $@ | awk '{print $6}'`;
 myhost=` echo $@ | awk '{print $7}'`;
 userreq=` echo $@ | awk '{print $8}'`;
-#echo $pDG $name $quota $writev $ipaddr $ipsubnet $myhost $userreq >> /root/volchange
+domain=` echo $@ | awk '{print $9}'`;
+domainsrvn=` echo $@ | awk '{print $10}'`;
+domainsrvi=` echo $@ | awk '{print $11}'`;
+domadm=` echo $@ | awk '{print $12}'`;
+dompass=` echo $@ | awk '{print $13}'`;
 DG=`echo $pDG `;
 privilege="CIFS";
 contrun=`./privthis.sh $privilege $userreq`;
@@ -32,25 +36,38 @@ then
  then
   writev=`echo $writev | sed 's/nogroup//g'`
  fi
+ echo $pDG $name $quota $writev $ipaddr $ipsubnet $myhost $userreq $extraparms>> /root/volchange
  /TopStor/logmsg.py VolCst01 info $userreq $name
  echo name=$name
  myhost=`hostname -s`
  older=`ETCDCTL_API=3 /pace/etcdget.py volumes $name `
- echo /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes >> /root/volchange
+ echo $older | grep DOMAIN
+ if [ $? -ne 0 ];
+ then
+  extraparms=''
+ else
+  extraparms='/'$domain'/'$domainsrvn'/'$domainsrvi'/'$domadm'/'$dompass
+ fi
+ older=`ETCDCTL_API=3 /pace/etcdget.py volumes $name `
+ echo /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$oldipaddr/${oldipsubnet}$extraparms >> /root/volchange
  oldipaddr=`zfs get -H ip:addr $DG/$name | awk '{print $3}'`
  oldipsubnet=`zfs get -H ip:subnet $DG/$name | awk '{print $3}'`
  /TopStor/VolumeDeleteCIFS $pDG $name CIFS $oldipaddr $userreq 
  ETCDCTL_API=3 /pace/etcddel.py volumes $name
- ETCDCTL_API=3 /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
- echo got ip $ipaddr
- echo got ip $ipsubnet
+ ETCDCTL_API=3 /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/${ipsubnet}$extraparms
  sed -i "s/$oldipaddr/$ipaddr/g" /$DG/smb.$name
  sed -i "s/$oldipsubnet/$ipsubnet/g" /$DG/smb.$name
  /sbin/zfs set ip:addr=$ipaddr $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
- /pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet 
+ /pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/${ipsubnet}$extraparms
 # /TopStor/VolumeDockerChange.py /$DG/$name $ipaddr
- /TopStor/VolumeActivateCIFS vol=$name user=$userreq
+ echo $writev | grep DOMAIN
+ if [ $? ne 0 ];
+ then
+  /TopStor/VolumeActivateCIFS vol=$name user=$userreq
+ else 
+   /TopStor/VolumeActivateCIFSdom vol=$name user=$userreq
+ fi
  /pace/putzpool.py 
  /TopStor/logmsg.py VolCsu01 info $userreq $name
  echo ready ;

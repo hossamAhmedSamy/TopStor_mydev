@@ -20,15 +20,18 @@ def cifs(*args):
  result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split('\n')
  result = [x for x in result if 'pdhc' in x]
  print('###############3')
+ print('cifs result', result)
  for res in result:
   reslist=res.split('/')
   if reslist[1] not in str(etcds):
    left='volumes/CIFS/'+myhost+'/'+'/'.join(reslist[0:2])
    put(left,res)
    broadcasttolocal(left,res)
-  if reslist[7] not in dockers or reslist[7] not in pcss:
-   print(reslist)
-   cmdline='/TopStor/cifs.sh '+reslist[0]+' '+reslist[1]+' '+reslist[7]+' '+reslist[8]+' cifs'
+  if (('cifs-'+reslist[7]) not in dockers) or (('cifs-'+reslist[7]) not in pcss):
+   if 'DOMAIN' in res:
+    cmdline='/TopStor/cifsmember.sh '+reslist[0]+' '+reslist[1]+' '+reslist[7]+' '+reslist[8]+' cifs '+' '.join(reslist[9:])
+   else:
+    cmdline='/TopStor/cifs.sh '+reslist[0]+' '+reslist[1]+' '+reslist[7]+' '+reslist[8]+' cifs'
    result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
    print(result)
 
