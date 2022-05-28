@@ -48,7 +48,7 @@ fi
  echo rightvol=$rightvols
  echo mounts=$mounts
  mount=''
- rm -rf /TopStortempsmb.$ipaddr
+ rm -rf /TopStordata/tempsmb.$ipaddr
  for x in $mounts; 
  do
   mount=$mount' -v /'$pool'/'$x':/'$pool'/'$x':rw '

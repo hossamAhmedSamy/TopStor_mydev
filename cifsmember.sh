@@ -54,7 +54,7 @@ fi
  echo rightvol=$rightvols
  echo mounts=$mounts
  mount=''
- rm -rf /TopStortempsmb.$ipaddr
+ rm -rf /TopStordata/tempsmb.$ipaddr
  for x in $mounts; 
  do
   mount=$mount' -v /'$pool'/'$x':/'$pool'/'$x':rw '
@@ -70,12 +70,26 @@ fi
  fi
  membername=`echo $vol | awk -F'_' '{print $1}'`
  wrkgrp=`echo $domain | awk -F'\.' '{print $1}'`  
- echo  "echo nameserver" $domainsrvi" > /etc/resolv.conf" > /etc/resolv${wrkgrp}.sh
- chmod +w /etc/resolv${wrkgrp}.sh
+ echo -e 'notyet=1 \nwhile [ $notyet -eq 1 ];\ndo\nsleep 3' > /etc/smb${vol}.sh
+ echo -e 'cat /etc/samba/smb.conf | grep' "'\[public\]'" >> /etc/smb${vol}.sh
+ echo -e 'if [ $? -eq 0 ];\nthen' >> /etc/smb${vol}.sh
+ echo -e ' cat /etc/samba/smb.conf | grep' "'\[private\]'" >> /etc/smb${vol}.sh
+ echo -e ' if [ $? -eq 0 ];\nthen' >> /etc/smb${vol}.sh
+ echo -e '  cat /etc/samba/smb.conf | grep' "'\[home\]'" >> /etc/smb${vol}.sh
+ echo -e '  if [ $? -eq 0 ];\nthen\nnotyet=0\nfi\nfi\nfi\ndone' >> /etc/smb${vol}.sh
+ echo  "sed -i -e '51,1000d' /etc/samba/smb.conf"  >> /etc/smb${vol}.sh
+ echo  "cat /etc/smb.conf >> /etc/samba/smb.conf"  >> /etc/smb${vol}.sh
+ echo  "service samba --full-restart"  >> /etc/smb${vol}.sh
+ chmod +w /etc/smb${vol}.sh
+ sync
+ cp /etc/resolv.conf /TopStordata/ 
+ echo nameserver $domainsrvi > /etc/resolv.conf
+#  -e TZ=Etc/UTC \
  docker run -d  $mount --privileged --rm --add-host "${membername}.$domain ${membername}":$ipaddr  \
   --hostname ${membername} \
-  -e TZ=Etc/UTC \
+  -v /etc/localtime:/etc/localtime:ro \
   -v /etc/:/hostetc/   \
+  -v /TopStordata/smb.${ipaddr}:/etc/smb.conf:rw \
   -e DOMAIN_NAME=$domain \
   -e ADMIN_SERVER=$domainsrvi \
   -e WORKGROUP=$wrkgrp  \
@@ -86,7 +100,8 @@ fi
   -p $ipaddr:139:139/tcp \
   -p $ipaddr:445:445/tcp \
   --name $resname 10.11.11.124:5000/membersmb 
-docker exec $resname sh /hostetc/resolv${wrkgrp}.sh
+cat /TopStordata/resolv.conf > /etc/resolv.conf
+docker exec $resname sh /hostetc/smb${vol}.sh &
 
 
 /TopStor/logqueue.py `basename "$0"` stop $userreq
