@@ -29,17 +29,19 @@ def config(*bargs):
  ######### changing alias ###############
  if 'alias' in arglist:
   queuethis('Hostconfig_alias','running',arglist['user'])
-  oldarg = get('alias/'+myhost)[0]
-  logmsg.sendlog('HostManual1st15','info',arglist['user'],oldarg, arglist['alias'])
+  oldarg = get('alias/'+arglist['name'])[0]
+  logmsg.sendlog('HostManual1st5','info',arglist['user'],oldarg, arglist['alias'])
   allhosts = get('ActivePartner','--prefix')
   for host in allhosts:
    hostname = host[0].replace('ActivePartners/','')
-   put('alias/'+leader,arglist['alias'])
-   broadcasttolocal('alias/'+leader,arglist['ntp'])
+   put('alias/'+arglist['name'],arglist['alias'])
+   put('alias/'+leader+'/tmp',str(arglist))
+   with open('/root/tmphostconfig','w') as f:
+    f.write(str(arglist)) 
   z=['/TopStor/pump.sh','HostManualconfigAlias']
   msg={'req': 'Pumpthis', 'reply':z}
   sendhost(leaderip, str(msg),'recvreply',myhost)
-  logmsg.sendlog('HostManual1su15','info',arglist['user'],oldarg, arglist['ntp'])
+  logmsg.sendlog('HostManual1su5','info',arglist['user'],oldarg, arglist['ntp'])
   queuethis('Hostconfig_Alias','finish',arglist['user'])
 ######### changing cluster address ###############
  if 'cluster' in arglist:
