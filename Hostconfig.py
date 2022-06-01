@@ -35,9 +35,6 @@ def config(*bargs):
   for host in allhosts:
    hostname = host[0].replace('ActivePartners/','')
    put('alias/'+arglist['name'],arglist['alias'])
-   put('alias/'+leader+'/tmp',str(arglist))
-   with open('/root/tmphostconfig','w') as f:
-    f.write(str(arglist)) 
   z=['/TopStor/pump.sh','HostManualconfigAlias']
   msg={'req': 'Pumpthis', 'reply':z}
   sendhost(leaderip, str(msg),'recvreply',myhost)
