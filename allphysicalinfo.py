@@ -63,7 +63,7 @@ def getall(*args):
   if vol[0].split('/')[1] == 'CIFS' or vol[0].split('/')[1] == 'HOME' :
    voldict['groups'] = vol[1].split('/')[4]
    if 'DOMAIN' in voldict['groups']:
-    voldict['groups']= 'Everyone'
+    voldict['groups']= 'DOMAIN'
     voldict['type']='DOMAIN'
    else:
     voldict['type']='WorkGroup'
