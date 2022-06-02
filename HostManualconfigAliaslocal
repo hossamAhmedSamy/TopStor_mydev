@@ -10,7 +10,4 @@ glog='/var/www/html/des20/Data/TopStor.log';
 txtres='/TopStordata/'`basename $0`'.txt'
 leader=`./etcdget.py leader --prefix | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
 myip=`./etcdget.py ready/$hostname`
-gateway=`./etcdget.py dnsname/$leader`
-./etcdput.py dnsname/$hostname $gateway
-./broadcasttolocal.py dnsname/$hostname $gateway
-echo nameserver $gateway > /etc/resolv.conf
+./etcdsync.py alias alias 
