@@ -69,10 +69,6 @@ echo $whyreboot | grep reset
 if [ $? -eq 0 ];
 then
  users=`cat /etc/passwd | grep TopStor | grep -v Everyone | awk -F':' '{print $1}'`
- for user in $users
- do 
-  /TopStor/UnixDelUser $user system 
- done
  systemctl stop etcd
  rm -rf /var/lib/etcd/member/*
 fi

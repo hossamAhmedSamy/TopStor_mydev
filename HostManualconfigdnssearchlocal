@@ -13,4 +13,4 @@ myip=`./etcdget.py ready/$hostname`
 gateway=`./etcdget.py dnssearch/$leader`
 ./etcdput.py dnsname/$hostname $gateway
 ./broadcasttolocal.py dnssearch/$hostname $gateway
-echo $gateway > >/etc/resolv.conf
+echo search $gateway > >/etc/resolv.conf
