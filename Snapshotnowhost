@@ -20,6 +20,5 @@ else
  /TopStor/logqueue.py `basename "$0"` running system 
   res=`./Snapshotnow $@`
 #  /TopStor/logmsg.py Snap1045 error $userreq $newsnap 
- /pace/putzpool.py
 /TopStor/logqueue.py `basename "$0"` stop system 
 fi

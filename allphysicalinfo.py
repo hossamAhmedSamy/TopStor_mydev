@@ -2,6 +2,7 @@
 from logqueue import queuethis
 from etcdgetpy import etcdget as get
 from ast import literal_eval as mtuple
+from raidrank import getraidrank
 import subprocess, copy
 from levelthis import levelthis
 import sys
@@ -121,10 +122,12 @@ def getall(*args):
       raidname = raid['name']
     poolraids.append(raidname)
     theraid = raid.copy()
-    theraid.pop('disklist',None)
     raiddisks = []
     raidsdict[raidname] = dict()
     raidsdict[raidname] = theraid.copy()
+    if raidname != 'free':
+     raidsdict[raidname] = getraidrank(raidsdict[raidname],raidsdict[raidname]['disklist'][0],raidsdict[raidname]['disklist'][0])
+    theraid.pop('disklist',None)
     raidsdict[raidname]['disks'] = raiddisks
     raidsdict[raidname]['name'] = raidname 
     for disk in raid['disklist']:
@@ -140,7 +143,6 @@ def getall(*args):
       raiddisks.append(disk['name'])
       if disk['name'] in freedisks:
        raidsdict['free']['disks'].remove(disk['name'])
-  
    poolvolumes = []
    poolsdict[pool['name']]['volumes'] = poolvolumes
    for volume in pool['volumes']:
@@ -204,7 +206,7 @@ def getall(*args):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
- print('pools',poolsdict)
+ print('raids',raidsdict)
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  
