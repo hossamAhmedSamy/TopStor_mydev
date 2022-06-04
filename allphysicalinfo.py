@@ -87,7 +87,10 @@ def getall(*args):
    voldict['chappas'] = vol[1].split('/')[7]
    voldict['prot'] = 'ISCSI'
    volumesdict[voldict['name']] = voldict.copy()
+ 
  for alldsk in alldsks:
+  if alldsk == -1:
+   continue
   host = alldsk[0].split('/')[1]
   #print(alldsk[1])
   pools = mtuple(alldsk[1])
