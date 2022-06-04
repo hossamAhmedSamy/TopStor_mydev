@@ -23,6 +23,11 @@ def zpooltoimport(*args):
  if myhost not in str(get('leader','--prefix')):
   return
  pools = getpoolstoimport()
+ needtoimport=get('needtoimport', '--prefix') 
+ for poolline in needtoimport:
+  pool = poolline[0].replace('needtoimport/','')
+  if pool not in str(pools):
+   dels('needtoimport',pool)
  for pool in pools:
   selectedhost = list(pool['currenthosts'])[0] 
   put('needtoimport/'+pool['name'], selectedhost)

@@ -45,7 +45,7 @@ def checkleader(key, prefix=''):
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
    err = result.returncode
  else:
-  cmdline='./leaderlost.sh '+leader+' '+myhost+' '+leaderip+' '+myip
+  cmdline='/pace/leaderlost.sh '+leader+' '+myhost+' '+leaderip+' '+myip
   result=subprocess.check_output(cmdline.split(),stderr=subprocess.STDOUT).decode('utf-8')
   endpoints=''
   data=json.load(open('/pacedata/runningetcdnodes.txt'));
