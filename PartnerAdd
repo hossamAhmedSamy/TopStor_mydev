@@ -16,11 +16,11 @@ privilege="Replication";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
-  /TopStor/logmsg.py Partner1007 info $userreq $Partnername
+  /TopStor/logmsg.py Partner1000 info $userreq $Partnername $type
 isthere=`cat $partners | grep "$Partnername $type" | wc -c `
 isthere=$((isthere+0));
 if [[ $isthere -ge 2 ]]; then
-  /TopStor/logmsg.py Partner1008 warning $userreq $Partnername
+  /TopStor/logmsg.py Partner1001 warning $userreq $Partnername
 else
 partnerlist=`cat $partners `;
 istherpartners=` echo $partnerlist | wc -c`;
@@ -49,6 +49,6 @@ echo $result >$webpartner;
 resdate=`date +%s`;
 res=` ./jsonthis3.sh updated $resdate`;
 echo $res > $resweb;
-  /TopStor/logmsg.py Partner1009 info $userreq $Partnername $newtype
+  /TopStor/logmsg.py Partner1003 info $userreq $Partnername $newtype
 fi
 fi
