@@ -1,7 +1,9 @@
 #!/bin/python3.6
-import subprocess,sys
+import subprocess,sys, os
 import json
 from time import sleep
+
+os.environ['ETCDCTL_API']= '3'
 
 def etcdgetjson(*argv):
  key=argv[0]
@@ -9,22 +11,18 @@ def etcdgetjson(*argv):
   prefix=argv[1]
  except:
   prefix='nothing'
- err = 2
- while err == 2:
-  endpoints=''
-  data=json.load(open('/pacedata/runningetcdnodes.txt'));
-  for x in data['members']:
-   endpoints=endpoints+str(x['clientURLs'])[2:][:-2]+','
-  if 'prefix' in prefix:
-   cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key,prefix]
-  elif 'nothing' in prefix: 
-   cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key]
-  else: 
-   cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key,'--prefix']
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  err = result.returncode
-  if err == 2:
-   sleep(2)
+ endpoints=''
+ data=json.load(open('/pacedata/runningetcdnodes.txt'));
+ for x in data['members']:
+  endpoints=endpoints+str(x['clientURLs'])[2:][:-2]+','
+ if 'prefix' in prefix:
+  cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key,prefix]
+ elif 'nothing' in prefix: 
+  cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key]
+ else: 
+  cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key,'--prefix']
+ result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+ err = result.returncode
  ilist=[]
  try:
   if(prefix !='nothing'):
@@ -43,9 +41,13 @@ def etcdgetjson(*argv):
     if 'prefix' not in prefix:
      hosts=[x for x in hosts if prefix in str(x)]
    #return str(hosts).replace('"','').replace("'",'"')
+   print(hosts)
+
    return hosts
    
   else:
+   print(dict(str(result.stdout).split(key)[1][2:][:-3].replace("'",'"')))
+
    return dict(str(result.stdout).split(key)[1][2:][:-3].replace("'",'"'))
  
  except:

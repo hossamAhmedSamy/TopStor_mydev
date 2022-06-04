@@ -467,7 +467,7 @@ def poolsinfo():
 
 @app.route('/api/v1/groups/groupchange', methods=['GET','POST'])
 @login_required
-def groupchange(data):
+def pgroupchange(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  usrs = data.get('users')
@@ -484,6 +484,14 @@ def groupchange(data):
  postchange(cmndstring)
  return data
 
+@app.route('/api/v1/replication/addpartner', methods=['GET','POST'])
+@login_required
+def partneradd(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
+ cmndstring = '/TopStor/pump.sh PartnerAdd.py '+data.get('partnerip')+' '+data.get('partneralias')+' '+data.get('replitype')+' '+data.get('repliport')+' '+data.get('phrase')+' '+data.get('user')
+ postchange(cmndstring)
+ return data
 
 @app.route('/api/v1/users/userchange', methods=['GET','POST'])
 @login_required
@@ -575,6 +583,10 @@ def volumesnapshotscreate(data):
  for param in switch[data['snapsel']]:
   datastr +=data[param]+' '
  #datastr = data['name']+' '+data['pool']+' '+data['volume']+' '+data['user']
+ if 'receiver' not in data:
+   datastr += 'NoReceiver'
+ else:
+   datastr += data['receiver']
  print('#############################')
  print(data)
  print(datastr)
@@ -889,13 +901,21 @@ def UnixAddGroup(data):
     if str(suser['id']) == str(usr):
      usrstr += suser['name']+',' 
   usrstr = usrstr[:-1]
- print('##########################33333')
- print(data)
- print('##########################33333')
  cmndstring = '/TopStor/pump.sh UnixAddGroup '+data['name']+' '+' users'+usrstr+' '+data['user']
  postchange(cmndstring)
  return data
- 
+
+@app.route('/api/v1/partners/AddPartner', methods=['GET','POST'])
+@login_required
+def AddPartner(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'} 
+ print('##########################33333')
+ print(data)
+ print('##########################33333')
+ cmdstring = '/TopStor/pump.sh PartnerAdd.py '+data['ip']+' '+data['alias']+' '+data['type']+' '+data['port']+' '+data['pass']+' '+data['user']
+ postchange(cmdstring)
+ return data
 
 @app.route('/api/v1/users/UnixAddUser', methods=['GET','POST'])
 @login_required
@@ -979,6 +999,15 @@ def userauths(data):
    break
  return jsonify({'auths':priv, 'response':data['response']})
 
+@app.route('/api/v1/partners/partnerlist', methods=['GET'])
+def api_partners_userslist():
+ allpartners=[]
+ partnerlst = etcdgetjson('Partner','--prefix')
+ for partner in partnerlst:
+  alias =  partner["name"].split('/')[1] 
+  split = partner["prop"].split('/') 
+  allpartners.append({'alias': alias, "ip":split[0], "type":split[1], "port":split[2]})
+ return { "allpartners":allpartners }
 
 @app.route('/api/v1/users/userlist', methods=['GET'])
 def api_users_userslist():
