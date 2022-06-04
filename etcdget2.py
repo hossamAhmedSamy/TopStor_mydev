@@ -9,18 +9,18 @@ def etcdgetjson(*argv):
   prefix=argv[1]
  except:
   prefix='nothing'
- endpoints=''
- data=json.load(open('/pacedata/runningetcdnodes.txt'));
- for x in data['members']:
-  endpoints=endpoints+str(x['clientURLs'])[2:][:-2]+','
- if 'prefix' in prefix:
-  cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key,prefix]
- elif 'nothing' in prefix: 
-  cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key]
- else: 
-  cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key,'--prefix']
  err = 2
  while err == 2:
+  endpoints=''
+  data=json.load(open('/pacedata/runningetcdnodes.txt'));
+  for x in data['members']:
+   endpoints=endpoints+str(x['clientURLs'])[2:][:-2]+','
+  if 'prefix' in prefix:
+   cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key,prefix]
+  elif 'nothing' in prefix: 
+   cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key]
+  else: 
+   cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key,'--prefix']
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   err = result.returncode
   if err == 2:
