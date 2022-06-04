@@ -14,7 +14,7 @@ import logmsg
 def config(*bargs):
  arglist = bargs[0]
  #arglist = {'ipaddr': '10.11.11.123', 'ipaddrsubnet': '24', 'id': '0', 'user': 'admin', 'name': 'dhcp32502'}
- queuethis('Hostconfig','running',arglist['user'])
+ queuethis('Hostconfig','running',arglist)
  enpdev='enp0s8'
  needreboot=False
  for key in arglist:
@@ -29,14 +29,17 @@ def config(*bargs):
  ######### changing alias ###############
  if 'alias' in arglist:
   queuethis('Hostconfig_alias','running',arglist['user'])
-  oldarg = get('alias/'+myhost)[0]
-  if arglist['alias'] != oldarg:
-   logmsg.sendlog('HostManual1st5','info',arglist['user'],oldarg,arglist['alias'])
+  oldarg = get('alias/'+arglist['name'])[0]
+  logmsg.sendlog('HostManual1st5','info',arglist['user'],oldarg, arglist['alias'])
+  allhosts = get('ActivePartner','--prefix')
+  for host in allhosts:
+   hostname = host[0].replace('ActivePartners/','')
    put('alias/'+arglist['name'],arglist['alias'])
-   broadcasttolocal('alias/'+arglist['name'],arglist['alias'])
-   logmsg.sendlog('HostManual1su5','info',arglist['user'],oldarg,arglist['alias'])
-  queuethis('Hostconfig_alias','finish',arglist['user'])
-
+  z=['/TopStor/pump.sh','HostManualconfigAlias']
+  msg={'req': 'Pumpthis', 'reply':z}
+  sendhost(leaderip, str(msg),'recvreply',myhost)
+  logmsg.sendlog('HostManual1su5','info',arglist['user'],oldarg, arglist['alias'])
+  queuethis('Hostconfig_Alias','finish',arglist['user'])
 ######### changing cluster address ###############
  if 'cluster' in arglist:
   queuethis('Hostconfig_cluster','running',arglist['user'])
@@ -179,4 +182,9 @@ def config(*bargs):
 
 
 if __name__=='__main__':
- config(*sys.argv[1:])
+
+ arg={'cluster': '10.11.11.250/24', 'tz': 'Kuwait%(GMT+03!00)_Kuwait^_Riyadh^_Baghdad', 'id': '0', 'user': 'admin', 'name': 'dhcp32570', 'token': '501ef1257322d1814125b1e16af95aa9', 'response': 'admin'}
+ config(arg)
+
+#{'cluster': '10.11.11.250/24', 'tz': 'Kuwait%(GMT+03!00)_Kuwait^_Riyadh^_Baghdad', 'id': '0', 'user': 'admin', 'name': 'dhcp32570', 'token': '501ef1257322d1814125b1e16af95aa9', 'response': 'admin'}
+

@@ -63,7 +63,7 @@ def getall(*args):
   if vol[0].split('/')[1] == 'CIFS' or vol[0].split('/')[1] == 'HOME' :
    voldict['groups'] = vol[1].split('/')[4]
    if 'DOMAIN' in voldict['groups']:
-    voldict['groups']= 'Everyone'
+    voldict['groups']= 'DOMAIN'
     voldict['type']='DOMAIN'
    else:
     voldict['type']='WorkGroup'
@@ -87,7 +87,10 @@ def getall(*args):
    voldict['chappas'] = vol[1].split('/')[7]
    voldict['prot'] = 'ISCSI'
    volumesdict[voldict['name']] = voldict.copy()
+ 
  for alldsk in alldsks:
+  if alldsk == -1:
+   continue
   host = alldsk[0].split('/')[1]
   #print(alldsk[1])
   pools = mtuple(alldsk[1])

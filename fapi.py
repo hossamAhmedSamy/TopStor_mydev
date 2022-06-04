@@ -405,8 +405,6 @@ def volumessnapshotsinfo():
 def volumesinfo(prot='all'):
  global allvolumes, alldsks, allinfo
  getalltime()
- alldsks = deepcopy(get('host','current'))
- allinfo = deepcopy(getall(alldsks))
  allgroups = getgroups()
  volgrouplist = []
  volumes = []
