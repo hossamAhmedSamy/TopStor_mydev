@@ -18,9 +18,10 @@ def zpooltoimport(*args):
   for poolline in needtoimport:
    pool = poolline[0].replace('needtoimport/','')
    ioperf()
-   cmdline= '/bin/zpool import  '+pool
-   result = str(subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout)
-   if result.returncode == 0:
+   cmdline= '/usr/sbin/zpool import  '+pool
+   result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
+   print('code',result.returncode)
+   if result.returncode == '0':
     sleep(3)
     dels('needtoimport', pool)
  if myhost not in str(get('leader','--prefix')):
