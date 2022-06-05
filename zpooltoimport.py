@@ -20,10 +20,6 @@ def zpooltoimport(*args):
    ioperf()
    cmdline= '/usr/sbin/zpool import  '+pool
    result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
-   print('code',result.returncode)
-   if result.returncode == '0':
-    sleep(3)
-    dels('needtoimport', pool)
  if myhost not in str(get('leader','--prefix')):
   return
  pools = getpoolstoimport()
