@@ -60,6 +60,7 @@ def getpoolstoimport():
       
   if "pdhc" in str(b) and  'pool' not in str(b):
    if b[0] in currentpools:
+    dels('needtoimport', b[0])
     continue
    disklist=[]
    zdict={}
