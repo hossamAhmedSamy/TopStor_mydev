@@ -1,7 +1,7 @@
 #!/bin/python3.6
 import sys, datetime
 from time import time
-from etcdget import etcdget as get
+from etcdgetpy import etcdget as get
 from etcdput import etcdput as put
 from ast import literal_eval as mtuple
 from socket import gethostname as hostname
@@ -24,9 +24,7 @@ def queuethis(*args):
   f.write(str(z))
  leaderinfo=get('leader','--prefix')
  leaderip = leaderinfo[0][1]
- print('leader',leaderip) 
  msg={'req': 'queue', 'reply':z}
- print('sending', leaderip, str(msg),'recevreply',myhost)
  sendhost(leaderip, str(msg),'recvreply',myhost)
  
 if __name__=='__main__':

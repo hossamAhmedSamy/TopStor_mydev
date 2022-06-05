@@ -1,44 +1,35 @@
 #!/bin/python3.6
-import subprocess, socket, binascii
+import subprocess, sys
+from time import sleep
+from socket import gethostname as hostname
+from ioperf import ioperf
 from logqueue import queuethis
-from sendhost import sendhost
 from etcdput import etcdput as put
 from etcdgetpy import etcdget as get 
-from etcddel import etcddel as deli 
-from broadcast import broadcast as broadcast 
-from broadcasttolocal import broadcasttolocal
-from os import listdir as listdir
-from os import remove as remove
-from putzpoolimport import putzpoolimport as putz, listpools
-from poolall import getall as getall
-from os.path import getmtime as getmtime
-import sys, datetime
-import logmsg
+from etcddel import etcddel as dels
+from putzpoolfound import getpoolstoimport
 
 def zpooltoimport(*args):
- cmdline='/TopStor/CheckPoolimport user=system'
- result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout
- myhost=socket.gethostname()
- pools=listpools() 
- if len(pools) > 0:
-  loads = get('cpu','--prefix')
-  loads = [(x[0].replace('cpuperf/',''),x[1]) for x in loads ]
-  hostsdict = {}
-  for load in loads:
-   hostsdict[load[0]] = load[1]
-  for pool in pools:
-   if myhost in pools[pool]:
-    poolhosts = []
-    for host in pools[pool]:
-     poolhosts.append((host,hostsdict[host])) 
-    poolhosts.sort(key=lambda x: x[1])
-    if poolhosts[0][0] == myhost:
-     cmdline='/TopStor/importthis.sh '+pool
-     result=subprocess.check_output(cmdline.split(),stderr=subprocess.STDOUT).decode('utf-8')
-     deli('poollock/'+pool,myhost)
-     if 'ok' in result:
-      put('poolready/'+pool,myhost)
-      broadcasttolocal('poolready/'+pool,myhost)
+ myhost = hostname()
+ needtoimport=get('needtoimport', myhost) 
+ if myhost not in str(needtoimport):
+  print('no need to import a pool here')
+ else:
+  for poolline in needtoimport:
+   pool = poolline[0].replace('needtoimport/','')
+   ioperf()
+   cmdline= '/bin/zpool import  '+pool
+   result = str(subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout)
+   if result.returncode == 0:
+    sleep(3)
+    dels('needtoimport', pool)
+ if myhost not in str(get('leader','--prefix')):
+  return
+ pools = getpoolstoimport()
+ for pool in pools:
+  selectedhost = list(pool['currenthosts'])[0] 
+  put('needtoimport/'+pool['name'], selectedhost)
+ return
      
        
 if __name__=='__main__':
