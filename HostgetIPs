@@ -17,8 +17,8 @@ hostsubnet=`pcs resource show CC | grep Attributes | awk -F'netmask=' '{print $2
 leader=`./etcdget.py leader --prefix`
 gw=`ip route | grep default | awk '{print $3}'`
 dns=` tail -n 1 /etc/resolv.conf | awk '{$1="";print}'`
-dnsname=`cat /etc/resolve.conf | grep name | head -1 | awk '{print $2}'`
-dnssearch=`cat /etc/resolve.conf | grep search | head -1 | awk '{print $2}'`
+dnsname=`cat /etc/resolv.conf | grep name | head -1 | awk '{print $2}'`
+dnssearch=`cat /etc/resolv.conf | grep search | head -1 | awk '{print $2}'`
 
 echo $leader | grep $hostname
 if [ $? -eq 0 ];
