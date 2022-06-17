@@ -23,9 +23,6 @@ def getraidrank(raid, removedisk, adddisk):
  ###### ranking: no. of hosts differrence, and 1 for diff disk size found
  hostrank = len(raidhosts)-len(raid['disklist'])
  raid['raidrank'] = (hostrank, sizerank)
- print('#############################')
- print('raid',raid)
- print('#############################')
  return raid 
 
   
