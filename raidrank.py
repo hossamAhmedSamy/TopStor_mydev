@@ -7,6 +7,9 @@ def getraidrank(raid, removedisk, adddisk):
  raidrank = (0,0) 
  raidhosts = set()
  raiddsksize = adddisk['size']
+ missingdisks=0
+ if raid['changeop'] != 'ONLINE':
+  missingdisks=1
  print('#############################')
  print('start test:',removedisk['name'],adddisk['name'])
  sizerank = 0
@@ -22,7 +25,7 @@ def getraidrank(raid, removedisk, adddisk):
    sizerank = 1
  ###### ranking: no. of hosts differrence, and 1 for diff disk size found
  hostrank = len(raidhosts)-len(raid['disklist'])
- raid['raidrank'] = (hostrank, sizerank)
+ raid['raidrank'] = (hostrank, sizerank, missingdisks)
  print('#############################')
  print('raid',raid)
  print('#############################')
