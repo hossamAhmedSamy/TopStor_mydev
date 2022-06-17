@@ -125,7 +125,8 @@ def getall(*args):
     raiddisks = []
     raidsdict[raidname] = dict()
     raidsdict[raidname] = theraid.copy()
-    raidsdict[raidname] = getraidrank(raidsdict[raidname],raidsdict[raidname]['disklist'][0],raidsdict[raidname]['disklist'][0])
+    if raidname != 'free':
+     raidsdict[raidname] = getraidrank(raidsdict[raidname],raidsdict[raidname]['disklist'][0],raidsdict[raidname]['disklist'][0])
     theraid.pop('disklist',None)
     raidsdict[raidname]['disks'] = raiddisks
     raidsdict[raidname]['name'] = raidname 
