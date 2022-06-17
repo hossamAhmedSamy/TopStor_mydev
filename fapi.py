@@ -52,7 +52,7 @@ allinfo = 0
 
 def getalltime():
  global allinfo,alldsks, getalltimestamp
- if (getalltimestamp+3) < timestamp():
+ if (getalltimestamp+30) < timestamp():
   alldsks = deepcopy(get('host','current'))
   allinfo = deepcopy(getall(alldsks))
   getalltimestamp = timestamp()
