@@ -89,7 +89,8 @@ def getpoolstoimport():
      phosts.add(host)
      size=z[7]
      devname=z[5].replace('/dev/','')
-     freepool.remove(lss)
+     if lss in freepool:
+      freepool.remove(lss)
      disknotfound=0
      break
    if disknotfound == 1:
