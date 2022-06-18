@@ -20,6 +20,7 @@ def checkleader(key, prefix=''):
     count += 1
     sleep(1)
   else:
+   print('iamherecheck')
    return result 
  
  from etcdgetlocal import etcdget as getlocal
