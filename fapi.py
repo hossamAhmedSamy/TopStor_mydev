@@ -897,13 +897,21 @@ def UnixAddGroup(data):
     if str(suser['id']) == str(usr):
      usrstr += suser['name']+',' 
   usrstr = usrstr[:-1]
- print('##########################33333')
- print(data)
- print('##########################33333')
  cmndstring = '/TopStor/pump.sh UnixAddGroup '+data['name']+' '+' users'+usrstr+' '+data['user']
  postchange(cmndstring)
  return data
- 
+
+@app.route('/api/v1/partners/AddPartner', methods=['GET','POST'])
+@login_required
+def AddPartner(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'} 
+ print('##########################33333')
+ print(data)
+ print('##########################33333')
+ cmdstring = '/TopStor/pump.sh PartnerAdd.py '+data['ip']+' '+data['alias']+' '+data['type']+' '+data['port']+' '+data['pass']+' '+data['user']
+ postchange(cmdstring)
+ return data
 
 @app.route('/api/v1/users/UnixAddUser', methods=['GET','POST'])
 @login_required
