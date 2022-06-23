@@ -16,10 +16,10 @@ def addpartner(*bargs):
  if (privthis('Replication',userreq) != 'true'):
   print('not authorized to add partner')
   return
- sendlog('Partner1007','info',userreq,partneralias)
+ sendlog('Partner1000','info',userreq,partneralias,replitype)
  broadcasttolocal('Partner/'+partneralias,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
  put('Partner/'+partneralias,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
- sendlog('Partner1009','info',userreq,partneralias,replitype)
+ sendlog('Partner1002','info',userreq,partneralias,replitype)
  
 
 if __name__=='__main__':

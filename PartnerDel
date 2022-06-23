@@ -1,7 +1,7 @@
 #!/usr/bin/sh
 export ETCDCTL_API=3
 cd /TopStor
-echo $@ >> tmppartner
+echo $@ > /root/tmppartnerdel
 cronthis='/TopStordata/cronthis.txt'
 Partner=`echo $@ | awk '{print $1}'`;
 issync=`echo $@ | awk '{print $2}'`;
@@ -20,5 +20,5 @@ then
     stamp=`date +%s`;
     ./etcdput.py sync/Snapperioddel_${Partner}_${userreq}_/$myhost  $stamp
   fi
-  /TopStor/logmsg.py Partner1006 info $userreq $Partner
+  /TopStor/logmsg.py Partner1004 info $userreq $Partner
 fi
