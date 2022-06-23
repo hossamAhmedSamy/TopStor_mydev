@@ -583,6 +583,10 @@ def volumesnapshotscreate(data):
  for param in switch[data['snapsel']]:
   datastr +=data[param]+' '
  #datastr = data['name']+' '+data['pool']+' '+data['volume']+' '+data['user']
+ if 'receiver' not in data:
+   datastr += 'NoReceiver'
+ else:
+   datastr += data['receiver']
  print('#############################')
  print(data)
  print(datastr)

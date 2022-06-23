@@ -59,7 +59,9 @@ echo filenameis=${txtres}$stamp >> $cronout
 err=`wc -c  ${txtres}$stamp | awk '{print $1}'`;
 if [[ $err -ge  4  ]]; then 
    /TopStor/logmsg.py Snap1028 error $userreq $newsnap
+   echo _newsnapError_newsnap
 else 
    /sbin/zfs set snap:type=$snaptype $newsnap
    /TopStor/logmsg.py Snap1030 info $userreq $newsnap
+   echo _newsnap${newsnap}_newsnap
 fi
