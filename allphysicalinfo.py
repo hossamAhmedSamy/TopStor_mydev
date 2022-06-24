@@ -23,6 +23,7 @@ def getsnapperiods(voldict):
    periodsdict[leftper[4]]['volume']=vol
    periodsdict[leftper[4]]['periodtype']=leftper[1]
    periodsdict[leftper[4]]['id']=leftper[4]
+   periodsdict[leftper[4]]['receiver']=rightper[-1]
    if 'Minutely' in leftper[1]: 
     periodsdict[leftper[4]]['keep']=rightper[4].split('.')[1]
     periodsdict[leftper[4]]['every']=rightper[4].split('.')[2]
@@ -206,7 +207,7 @@ def getall(*args):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
- print('raids',raidsdict)
+ print('snapperiods',snapperiodsdict) 
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  
