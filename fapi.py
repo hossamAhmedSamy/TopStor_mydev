@@ -878,7 +878,7 @@ def groupdel(data):
 
 @app.route('/api/v1/partners/partnerdel', methods=['GET','POST'])
 @login_required
-def userdel(data):
+def partnerdel(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  cmndstring = '/TopStor/pump.sh PartnerDel '+data.get('name')+' no '+data['user']
