@@ -7,6 +7,7 @@ from logmsg import sendlog
 from socket import gethostname as hostname
 from sendhost import sendhost
 from privthis import privthis 
+from time import time as timestamp
 from broadcasttolocal import broadcasttolocal
 myhost = hostname()
 myip = get('ready/'+myhost)[0]
@@ -23,14 +24,20 @@ def addpartner(*bargs):
   return
  sendlog('Partner1000','info',userreq,partneralias,replitype)
  cmdline = '/TopStor/preparekeys.sh '+partnerip
- result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split('\n')[0]
- z=['/TopStor/pump.sh','receivekeys.sh',myhost,myip,clusterip, repliport, replitype, phrase, result]
+ result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split('\n')[0].replace(' ','_spc_')
+ z=['/TopStor/pump.sh','receivekeys.sh',myhost,myip,clusterip, replitype, repliport, phrase, result]
  msg={'req': 'Exchange', 'reply':z}
  print(msg)
  sendhost(partnerip, str(msg),'recvreply',myhost)
- return
+ cmdline = '/TopStor/checkpartner.sh '+partnerip+' '+repliport
+ print('sending',cmdline.split())
+ result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
+ if 'open' not in result:
+  sendlog('Partner1fa2','info',userreq,partneralias,replitype)
+  return
  broadcasttolocal('Partner/'+partneralias,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
  put('Partner/'+partneralias,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
+ put('sync/PartnerAdd_'+partneralias+'/'+myhost, str(timestamp()))
  sendlog('Partner1002','info',userreq,partneralias,replitype)
  
 
