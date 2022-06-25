@@ -315,6 +315,9 @@ def do(body):
   with open('/root/recv2','a') as f:
    f.write('received UpdateHosts from parnter :'+str(r["reply"])+'\n')
   result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
+  ########## if Exchange  ##############
+ elif r["req"]=='Exchange':  
+  result=subprocess.run(r["reply"],stdout=subprocess.PIPE)
  
 
 
