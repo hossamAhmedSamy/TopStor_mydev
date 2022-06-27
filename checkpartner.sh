@@ -1,14 +1,38 @@
 #!/bin/sh
 partner=`echo $@ | awk '{print $1}'`
 port=`echo $@ | awk '{print $2}'`
-sleep 10 
-result=`nmap --max-rtt-timeout 20ms -p ${port} $partner`
-echo $result | grep open 
+isnew=`echo $@ | awk '{print $3}'`
+count=0
+nodeloc='ssh -i /TopStordata/'${partner}'_keys/'${partner}' -p '$port' '${partner}
+result='closed'
+echo $isnew | grep 'new' >/dev/null
 if [ $? -eq 0 ];
 then
- echo I ma here
+ strict='-o StrictHostKeyChecking=no' 
  known=`cat /root/.ssh/known_hosts | grep -v $partner`
  echo -e "$known" > /root/.ssh/known_hosts
- scp -i /TopStordata/${partner}_keys/${partner} -P $port -o StrictHostKeyChecking=no /etc/ssh/sshd_config ${partner}:
+ clusterip=`echo $@ | awk '{print $3}'`
+else
+ strict=''
 fi
-echo $result
+while [ $count -le 10 ];
+do
+ ssh -oBatchmode=yes -i /TopStordata/${partner}_keys/${partner} -p $port $strict ${partner} ls  >/dev/null 2>/dev/null
+ if [ $? -eq 0 ];
+ then
+  result='open'
+  echo $isnew | grep 'new' >/dev/null
+  if [ $? -eq 0 ];
+  then
+   noden=`$nodeloc /usr/bin/hostname` 
+   nodei=`$nodeloc /TopStor/etcdget.py ready/$noden` 
+   /TopStor/etcdput.py Prtnrcluster/${partner}/$nodei $noden 
+   ssh -oBatchmode=yes -i /TopStordata/${partner}_keys/${partner} -p $port $strict ${nodei} ls  >/dev/null 2>/dev/null
+  fi
+  count=11
+ else
+  count=$((count +1))
+  sleep 1
+ fi
+done
+echo $result 

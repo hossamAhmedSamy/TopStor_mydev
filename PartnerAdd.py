@@ -34,7 +34,7 @@ def addpartner(*bargs):
   msg={'req': 'Exchange', 'reply':z}
   print(msg)
   sendhost(partnerip, str(msg),'recvreply',myhost)
-  cmdline = '/TopStor/checkpartner.sh '+partnerip+' '+repliport
+  cmdline = '/TopStor/checkpartner.sh '+partnerip+' '+repliport+' '+'new'
   print('sending',cmdline.split())
   result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
   if 'open' not in result:
