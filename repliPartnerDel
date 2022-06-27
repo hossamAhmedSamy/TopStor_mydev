@@ -32,6 +32,16 @@ then
   done 
   echo "$nodes" > /root/.ssh/authorized_keys
   echo "$hosts" > /root/.ssh/known_hosts
+  chmod 004 /root/.ssh/authorized_keys
+  chmod 004 /root/.ssh/known_hosts
+  echo $partnerinfo | grep "Receiver" 
+  if [ $? -ne 0 ];
+  then
+   pport=` echo $partnerinfo | awk -F'/' '{print $4}'`
+   sshd=`cat /etc/ssh/sshd_config | grep -v $pport`
+   echo -e "$sshd" > /etc/ssh/sshd_config
+   systemctl restart sshd
+  fi 
   ./etcddel.py "" $Partner
   crontab -l | grep -v $Partner > $cronthis
   crontab $cronthis
