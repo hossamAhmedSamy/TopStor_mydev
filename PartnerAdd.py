@@ -14,6 +14,8 @@ myhost = hostname()
 myip = get('ready/'+myhost)[0]
 clusterip = get('namespace/mgmtip')[0].split('/')[0]
 def addpartner(*bargs):
+ with open('/root/PartnerAdd','w') as f:
+  f.write(str(bargs))
  partnerip = bargs[0]
  partneralias = bargs[1]
  replitype = bargs[2]
