@@ -42,7 +42,7 @@ then
    echo -e "$sshd" > /etc/ssh/sshd_config
    systemctl restart sshd
   fi 
-  ./etcddel.py "" $Partner
+  ./etcddel.py "" $clusterip
   crontab -l | grep -v $Partner > $cronthis
   crontab $cronthis
   echo $issync | grep yes 
