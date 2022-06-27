@@ -1,7 +1,7 @@
 #!/bin/sh
 partner=`echo $@ | awk '{print $1}'`
 port=`echo $@ | awk '{print $2}'`
-sleep 2
+sleep 10 
 result=`nmap --max-rtt-timeout 20ms -p ${port} $partner`
 echo $result | grep open 
 if [ $? -eq 0 ];

@@ -924,7 +924,7 @@ def AddPartner(data):
  print('##########################33333')
  print(data)
  print('##########################33333')
- cmdstring = '/TopStor/pump.sh PartnerAdd.py '+data['ip']+' '+data['alias']+' '+data['type']+' '+data['port']+' '+data['pass']+' '+data['user']
+ cmdstring = '/TopStor/pump.sh PartnerAdd.py '+data['ip']+' '+data['alias']+' '+data['type']+' '+data['port']+' '+data['pass']+' '+data['user'] + ' init'
  postchange(cmdstring)
  return data
 
