@@ -1,0 +1,46 @@
+#!/usr/bin/sh
+export ETCDCTL_API=3
+cd /TopStor
+echo $@ > /root/tmppartnerdel
+cronthis='/TopStordata/cronthis.txt'
+Partner=`echo $@ | awk '{print $1}'`;
+issync=`echo $@ | awk '{print $2}'`;
+userreq=`echo $@  | awk '{print $3}'`;
+privilege="Replication";
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]]
+then
+  /TopStor/logmsg.py Partner1003 info $userreq $Partner
+  partnerinfo=`./etcdget.py Partner/$Partner` 
+  clusterip=`echo $partnerinfo | awk -F'/' '{print $1}'`
+  currentkeys=`cat /root/.ssh/authorized_keys`
+  currenthosts=`cat /root/.ssh/known_hosts`
+  nodes=`./etcdget.py Prtnrcluster/$clusterip --prefix | awk -F'dhcp' '{print $2}' | sed "s/')//g" | sed 's/ /\//g' `
+  hosts=`./etcdget.py Prtnrcluster/$clusterip --prefix | awk -F"', '" '{print $1}' | awk -F"/" '{print $NF}'`
+  echo hosts=$hosts
+  echo "$nodes" | while read r;
+  do
+   echo r=$r
+   currentkeys=`echo  "$currentkeys" | grep -v 'dhcp'$r `
+   echo currentkeys="$currentkeys"
+  done 
+  echo "$hosts" | while read r;
+  do
+   echo r=$r
+   currenthosts=`echo  "$currenthosts" | grep -v $r `
+   echo currenthosts="$currenthosts"
+  done 
+  echo "$nodes" > /root/.ssh/authorized_keys
+  echo "$hosts" > /root/.ssh/known_hosts
+  ./etcddel.py "" $Partner
+  crontab -l | grep -v $Partner > $cronthis
+  crontab $cronthis
+  echo $issync | grep yes 
+  if [ $? -ne 0 ];
+  then
+    stamp=`date +%s`;
+    ./etcdput.py sync/repliPartnerDel_${Partner}_${userreq}_/$myhost  $stamp
+    ./etcdput.py sync/Snapperioddel_${Partner}_${userreq}_/$myhost  $stamp
+  fi
+  /TopStor/logmsg.py Partner1004 info $userreq $Partner
+fi
