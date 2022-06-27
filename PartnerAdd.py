@@ -1,6 +1,7 @@
 #!/bin/python3.6
 import sys, subprocess
 from etcdput import etcdput as put
+from etcdputlocal import etcdput as putlocal
 from etcdget import etcdget as get 
 from logqueue import queuethis
 from logmsg import sendlog
@@ -19,6 +20,7 @@ def addpartner(*bargs):
  repliport = bargs[3]
  phrase = bargs[4]
  userreq = bargs[5]
+ init = bargs[6]
  if (privthis('Replication',userreq) != 'true'):
   print('not authorized to add partner')
   return
@@ -36,8 +38,12 @@ def addpartner(*bargs):
   sendlog('Partner1fa2','info',userreq,partneralias,replitype)
   return
  broadcasttolocal('Partner/'+partneralias,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
- put('Partner/'+partneralias,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
- put('sync/PartnerAdd_'+partneralias+'/'+myhost, str(timestamp()))
+ if 'init' in init:
+  put('Partner/'+partneralias,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
+  put('sync/PartnerAdd_'+partneralias+'/'+myhost, str(timestamp()))
+ else:
+  putlocal(myip,'Partner/'+partneralias,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
+
  sendlog('Partner1002','info',userreq,partneralias,replitype)
  
 
