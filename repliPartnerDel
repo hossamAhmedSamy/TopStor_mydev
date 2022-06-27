@@ -17,30 +17,48 @@ then
   currenthosts=`cat /root/.ssh/known_hosts`
   nodes=`./etcdget.py Prtnrcluster/$clusterip --prefix | awk -F'dhcp' '{print $2}' | sed "s/')//g" | sed 's/ /\//g' `
   hosts=`./etcdget.py Prtnrcluster/$clusterip --prefix | awk -F"', '" '{print $1}' | awk -F"/" '{print $NF}'`
+  echo clusterip=$clusterip
+  echo currentkeys="$currentkeys"
+  echo currenthosts="$currenthosts"
   echo hosts=$hosts
+  echo nodes=$nodes
   echo "$nodes" | while read r;
   do
    echo r=$r
    currentkeys=`echo  "$currentkeys" | grep -v 'dhcp'$r `
-   echo currentkeys="$currentkeys"
+   echo "$currentkeys" > /root/.ssh/authorized_keys
   done 
   echo "$hosts" | while read r;
   do
    echo r=$r
    currenthosts=`echo  "$currenthosts" | grep -v $r `
+   echo "$currenthosts" > /root/.ssh/known_hosts
    echo currenthosts="$currenthosts"
   done 
-  echo "$nodes" > /root/.ssh/authorized_keys
-  echo "$hosts" > /root/.ssh/known_hosts
+  echo '##########################'
+  currentkeys=`cat /root/.ssh/authorized_keys`
+  currenthosts=`cat /root/.ssh/known_hosts`
+  echo currentkeys="$currentkeys"
+  echo currenthosts="$currenthosts"
+  echo hosts=$hosts
+  echo nodes=$nodes
+  echo '##########################'
+#  echo "$currentkeys" > /root/.ssh/authorized_keys
+#  echo "$currenthosts" > /root/.ssh/known_hosts
   chmod 004 /root/.ssh/authorized_keys
   chmod 004 /root/.ssh/known_hosts
   echo $partnerinfo | grep "Receiver" 
   if [ $? -ne 0 ];
   then
-   pport=` echo $partnerinfo | awk -F'/' '{print $4}'`
-   sshd=`cat /etc/ssh/sshd_config | grep -v $pport`
-   echo -e "$sshd" > /etc/ssh/sshd_config
-   systemctl restart sshd
+   pport=` echo $partnerinfo | awk -F'/' '{print $3}'`
+   allpartners=`./etcdget.py Partner --prefix | grep -v $clusterip`
+   echo $allpartners | grep $pport
+   if [ $? -ne 0 ];
+   then
+    sshd=`cat /etc/ssh/sshd_config | grep -v $pport`
+    echo -e "$sshd" > /etc/ssh/sshd_config
+    systemctl restart sshd
+   fi
   fi 
   ./etcddel.py "" $clusterip
   crontab -l | grep -v $Partner > $cronthis

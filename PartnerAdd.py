@@ -38,7 +38,7 @@ def addpartner(*bargs):
   print('sending',cmdline.split())
   result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
   if 'open' not in result:
-   sendlog('Partner1fa2','info',userreq,partneralias,replitype)
+   sendlog('Partner1fa2','error',userreq,partneralias,replitype)
    return
  broadcasttolocal('Partner/'+partneralias,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
  if 'init' in init:
