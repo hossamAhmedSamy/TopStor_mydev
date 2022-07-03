@@ -3,6 +3,7 @@ import sys, subprocess
 from etcdput import etcdput as put
 from etcdputlocal import etcdput as putlocal
 from etcdget import etcdget as get 
+from etcddel import etcddel as dels 
 from logqueue import queuethis
 from logmsg import sendlog
 from socket import gethostname as hostname
@@ -34,18 +35,20 @@ def addpartner(*bargs):
   msg={'req': 'Exchange', 'reply':z}
   print(msg)
   sendhost(partnerip, str(msg),'recvreply',myhost)
-  cmdline = '/TopStor/checkpartner.sh '+partnerip+' '+repliport
+  cmdline = '/TopStor/checkpartner.sh '+partneralias+'_'+replitype+' '+partnerip+' '+repliport+' '+'new'
   print('sending',cmdline.split())
   result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
   if 'open' not in result:
    sendlog('Partner1fa2','error',userreq,partneralias,replitype)
    return
- broadcasttolocal('Partner/'+partneralias,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
+ broadcasttolocal('Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
  if 'init' in init:
-  put('Partner/'+partneralias,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
-  put('sync/PartnerAdd_'+partneralias+'/'+myhost, str(timestamp()))
+  put('Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
+  dels('sync/Partner', partneralias+'_'+replitype)
+  dels('sync/repliPartner', partneralias+'_'+replitype)
+  put('sync/PartnerAdd_'+partneralias+'_'+replitype+'/'+myhost, str(timestamp()))
  else:
-  putlocal(myip,'Partner/'+partneralias,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
+  putlocal(myip,'Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
 
  sendlog('Partner1002','info',userreq,partneralias,replitype)
  

@@ -32,6 +32,8 @@ else
  then
   receiver=` echo $@ | awk -F'/' '{print $NF'}`
   snapshot=`echo $res | grep '_newsnap' | awk -F'_newsnap' '{print $2}' `
+  params=`/TopStor/repliparams.py $snapshot`
+  echo $receiver $snapshot > /root/snpshottemp
   echo snapshot=$snapshot  receiver=$receiver
   zfs set partner:receiver=$receiver $snapshot
  fi

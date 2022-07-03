@@ -10,7 +10,8 @@ echo Snap1012: > $web;
 name=`echo $@ | awk '{print $1}'`;
 pDG=`echo $@ | awk '{print $2}'`;
 FileS=` echo $@ | awk '{print $3}'`;
-userreq=` echo $@ | awk '{print $4}'`;
+receiver=` echo $@ | awk '{print $4}'`;
+userreq=` echo $@ | awk '{print $NF}'`;
 /TopStor/logqueue.py `basename "$0"` running $userreq 
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
 rm $txtres 2>/dev/null
@@ -20,7 +21,7 @@ if [[ $contrun == 'true' ]]
 then
   /TopStor/logmsg.py Snap1026 info $userreq $FileS/$name 
 echo /TopStor/SnapshotnowOnce $pDG $FileS $name 
-/TopStor/SnapshotnowOnce $pDG $FileS $name > $txtres
+/TopStor/SnapshotnowOnce $pDG $FileS $name $receiver > $txtres
 if [ $? -ne 0  ]; then
   /TopStor/logmsg.py Snap1028 error $userreq $FileS/$name 
 else 
