@@ -29,7 +29,7 @@ def selectDG(volname , volsize):
  dgsinfo = {'raids':allinfo['raids'], 'pools':allinfo['pools'], 'disks':allinfo['disks']}
  dgsinfo['newraid'] = posraids
  if len(dgsinfo['newraid']) == 0 or 'noraid' in raidname:
-  return 'No space for volume replication at the target'
+  return 'No_vol_Space'
  data = {}
  data['redundancy'] = raidname
  data['useable'] = raidsize
@@ -89,9 +89,9 @@ def selectDG(volname , volsize):
 def selectPool(volname, volsize):
  pools = allinfo['pools']
  volquota = levelthis(volsize,'G')
- pool = 'nopool'
+ pool = 'No_vol_space'
  poolsize = float('inf')
- host = 'nohost'
+ host = 'No_vol_space'
  for pol in pools:
   if 'pree' not in pol and 'Availability' in pools[pol]['availtype'] and levelthis(pools[pol]['available']) > volquota and pools[pol]['available'] < poolsize:
    pool = pol
@@ -103,7 +103,7 @@ def selectPool(volname, volsize):
  
 def selectVol(volname, volsize):
  volinfo = allinfo['volumes']
- volumes='initial'
+ volumes='No_vol_Space'
  for vol in volinfo:
   if vol == volname:
    if levelthis(volinfo[vol]['available'],'B') > levelthis(volsize,'B') - levelthis(volinfo[vol]['used'],'B'):
@@ -127,10 +127,10 @@ if __name__=='__main__':
  #volname = 'common_427522895'
  print('check existing volumes.....')
  replivol= selectVol(volname,volsize)
- if 'initial' in replivol:
+ if 'No_vol_Space' in replivol:
   print('continuing to check existing pool.....')
   replivol = selectPool(volname,volsize)
-  if 'nopool' in replivol:
+  if 'No_vol_Space' in replivol:
    print('continuing to create a pool....')
    replivol = selectDG(volname,volsize)
  print('result_'+replivol+'result_')

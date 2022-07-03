@@ -154,6 +154,7 @@ def getall(*args):
     if volume['prot'] == 'ISCSI':
      volume['quota'] = volume['used'] 
     else:
+     print('volume', volume)
      volume['quota'] = levelthis(volume['quota'])
     volume['usedbysnapshots'] = levelthis(volume['usedbysnapshots'],'M')
     poolvolumes.append(volume['name'])
