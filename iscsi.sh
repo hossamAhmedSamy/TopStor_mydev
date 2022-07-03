@@ -13,6 +13,13 @@ chappas=`echo $@ | awk '{print $8}'`
 vtype='iscsi'
 myhost=`hostname`
 echo $@ > /root/iscsiparam
+replivols=`./etcdget.py replivolumes --prefix`
+echo $replivols | grep $vol
+if [ $? -eq 0 ];
+then
+ exit
+fi
+
 rightip=`/pace/etcdget.py ipaddr/$myhost $vtype-$ipaddr | grep -v $vol`
 otherip=`/pace/etcdget.py ipaddr $vtype-$ipaddr | grep -v $myhost | wc -c`
 othervtype=`/pace/etcdget.py ipaddr $ipaddr | grep -v $vtype | wc -c` 

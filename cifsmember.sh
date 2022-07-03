@@ -14,6 +14,13 @@ domadmin=`echo $@ | awk '{print $9}'`
 adminpass=`echo $@ | awk '{print $10}'`
 echo $@ > /root/cifsmember
 echo $@ > /root/cifsparam
+replivols=`./etcdget.py replivolumes --prefix`
+echo $replivols | grep $vol
+if [ $? -eq 0 ];
+then
+ exit
+fi
+
 myhost=`hostname`
 #docker rm -f `docker ps -a | grep -v Up | grep $ipaddr | awk '{print $1}'` 2>/dev/null
 echo cifs $@
@@ -57,6 +64,11 @@ fi
  rm -rf /TopStordata/tempsmb.$ipaddr
  for x in $mounts; 
  do
+  echo $replivols | grep $x
+  if [ $? -eq 0 ];
+  then
+   continue
+  fi
   mount=$mount' -v /'$pool'/'$x':/'$pool'/'$x':rw '
   cat /TopStordata/smb.$x >> /TopStordata/tempsmb.$ipaddr
  done

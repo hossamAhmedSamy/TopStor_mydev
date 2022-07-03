@@ -9,7 +9,8 @@ vtype=`echo $@ | awk '{print $4}'`
 echo $@ > /root/`basename "$0"`
 myhost=`hostname -s`
 /TopStor/logqueue.py `basename "$0"` running $userreq
-/TopStor/etcddel.py vol $vol 
+/TopStor/etcddel.py vol $vol
+/TopStor/etcddel.py replivol $vol
 /TopStor/etcddel.py size $vol 
 /TopStor/deltolocal.py size $vol 
 /TopStor/deltolocal.py vol $vol 
@@ -62,4 +63,6 @@ else
   docker exec $resname sh /hostetc/VolumeCIFSupdate.sh
   /TopStor/logqueue.py `basename "$0"` stop $userreq
 fi
+/TopStor/etcddel.py vol $vol
+/TopStor/etcddel.py replivol $vol
 /TopStor/logqueue.py `basename "$0"` stop $userreq
