@@ -1,5 +1,5 @@
 #!/bin/python3.6
-
+import sys
 from time import time as timestamp, sleep
 from allphysicalinfo import getall 
 from etcdgetpy import etcdget as get
@@ -28,6 +28,8 @@ def selectDG(volname , volsize):
      raidhosts = posraids[raid][raidsz]['hosts']
  dgsinfo = {'raids':allinfo['raids'], 'pools':allinfo['pools'], 'disks':allinfo['disks']}
  dgsinfo['newraid'] = posraids
+ if len(dgsinfo['newraid']) == 0 or 'noraid' in raidname:
+  return 'No space for volume replication at the target'
  data = {}
  data['redundancy'] = raidname
  data['useable'] = raidsize
@@ -79,7 +81,7 @@ def selectDG(volname , volsize):
    counter = -10 
  host = allinfo['pools'][createdpool]['host']
  hostip = allinfo['hosts'][host]['ipaddress']
- result = 'result_'+hostip+':'+createdpool+'/'+volname+'result_'
+ result = hostip+':'+createdpool+'/'+volname
  return result
   
  
@@ -91,21 +93,20 @@ def selectPool(volname, volsize):
  poolsize = float('inf')
  host = 'nohost'
  for pol in pools:
-  if 'pree' not in pol and 'Availability' in pools[pol]['availtype'] and pools[pol]['available'] > volquota and pools[pol]['available'] < poolsize:
+  if 'pree' not in pol and 'Availability' in pools[pol]['availtype'] and levelthis(pools[pol]['available']) > volquota and pools[pol]['available'] < poolsize:
    pool = pol
    poolsize = pools[pol]['available']
    host = allinfo['hosts'][pools[pol]['host']]['ipaddress']
- pools = 'result_'+host+':'+pool+'/'+volname+'result_'
+ pools = host+':'+pool+'/'+volname
  return pools 
    
  
-def selectVol(volname, snap):
+def selectVol(volname, volsize):
  volinfo = allinfo['volumes']
- snapused=levelthis(snap,'B')
  volumes='initial'
  for vol in volinfo:
   if vol == volname:
-   if levelthis(volinfo[vol]['available'],'B') > levelthis(snapused):
+   if levelthis(volinfo[vol]['available'],'B') > levelthis(volsize,'B') - levelthis(volinfo[vol]['used'],'B'):
     hostip = allinfo['hosts'][volinfo[vol]['host']]['ipaddress']
     volumes = hostip+':'+volinfo[vol]['pool']+'/'+vol
    else:
@@ -115,28 +116,24 @@ def selectVol(volname, snap):
 
 
 if __name__=='__main__':
+ volname = sys.argv[1]
+ volsize = float(sys.argv[2])
+ snapshot = sys.argv[3]
+ #snapused = levelthis(sys.argv[4])
  alldsks = get('host','current')
  allinfo = getall(alldsks)
- volname = sys.argv[1]
- volsize = levelthis(sys.argv[2])
- snapshot = sys.argv[3]
- snapused = levelthis(sys.argv[4])
  #volsize = sys.argvlevelthis('96K','G')
  #snapused = levelthis('1K','G')
  #volname = 'common_427522895'
  print('check existing volumes.....')
- replivol= selectVol(volname,snapused)
- if 'initial' not in replivol:
-  print('result_'+replivol+'result_')
- else:
+ replivol= selectVol(volname,volsize)
+ if 'initial' in replivol:
   print('continuing to check existing pool.....')
   replivol = selectPool(volname,volsize)
-  if 'nopool' not in replivol:
-   print('result_'+replivol+'result_')
-  else:
+  if 'nopool' in replivol:
    print('continuing to create a pool....')
    replivol = selectDG(volname,volsize)
- print(replivol)
+ print('result_'+replivol+'result_')
 
    
   
