@@ -43,8 +43,9 @@ def getsnapperiods(voldict):
     periodsdict[leftper[4]]['every']=rightper[3].split('.')[4].split('%')[0]
  return (periodsdict,voldict)
 
-def getall(*args):
- alldsks = args[0]
+def getall(alldsks='0', *args):
+ if alldsks == '0':
+  alldsks = get('host','current')
  hostsdict = dict()
  poolsdict = dict()
  raidsdict = dict()

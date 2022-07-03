@@ -35,9 +35,10 @@ then
  result=$?
 else
  echo $result
- lastsnap=`echo $result | awk -F'result_' '{print $4}'`
+ lastsnap=`echo $result | awk -F'result_' '{print $4}' | sed 's/ //g'`
  zfs send -DvPc -i $myvol@$lastsnap $snapshot | $nodeloc zfs recv -F $poolvol 
  result=$?
+ echo 'zfs send -DvPc -i '$myvol'@'$lastsnap $snapshot' | '$nodeloc' zfs recv -F '$poolvol 
 fi
 #zfs send -Lc $snapshot | $nodeloc zfs recv -F $poolvol 
 if [ $result -eq 0 ];
