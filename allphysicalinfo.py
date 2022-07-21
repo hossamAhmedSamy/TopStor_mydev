@@ -148,6 +148,8 @@ def getall(*args):
    poolsdict[pool['name']]['volumes'] = poolvolumes
    for volume in pool['volumes']:
     volume['used'] = levelthis(volume['used'])
+    volume['available'] = levelthis(volume['available'])
+    volume['referenced'] = levelthis(volume['referenced'],'M')
     if volume['prot'] == 'ISCSI':
      volume['quota'] = volume['used'] 
     else:
@@ -207,7 +209,7 @@ def getall(*args):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
- print('snapperiods',snapperiodsdict) 
+ print('snapshots',snapshotsdict)
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  
