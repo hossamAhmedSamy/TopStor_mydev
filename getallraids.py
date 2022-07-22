@@ -117,7 +117,7 @@ allraids ={'raid5':{'parity':1, 'group':3 } , 'raid6':{ 'parity':2, 'group':4}, 
 def newraids(diskdict):
  allsizes = dict() 
  single = dict() 
- allsizes['single'] = single
+ #allsizes['single'] = single
  for disk in diskdict:
   if 'free' in diskdict[disk]['raid']:
    if diskdict[disk]['size'] not in single:
@@ -130,6 +130,8 @@ def newraids(diskdict):
  theraid = getmirror(single,2,diskdict)
  if len(theraid) > 0:
   allsizes['mirror'] = theraid
+ if len(single) > 0:
+  allsizes['single'] = single
  return allsizes
 
 def selectdisks(disks,singles, disksinfo):
