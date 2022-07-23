@@ -12,7 +12,7 @@ def repliparam(snapshot):
  snapshot = snapshot.split('@')[1]
  volused = allinfo['volumes'][volume]['referenced'] 
  snapused = '0' 
- print('result_'+volume, volused, snapshot, str(snapused)+'result_') 
+ print('result_'+volume, volused, snapshot+'result_') 
 
 
 

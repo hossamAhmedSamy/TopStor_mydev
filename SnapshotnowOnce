@@ -21,7 +21,9 @@ if [ $? -ne 0 ];
 then 
  zfs set partner:receiver=$receiver $snapshot
  params=`./repliparams.py $snapshot | grep 'result_' | sed 's/result\_//g'`
- echo $params > /root/snapshotnowtemp
+ result=`./replitargetget.sh ${receiver} $params | awk -F'result_' '{print $2}'`
+ nodeowner=`echo $result | awk -F':' '{print $1}'`
+ poolvol=`echo $result | awk -F':' '{print $2}'`
 fi 
 /sbin/zfs set snap:type=Once $pool/$vol@${name}.$stamp
 echo OK;
