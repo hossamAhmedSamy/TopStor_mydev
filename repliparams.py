@@ -13,6 +13,7 @@ def repliparam(snapshot):
  volused = allinfo['volumes'][volume]['referenced'] 
  snapused = '0' 
  print('result_'+volume, volused, snapshot+'result_') 
+ return 'result_'+volume, volused, snapshot+'result_'
 
 
 

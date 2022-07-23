@@ -395,6 +395,9 @@ def volumessnapshotsinfo():
  snappriods = []
  for snap in allinfo['snapshots']:
   allinfo['snapshots'][snap]['date'] = datetime.strptime(allinfo['snapshots'][snap]['creation'], '%a %b %d %Y').strftime('%d-%B-%Y')
+  print('#####################################33')
+  print(allinfo['snapshots'][snap])
+  print('#####################################33')
   snaplist[allinfo['snapshots'][snap]['snaptype']].append(allinfo['snapshots'][snap].copy())
   alllist.append(allinfo['snapshots'][snap].copy())
  for period in allinfo['snapperiods']:
