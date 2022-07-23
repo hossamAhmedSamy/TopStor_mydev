@@ -7,14 +7,22 @@ myhost=$myhost;
 pool=`echo $@ | awk '{print $1}'`;
 vol=`echo $@ | awk '{print $2}'`;
 name=`echo $@ | awk '{print $3}'` ;
+receiver=`echo $@ | awk '{print $NF}'` ;
 stamp=`date +%s`;
 echo /sbin/zfs snapshot $pool/$vol@${name}.$stamp
+snapshot=$pool/$vol@${name}.$stamp
 /sbin/zfs snapshot $pool/$vol@${name}.$stamp
 if [ $? -ne 0  ]; then
         echo failed
         exit 1;
 else 
-timenow=`/usr/bin/date`
+echo $receiver | grep $name
+if [ $? -ne 0 ];
+then 
+ zfs set partner:receiver=$receiver $snapshot
+ params=`./repliparams.py $snapshot | grep 'result_' | sed 's/result\_//g'`
+ echo $params > /root/snapshotnowtemp
+fi 
 /sbin/zfs set snap:type=Once $pool/$vol@${name}.$stamp
 echo OK;
 exit 0

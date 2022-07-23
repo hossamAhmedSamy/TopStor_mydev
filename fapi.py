@@ -881,7 +881,7 @@ def groupdel(data):
 def partnerdel(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- cmndstring = '/TopStor/pump.sh repliPartnerDel '+data.get('name')+' no '+data['user']
+ cmndstring = '/TopStor/pump.sh repliPartnerDel '+data.get('name')+' yes '+data['user']
  postchange(cmndstring)
  return data
 
@@ -1013,7 +1013,7 @@ def userauths(data):
 @app.route('/api/v1/partners/partnerlist', methods=['GET'])
 def api_partners_userslist():
  allpartners=[]
- partnerlst = etcdgetjson('Partner','--prefix')
+ partnerlst = etcdgetjson('Partner/','--prefix')
  for partner in partnerlst:
   alias =  partner["name"].split('/')[1] 
   split = partner["prop"].split('/') 

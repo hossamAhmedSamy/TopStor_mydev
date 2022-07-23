@@ -117,9 +117,13 @@ def selectVol(volname, snap):
 if __name__=='__main__':
  alldsks = get('host','current')
  allinfo = getall(alldsks)
- volsize = levelthis('96K','G')
- snapused = levelthis('1K','G')
- volname = 'common_427522895'
+ volname = sys.argv[1]
+ volsize = levelthis(sys.argv[2])
+ snapshot = sys.argv[3]
+ snapused = levelthis(sys.argv[4])
+ #volsize = sys.argvlevelthis('96K','G')
+ #snapused = levelthis('1K','G')
+ #volname = 'common_427522895'
  print('check existing volumes.....')
  replivol= selectVol(volname,snapused)
  if 'initial' not in replivol:

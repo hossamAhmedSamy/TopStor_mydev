@@ -12,8 +12,8 @@ if [ $? -eq 0 ];
 then
  echo it is okok >> /root/receivekeys
  myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'` 
- ./etcdput.py Prtnrcluster/${clusterip}/$partnerip $partner
- ./etcdputlocal.py $myip Prtnrcluster/${clusterip}/$partnerip $partner   2>/dev/null
+ ./etcdput.py nodesender/${clusterip}/$partnerip/$myip $partner
+ ./etcdputlocal.py $myip nodesender/${clusterip}/$partnerip $partner   2>/dev/null
  authkeys=`cat /root/.ssh/authorized_keys | grep -v $partner`
  echo $authkeys > /root/.ssh/authorized_keys
  echo $keys | sed 's/\_spc\_/ /g' >> /root/.ssh/authorized_keys
