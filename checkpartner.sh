@@ -20,6 +20,7 @@ fi
 echo $isnew | grep 'new' >/dev/null
 if [ $? -eq 0 ];
 then
+ /TopStor/pumpkeys.py $partnerip $replitype $port $phrase
  strict='-o StrictHostKeyChecking=no' 
  known=`cat /root/.ssh/known_hosts | grep -v $partnerip`
  echo -e "$known" > /root/.ssh/known_hosts
@@ -29,6 +30,7 @@ else
 fi
 while [ $count -le 10 ];
 do
+ echo ssh -oBatchmode=yes -i /TopStordata/${partnerip}_keys/${partnerip} -p $port $strict ${partnerip} ls 
  ssh -oBatchmode=yes -i /TopStordata/${partnerip}_keys/${partnerip} -p $port $strict ${partnerip} ls  >/dev/null 2>/dev/null
  if [ $? -eq 0 ];
  then
@@ -38,19 +40,15 @@ do
   then
    noden=`$nodeloc /usr/bin/hostname` 
    nodei=`$nodeloc /TopStor/etcdget.py ready/$noden` 
-   result=`/TopStor/preparekeys.sh $nodei | sed 's/ /_spc_/g'`
-   z='/TopStor/pump.sh','receivekeys.sh '$myhost' '$myip' '$clusterip' '$replitype' '$port' '$phrase' '$result
-   msg="{'req': 'Exchange', 'reply':$z}"
-   ./sendhost.py partnerip msg 'recvreply' myhost
-   exit
+   /TopStor/pumpkeys.py $nodei $replitype $port $phrase
    echo nodei=$nodei
+   sleep 2
    echo $nodei | grep $partnerip
    if [ $? -ne 0 ];
    then
     stamp=`date +%s` 
     known=`cat /root/.ssh/known_hosts | grep -v $partnerip`
     echo -e "$known" > /root/.ssh/known_hosts
-    /TopStor/preparekeys.sh $nodei 
     ssh -oBatchmode=yes -i /TopStordata/${nodei}_keys/${nodei} -p $port $strict ${nodei} ls  >/dev/null 2>/dev/null
    fi
    /TopStor/etcdput.py Partnernode/${partner}_$replitype/$nodei/$myip $noden 
