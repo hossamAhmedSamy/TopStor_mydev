@@ -36,9 +36,9 @@ do
  fi
  echo $partnerip $pport
  nodeloc='ssh -oBatchmode=yes -i /TopStordata/'${partnerip}'_keys/'${partnerip}' -p '$pport' '${partnerip}
- echo $nodeloc hostname 
- xx=`$nodeloc hostname`
- echo $xx
+ echo nodeloc /TopStor/repliSelection.py $volume $volsize $snapshot
+ xx=`$nodeloc /TopStor/repliSelection.py $volume $volsize $snapshot`
+ echo $xx | awk -F'result_' '{print $2}'
 done
 
 
