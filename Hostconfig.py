@@ -12,6 +12,7 @@ from UpdateNameSpace import updatenamespace
 import logmsg
 
 def config(*bargs):
+ rebootme = 0
  arglist = bargs[0]
  #arglist = {'ipaddr': '10.11.11.123', 'ipaddrsubnet': '24', 'id': '0', 'user': 'admin', 'name': 'dhcp32502'}
  queuethis('Hostconfig','running',arglist)
@@ -145,14 +146,7 @@ def config(*bargs):
   else:
    logmsg.sendlog('HostManual2su12','info',arglist['user'])
   queuethis('LocalManualConfig.py','stop',bargs[-1])
-  z=['/TopStor/pump.sh','rebootme', 'now']
-  msg={'req': 'Pumpthis', 'reply':z}
-  sendip = get('ready/'+arglist['name'])[0]
-  queuethis('Hostconfig_cf','finish',arglist['user'])
-  for x in range(10):
-   x =+1
-   sendhost(sendip, str(msg),'recvreply',myhost)
-   sleep(10)
+  rebootme=1
  ########## changing box address ###############
  if 'ipaddr' in arglist:
   queuethis('Hostconfig_ip','running',arglist['user'])
@@ -166,12 +160,22 @@ def config(*bargs):
   msg={'req': 'Pumpthis', 'reply':z}
   sendip = get('ready/'+arglist['name'])[0]
   logmsg.sendlog('HostManual1su6','info',arglist['user'], str(oldipaddr)+'/'+str(oldipsubnet),arglist['ipaddr']+'/'+arglist['ipaddrsubnet'])
-  queuethis('Hostconfig_ip','finish',arglist['user'])
+  rebootme = 2
+######################################
+############# need to reboot  ###############
+ if rebootme > 0:
+  msg={'req': 'Pumpthis', 'reply':z}
+  sendip = get('ready/'+arglist['name'])[0]
+  if rebootme == 2:
+   z=['/TopStor/pump.sh','rebootme', 'ipchange', oldipaddr, oldipsubnet, arglist['ipaddr'], arglist['ipaddrsubnet']]
+  else:
+   z=['/TopStor/pump.sh','rebootme', 'now']
+  queuethis('Hostconfig_cf','finish',arglist['user'])
   for x in range(10):
    x =+1
    sendhost(sendip, str(msg),'recvreply',myhost)
    sleep(10)
-######################################
+
  queuethis('Hostconfig','finish',arglist['user'])
 
  return 1

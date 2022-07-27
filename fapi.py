@@ -384,6 +384,7 @@ def dskperfs():
  ioperf()
  return jsonify({'dsk':dskperf(), 'cpu':cpuperf()})
 
+
 @app.route('/api/v1/volumes/snapshots/snapshotsinfo', methods=['GET','POST'])
 def volumessnapshotsinfo():
  global allvolumes, alldsks, allinfo
