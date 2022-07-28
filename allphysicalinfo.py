@@ -95,7 +95,6 @@ def getall(alldsks='0', *args):
   if alldsk == -1:
    continue
   host = alldsk[0].split('/')[1]
-  #print(alldsk[1])
   pools = mtuple(alldsk[1])
   hostpools = []
   hostip = get('ActivePartners/'+host)[0]
@@ -211,7 +210,7 @@ def getall(alldsks='0', *args):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
- print('volumes',volumesdict)
+ print('snapshots',snapshotsdict)
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  
