@@ -8,7 +8,7 @@ clusterip=`echo $@ | awk '{print $5}'`
 phrase=`echo $@ | awk '{print $6}'`
 isnew=`echo $@ | awk '{print $7}'`
 count=0
-nodeloc='ssh -i /TopStordata/'${partnerip}'_keys/'${partnerip}' -p '$port' '${partnerip}
+nodeloc='ssh -oBatchmode=yes -i /TopStordata/'${partnerip}'_keys/'${partnerip}' -p '$port' '${partnerip}
 result='closed'
 myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 myhost=`hostname`
@@ -16,7 +16,21 @@ myhost=`hostname`
 if [ $? -ne 0 ];
 then
  isnew='new'
+ echo partner is new to myhost
 fi
+if [ ! -f /TopStordata/${partnerip}_keys/${partnerip}  ];
+then
+ isnew='new'
+ echo keys are not found so makeing new ones
+fi
+
+ssh -oBatchmode=yes -i /TopStordata/${partnerip}_keys/${partnerip} -p $port ${partnerip} ls  >/dev/null 2>/dev/null
+if [ $? -ne 0 ];
+then
+ isnew='new'
+ echo partner is not connecting
+fi
+
 echo $isnew | grep 'new' >/dev/null
 if [ $? -eq 0 ];
 then
@@ -40,7 +54,7 @@ do
   then
    noden=`$nodeloc /usr/bin/hostname` 
    nodei=`$nodeloc /TopStor/etcdget.py ready/$noden` 
-   /TopStor/pumpkeys.py $nodei $replitype $port $phrase
+#   /TopStor/pumpkeys.py $nodei $replitype $port $phrase
    echo nodei=$nodei
    sleep 2
    echo $nodei | grep $partnerip
