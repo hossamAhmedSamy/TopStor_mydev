@@ -12,12 +12,13 @@ pDG=`echo $@ | awk '{print $1}'`;
 quota=`echo $@ | awk '{print $3}'`;
 ipaddr=`echo $@ | awk '{print $4}'`;
 ipsubnet=`echo $@ | awk '{print $5}'`;
-portalport=`echo $@ | awk '{print $6}'`;
-initiators=`echo $@ | awk '{print $7}'`;
-chapuser=`echo $@ | awk '{print $8}'`;
-chappas=`echo $@ | awk '{print $9}'`;
+active=`echo $@ | awk '{print $6}'`;
+portalport=`echo $@ | awk '{print $7}'`;
+initiators=`echo $@ | awk '{print $8}'`;
+chapuser=`echo $@ | awk '{print $9}'`;
+chappas=`echo $@ | awk '{print $10}'`;
 myhost=`hostname -s`;
-userreq=` echo $@ | awk '{print $10}'`;
+userreq=` echo $@ | awk '{print $11}'`;
 DG=`echo $pDG `;
 privilege="ISCSI";
 contrun=`./privthis.sh $privilege $userreq`;
@@ -27,9 +28,9 @@ then
  echo name=$name
  myhost=`hostname -s`
  older=`ETCDCTL_API=3 /pace/etcdget.py volumes $name `
- echo /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas 
- /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas
- /pace/broadcasttolocal.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas
+ echo /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas/$active
+ /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas/$active
+ /pace/broadcasttolocal.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas/$active
  oldipaddr=`zfs get -H ip:addr $DG/$name | awk '{print $3}'`
  echo got ip $ipaddr
  oldipsubnet=`zfs get -H ip:subnet $DG/$name | awk '{print $3}'`
@@ -38,6 +39,7 @@ then
  /sbin/zfs set ip:addr=$ipaddr $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
  /sbin/zfs set ip:portalport=$portalport $DG/$name
+ /sbin/zfs set status:mount=$active $DG/$name
 #pdhcp2524812990 pool1is 3G 10.11.11.11 24 3263 iqn.1991-05.com.microsoft:desktop-jckvhk3 MoatazNegm MezoAdmin admin dhcp19503 admin
  yes | cp shareiscsi.txt /TopStordata/iscsi.${name}
  shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
@@ -55,6 +57,7 @@ then
  sed -i "s/TARGETIQN/$initiators/g" /TopStordata/iscsi.${name}
  sed -i "s/CHAPUSER/$chapuser/g" /TopStordata/iscsi.${name}
  sed -i "s/CHAPPAS/$chappas/g" /TopStordata/iscsi.${name}
+ sed -i "s/ACTIVE/$active/g" /TopStordata/iscsi.${name}
  yes | cp /TopStordata/iscsi.${name} /$DG/
  /pace/delzfsvolumetarget $DG $name $userreq
  for i in $(echo $initiators | sed "s/,/ /g")

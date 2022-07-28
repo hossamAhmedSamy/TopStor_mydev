@@ -1,5 +1,5 @@
 ;;;;;;;;         startNAMECIFS_only
-;;;;;;;; SUMMARY Vtype Rpool/Rname/Rreadv/Rbrows/Rwritev/Radmin/Rwritea/Ripadd/Ripsub/DOMNAME/DOMSRVN/DOMSRVI/DOMADM/DOMPASS
+;;;;;;;; SUMMARY Vtype Rpool/Rname/Rreadv/Rbrows/Rwritev/Radmin/Rwritea/Ripadd/Ripsub/DOMNAME/DOMSRVN/DOMSRVI/DOMADM/DOMPASS/ACTIVE
 [NAMECIFS]
 path = /POOL/NAMECIFS
 read only = no

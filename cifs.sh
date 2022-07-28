@@ -8,10 +8,12 @@ ipaddr=`echo $@ | awk '{print $3}'`
 ipsubnet=`echo $@ | awk '{print $4}'`
 vtype=`echo $@ | awk '{print $5}'`
 echo $@ > /root/cifsparam
-replivols=`./etcdget.py replivolumes --prefix`
-echo $replivols | grep $vol
-if [ $? -eq 0 ];
+allvols=`./etcdget.py volumes --prefix`
+replivols=`echo $allvols | grep $vol `
+echo $replivols | grep active 
+if [ $? -ne 0 ];
 then
+ echo it is not active
  exit
 fi
 myhost=`hostname`
@@ -59,8 +61,9 @@ fi
  rm -rf /TopStordata/tempsmb.$ipaddr
  for x in $mounts; 
  do
-  echo $replivols | grep $x
-  if [ $? -eq 0 ];
+  replivols=`echo $allvols | grep $x `
+  echo $replivols | grep active
+  if [ $? -ne 0 ];
   then
    continue
   fi

@@ -1,6 +1,6 @@
 #!/bin/python3.6
 from allphysicalinfo import getall 
-import sys, subprocess
+import sys, subprocess, json
 from ast import literal_eval as mtuple
 from etcdget2 import etcdgetjson
 from etcdgetpy import etcdget  as get
@@ -163,7 +163,7 @@ def checkhosts():
  allinfo = getall(alldsks)
  lastalldsks = get('hosts','last')
  if lastalldsks[0] == -1:
-  put('hosts/last',str(allinfo) )
+  put('hosts/last',json.dumps(allinfo) )
   return
  alllastinfo = mtuple(lastalldsks[0][1])
  allchange = allcompare() 
@@ -182,7 +182,7 @@ def checkhosts():
   print('found a change')
  allmsgs = parsechange()
  takedecision(allmsgs)
- put('hosts/last',str(allinfo))
+ put('hosts/last',json.dumps(allinfo))
  #replacedisks()
  return allchange
 

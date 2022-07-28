@@ -19,13 +19,14 @@ quota=`echo $@ | awk '{print $3}'`;
 writev=`echo $@ | awk '{print $4}'`;
 ipaddr=`echo $@ | awk '{print $5}'`;
 ipsubnet=`echo $@ | awk '{print $6}'`;
-myhost=` echo $@ | awk '{print $7}'`;
-userreq=` echo $@ | awk '{print $8}'`;
-domain=` echo $@ | awk '{print $9}'`;
-domainsrvn=` echo $@ | awk '{print $10}'`;
-domainsrvi=` echo $@ | awk '{print $11}'`;
-domadm=` echo $@ | awk '{print $12}'`;
-dompass=` echo $@ | awk '{print $13}'`;
+active=`echo $@ | awk '{print $7}'`;
+myhost=`echo $@ | awk '{print $8}'`;
+userreq=` echo $@ | awk '{print $9}'`;
+domain=` echo $@ | awk '{print $10}'`;
+domainsrvn=` echo $@ | awk '{print $11}'`;
+domainsrvi=` echo $@ | awk '{print $12}'`;
+domadm=` echo $@ | awk '{print $13}'`;
+dompass=` echo $@ | awk '{print $14}'`;
 DG=`echo $pDG `;
 privilege="CIFS";
 contrun=`./privthis.sh $privilege $userreq`;
@@ -46,26 +47,27 @@ then
  then
   extraparms=''
  else
-  isparams=`echo $domain | wc -3`
-  if [ isparams -ge 3 ];
+  isparams=`echo $domain | wc -c`
+  if [ $isparams -ge 3 ];
   then 
    extraparms='/'$domain'/'$domainsrvn'/'$domainsrvi'/'$domadm'/'$dompass
   else
-    extraparms=`echo $older | awk -F'/' '{for(i=NF-4;i<=NF;i++) printf $i"/"; print ""}' | sed "s/')\///g"`
+    extraparms='/'`echo $older | awk -F'/' '{for(i=NF-4;i<=NF;i++) printf $i"/"; print ""}' | sed "s/')\///g"`
   fi
  fi
- echo /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$oldipaddr/${oldipsubnet}/$extraparms >> /root/volchange
+ echo /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$oldipaddr/${oldipsubnet}$extraparms/$active >> /root/volchange
  oldipaddr=`zfs get -H ip:addr $DG/$name | awk '{print $3}'`
  oldipsubnet=`zfs get -H ip:subnet $DG/$name | awk '{print $3}'`
+ ETCDCTL_API=3 /pace/etcddel.py volumes $name
+ ETCDCTL_API=3 /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/${ipsubnet}$extraparms/$active
  /TopStor/VolumefixChangeCIFS $pDG $name CIFS $oldipaddr $userreq 
  /TopStor/VolumeDockerChange.py /$DG/$name $ipaddr
- ETCDCTL_API=3 /pace/etcddel.py volumes $name
- ETCDCTL_API=3 /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/${ipsubnet}/$extraparms
  sed -i "s/$oldipaddr/$ipaddr/g" /$DG/smb.$name
  sed -i "s/$oldipsubnet/$ipsubnet/g" /$DG/smb.$name
  /sbin/zfs set ip:addr=$ipaddr $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
- /pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/${ipsubnet}/$extraparms
+ /sbin/zfs set status:mount=$active $DG/$name
+ /pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/${ipsubnet}$extraparms/$active
  echo $writev | grep DOMAIN
  if [ $? ne 0 ];
  then
