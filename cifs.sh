@@ -8,12 +8,19 @@ ipaddr=`echo $@ | awk '{print $3}'`
 ipsubnet=`echo $@ | awk '{print $4}'`
 vtype=`echo $@ | awk '{print $5}'`
 echo $@ > /root/cifsparam
+replivols=`./etcdget.py replivolumes --prefix`
+echo $replivols | grep $vol
+if [ $? -eq 0 ];
+then
+ exit
+fi
 myhost=`hostname`
 #docker rm -f `docker ps -a | grep -v Up | grep $ipaddr | awk '{print $1}'` 2>/dev/null
 echo cifs $@
-rightip=`/pace/etcdget.py ipaddr/$myhost $vtype-$ipaddr | grep -v $vol`
+ipaddrinfo=`/pace/etcdget.py ipaddr/$myhost $vtype-ipaddr`
+rightip=`echo $ipaddrinfo | awk -F"'," '{print $2}' | awk -F"'" '{print $2}' | sed "s/${vol}\///g" | sed "s/\/${vol}//g" | sed "s/${vtype}\-${ipaddr}\///g" | sed "s/${vtype}\-$ipaddr//g"`
 otherip=`/pace/etcdget.py ipaddr $vtype-$ipaddr | grep -v $myhost | wc -c`
-othervtype=`/pace/etcdget.py ipaddr $ipaddr | grep -v $vtype | wc -c` 
+othervtype=`/pace/etcdget.py ipaddr $ipaddr | grep -v $vtype | wc -c`
 /TopStor/logqueue.py `basename "$0"` running $userreq
 if [ $otherip -ge 5 ];
 then 
@@ -38,7 +45,8 @@ then
  rightvols=$vol
 else
  echo found other vols
- rightvols=`/pace/etcdget.py ipaddr/$myhost/$ipaddr/$ipsubnet | sed "s/$resname\///g"`'/'$vol
+ #rightvols=`/pace/etcdget.py ipaddr/$myhost/$ipaddr/$ipsubnet | sed "s/$resname\///g"`'/'$vol
+ rightvols=$rightip'/'$vol
 fi
  /pace/etcdput.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
  /pace/broadcasttolocal.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols 
@@ -51,6 +59,11 @@ fi
  rm -rf /TopStordata/tempsmb.$ipaddr
  for x in $mounts; 
  do
+  echo $replivols | grep $x
+  if [ $? -eq 0 ];
+  then
+   continue
+  fi
   mount=$mount' -v /'$pool'/'$x':/'$pool'/'$x':rw '
   cat /TopStordata/smb.$x >> /TopStordata/tempsmb.$ipaddr
  done
