@@ -21,7 +21,25 @@ if [[ $contrun == 'true' ]]
 then
  /TopStor/logmsg.py NFS1000 info $userreq $pDG/$volname
  /TopStor/logqueue.py `basename "$0"` running $userreq
+ ipaddr=`./etcdget.py ipaddr $volname | sed "s/$volname\///g" | sed "s/\/$volname//g"`
+ ipaddrleft=` echo $ipaddr | awk -F"'," '{print $1}' | awk -F"'" '{print $2}'`
+ ipaddrright=` echo $ipaddr | awk -F"'," '{print $2}' | awk -F"'" '{print $2}'`
+ echo ip=$ipaddr
+ echo ipright=$ipaddrright
+ echo $ipaddrright | grep '/'
+ if [ $? -ne 0 ];
+ then
+  echo $ipaddrleft | grep '/'
+  if [ $? -eq 0 ];
+  then
+   ./etcddel.py $ipaddrleft
+  fi
+ else
+  ./etcdput.py $ipaddrleft $ipaddrright
+ fi
  /TopStor/cifsremove.sh $pDG $volname $volip cifs 2>/root/errcifsremove
+ echo /sbin/zfs destroy -rf $pDG/$volname 
+ /sbin/zfs unmount -f $pDG/$volname 
  /sbin/zfs destroy -rf $pDG/$volname 
  if [ $? -ne 0  ]; then
    /TopStor/logmsg.py NFS1001 error $userreq $volname
@@ -29,6 +47,9 @@ then
    /TopStor/logqueue.py `basename "$0"` stop $userreq
    exit
  fi
+ rm -rf $pDG/$volname 
+ echo rm -rf $pDG/$volname 
  /TopStor/logmsg.py NFS1002 info $userreq $pDG/$volname
  /TopStor/logqueue.py `basename "$0"` stop $userreq
 fi
+/TopStor/logqueue.py `basename "$0"` stop $userreq

@@ -1,15 +1,16 @@
 #!/bin/python3.6
-import sys
+import sys, subprocess
 from etcdgetpy import etcdget as get
 
-def createvol(*args)
+def createvol(*args):
  datastr = ''
- owner = args[1] 
- ownerip = get('ready/'+args[1])[0]
- pool = args[2]
- name = args[3]
- ipaddress = args[4]
- Subnet = args[5]
+ owner = args[0] 
+ ownerip = get('ready/'+args[0])[0]
+ pool = args[1]
+ name = args[2]
+ ipaddress = args[3]
+ Subnet = args[4]
+ size = args[5]
  user = 'system'
  typep = args[6]
  if 'ISCSI' in typep:
@@ -31,11 +32,10 @@ def createvol(*args)
   groups = args[7]
   datastr = pool+' '+name+' '+size+' '+groups+' '+ipaddress+' '+Subnet+' '+user+' '+owner+' '+user
  print('#############################')
- print(data)
  print(datastr)
  print('###########################')
- cmndstring = '/TopStor/pump.sh VolumeCreate'+typep+' '+datastr
- result=subprocess.run(cmndstring,stdout=subprocess.PIPE)
+ cmndstring = '/TopStor/VolumeCreate'+typep+' '+datastr
+ result=subprocess.run(cmndstring.split(),stdout=subprocess.PIPE)
  return 
 
 
