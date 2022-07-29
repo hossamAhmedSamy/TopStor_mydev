@@ -6,8 +6,8 @@ def getlatestsnap(volume):
  allinfo = getall('0')
  allsnaps = allinfo['volumes'][volume]['snapshots']
  allsnaps = sorted(allsnaps,key= lambda x: float(x.split('.')[1]))
- print ('latest',allsnaps[0])
-
+ print ('latest','result_'+allsnaps[0]+'result_')
+ return allsnaps[0]
 
 
 if __name__=='__main__':

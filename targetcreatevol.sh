@@ -16,11 +16,13 @@ if [ $? -eq 0 ];
 then
  volinfo=`./etcdget.py vol $newvol`
  zfs unmount -f $pool/${newvol}
+ latestsnap=`/TopStor/getlatestsnap.py $newvol | awk -F'result_' '{print $2}'`
  oldnew='old'
 else 
  echo ./createmyvol.py $owner $pool $name $ipaddress $Subnet $size $typep $groups > /root/targetcreatevol
  ./createmyvol.py $owner $pool $name $ipaddress $Subnet $size $typep $groups
  oldnew='new'
+ latestsnap=''
  zfs destroy -f $pool/${newvol}
 fi
 newvol=`./etcdget.py vol $name | grep $pool | awk -F'/' '{print $6}'`
@@ -33,7 +35,7 @@ then
  volleft=`echo $volleft | sed 's/volumes/replivolumes/g'`
  ./etcdput.py $volleft $volright
  docker rm -f `docker ps | grep $ipaddress | awk '{print $1}' 2>/dev/null`
- echo result_${oldnew}vol/@${oldnew}result_$pool/${newvol}result_
+ echo result_${oldnew}vol/@${oldnew}result_$pool/${newvol}result_${latestsnap}result_
 else
  echo result_problem/@newresult_
  
