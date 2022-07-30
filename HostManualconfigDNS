@@ -4,11 +4,12 @@ cd /TopStor/
 echo $@ > ~/`basename "$0"`
 hostname=`hostname -s`
 dev='enp0s8'
-dns=`ETCDCTL_API=3 /TopStor/etcdget.py dnsname/$hostname`
-searchdns=`ETCDCTL_API=3 /TopStor/etcdget.py dnssearch/$hostname`
+leader=`./etcdget.py leader --prefix | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+dns=`ETCDCTL_API=3 /TopStor/etcdget.py dnsname/$leader`
+searchdns=`ETCDCTL_API=3 /TopStor/etcdget.py dnssearch/$leader`
 olddns=`cat /etc/resolv.conf | grep nameserver | head -1 | awk '{print $2}'`
+olddnssearch=`cat /etc/resolv.conf | grep search | head -1 | awk '{print $2}'`
 myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
-leader=`./etcdget.py leader --prefix`
 echo $leader | grep $hostname
 if [ $? -eq 0 ];
 then
@@ -17,17 +18,20 @@ then
 else
  local='local'
 fi
-
-echo $dns | grep '\.'
+echo $dns | grep .
 if [ $? -ne 0 ];
 then
+echo leader=$leader, dns=$dns, searchdns=$searchdns
  echo $olddns | grep '\.'
  if [ $? -ne 0 ];
  then
   olddns='NoDNS'
  fi
- ./etcdput${local}.py $myip dns/$hostname $olddns
 else
+ ./etcdput${local}.py $myip dnssearch/$hostname $searchdns
+ ./etcdput${local}.py $myip dnsname/$hostname $dns
+ ./etcdput.py dnssearch/$hostname $searchdns
+ ./etcdput.py dnsname/$hostname $dns
  echo 'supersede domain-name-server '$dns';' > /etc/dhcp/dhclient.conf
  echo nameserver $dns > /etc/resolv.conf
  echo $searchdns | grep '\-1'
