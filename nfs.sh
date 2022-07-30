@@ -6,9 +6,9 @@ vol=`echo $@ | awk '{print $2}'`
 ipaddr=`echo $@ | awk '{print $3}'`
 ipsubnet=`echo $@ | awk '{print $4}'`
 echo $@ > /root/nfsparam
-replivols=`./etcdget.py replivolumes --prefix`
-echo $replivols | grep $vol
-if [ $? -eq 0 ];
+replivols=`./etcdget.py volumes --prefix`
+echo $replivols | grep $vol | grep active
+if [ $? -ne 0 ];
 then
  exit
 fi
@@ -35,8 +35,8 @@ then
  mount=''
  for x in $mounts; 
  do
-  echo $replivols | grep $x
-  if [ $? -eq 0 ];
+  echo $replivols | grep $x | grep active
+  if [ $? -ne 0 ];
   then
    continue
   fi

@@ -73,6 +73,8 @@ echo  /sbin/zfs create -V $quota -o dedup=on -o compression=lz4  $DG/$name
  /sbin/zfs set ip:addr=$ipaddr $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
  /sbin/zfs set ip:portalport=$portalport $DG/$name
+ /sbin/zfs set status:activated=no $DG/$name
+ /sbin/zfs unmount $DG/$name
  myhost=`hostname -s`
  echo /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$targetiqn/$chapuser/$chappas >> /root/volcreate
  /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$targetiqn/$chapuser/$chappas

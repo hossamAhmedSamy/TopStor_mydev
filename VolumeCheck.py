@@ -9,6 +9,7 @@ from socket import gethostname as hostname
 
 myhost = hostname()
 etcds = get('volumes')
+replis = get('replivol')
 cmdline = 'pcs resource'
 pcss = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8') 
 
