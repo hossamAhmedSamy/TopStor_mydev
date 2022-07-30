@@ -14,9 +14,9 @@ domadmin=`echo $@ | awk '{print $9}'`
 adminpass=`echo $@ | awk '{print $10}'`
 echo $@ > /root/cifsmember
 echo $@ > /root/cifsparam
-
-replivols=`./etcdget.py volumes --prefix`
-echo $replivols | grep $vol | grep active
+allvols=`./etcdget.py volumes --prefix`
+replivols=`echo $allvols | grep $vol`
+echo $replivols | grep active
 if [ $? -ne 0 ];
 then
  exit
@@ -65,7 +65,8 @@ fi
  rm -rf /TopStordata/tempsmb.$ipaddr
  for x in $mounts; 
  do
-  echo $replivols | grep $x | grep active
+  replivols=`echo $allvols | grep $x`
+  echo $replivols | grep active
   if [ $? -ne 0 ];
   then
    continue

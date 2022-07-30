@@ -5,16 +5,16 @@ prot=`echo $@ | awk '{print $1}'`
 
 if [[ $prot == 'cifs' ]];
 then
- head -n 2 /pdhcp*/smb.* | grep CIFS | grep SUMMARY | awk -F'CIFS ' '{print $2}'
+ head -n 2 /pdhcp*/smb.* | grep CIFS | grep SUMMARY | grep active | awk -F'CIFS ' '{print $2}'
  exit
 fi
 if [[ $prot == 'home' ]];
 then
- head -n 2 /pdhcp*/smb.* | grep HOME | grep SUMMARY | awk -F'HOME ' '{print $2}' 
+ head -n 2 /pdhcp*/smb.* | grep HOME | grep SUMMARY | grep active | awk -F'HOME ' '{print $2}' 
  exit
 fi
 if [[ $prot == 'iscsi' ]];
 then
- head -n 2 /pdhcp*/iscsi.* | grep ISCSI | grep SUMMARY | awk -F'ISCSI ' '{print $2}'
+ head -n 2 /pdhcp*/iscsi.* | grep ISCSI | grep SUMMARY | grep active | awk -F'ISCSI ' '{print $2}'
  exit
 fi

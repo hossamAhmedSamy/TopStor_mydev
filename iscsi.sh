@@ -13,8 +13,9 @@ chappas=`echo $@ | awk '{print $8}'`
 vtype='iscsi'
 myhost=`hostname`
 echo $@ > /root/iscsiparam
-replivols=`./etcdget.py volumes --prefix`
-echo $replivols | grep $vol | grep active
+allvols=`./etcdget.py volumes --prefix`
+replivols=`echo $allvols | grep $vol`
+echo $replivols | grep active
 if [ $? -ne 0 ];
 then
  exit

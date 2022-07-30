@@ -18,7 +18,7 @@ def createvol(*args):
   chappas = 'MezoAdmin'
   portalport = args[7]
   initiators = args[8]
-  datastr = pool+' '+name+' '+size+' '+ipaddress+' '+Subnet+' '+portalport+' '+initiators+' '+chapuse+' '+chappas+' '+user+' '+owner+' '+user
+  datastr = pool+' '+name+' '+size+' '+ipaddress+' '+Subnet+' disabled '+portalport+' '+initiators+' '+chapuse+' '+chappas+' '+user+' '+owner+' '+user
  elif 'CIFSdom' in typep:
   domname = args[7]
   dompass = args[8]
@@ -30,7 +30,7 @@ def createvol(*args):
   datastr = pool+' '+name+' '+size+' '+ipaddress+' '+Subnet+' '+user+' '+owner+' '+user+' '+domname+' '+domsrv+' '+ domip+' '+domadmin+' '+dompass 
  else:
   groups = args[7]
-  datastr = pool+' '+name+' '+size+' '+groups+' '+ipaddress+' '+Subnet+' '+user+' '+owner+' '+user
+  datastr = pool+' '+name+' '+size+' '+groups+' '+ipaddress+' '+Subnet+' disabled '+user+' '+owner+' '+user
  print('#############################')
  print(datastr)
  print('###########################')
