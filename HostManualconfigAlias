@@ -2,6 +2,7 @@
 export ETCDCTL_API=3
 cd /TopStor/
 echo $@ > ~/alias
+aliast='alias'
 hostname=`hostname -s`
 dev='enp0s8'
 web='/var/www/html/des20/Data/HostManualconfigstatus.log';
@@ -12,5 +13,5 @@ txtres='/TopStordata/'`basename $0`'.txt'
 gateway=`ETCDCTL_API=3 /TopStor/etcdget.py gw/$hostname`
 myhost=$hostname
 stamp=`date +%s%N`
-./etcdput.py sync/alias/$myhost $stamp 
-./broadcasttolocal.py sync/alias/$myhost $stamp 
+./etcdput.py sync/$aliast/$myhost $stamp 
+./broadcasttolocal.py sync/$aliast/$myhost $stamp 
