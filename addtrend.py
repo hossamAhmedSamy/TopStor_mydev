@@ -13,8 +13,8 @@ def addtrend(vol,size,stamp):
  csizes = get('sizevol/'+vol)[0]
  csizes += '/'+stamp+'-'+normsize
  put('sizevol/'+vol,csizes)
- put('sync/sizevol/'+myhost, str(stamp()))
- broadcasttolocal('sizevol/'+vol,csizes)
+ put('sync/sizevol/Add_'+'sizevol::'+vol+'_'+csizes.replace('/','::')+'/request/'+myhost, 'sizevol'_str(stamp()))
+# broadcasttolocal('sizevol/'+vol,csizes)
  
 if __name__=='__main__':
  addtrend(*sys.argv[1:])

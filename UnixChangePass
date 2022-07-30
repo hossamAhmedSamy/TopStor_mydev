@@ -21,7 +21,8 @@ cp $logthis $logging 2>/dev/null ; rm -rf $logthis 2>/dev/null;
 usermod  -p $userpass $username
 pas=`echo $userpass | openssl enc -e -base64 -aes-256-ctr -nopad -nosalt -k '#skMe22'$username`
 echo __1
-/TopStor/etcdget.py prim --prefix | grep address | grep $myip
+isleader=`/TopStor/etcdget.py leader --prefix `
+echo $isleader | grep $myip
 if [ $? -eq 0 ];
 then
  echo __1.5
@@ -65,8 +66,10 @@ fi
 resdate=`date +%s`;
 resjson=`./jsonthis3.sh updated $resdate`;
 echo $resjson > $resweb;
-./etcdput.py sync/user/$myhost `date +%s%N`
-./broadcasttolocal.py sync/user/$myhost `date +%s%N`
-./etcdput.py modified/user/$username $myhost 
-./broadcasttolocal.py modified/user/$username $myhost 
+echo $isleader | grep $myhost 
+if [ $? -eq 0 ];
+then
+ /pace/etcdput.py sync/passwd/UnixChkUser:UnixChangePass_${userpass}_${pas}_$userreq/request/$myhost passwd_$stamp
+ /pace/etcdput.py sync/passwd/UnixChkUser:UnixChangePass_${userpass}_${pas}_$userreq/request passwd_$stamp
+fi
 /TopStor/logqueue.py `basename "$0"` finish $userreq 

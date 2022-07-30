@@ -8,9 +8,11 @@ import poolall
 import socket, sys, datetime, subprocess
 from broadcast import broadcast as broadcast 
 from sendhost import sendhost
+from time import time as timestamp
+
 from ast import literal_eval as mtuple
 #from zpooltoimport import zpooltoimport as importables
-def electimport(myhost, allpools,*arg):
+def electimport(myhost, allpools, leader, *arg):
 	knowns=get('known','--prefix')
 	for poolpair in allpools:
 		pool=poolpair[0].split('/')[1]
@@ -31,7 +33,10 @@ def electimport(myhost, allpools,*arg):
 					f.write(' ,nhost:'+nhost)
 				if len(host) > 2 and len(pool) > 4:
 					put('poolsnxt/'+pool,host)
-					broadcasttolocal('poolsnxt/'+pool,host)
+					stamp=int(datetime.datetime.now().timestamp())	
+					put('sync/poolsnxt/'+pool+'_'+host+'/request','poolsnxt_'+str(stamp))
+					put('sync/poolsnxt/'+pool+'_'+host+'/request/'+leader,'poolsnxt_'+str(stamp))
+#					broadcasttolocal('poolsnxt/'+pool,host)
 				break
 	return
 

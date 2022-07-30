@@ -12,7 +12,7 @@ leader=`./etcdget.py leader --prefix | awk -F'/' '{print $2}' | awk -F"'" '{prin
 myip=`./etcdget.py ready/$hostname`
 gateway=`./etcdget.py gw/$leader`
 ./etcdput.py gw/$hostname $gateway
-./broadcasttolocal.py gw/$hostname $gateway
+#./broadcasttolocal.py gw/$hostname $gateway
 oldgateway=`ip route | grep default | awk '{print $3}'`
 echo $gateway | grep '\.'
 if [ $? -ne 0 ];
@@ -23,8 +23,7 @@ then
   oldgateway='NoGateway'
  fi
  ./etcdput.py gw/$hostname $oldgateway
- ./broadcasttolocal.py gw/$hostname $oldgateway
- 
+# ./broadcasttolocal.py gw/$hostname $oldgateway
 else
  echo $oldgateway | grep '\.'
  if [ $? -eq 0 ];

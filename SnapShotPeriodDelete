@@ -24,7 +24,10 @@ then
  /bin/crontab -l | grep -v "$periodel" > /TopStordata/thiscron
  /bin/crontab /TopStordata/thiscron
  /pace/etcddel.py Snapperiod $periodel 
- ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
+ stamp=`date +%s`;
+ /pace/etcdput.py sync/Snapperiod/Del_$periodel/request/$myhost Snapperiod_$stamp
+ /pace/etcdput.py sync/Snapperiod/Del_$periodel/request Snapperiod_$stamp
+# ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
  /TopStor/logmsg.py Snap1045 info $userreq $periodel
 fi;
 /pace/putzpool.py & 

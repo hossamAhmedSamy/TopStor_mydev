@@ -10,7 +10,10 @@ glog='/var/www/html/des20/Data/TopStor.log';
 txtres='/TopStordata/'`basename $0`'.txt'
 leader=`./etcdget.py leader --prefix | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
 myip=`./etcdget.py ready/$hostname`
-gateway=`./etcdget.py dnssearch/$leader`
-./etcdput.py dnsname/$hostname $gateway
-./broadcasttolocal.py dnssearch/$hostname $gateway
-echo search $gateway > >/etc/resolv.conf
+gateway1=`./etcdget.py dnsname/$leader`
+./etcdput.py dnsname/$hostname $gateway1
+echo nameserver $gateway1 > /etc/resolv.conf
+gateway2=`./etcdget.py dnssearch/$leader`
+./etcdput.py dnssearch/$hostname $gateway2
+echo search $gateway2 >> /etc/resolv.conf
+#./broadcasttolocal.py dnssearch/$hostname $gateway

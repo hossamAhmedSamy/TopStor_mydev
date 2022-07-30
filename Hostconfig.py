@@ -10,6 +10,7 @@ from ast import literal_eval as mtuple
 from sendhost import sendhost
 from UpdateNameSpace import updatenamespace
 import logmsg
+from time import time as stamp
 
 def config(*bargs):
  rebootme = 0
@@ -33,12 +34,9 @@ def config(*bargs):
   oldarg = get('alias/'+arglist['name'])[0]
   logmsg.sendlog('HostManual1st5','info',arglist['user'],oldarg, arglist['alias'])
   allhosts = get('ActivePartner','--prefix')
-  for host in allhosts:
-   hostname = host[0].replace('ActivePartners/','')
-   put('alias/'+arglist['name'],arglist['alias'])
-  z=['/TopStor/pump.sh','HostManualconfigAlias']
-  msg={'req': 'Pumpthis', 'reply':z}
-  sendhost(leaderip, str(msg),'recvreply',myhost)
+  put('alias/'+arglist['name'],arglist['alias'])
+  put('sync/alias/Add_'+'alias::'+arglist['name']+'_'+arglist['alias']+'/request','alias_'+str(stamp()))
+  put('sync/alias/Add_'+'alias::'+arglist['name']+'_'+arglist['alias']+'/request/'+myhost,'alias_'+str(stamp()))
   logmsg.sendlog('HostManual1su5','info',arglist['user'],oldarg, arglist['alias'])
   queuethis('Hostconfig_Alias','finish',arglist['user'])
 ######### changing cluster address ###############
@@ -46,14 +44,12 @@ def config(*bargs):
   queuethis('Hostconfig_cluster','running',arglist['user'])
   oldarg = get('namespace/mgmtip')[0]
   logmsg.sendlog('HostManual1st7','info',arglist['user'],oldarg,arglist['cluster'])
-  broadcasttolocal('namespace/mgmtip',arglist['cluster'])
-  put('namespace/mgmtip',arglist['cluster'])
+#  broadcasttolocal('namespace/mgmtip',arglist['cluster'])
   if myhost == leader:
    updatenamespace(arglist['cluster'],oldarg)
-  else:
-   z=['/TopStor/pump.sh','UpdateNameSpace.py', arglist['cluster'],oldarg]
-   msg={'req': 'Pumpthis', 'reply':z}
-   sendhost(leaderip, str(msg),'recvreply',myhost)
+  put('sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster']+'/request','namespace_'+str(stamp()))
+  put('sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster']+'/request/'+myhost,'namespace_'+str(stamp()))
+  put('namespace/mgmtip',arglist['cluster'])
   logmsg.sendlog('HostManual1su7','info',arglist['user'],oldarg,arglist['cluster'])
   queuethis('Hostconfig_cluster','finish',arglist['user'])
 
@@ -61,7 +57,8 @@ def config(*bargs):
  if 'password' in arglist:
   queuethis('ChangeUserPass','running',arglist['user'])
   #broadcasttolocal('userhash/'+arglist['username'],arglist['password'])
-  broadcast('UserPassChange','/TopStor/pump.sh','UnixChangePass',arglist['password'],arglist['username'],arglist['user'])
+  put('sync/passwd/UnixChangePass_'+'_'+arglist['password']+'_'+arglsit['username']+'_'+arglist['user']+'/request','passwd_'+str(stamp()))
+#  broadcast('UserPassChange','/TopStor/pump.sh','UnixChangePass',arglist['password'],arglist['username'],arglist['user'])
   queuethis('ChangeUserPass','finish',arglist['user'])
 ############ changing time zone ###############
  if 'tz' in arglist:
@@ -69,14 +66,8 @@ def config(*bargs):
   oldarg = get('tz/'+myhost)[0]
   argtz = arglist['tz'].split('%')[1]
   logmsg.sendlog('HostManual1st10','info',arglist['user'],oldarg, argtz)
-  allhosts = get('ActivePartner','--prefix')
-  for host in allhosts:
-   hostname = host[0].replace('ActivePartners/','')
-   put('tz/'+leader,arglist['tz'])
-   broadcasttolocal('tz/'+leader,arglist['tz'])
-  z=['/TopStor/pump.sh','HostManualconfigTZ']
-  msg={'req': 'Pumpthis', 'reply':z}
-  sendhost(leaderip, str(msg),'recvreply',myhost)
+  put('tz/'+leader,arglist['tz'])
+  put('sync/tz/HostManualConfigTZ_'+'_'+arglist['tz']+'/request','tz_'+str(stamp()))
   logmsg.sendlog('HostManual1su10','info',arglist['user'], oldarg, argtz)
   queuethis('Hostconfig_tzone','finish',arglist['user'])
 ########### changing ntp server ###############
@@ -84,14 +75,8 @@ def config(*bargs):
   queuethis('Hostconfig_ntp','running',arglist['user'])
   oldarg = get('ntp/'+myhost)[0]
   logmsg.sendlog('HostManual1st9','info',arglist['user'],oldarg, arglist['ntp'])
-  allhosts = get('ActivePartner','--prefix')
-  for host in allhosts:
-   hostname = host[0].replace('ActivePartners/','')
-   put('ntp/'+leader,arglist['ntp'])
-   broadcasttolocal('ntp/'+leader,arglist['ntp'])
-  z=['/TopStor/pump.sh','HostManualconfigNTP']
-  msg={'req': 'Pumpthis', 'reply':z}
-  sendhost(leaderip, str(msg),'recvreply',myhost)
+  put('ntp/'+leader,arglist['ntp'])
+  put('sync/ntp/HostManualconfigNTP_'+'_'+arglist['ntp']+'/request','ntp_'+str(stamp()))
   logmsg.sendlog('HostManual1su9','info',arglist['user'],oldarg, arglist['ntp'])
   queuethis('Hostconfig_ntp','finish',arglist['user'])
 ########### changing dns  ###############
@@ -104,16 +89,9 @@ def config(*bargs):
   if arglist['dnssearch'] == "":
    arglist['dnssearch'] = oldargsearch
   logmsg.sendlog('HostManual1st13','info',arglist['user'],oldargname, oldargsearch, arglist['dnsname'],arglist['dnssearch'])
-  allhosts = get('ActivePartner','--prefix')
-  for host in allhosts:
-   hostname = host[0].replace('ActivePartners/','')
-   put('dnsname/'+leader,arglist['dnsname'])
-   put('dnssearch/'+leader,arglist['dnssearch'])
-   broadcasttolocal('dnsname/'+leader,arglist['dnsname'])
-   broadcasttolocal('dnssearch/'+leader,arglist['dnssearch'])
-  z=['/TopStor/pump.sh','HostManualconfigDNS']
-  msg={'req': 'Pumpthis', 'reply':z}
-  sendhost(leaderip, str(msg),'recvreply',myhost)
+  put('dnsname/'+leader,arglist['dnsname'])
+  put('dnssearch/'+leader,arglist['dnssearch'])
+  put('sync/dns/HostManualconfigDNS'+'_'+arglist['dnsname']+'_'+arglist['dnssearch']+'/request','dns_'+str(stamp()))
   logmsg.sendlog('HostManual1su13','info',arglist['user'],oldargname, oldargsearch, arglist['dnsname'],arglist['dnssearch'])
   queuethis('Hostconfig_dns','finish',arglist['user'])
  
@@ -122,14 +100,8 @@ def config(*bargs):
   queuethis('Hostconfig_gw','running',arglist['user'])
   oldarg = get('gw/'+myhost)[0]
   logmsg.sendlog('HostManual1st11','info',arglist['user'],oldarg, arglist['gw'])
-  allhosts = get('ActivePartner','--prefix')
-  for host in allhosts:
-   hostname = host[0].replace('ActivePartners/','')
-   put('gw/'+leader,arglist['gw'])
-   broadcasttolocal('gw/'+leader,arglist['gw'])
-  z=['/TopStor/pump.sh','HostManualconfigGW']
-  msg={'req': 'Pumpthis', 'reply':z}
-  sendhost(leaderip, str(msg),'recvreply',myhost)
+  put('gw/'+leader,arglist['gw'])
+  put('sync/gw/HostManualconfigGW_'+'_'+arglist['gw']+'/request','gw_'+str(stamp()))
   logmsg.sendlog('HostManual1su11','info',arglist['user'],oldarg, arglist['gw'])
   queuethis('Hostconfig_gw','finish',arglist['user'])
  ############# changing configured  ###############
