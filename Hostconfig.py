@@ -57,7 +57,7 @@ def config(*bargs):
  if 'password' in arglist:
   queuethis('ChangeUserPass','running',arglist['user'])
   #broadcasttolocal('userhash/'+arglist['username'],arglist['password'])
-  put('sync/passwd/UnixChangePass_'+'_'+arglist['password']+'_'+arglsit['username']+'_'+arglist['user']+'/request','passwd_'+str(stamp()))
+  put('sync/passwd/UnixChangePass_'+'_'+arglist['password']+'_'+arglist['username']+'_'+arglist['user']+'/request','passwd_'+str(stamp()))
 #  broadcast('UserPassChange','/TopStor/pump.sh','UnixChangePass',arglist['password'],arglist['username'],arglist['user'])
   queuethis('ChangeUserPass','finish',arglist['user'])
 ############ changing time zone ###############
