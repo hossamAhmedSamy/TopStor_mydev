@@ -80,6 +80,7 @@ then
     targetiqn=`echo $l | awk -F'/' '{print $6}'`
     chapuser=`echo $l | awk -F'/' '{print $8}'`
     chappas=`echo $l | awk -F'/' '{print $9}'`
+    active=`echo $l | awk -F'/' '{print $10}'`
     echo $ipsubnet > /TopStordata/ISCSItmp
     yes | cp shareiscsi.txt /TopStordata/iscsi.${name}
     shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
@@ -97,6 +98,7 @@ then
     sed -i "s/TARGETIQN/$targetiqn/g" /TopStordata/iscsi.${name}
     sed -i "s/CHAPUSER/$chapuser/g" /TopStordata/iscsi.${name}
     sed -i "s/CHAPPAS/$chappas/g" /TopStordata/iscsi.${name}
+    sed -i "s/ACTIVE/$active/g" /TopStordata/iscsi.${name}
     cat /TopStordata/iscsi.${name} >> /TopStordata/iscsi.$ip
     yes | cp /TopStordata/iscsi.$name /$pool/
    done
@@ -127,6 +129,7 @@ then
    targetiqn=`echo $l | awk -F'/' '{print $6}'`
    chapuser=`echo $l | awk -F'/' '{print $7}'`
    chappas=`echo $l | awk -F'/' '{print $8}'`
+   active=`echo $l | awk -F'/' '{print $9}'`
    yes | cp shareiscsi.txt /TopStordata/iscsi.${name}
    shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
    sed -i "s/Vtype/ISCSI/g"  /TopStordata/iscsi.${name}
@@ -140,13 +143,22 @@ then
    sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/iscsi.${name}
    sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/iscsi.${name}
    sed -i "s/PORTALPORT/$portalport/g" /TopStordata/iscsi.${name}
-    sed -i "s/TARGETIQN/$targetiqn/g" /TopStordata/iscsi.${name}
-    sed -i "s/CHAPUSER/$chapuser/g" /TopStordata/iscsi.${name}
-    sed -i "s/CHAPPAS/$chappas/g" /TopStordata/iscsi.${name}
+   sed -i "s/TARGETIQN/$targetiqn/g" /TopStordata/iscsi.${name}
+   sed -i "s/CHAPUSER/$chapuser/g" /TopStordata/iscsi.${name}
+   sed -i "s/CHAPPAS/$chappas/g" /TopStordata/iscsi.${name}
+   sed -i "s/ACTIVE/$active/g" /TopStordata/iscsi.${name}
    echo running iscsi.sh=$pool $name $ipaddr $ipsubnet $portalport $targetiqn $chapuser $chappas >> /root/volactivateparam
    echo running iscsi.sh=$pool $name $ipaddr $ipsubnet $portalport $targetiqn $chapuser $chappas 
    yes | cp /TopStordata/iscsi.${name} /$pool/
    /TopStor/iscsi.sh $pool $name $ipaddr $ipsubnet $portalport $targetiqn $chapuser $chappas
+   zfs set status:mount=$active $pool/$name
+   echo $active | grep active
+   if [ $? -eq 0 ];
+    zfs mount $pool/$name
+   else
+    zfs unmount $pool/$name
+   fi
+
    echo finished iscsi.sh >> /root/volactivateparam
   done
  fi

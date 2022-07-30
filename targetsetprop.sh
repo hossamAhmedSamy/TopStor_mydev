@@ -11,3 +11,8 @@ then
 fi
 echo zfs set $props partner:sender=$partner $poolvol 
 zfs set $props partner:sender=$partner $poolvol 
+pdhcp2608430392 common_427522895_972132710 CIFS disabled admin
+pool=`echo $poolvol | awk -F'/' '{print $1}'`
+volname=`echo $poolvol | awk -F'/' '{print $2}'`
+prot=`./etcdget.py volumes $volname | awk -F'/' '{print $2}'`
+./Volumeactive.py $pool $volname $prot disabled system 

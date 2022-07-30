@@ -46,4 +46,4 @@ then
  props=`zfs get all $snapshot | awk '{print $2"="$3}' | grep ':' | grep -v receiver | tr '\n' ','`
  $nodeloc /TopStor/targetsetprop.sh $poolvol $clusterip ${props:0:-1}
 fi
-echo result_${result}result_
+echo result2_${result}result2__
