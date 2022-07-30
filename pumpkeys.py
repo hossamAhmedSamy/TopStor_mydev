@@ -1,16 +1,9 @@
 #!/bin/python3.6
 import sys, subprocess
-from etcdput import etcdput as put
-from etcdputlocal import etcdput as putlocal
 from etcdget import etcdget as get 
-from etcddel import etcddel as dels 
-from logqueue import queuethis
-from logmsg import sendlog
 from socket import gethostname as hostname
 from sendhost import sendhost
 from privthis import privthis 
-from time import time as timestamp
-from broadcasttolocal import broadcasttolocal
 myhost = hostname()
 myip = get('ready/'+myhost)[0]
 clusterip = get('namespace/mgmtip')[0].split('/')[0]

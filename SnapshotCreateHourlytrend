@@ -26,5 +26,6 @@ crontab -l > $cronthis
 echo $min  "*"/$every "*" "*" "*"  /TopStor/Snapshotnowhosttrend $DG/$FileS Trend $stamp  >> $cronthis
 crontab $cronthis 2>> $txtres
 /pace/etcdput.py sizevol/$DG/$FileS $stamp-0 
+ETCDCTL_API=3 /pace/etcdput.py sync/sizevol/$myhost $stamp 
 /pace/broadcasttolocal.py sizevol/$DG/$FileS $stamp-0 
 fi

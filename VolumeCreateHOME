@@ -67,6 +67,8 @@ then
  myhost=`hostname -s`
  echo /pace/etcdput.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes >> /root/volcreate
  ETCDCTL_API=3 /pace/etcdput.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
+ stamp=`date +%s`
+ ETCDCTL_API=3 /pace/etcdput.py sync/volumes/$myhost $stamp 
  /pace/broadcasttolocal.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet 
  ./VolumeActivateHome vol=$name user=$userreq
  /pace/putzpool.py 

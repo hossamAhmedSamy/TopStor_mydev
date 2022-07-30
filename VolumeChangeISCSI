@@ -30,6 +30,8 @@ then
  older=`ETCDCTL_API=3 /pace/etcdget.py volumes $name `
  echo /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas/$active
  /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas/$active
+ stamp=`date +%s`
+ ETCDCTL_API=3 /pace/etcdput.py sync/volumes/$myhost $stamp 
  /pace/broadcasttolocal.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas/$active
  oldipaddr=`zfs get -H ip:addr $DG/$name | awk '{print $3}'`
  echo got ip $ipaddr

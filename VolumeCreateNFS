@@ -61,6 +61,8 @@ then
 
  who=$oct1'.'$oct2'.'$oct3'.*'
  ETCDCTL_API=3 /pace/etcdput.py volumes/NFS/$myhost/$DG/$name $DG/$name/$who/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet/$active
+ stamp=`date +%s`
+ ETCDCTL_API=3 /pace/etcdput.py sync/volumes/$myhost $stamp 
  ETCDCTL_API=3 /pace/broadcasttolocal.py volumes/NFS/$myhost/$DG/$name $DG/$name/$who/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet/$active
  /TopStor/SnapshotCreateHourlytrend $DG $name 0 24 7 system 
  /TopStor/VolumeActivateNFS vol=$name user=$userreq
@@ -70,6 +72,8 @@ then
   /TopStor/logmsg.py NFS1005 error  $userreq $name
  else 
   ETCDCTL_API=3 /pace/etcdput.py volumes/NFS/$myhost/$DG/$name $DG/$name/$who/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet/$active
+ stamp=`date +%s`
+ ETCDCTL_API=3 /pace/etcdput.py sync/volumes/$myhost $stamp 
  ETCDCTL_API=3 /pace/broadcasttolocal.py volumes/NFS/$myhost/$DG/$name $DG/$name/$who/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet/$active
   /TopStor/logmsg.py NFS1007 info $userreq $name
  fi;
