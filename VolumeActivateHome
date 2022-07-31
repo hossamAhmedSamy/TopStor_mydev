@@ -194,9 +194,13 @@ then
    for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done
   fi
   /pace/etcdput.py volumes/HOME/$myhost/$pool/$name $volsvalue
+  stamp=`date +%s`
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/$myhost $stamp 
   if [ $volhost != $myhost ];
   then
    /pace/etcddel.py volumes/HOME/$volhost/$pool/$name
+   stamp=`date +%s`
+   ETCDCTL_API=3 /pace/etcdput.py sync/volumes/$myhost $stamp 
   fi
  done
  echo finished setting volumes regestry >> /root/volactivateparamHome
