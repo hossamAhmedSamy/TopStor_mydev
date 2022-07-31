@@ -29,7 +29,7 @@ fi
 /pace/etcdput.py ActivePartners/$myhost $hostip
 /pace/etcdput.py hostipsubnet/$myhost $subnet
 /pace/etcdput.py ready/$myhost $hostip
-configured=`./etcdput.py configured/$myhost yes`
+#configured=`./etcdput.py configured/$myhost yes`
 ./UpdateHosts $myhost $hostip
 /sbin/pcs resource update CC cidr_netmask=$subnet ip=$hostip
 /pace/keysend.sh $hostip
