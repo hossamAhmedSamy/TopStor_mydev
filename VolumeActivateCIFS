@@ -65,6 +65,11 @@ then
   echo "${ips[@]}" | awk '{print $2}' | sed "s/'//g" | sed "s/)//g" | sed "s/(//g"  | while read i;
   do
    ip=`echo $i | awk -F'-' '{print $3}' | awk -F'/' '{print $1}'`
+   echo $ip | grep '-1'
+   if [ $? -eq 0 ];
+   then
+    continue
+   fi
    rm -rf /TopStordata/smb.$ip
    declare ipvol=`echo $i |  cut -d/ -f2-`
    echo "${ipvol[@]}" | sed 's/\//\n/g' | while read v;
@@ -82,6 +87,7 @@ then
     browsable=`echo $l | awk -F'/' '{print $4}'`
     ipaddr=`echo $l | awk -F'/' '{print $8}'`
     ipsubnet=`echo $l | awk -F'/' '{print $9}'`
+    active=`echo $l | awk -F'/' '{print $10}'`
     writev=`echo $l | awk -F'/' '{print $5}'`
     writev=`echo $writev | sed 's/\,/ /g' `;
     admin=`echo $l | awk -F'/' '{print $6}'`
@@ -115,6 +121,7 @@ then
     sed -i "s/\@everyone/$writev/g" /TopStordata/smb.${name}
     sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/smb.${name}
     sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/smb.${name}
+    sed -i "s/ACTIVE/$active/g" /TopStordata/smb.${name}
 
     rm -rf /TopStordata/smb.${ipaddr}.new
     /TopStor/delblock.py start${name}_only stop${name}_only /TopStordata/smb.$ipaddr  ;
@@ -149,6 +156,7 @@ then
    writev=`echo $l | awk -F'/' '{print $5}'`
    ipaddr=`echo $l | awk -F'/' '{print $8}'`
    ipsubnet=`echo $l | awk -F'/' '{print $9}'`
+   active=`echo $l | awk -F'/' '{print $10}'`
    writev=`echo $writev | sed 's/\,/ /g' `;
    admin=`echo $l | awk -F'/' '{print $6}'`
    writeable=`echo $l | awk -F'/' '{print $7}'`
@@ -174,11 +182,19 @@ then
    sed -i "s/Yes/$writeable/g" /TopStordata/smb.${name}
    sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/smb.${name}
    sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/smb.${name}
+   sed -i "s/ACTIVE/$active/g" /TopStordata/smb.${name}
    chmod 770 /$pool/$name
    echo running cifs.sh=$pool $name $ipaddr $ipsubnet cifs >> /root/volactivateparam
    echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    yes | cp /TopStordata/smb.$name /$pool/
    /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
+   zfs set status:mount=$active $pool/$name
+   echo $active | grep active
+   if [ $? -eq 0 ];
+    zfs mount $pool/$name
+   else
+    zfs unmount $pool/$name
+   fi
    echo finished cifs.sh >> /root/volactivateparam
    echo writve=$writev
    setfacl -b /$pool/$name

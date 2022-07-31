@@ -7,6 +7,12 @@ logging='/var/www/html/des20/Data/currentinfo2.log'
 runningpools='/pacedata/pools/runningpools'
 pDG=`echo $@ | awk '{print $1}'`;
 DG=`echo $@ | awk -F/ '{print $1}'`;
+receiver='NoReceiver'
+echo $? | grep NoReceiver
+if [ $? -ne -0 ];
+then
+receiver=` echo $@ | awk -F'/' '{print $NF'}`
+fi
 echo $pDG
 myhost=`hostname -s`
 pp=`/sbin/zpool list | grep $DG`
@@ -18,7 +24,19 @@ then
  /TopStor/logqueue.py `basename "$0"` stop_cancel system 
 else
  /TopStor/logqueue.py `basename "$0"` running system 
-  res=`./Snapshotnow $@`
+ res=`./Snapshotnow $@`
+ echo result is =$res
+ receiver='NoReceiver'
+ echo $@ | grep NoReceiver
+ if [ $? -ne -0 ];
+ then
+  receiver=` echo $@ | awk -F'/' '{print $NF'}`
+  snapshot=`echo $res | grep '_newsnap' | awk -F'_newsnap' '{print $2}' `
+  params=`/TopStor/repliparams.py $snapshot`
+  echo $receiver $snapshot > /root/snpshottemp
+  echo snapshot=$snapshot  receiver=$receiver
+  zfs set partner:receiver=$receiver $snapshot
+ fi
 #  /TopStor/logmsg.py Snap1045 error $userreq $newsnap 
 /TopStor/logqueue.py `basename "$0"` stop system 
 fi

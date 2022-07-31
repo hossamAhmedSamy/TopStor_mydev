@@ -23,6 +23,7 @@ def getsnapperiods(voldict):
    periodsdict[leftper[4]]['volume']=vol
    periodsdict[leftper[4]]['periodtype']=leftper[1]
    periodsdict[leftper[4]]['id']=leftper[4]
+   periodsdict[leftper[4]]['receiver']=rightper[-1]
    if 'Minutely' in leftper[1]: 
     periodsdict[leftper[4]]['keep']=rightper[4].split('.')[1]
     periodsdict[leftper[4]]['every']=rightper[4].split('.')[2]
@@ -42,8 +43,9 @@ def getsnapperiods(voldict):
     periodsdict[leftper[4]]['every']=rightper[3].split('.')[4].split('%')[0]
  return (periodsdict,voldict)
 
-def getall(*args):
- alldsks = args[0]
+def getall(alldsks='0', *args):
+ if alldsks == '0':
+  alldsks = get('host','current')
  hostsdict = dict()
  poolsdict = dict()
  raidsdict = dict()
@@ -93,7 +95,6 @@ def getall(*args):
   if alldsk == -1:
    continue
   host = alldsk[0].split('/')[1]
-  #print(alldsk[1])
   pools = mtuple(alldsk[1])
   hostpools = []
   hostip = get('ActivePartners/'+host)[0]
@@ -103,6 +104,7 @@ def getall(*args):
    pool['available'] = levelthis(pool['available'])
    pool['alloc'] = levelthis(pool['alloc'])
    pool['empty'] = levelthis(pool['empty'])
+   pool['size'] = levelthis(pool['size'])
    hostpools.append(pool['name'])
    thepool = pool.copy()
    thepool.pop('raidlist',None)
@@ -147,6 +149,8 @@ def getall(*args):
    poolsdict[pool['name']]['volumes'] = poolvolumes
    for volume in pool['volumes']:
     volume['used'] = levelthis(volume['used'])
+    volume['available'] = levelthis(volume['available'])
+    volume['referenced'] = levelthis(volume['referenced'],'M')
     if volume['prot'] == 'ISCSI':
      volume['quota'] = volume['used'] 
     else:
@@ -159,7 +163,7 @@ def getall(*args):
     volumesnapshots = []
     volumesnapperiods = []
     for snapshot in volume['snapshots']:
-     snapshot['used'] = levelthis(snapshot['used'],'M')
+     snapshot['used'] = levelthis(snapshot['used'])
      volumesnapshots.append(snapshot['name'])
      snapshotsdict[snapshot['name']] = snapshot.copy() 
     if 'snapperiods' in volume:
@@ -206,7 +210,7 @@ def getall(*args):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
- print('raids',raidsdict)
+ print('snapshots',snapshotsdict)
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  

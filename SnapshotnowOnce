@@ -7,16 +7,58 @@ myhost=$myhost;
 pool=`echo $@ | awk '{print $1}'`;
 vol=`echo $@ | awk '{print $2}'`;
 name=`echo $@ | awk '{print $3}'` ;
+receiver=`echo $@ | awk '{print $4}'` ;
+userreq=`echo $@ | awk '{print $5}'` ;
 stamp=`date +%s`;
-echo /sbin/zfs snapshot $pool/$vol@${name}.$stamp
-/sbin/zfs snapshot $pool/$vol@${name}.$stamp
+snapshot=$pool'/'$vol'@'${name}'.'$stamp
+shortreceiver=`echo $receiver | awk -F'_' '{print $1}'`
+
+
+echo $receiver | grep $name
+if [ $? -ne 0 ];
+then 
+ ./logmsg.py Replispacest01 info $userreq $vol $shortreceiver  
+ echo /logmsg.py Replispacest01 info $userreq $vol $shortreceiver  
+else
+ /TopStor/logmsg.py Snap1026 info $userreq $FileS/$name 
+fi
+zfs snapshot $snapshot 
 if [ $? -ne 0  ]; then
-        echo failed
-        exit 1;
-else 
-timenow=`/usr/bin/date`
-/sbin/zfs set snap:type=Once $pool/$vol@${name}.$stamp
-echo OK;
-exit 0
+      echo failed
+      exit 1;
+fi 
+result='init'
+zfs set snap:type=Once $snapshot 
+echo $receiver | grep $name 
+if [ $? -ne 0 ];
+then 
+ params=`./repliparams.py $snapshot | grep 'result_' | sed 's/result\_//g'`
+ echo ./replitargetget.sh ${receiver} $params  awk -F'result_' '{print $2}'
+ result=`./replitargetget.sh ${receiver} $params | awk -F'result_' '{print $2}'`
+ echo result=$result
+ #result=`./replitargetget.sh ${receiver} sico 2030202 snapsnap | awk -F'result_' '{print $2}'`
+ echo $result | grep 'No_vol_space'
+ if [ $? -eq 0 ];
+ then
+  echo zfs destroy $snapshot
+  zfs destroy $snapshot
+  ./logmsg.py Replispacefa01 error $userreq $shortreceiver $vol
+ else
+  nodeowner=`echo $result | awk -F':' '{print $1}'`
+  poolvol=`echo $result | awk -F':' '{print $2}'`
+  echo newresult $result
+  overallres=`./replistream.sh $receiver $snapshot $nodeowner $poolvol`
+  streamres=`echo $overallres | awk -F'result2_' '{print $2}'`
+  if [ $streamres -eq 0 ];
+  then
+   zfs set partner:receiver=$shortreceiver $snapshot
+   ./logmsg.py Replispacesu01 info $userreq $shortreceiver $vol
+  else
+   echo zfs destroy $snapshot
+   echo $overallres > /root/replicationresult
+   zfs destroy $snapshot
+   ./logmsg.py Streamfa01 error $userreq $vol $shortreceiver
+  fi
+ fi 
 fi;
 #sleep 2;

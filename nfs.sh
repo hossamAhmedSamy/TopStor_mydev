@@ -6,6 +6,13 @@ vol=`echo $@ | awk '{print $2}'`
 ipaddr=`echo $@ | awk '{print $3}'`
 ipsubnet=`echo $@ | awk '{print $4}'`
 echo $@ > /root/nfsparam
+allvols=`./etcdget.py volumes --prefix`
+replivols=`echo $allvols | grep $vol`
+echo $replivols | grep active
+if [ $? -ne 0 ];
+then
+ exit
+fi
 docker rm -f `docker ps -a | grep -v Up | grep $ipaddr | awk '{print $1}'` 2>/dev/null
 clearvol=`./prot.py clearvol $vol | awk -F'result=' '{print $2}'`
 if [ $clearvol != '-1' ];
@@ -29,6 +36,12 @@ then
  mount=''
  for x in $mounts; 
  do
+  replivols=`echo $allvols | grep $x`
+  echo $replivols | grep active
+  if [ $? -ne 0 ];
+  then
+   continue
+  fi
   mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
  done
 fi 

@@ -384,6 +384,7 @@ def dskperfs():
  ioperf()
  return jsonify({'dsk':dskperf(), 'cpu':cpuperf()})
 
+
 @app.route('/api/v1/volumes/snapshots/snapshotsinfo', methods=['GET','POST'])
 def volumessnapshotsinfo():
  global allvolumes, alldsks, allinfo
@@ -395,6 +396,9 @@ def volumessnapshotsinfo():
  snappriods = []
  for snap in allinfo['snapshots']:
   allinfo['snapshots'][snap]['date'] = datetime.strptime(allinfo['snapshots'][snap]['creation'], '%a %b %d %Y').strftime('%d-%B-%Y')
+  print('#####################################33')
+  print(allinfo['snapshots'][snap])
+  print('#####################################33')
   snaplist[allinfo['snapshots'][snap]['snaptype']].append(allinfo['snapshots'][snap].copy())
   alllist.append(allinfo['snapshots'][snap].copy())
  for period in allinfo['snapperiods']:
@@ -467,7 +471,7 @@ def poolsinfo():
 
 @app.route('/api/v1/groups/groupchange', methods=['GET','POST'])
 @login_required
-def groupchange(data):
+def pgroupchange(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  usrs = data.get('users')
@@ -484,6 +488,14 @@ def groupchange(data):
  postchange(cmndstring)
  return data
 
+@app.route('/api/v1/replication/addpartner', methods=['GET','POST'])
+@login_required
+def partneradd(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
+ cmndstring = '/TopStor/pump.sh PartnerAdd.py '+data.get('partnerip')+' '+data.get('partneralias')+' '+data.get('replitype')+' '+data.get('repliport')+' '+data.get('phrase')+' '+data.get('user')
+ postchange(cmndstring)
+ return data
 
 @app.route('/api/v1/users/userchange', methods=['GET','POST'])
 @login_required
@@ -575,6 +587,10 @@ def volumesnapshotscreate(data):
  for param in switch[data['snapsel']]:
   datastr +=data[param]+' '
  #datastr = data['name']+' '+data['pool']+' '+data['volume']+' '+data['user']
+ if 'receiver' not in data:
+   datastr += 'NoReceiver'
+ else:
+   datastr += data['receiver']
  print('#############################')
  print(data)
  print(datastr)
@@ -602,14 +618,14 @@ def volumecreate(data):
  if 'ISCSI' in data['type']:
   data['chapuser']='MoatazNegm'
   data['chappas']='MezoAdmin'
-  datastr = data['pool']+' '+data['name']+' '+data['size']+' '+data['ipaddress']+' '+data['Subnet']+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+data['user']+' '+data['owner']+' '+data['user']
+  datastr = data['pool']+' '+data['name']+' '+data['size']+' '+data['ipaddress']+' '+data['Subnet']+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+data['active']+' '+data['user']+' '+data['owner']+' '+data['user']
  elif 'CIFSdom' in data['type']:
   cmdline=['./encthis.sh',data["dompass"]]
   data["dompass"]=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode().replace('/','@@sep')[:-1]
 
-  datastr = data['pool']+' '+data['name']+' '+data['size']+' '+' '+data['ipaddress']+' '+data['Subnet']+' '+data['user']+' '+data['owner']+' '+data['user']+' '+ data["domname"]+' '+ data["domsrv"]+' '+ data["domip"]+' '+ data["domadmin"]+' '+ data["dompass"] 
+  datastr = data['pool']+' '+data['name']+' '+data['size']+' '+' '+data['ipaddress']+' '+data['Subnet']+' '+data['active']+' '+data['user']+' '+data['owner']+' '+data['user']+' '+ data["domname"]+' '+ data["domsrv"]+' '+ data["domip"]+' '+ data["domadmin"]+' '+ data["dompass"]
  else:
-  datastr = data['pool']+' '+data['name']+' '+data['size']+' '+data['groups']+' '+data['ipaddress']+' '+data['Subnet']+' '+data['user']+' '+data['owner']+' '+data['user']
+  datastr = data['pool']+' '+data['name']+' '+data['size']+' '+data['groups']+' '+data['ipaddress']+' '+data['Subnet']+' '+data['active']+' '+data['user']+' '+data['owner']+' '+data['user']
  print('#############################')
  print(data)
  print(datastr)
@@ -707,13 +723,13 @@ def volumeconfig(data):
    data['initiators'] = volume['initiators']
   if 'portalport' not in data:
    data['portalport'] = volume['portalport']
-  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+data['ipaddress']+' '+str(volume['Subnet'])+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+data['user']+' '+data['owner']+' '+data['user']
+  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+data['ipaddress']+' '+str(volume['Subnet'])+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+data['active']+' '+data['user']+' '+data['owner']+' '+data['user']
  else:
   if 'groups' in data and len(data['groups']) < 1: 
    data['groups'] = 'NoGroup'
   for ele in data:
    volume[ele] = data[ele] 
-  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+volume['groups']+' '+volume['ipaddress']+' '+str(volume['Subnet'])+' '+volume['host']+' '+volume['user']
+  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+volume['groups']+' '+volume['ipaddress']+' '+str(volume['Subnet'])+' '+data['active']+' '+volume['host']+' '+volume['user']
  print('#############################')
  print(data)
  print(datastr)
@@ -832,6 +848,22 @@ def volumesnapshotdel(data):
         		 
  return data
 
+@app.route('/api/v1/volumes/volumeactive', methods=['GET','POST'])
+@login_required
+def volumeactive(data):
+ global allinfo
+ pool = allinfo['volumes'][data['name']]['pool']
+ prot = allinfo['volumes'][data['name']]['prot']
+ owner = allinfo['volumes'][data['name']]['host']
+ ownerip = allinfo['hosts'][owner]['ipaddress']
+ cmndstring = "/TopStor/pump.sh Volumeactive.py "+pool+" "+data['name']+" "+prot+" "+data['active']+" "+data['user']
+ print('##################################')
+ print('volumeactive',cmndstring)
+ print('##################################')
+ z= cmndstring.split(' ')
+ msg={'req': 'Pumpthis', 'reply':z}
+ sendhost(ownerip, str(msg),'recvreply',myhost)
+ return data
 
 
 
@@ -864,6 +896,17 @@ def groupdel(data):
  postchange(cmndstring)
  return data
 
+@app.route('/api/v1/partners/partnerdel', methods=['GET','POST'])
+@login_required
+def partnerdel(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'}
+ cmndstring = '/TopStor/pump.sh repliPartnerDel '+data.get('name')+' yes '+data['user']
+ postchange(cmndstring)
+ return data
+
+
+
 @app.route('/api/v1/users/userdel', methods=['GET','POST'])
 @login_required
 def userdel(data):
@@ -889,13 +932,21 @@ def UnixAddGroup(data):
     if str(suser['id']) == str(usr):
      usrstr += suser['name']+',' 
   usrstr = usrstr[:-1]
- print('##########################33333')
- print(data)
- print('##########################33333')
  cmndstring = '/TopStor/pump.sh UnixAddGroup '+data['name']+' '+' users'+usrstr+' '+data['user']
  postchange(cmndstring)
  return data
- 
+
+@app.route('/api/v1/partners/AddPartner', methods=['GET','POST'])
+@login_required
+def AddPartner(data):
+ if 'baduser' in data['response']:
+  return {'response': 'baduser'} 
+ print('##########################33333')
+ print(data)
+ print('##########################33333')
+ cmdstring = '/TopStor/pump.sh PartnerAdd.py '+data['ip']+' '+data['alias']+' '+data['type']+' '+data['port']+' '+data['pass']+' '+data['user'] + ' init'
+ postchange(cmdstring)
+ return data
 
 @app.route('/api/v1/users/UnixAddUser', methods=['GET','POST'])
 @login_required
@@ -979,6 +1030,15 @@ def userauths(data):
    break
  return jsonify({'auths':priv, 'response':data['response']})
 
+@app.route('/api/v1/partners/partnerlist', methods=['GET'])
+def api_partners_userslist():
+ allpartners=[]
+ partnerlst = etcdgetjson('Partner/','--prefix')
+ for partner in partnerlst:
+  alias =  partner["name"].split('/')[1] 
+  split = partner["prop"].split('/') 
+  allpartners.append({'alias': alias, "ip":split[0], "type":split[1], "port":split[2]})
+ return { "allpartners":allpartners }
 
 @app.route('/api/v1/users/userlist', methods=['GET'])
 def api_users_userslist():

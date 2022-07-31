@@ -90,6 +90,7 @@ then
     writev=`echo $l | awk -F'/' '{print $9}'`
     ipaddr=`echo $l | awk -F'/' '{print $10}'`
     ipsubnet=`echo $l | awk -F'/' '{print $11}'`
+    active=`echo $l | awk -F'/' '{print $12}'`
     writev=`echo $writev | sed 's/\,/ /g' `;
     echo $ipsubnet > /TopStordata/NFStmp
     echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' > /TopStordata/exports.$name 
@@ -131,6 +132,7 @@ then
    writev=`echo $l | awk -F'/' '{print $9}'`
    ipaddr=`echo $l | awk -F'/' '{print $10}'`
    ipsubnet=`echo $l | awk -F'/' '{print $11}'`
+   active=`echo $l | awk -F'/' '{print $12}'`
    writev=`echo $writev | sed 's/\,/ /g' `;
    echo $path' '$who'('$access','$sync','$secure','$squash','$subtree')' > /TopStordata/exports.$name 
     echo '# SUMMARY' $l  >> /TopStordata/exports.${name}
@@ -144,6 +146,13 @@ then
    fi
    echo running nfs $pool $name $ipaddr $ipsubnet
    /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
+   zfs set status:mount=$active $pool/$name
+   echo $active | grep active
+   if [ $? -eq 0 ];
+    zfs mount $pool/$name
+   else
+    zfs unmount $pool/$name
+   fi
   done
  fi
 # /sbin/exportfs -ra

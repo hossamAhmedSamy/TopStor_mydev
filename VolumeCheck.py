@@ -9,6 +9,7 @@ from socket import gethostname as hostname
 
 myhost = hostname()
 etcds = get('volumes')
+replis = get('replivol')
 cmdline = 'pcs resource'
 pcss = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8') 
 
@@ -27,13 +28,14 @@ def cifs(*args):
    left='volumes/CIFS/'+myhost+'/'+'/'.join(reslist[0:2])
    put(left,res)
    broadcasttolocal(left,res)
-  if (('cifs-'+reslist[7]) not in dockers) or (('cifs-'+reslist[7]) not in pcss):
-   if 'DOMAIN' in res:
-    cmdline='/TopStor/cifsmember.sh '+reslist[0]+' '+reslist[1]+' '+reslist[7]+' '+reslist[8]+' cifs '+' '.join(reslist[9:])
-   else:
-    cmdline='/TopStor/cifs.sh '+reslist[0]+' '+reslist[1]+' '+reslist[7]+' '+reslist[8]+' cifs'
-   result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
-   print(result)
+  if 'active' in res:
+   if (('cifs-'+reslist[7]) not in dockers) or (('cifs-'+reslist[7]) not in pcss):
+    if 'DOMAIN' in res:
+     cmdline='/TopStor/cifsmember.sh '+reslist[0]+' '+reslist[1]+' '+reslist[7]+' '+reslist[8]+' cifs '+' '.join(reslist[9:])
+    else:
+     cmdline='/TopStor/cifs.sh '+reslist[0]+' '+reslist[1]+' '+reslist[7]+' '+reslist[8]+' cifs'
+    result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
+    print(result)
 
 def homes(*args):
   global myhost, etcds, pcss

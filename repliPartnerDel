@@ -1,0 +1,96 @@
+#!/usr/bin/sh
+export ETCDCTL_API=3
+cd /TopStor
+echo $@ > /root/tmppartnerdel
+cronthis='/TopStordata/cronthis.txt'
+Partner=`echo $@ | awk '{print $1}'`;
+issync=`echo $@ | awk '{print $2}'`;
+userreq=`echo $@  | awk '{print $3}'`;
+privilege="Replication";
+contrun=`./privthis.sh $privilege $userreq`;
+if [[ $contrun == 'true' ]]
+then
+  /TopStor/logmsg.py Partner1003 info $userreq $Partner
+  myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+  leader=`./etcdget.py leader --prefix`
+  echo $leader | grep $myip
+  if [ $? -eq 0 ];
+  then
+   isleader=''
+   islocal=''
+  else
+   isleader=$myip
+   islocal='local'
+  fi
+  issender=`echo $Partner | awk -F'_' '{print $2}'`
+  partnerinfo=`./etcdget${islocal}.py $isleader Partner/${Partner}` 
+  clusterip=`echo $partnerinfo | awk -F'/' '{print $1}'`
+  currentkeys=`cat /root/.ssh/authorized_keys`
+  currenthosts=`cat /root/.ssh/known_hosts`
+  nodes=`./etcdget${islocal}.py $isleader node${issender}/$clusterip --prefix | awk -F'dhcp' '{print $2}' | sed "s/')//g" | sed 's/ /\//g' `
+  hosts=`./etcdget${islocal}.py $isleader node${issender}/$clusterip --prefix | awk -F"', '" '{print $1}' | awk -F"/" '{print $NF}'`
+  echo clusterip=$clusterip
+  echo currentkeys="$currentkeys"
+  echo currenthosts="$currenthosts"
+  echo hosts=$hosts
+  echo nodes=$nodes
+  echo $issender | grep Sender
+  if [ $? -eq 0 ];
+  then
+   echo "$nodes" | while read r;
+   do
+    echo r=$r
+    currentkeys=`echo  "$currentkeys" | grep -v 'dhcp'$r `
+    echo "$currentkeys" > /root/.ssh/authorized_keys
+   done 
+  else
+   echo "$hosts" | while read r;
+   do
+    echo r=$r
+    currenthosts=`echo  "$currenthosts" | grep -v $r `
+    echo "$currenthosts" > /root/.ssh/known_hosts
+    echo currenthosts="$currenthosts"
+   done 
+  fi
+  echo '##########################'
+  currentkeys=`cat /root/.ssh/authorized_keys`
+  currenthosts=`cat /root/.ssh/known_hosts`
+  echo currentkeys="$currentkeys"
+  echo currenthosts="$currenthosts"
+  echo hosts=$hosts
+  echo nodes=$nodes
+  echo '##########################'
+#  echo "$currentkeys" > /root/.ssh/authorized_keys
+#  echo "$currenthosts" > /root/.ssh/known_hosts
+  chmod 004 /root/.ssh/authorized_keys
+  chmod 004 /root/.ssh/known_hosts
+  echo $issender | grep sender 
+  if [ $? -eq 0 ];
+  then
+   pport=` echo $partnerinfo | awk -F'/' '{print $3}'`
+   allpartners=`./etcdget${islocal}.py $isleader Partner --prefix | grep -v $clusterip`
+   echo $allpartners | grep $pport
+   if [ $? -ne 0 ];
+   then
+    sshd=`cat /etc/ssh/sshd_config | grep -v $pport`
+    echo -e "$sshd" > /etc/ssh/sshd_config
+    systemctl restart sshd
+   fi
+  fi 
+  ./etcddel${islocal}.py $isleader Partner $Partner 
+  crontab -l | grep -v $Partner > $cronthis
+  crontab $cronthis
+  echo $issync | grep yes 
+  if [ $? -eq 0 ];
+  then
+    stamp=`date +%s`;
+    echo $leader | grep $myip
+    if [ $? -eq 0 ];
+    then
+     ./etcddel.py sync/Partner ${Partner}
+     ./etcdput.py sync/repliPartnerDel_${Partner}_${userreq}_/$myhost  $stamp
+     ./etcdput.py sync/Snapperioddel_${Partner}_${userreq}_/$myhost  $stamp
+    fi
+  fi
+  /TopStor/logmsg.py Partner1004 info $userreq $Partner
+fi

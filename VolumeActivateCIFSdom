@@ -155,6 +155,7 @@ then
    adwini=`echo $l | awk -F'/' '{print $12}'`
    winadm=`echo $l | awk -F'/' '{print $13}'`
    winpass=`echo $l | awk -F'/' '{print $14}'`
+   active=`echo $l | awk -F'/' '{print $15}'`
    yes | cp sharecifsdom.txt /TopStordata/smb.${name}
    shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
    sed -i "s/Vtype/CIFS/g"  /TopStordata/smb.${name}
@@ -181,11 +182,20 @@ then
    sed -i "s/DOMSRVI/$adwini/g" /TopStordata/smb.${name}
    sed -i "s/DOMADM/$winadm/g" /TopStordata/smb.${name}
    sed -i "s/DOMPASS/$winpass/g" /TopStordata/smb.${name}
+   sed -i "s/ACTIVE/$active/g" /TopStordata/smb.${name}
    chmod 770 /$pool/$name
    echo running cifs.sh=$pool $name $ipaddr $ipsubnet cifs >> /root/volactivateparam
    echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    yes | cp /TopStordata/smb.$name /$pool/
    /TopStor/cifsmember.sh $pool $name $ipaddr $ipsubnet cifs $domain $adwinn $adwini $winadm $winpass
+   zfs set status:mount=$active $pool/$name
+   echo $active | grep active
+   if [ $? -eq 0 ];
+    zfs mount $pool/$name
+   else
+    zfs unmount $pool/$name
+   fi
+
    echo finished cifs.sh >> /root/volactivateparam
    echo writve=$writev
    setfacl -b /$pool/$name
