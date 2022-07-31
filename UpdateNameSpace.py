@@ -2,10 +2,14 @@
 import subprocess,sys
 from etcdget import etcdget as get
 from etcdput import etcdput as put 
-import json
+from time import time as stamp
+from socket import gethostname as hostname
+
 dev='enp0s8'
 def updatenamespace(*args):
+  myhost = hostname()
   put('namespace/mgmtip',args[0])
+  put('sync/namespace/'+myhost,str(stamp()))
   print('hihi',args[0])
   print('hi',args[0].split('/')[0],args[0].split('/')[1])
   print('hihihi',args[1].split('/')[0],args[1].split('/')[1])
