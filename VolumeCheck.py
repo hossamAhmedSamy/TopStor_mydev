@@ -3,6 +3,7 @@ import subprocess,sys, os
 from etcdgetpy import etcdget as get
 from etcdput import etcdput as put 
 from broadcasttolocal import broadcasttolocal 
+from time import time as stamp
 
 from socket import gethostname as hostname
 
@@ -27,6 +28,7 @@ def cifs(*args):
   if reslist[1] not in str(etcds):
    left='volumes/CIFS/'+myhost+'/'+'/'.join(reslist[0:2])
    put(left,res)
+   put('sync/volumes/'+myhost,str(stamp()))
    broadcasttolocal(left,res)
   if 'active' in res:
    if (('cifs-'+reslist[7]) not in dockers) or (('cifs-'+reslist[7]) not in pcss):
@@ -50,6 +52,7 @@ def homes(*args):
    if reslist[1] not in str(etcds):
     left='volumes/HOME/'+myhost+'/'+'/'.join(reslist[0:2])
     put(left,res)
+    put('sync/volumes/'+myhost,str(stamp()))
     broadcasttolocal(left,res)
    if reslist[7] not in dockers or reslist[7] not in pcss:
     print(reslist)
@@ -71,6 +74,7 @@ def iscsi(*args):
   if reslist[1] not in str(etcds):
    left='volumes/ISCSI/'+myhost+'/'+'/'.join(reslist[0:2])
    put(left,res)
+   put('sync/volumes/'+myhost,str(stamp()))
    broadcasttolocal(left,res)
   if reslist[1] not in targets or reslist[2] not in pcss:
    print(reslist)

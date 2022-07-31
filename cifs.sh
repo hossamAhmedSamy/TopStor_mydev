@@ -51,6 +51,8 @@ else
  rightvols=$rightip'/'$vol
 fi
  /pace/etcdput.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
+ stamp=`date +%s`;
+ /pace/etcdput.py sync/ipaddr/$myhost $stamp
  /pace/broadcasttolocal.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols 
  /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
  /sbin/pcs resource group add ip-all $resname 
