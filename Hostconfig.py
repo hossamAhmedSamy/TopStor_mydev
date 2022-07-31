@@ -155,8 +155,6 @@ def config(*bargs):
   logmsg.sendlog('HostManual1st6','info',arglist['user'],str(oldipaddr)+'/'+str(oldipsubnet),arglist['ipaddr']+'/'+arglist['ipaddrsubnet'])
   if '-1' in str(oldipsubnet):
    oldipsubnet = '-1_.'
-  z=['/TopStor/pump.sh','rebootme', 'ipchange', oldipaddr, oldipsubnet, arglist['ipaddr'], arglist['ipaddrsubnet']]
-  print('zzzzzzzzzzzzzz',z)
   msg={'req': 'Pumpthis', 'reply':z}
   sendip = get('ready/'+arglist['name'])[0]
   logmsg.sendlog('HostManual1su6','info',arglist['user'], str(oldipaddr)+'/'+str(oldipsubnet),arglist['ipaddr']+'/'+arglist['ipaddrsubnet'])
@@ -164,13 +162,13 @@ def config(*bargs):
 ######################################
 ############# need to reboot  ###############
  if rebootme > 0:
-  msg={'req': 'Pumpthis', 'reply':z}
   sendip = get('ready/'+arglist['name'])[0]
   if rebootme == 2:
    z=['/TopStor/pump.sh','rebootme', 'ipchange', oldipaddr, oldipsubnet, arglist['ipaddr'], arglist['ipaddrsubnet']]
   else:
    z=['/TopStor/pump.sh','rebootme', 'now']
   queuethis('Hostconfig_cf','finish',arglist['user'])
+  msg={'req': 'Pumpthis', 'reply':z}
   for x in range(10):
    x =+1
    sendhost(sendip, str(msg),'recvreply',myhost)
