@@ -38,9 +38,10 @@ if [ $? -ne  0 ]; then
    /TopStor/logmsg.py Snap1032 error $userreq  $DG/$FileS
 else 
   /TopStor/logmsg.py Snap1033 info $userreq Weekly.$keep.$hr.$min.$every.$stamp $DG/$FileS
-  /pace/etcdput.py sync/Snapperiod/Weekly/$DG/$FileS/$stamp  $min%$hr%*%*%$every%/TopStor/Snapshotnowhost%$DG/$FileS%Weekly.$keep.$hr.$min.$every%$stamp
- /pace/etcdput.py Snapperiod/$myhost $stamp
- ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
+  /pace/etcdput.py Snapperiod/Weekly/$DG/$FileS/$stamp  $min%$hr%*%*%$every%/TopStor/Snapshotnowhost%$DG/$FileS%Weekly.$keep.$hr.$min.$every%$stamp
+ /pace/etcdput.py sync/Snapperiod/Add_$stamp/request/$myhost Snapperiod_$stamp
+ /pace/etcdput.py sync/Snapperiod/Add_$stamp/request Snapperiod_$stamp
+ #ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
 fi;
  /pace/putzpool.py 
 fi

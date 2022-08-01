@@ -29,5 +29,6 @@ else
 fi
 myhost=$hostname
 stamp=`date +%s%N`
-./etcdput.py sync/gw/$myhost $stamp 
-./broadcasttolocal.py sync/gw/$myhost $stamp 
+./etcdput.py sync/dns/DNS_${hostname}_$olddns/request/$myhost dns_$stamp 
+./etcdput.py sync/dns/DNS_${hostname}_$olddns/request/$myhost/$myhost dns_$stamp 
+#./broadcasttolocal.py sync/gw/$myhost $stamp 

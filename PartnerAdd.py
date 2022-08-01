@@ -41,14 +41,14 @@ def addpartner(*bargs):
   if 'open' not in result:
    sendlog('Partner1fa2','error',userreq,partneralias,replitype)
    return
- broadcasttolocal('Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
+# broadcasttolocal('Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
  if 'init' in init:
   put('Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
-  dels('sync/Partner', partneralias+'_'+replitype)
-  dels('sync/repliPartner', partneralias+'_'+replitype)
-  put('sync/PartnerAdd_'+partneralias+'_'+replitype+'/'+myhost, str(timestamp()))
- else:
-  putlocal(myip,'Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
+  dels('sync/Partner/Del_'+partneralias+'_'+replitype, '--prefix')
+  put('sync/Partner/Add_'+partneralias+'_'+replitype+'/request/'+myhost, 'Partner_'+str(timestamp()))
+  put('sync/Partner/Add_'+partneralias+'_'+replitype+'/request', 'Partner_'+str(timestamp()))
+# else:
+#  putlocal(myip,'Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
 
  sendlog('Partner1002','info',userreq,partneralias,replitype)
  
