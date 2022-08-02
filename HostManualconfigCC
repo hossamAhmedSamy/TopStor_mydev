@@ -23,12 +23,23 @@ cp /tmp/cpools/* /TopStordata/
 if [ $? -eq 0 ];
 then
  /pace/etcdput.py leader/$myhost $hostip
+ /pace/etcdput.py sync/leader/Add_leader::$myhost_$hostip/request/$myhost leader_$stamp
+ /pace/etcdput.py sync/leader/Add_leader::$myhost_$hostip/request leader_$stamp
 else
  /pace/etcdput.py known/$myhost $hostip
+ /pace/etcdput.py sync/known/Add_known::$myhost_$hostip/request/$myhost known_$stamp
+ /pace/etcdput.py sync/known/Add_known::$myhost_$hostip/request known_$stamp
 fi
 /pace/etcdput.py ActivePartners/$myhost $hostip
 /pace/etcdput.py hostipsubnet/$myhost $subnet
 /pace/etcdput.py ready/$myhost $hostip
+
+ /pace/etcdput.py sync/ActivePartners/Add_ActivePartners::$myhost_$hostip/request/$myhost ActivePartners_$stamp
+ /pace/etcdput.py sync/ActivePartners/Add_ActivePartners::$myhost_$hostip/request ActivePartners_$stamp
+ /pace/etcdput.py sync/hostipsubnet/Add_hostipsubnet::$myhost_$subnet/request/$myhost hostipsubnet_$stamp
+ /pace/etcdput.py sync/hostipsubnet/Add_hostipsubnet::$myhost_$subnet/request hostipsubnet_$stamp
+ /pace/etcdput.py sync/ready/Add_ready::$myhost_$hostip/request/$myhost ready_$stamp
+ /pace/etcdput.py sync/ready/Add_ready::$myhost_$hostip/request ready_$stamp
 #configured=`./etcdput.py configured/$myhost yes`
 ./UpdateHosts $myhost $hostip
 /sbin/pcs resource update CC cidr_netmask=$subnet ip=$hostip
