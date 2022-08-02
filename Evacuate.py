@@ -22,7 +22,7 @@ def do(*args):
  leader=get('leader','--prefix')[0][0].replace('leader/','')
  stamp = time()
  put('sync/evacuatehost/evacuate_'+args[-2]+'_'+evacip+'_'+leader+'/request/', 'evacuatehost_'+str(stamp))
- put('sync/evacuatehost/evacuate_'+args[-2]'/request/'+myhost, 'evacuatehost_'+str(stamp))
+ put('sync/evacuatehost/evacuate_'+args[-2]+'/request/'+myhost, 'evacuatehost_'+str(stamp))
 # put('modified/evacuatehost/'+args[-2], evacip)
 # broadcasttolocal('sync/evacuatehost/', str(stamp))
 # broadcasttolocal('modified/evacuatehost/'+args[-2], evacip)
