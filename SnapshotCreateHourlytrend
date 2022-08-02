@@ -23,9 +23,12 @@ if [[ $contrun == 'true' ]]
 then
 stamp=`date +%s`;
 crontab -l > $cronthis
-echo $min  "*"/$every "*" "*" "*"  /TopStor/Snapshotnowhosttrend $DG/$FileS Trend $stamp  >> $cronthis
+echo $min "*"/$every "*" "*" "*"  /TopStor/Snapshotnowhosttrend $DG/$FileS Trend $stamp  >> $cronthis
 crontab $cronthis 2>> $txtres
 /pace/etcdput.py sizevol/$DG/$FileS $stamp-0 
-ETCDCTL_API=3 /pace/etcdput.py sync/sizevol/$myhost $stamp 
-/pace/broadcasttolocal.py sizevol/$DG/$FileS $stamp-0 
+ETCDCTL_API=3 /pace/etcdput.py sync/sizevol/Add_$DG_$FileS/request/$myhost sizevol_$stamp 
+ETCDCTL_API=3 /pace/etcdput.py sync/sizevol/Add_$DG_$FileS/request sizevol_$stamp 
+ETCDCTL_API=3 /pace/etcdput.py sync/cron/Add_$DG_$FileS/request/$myhost cron_$stamp 
+ETCDCTL_API=3 /pace/etcdput.py sync/sizevol/Add_$DG_$FileS/request cron_$stamp 
+#/pace/broadcasttolocal.py sizevol/$DG/$FileS $stamp-0 
 fi

@@ -30,7 +30,10 @@ if [ $? -ne 0  ]; then
 else 
   /TopStor/logmsg.py Snap1036 info $userreq $Minutely.$keep.$every.na.na.$stamp $DG/$FileS
   /pace/etcdput.py Snapperiod/Minutely/$DG/$FileS/$stamp  */$every%*%*%*%*%/TopStor/Snapshotnowhost%$DG/$FileS%Minutely.$keep.$every.na.na%$stamp/$receiver
- /pace/etcdput.py sync/Snapperiod/$myhost $stamp
+ right='*::'$every'%*%*%*%*%::TopStor::Snapshotnowhost%'$DG'::'$FileS'%Minutely.'$keep'.'$every'.na.na%'$stamp'::'$receiver
+ left='Snapperiod::Minutely::'$DG'::'$FileS'::'$stamp 
+ /pace/etcdput.py sync/Snapperiod/Add_${left}_${right}/request/$myhost Snapperiod_$stamp
+ /pace/etcdput.py sync/Snapperiod/Add_${left}_${right}/request Snapperiod_$stamp
  ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
 fi;
  /pace/putzpool.py
