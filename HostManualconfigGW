@@ -11,6 +11,17 @@ glog='/var/www/html/des20/Data/TopStor.log';
 txtres='/TopStordata/'`basename $0`'.txt'
 gateway=`ETCDCTL_API=3 /TopStor/etcdget.py gw/$hostname`
 oldgateway=`ip route | grep default | awk '{print $3}'`
+leader=`./etcdget.py leader --prefix`
+myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+echo $leader | grep $hostname
+if [ $? -eq 0 ];
+then
+ local=''
+  myip=''
+else
+ local='local'
+fi
+
 echo $gateway | grep '\.'
 if [ $? -ne 0 ];
 then
@@ -19,7 +30,7 @@ then
  then
   oldgateway='NoGateway'
  fi
- ./etcdput.py gw/$hostname $oldgateway
+ ./etcdput.py${local} $myip gw/$hostname $oldgateway
  
 else
  echo $oldgateway | grep '\.'
@@ -29,8 +40,3 @@ else
  fi
  route add default gw $gateway
 fi
-myhost=$hostname
-stamp=`date +%s%N`
-./etcdput.py sync/gw/GW_${hostname}_$olddns/request/$myhost gw_$stamp 
-./etcdput.py sync/gw/GW_${hostname}_$olddns/request/$myhost/$myhost gw_$stamp 
-#./broadcasttolocal.py sync/gw/$myhost $stamp 

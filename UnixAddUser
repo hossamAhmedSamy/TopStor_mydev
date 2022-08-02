@@ -91,8 +91,6 @@ ln -f /etc/passwd  /opt/passwds/passwd
 ln -f /etc/group  /opt/passwds/group
 ln -f /etc/shadow  /opt/passwds/shadow
 stamp=`date +%s%N`
-./etcdput.py sync/user/$myhost $stamp 
- /pace/etcdput.py sync/user/Add_${username}_/request/$myhost user_$stamp
- /pace/etcdput.py sync/user/Add_${username}_/request user_$stamp
-./etcdput.py modified/user/$username $myhost 
+/pace/etcdput.py sync/user/syncfn_oneusersync_Add_${username}/request/$myhost user_$stamp
+/pace/etcdput.py sync/user/syncfn_oneusersync_Add_${username}/request user_$stamp
 /TopStor/logqueue.py `basename "$0"` finish $userreq 

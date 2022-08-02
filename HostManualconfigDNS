@@ -7,6 +7,17 @@ dev='enp0s8'
 dns=`ETCDCTL_API=3 /TopStor/etcdget.py dnsname/$hostname`
 searchdns=`ETCDCTL_API=3 /TopStor/etcdget.py dnssearch/$hostname`
 olddns=`cat /etc/resolv.conf | grep nameserver | head -1 | awk '{print $2}'`
+myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+leader=`./etcdget.py leader --prefix`
+echo $leader | grep $hostname
+if [ $? -eq 0 ];
+then
+ local=''
+ myip=''
+else
+ local='local'
+fi
+
 echo $dns | grep '\.'
 if [ $? -ne 0 ];
 then
@@ -15,7 +26,7 @@ then
  then
   olddns='NoDNS'
  fi
- ./etcdput.py dns/$hostname $olddns
+ ./etcdput${local}.py $myip dns/$hostname $olddns
 else
  echo 'supersede domain-name-server '$dns';' > /etc/dhcp/dhclient.conf
  echo nameserver $dns > /etc/resolv.conf
@@ -27,8 +38,3 @@ else
  fi
  #systemctl restart network
 fi
-myhost=$hostname
-stamp=`date +%s%N`
-./etcdput.py sync/dns/DNS_${hostname}_$olddns/request/$myhost dns_$stamp 
-./etcdput.py sync/dns/DNS_${hostname}_$olddns/request/$myhost/$myhost dns_$stamp 
-#./broadcasttolocal.py sync/gw/$myhost $stamp 

@@ -21,14 +21,27 @@ contrun=`./privthis.sh $privilege $userreq`;
 echo contrun $contrun
 if [[ $contrun == 'true' ]]
 then
-stamp=`date +%s`;
+leader=`./etcdget.py leader --prefix`
+echo $leader | grep $myhost
+if [ $? -eq 0 ];
+then
+ stamp=`date +%s`;
+ local=''
+ myip=''
+else
+ stamp=` echo $@ | awk '{print $7}'`;
+ local='local'
+ myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+fi
+
+
 crontab -l > $cronthis
 echo $min "*"/$every "*" "*" "*"  /TopStor/Snapshotnowhosttrend $DG/$FileS Trend $stamp  >> $cronthis
 crontab $cronthis 2>> $txtres
-/pace/etcdput.py sizevol/$DG/$FileS $stamp-0 
-ETCDCTL_API=3 /pace/etcdput.py sync/sizevol/Add_$DG_$FileS/request/$myhost sizevol_$stamp 
-ETCDCTL_API=3 /pace/etcdput.py sync/sizevol/Add_$DG_$FileS/request sizevol_$stamp 
-ETCDCTL_API=3 /pace/etcdput.py sync/cron/Add_$DG_$FileS/request/$myhost cron_$stamp 
-ETCDCTL_API=3 /pace/etcdput.py sync/sizevol/Add_$DG_$FileS/request cron_$stamp 
-#/pace/broadcasttolocal.py sizevol/$DG/$FileS $stamp-0 
+/pace/etcdput${local}.py $myip sizevol/$DG/$FileS $stamp-0 
+if [ -z $local ];
+then
+ /pace/etcdput.py sync/Snapperiod/`basename "$0"`_$@ $stamp/request/$myhost Snapperiod_$stamp
+ /pace/etcdput.py sync/Snapperiod/`basename "$0"`_$@ $stamp/request Snapperiod_$stamp
+fi
 fi

@@ -35,8 +35,8 @@ def config(*bargs):
   logmsg.sendlog('HostManual1st5','info',arglist['user'],oldarg, arglist['alias'])
   allhosts = get('ActivePartner','--prefix')
   put('alias/'+arglist['name'],arglist['alias'])
-  put('sync/alias/alias_'+arglist['name']+'_'+arglist['alias']+'/request','alias_'+str(stamp()))
-  put('sync/alias/alias_'+arglist['name']+'_'+arglist['alias']+'/request/'+myhost,'alias_'+str(stamp()))
+  put('sync/alias/Add_'+'alias::'+arglist['name']+'_'+arglist['alias']+'/request','alias_'+str(stamp()))
+  put('sync/alias/Add_'+'alias::'+arglist['name']+'_'+arglist['alias']+'/request/'+myhost,'alias_'+str(stamp()))
   logmsg.sendlog('HostManual1su5','info',arglist['user'],oldarg, arglist['alias'])
   queuethis('Hostconfig_Alias','finish',arglist['user'])
 ######### changing cluster address ###############
@@ -47,8 +47,8 @@ def config(*bargs):
 #  broadcasttolocal('namespace/mgmtip',arglist['cluster'])
   if myhost == leader:
    updatenamespace(arglist['cluster'],oldarg)
-  put('sync/namespace/mgmtip_'+arglist['cluster']+'/request','namespace_'+str(stamp()))
-  put('sync/namespace/mgmtip_'+arglist['cluster']+'/request/'+myhost,'namespace_'+str(stamp()))
+  put('sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster']+'/request','namespace_'+str(stamp()))
+  put('sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster']+'/request/'+myhost,'namespace_'+str(stamp()))
   put('namespace/mgmtip',arglist['cluster'])
   logmsg.sendlog('HostManual1su7','info',arglist['user'],oldarg,arglist['cluster'])
   queuethis('Hostconfig_cluster','finish',arglist['user'])
@@ -67,7 +67,7 @@ def config(*bargs):
   argtz = arglist['tz'].split('%')[1]
   logmsg.sendlog('HostManual1st10','info',arglist['user'],oldarg, argtz)
   put('tz/'+leader,arglist['tz'])
-  put('sync/tz/TZ_'+'_'+arglist['tz']+'/request','tz_'+str(stamp()))
+  put('sync/tz/HostManualConfigTZ_'+'_'+arglist['tz']+'/request','tz_'+str(stamp()))
   logmsg.sendlog('HostManual1su10','info',arglist['user'], oldarg, argtz)
   queuethis('Hostconfig_tzone','finish',arglist['user'])
 ########### changing ntp server ###############
@@ -76,8 +76,7 @@ def config(*bargs):
   oldarg = get('ntp/'+myhost)[0]
   logmsg.sendlog('HostManual1st9','info',arglist['user'],oldarg, arglist['ntp'])
   put('ntp/'+leader,arglist['ntp'])
-#   broadcasttolocal('ntp/'+leader,arglist['ntp'])
-  put('sync/ntp/NTP_'+'_'+arglist['ntp']+'/request','ntp_'+str(stamp()))
+  put('sync/ntp/HostManualconfigNTP_'+'_'+arglist['ntp']+'/request','ntp_'+str(stamp()))
   logmsg.sendlog('HostManual1su9','info',arglist['user'],oldarg, arglist['ntp'])
   queuethis('Hostconfig_ntp','finish',arglist['user'])
 ########### changing dns  ###############
@@ -92,7 +91,7 @@ def config(*bargs):
   logmsg.sendlog('HostManual1st13','info',arglist['user'],oldargname, oldargsearch, arglist['dnsname'],arglist['dnssearch'])
   put('dnsname/'+leader,arglist['dnsname'])
   put('dnssearch/'+leader,arglist['dnssearch'])
-  put('sync/dns/DNS_'+'_'+arglist['dnsname']+'_'+arglist['dnssearch']+'/request','dns_'+str(stamp()))
+  put('sync/dns/HostManualconfigDNS'+'_'+arglist['dnsname']+'_'+arglist['dnssearch']+'/request','dns_'+str(stamp()))
   logmsg.sendlog('HostManual1su13','info',arglist['user'],oldargname, oldargsearch, arglist['dnsname'],arglist['dnssearch'])
   queuethis('Hostconfig_dns','finish',arglist['user'])
  
@@ -102,7 +101,7 @@ def config(*bargs):
   oldarg = get('gw/'+myhost)[0]
   logmsg.sendlog('HostManual1st11','info',arglist['user'],oldarg, arglist['gw'])
   put('gw/'+leader,arglist['gw'])
-  put('sync/gw/GW_'+'_'+arglist['gw']+'/request','gw_'+str(stamp()))
+  put('sync/gw/HostManualconfigGW_'+'_'+arglist['gw']+'/request','gw_'+str(stamp()))
   logmsg.sendlog('HostManual1su11','info',arglist['user'],oldarg, arglist['gw'])
   queuethis('Hostconfig_gw','finish',arglist['user'])
  ############# changing configured  ###############

@@ -69,7 +69,7 @@ echo $resjson > $resweb;
 echo $isleader | grep $myhost 
 if [ $? -eq 0 ];
 then
- /pace/etcdput.py sync/passwd/Add_${userpass}_${pas}_$userreq/request/$myhost passwd_$stamp
- /pace/etcdput.py sync/passwd/Add_${userpass}_${pas}_$userreq/request passwd_$stamp
+ /pace/etcdput.py sync/passwd/UnixChkUser:UnixChangePass_${userpass}_${pas}_$userreq/request/$myhost passwd_$stamp
+ /pace/etcdput.py sync/passwd/UnixChkUser:UnixChangePass_${userpass}_${pas}_$userreq/request passwd_$stamp
 fi
 /TopStor/logqueue.py `basename "$0"` finish $userreq 

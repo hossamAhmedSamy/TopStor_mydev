@@ -30,7 +30,18 @@ contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
    /TopStor/logmsg.py Snap1031 info $userreq Weekly.$hr.$min.$every.$keep $DG/$FileS
-stamp=`date +%s`;
+leader=`./etcdget.py leader --prefix`
+echo $leader | grep $myhost
+if [ $? -eq 0 ];
+then
+ stamp=`date +%s`;
+ local=''
+ myip=''
+else
+ stamp=` echo $@ | awk '{print $7}'`;
+ local='local'
+ myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+fi
 crontab -l > $cronthis
 echo $min  $hr "*" "*" $every  /TopStor/Snapshotnowhost $DG/$FileS Weekly.$keep.$hr.$min.$every $stamp 2>txt/SnapshotnowSystem.txt >> $cronthis
 crontab $cronthis
@@ -38,13 +49,12 @@ if [ $? -ne  0 ]; then
    /TopStor/logmsg.py Snap1032 error $userreq  $DG/$FileS
 else 
   /TopStor/logmsg.py Snap1033 info $userreq Weekly.$keep.$hr.$min.$every.$stamp $DG/$FileS
-  /pace/etcdput.py Snapperiod/Weekly/$DG/$FileS/$stamp  $min%$hr%*%*%$every%/TopStor/Snapshotnowhost%$DG/$FileS%Weekly.$keep.$hr.$min.$every%$stamp
- left='Snapperiod::Weekly::'$DG'::'$FileS'::'$stamp 
- right=$min'%'$hr'%*%*%'$every'%::TopStor::Snapshotnowhost%'$DG'::'$FileS'%Weekly.'$keep'.'$hr'.'$min'.'$every'%'$stamp
-
- /pace/etcdput.py sync/Snapperiod/Add_${left}_${right}/request/$myhost Snapperiod_$stamp
- /pace/etcdput.py sync/Snapperiod/Add_${left}_${right}/request Snapperiod_$stamp
- #ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
+  /pace/etcdput${local}.py $myip Snapperiod/Weekly/$DG/$FileS/$stamp  $min%$hr%*%*%$every%/TopStor/Snapshotnowhost%$DG/$FileS%Weekly.$keep.$hr.$min.$every%$stamp
+  if [ -z $local ];
+  then
+   /pace/etcdput.py sync/Snapperiod/`basename "$0"`_$@ $stamp/request/$myhost Snapperiod_$stamp
+   /pace/etcdput.py sync/Snapperiod/`basename "$0"`_$@ $stamp/request Snapperiod_$stamp
+  fi
 fi;
  /pace/putzpool.py 
 fi
