@@ -67,8 +67,6 @@ then
  fi;
 fi
 stamp=`date +%s%N`
-./etcdput.py sync/user/$myhost $stamp 
-./broadcasttolocal.py sync/user/$myhost $stamp 
-./etcdput.py modified/user/$username $myhost 
-./broadcasttolocal.py modified/user/$username $myhost 
+/pace/etcdput.py sync/user/syncfn_oneusersync_Del_${username}/request/$myhost user_$stamp
+/pace/etcdput.py sync/user/syncfn_oneusersync_Del_${username}/request user_$stamp
 /TopStor/logqueue.py `basename "$0"` stop $userreq 

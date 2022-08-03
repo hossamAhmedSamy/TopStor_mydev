@@ -14,6 +14,17 @@ logging='/var/www/html/des20/Data/currentinfo2.log';
 runningpools='/pacedata/pools/runningpools';
 glog='/var/www/html/des20/Data/TopStor.log';
 txtres='/TopStordata/'`basename $0`'.txt'
+leader=`./etcdget.py leader --prefix`
+myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+echo $leader | grep $hostname
+if [ $? -eq 0 ];
+then
+ local=''
+ myip=''
+else
+ local='local'
+fi
+
 fulltz=`./etcdget.py tz/$hostname` 
 #echo 'actualfull',$fulltz
 #fulltz='Kirit%(GMT-10!00)_Hawaii'
@@ -31,7 +42,7 @@ then
  tzone=`timedatectl list-timezones | grep $tz` 
  echo $tz, $tzone
  timedatectl set-timezone $tzone
- ./etcdput.py tz/$hostname $fulltz 
+ ./etcdput$local.py $myip tz/$hostname $fulltz 
  
 fi
 echo $perfmon | grep 1
@@ -40,5 +51,3 @@ if [ $? -eq 0 ]; then
 fi
 myhost=$hostname
 stamp=`date +%s%N`
-./etcdput.py sync/tz/$myhost $stamp 
-./broadcasttolocal.py sync/tz/$myhost $stamp 

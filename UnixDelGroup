@@ -41,8 +41,6 @@ else
 fi;
 fi
 stamp=`date +%s%N`
-./etcdput.py sync/group/$myhost $stamp 
-./broadcasttolocal.py sync/group/$myhost $stamp
-./etcdput.py modified/group/$username $myhost 
-./broadcasttolocal.py modified/group/$username $myhost 
+/pace/etcdput.py sync/group/syncfn_onegroupsync_Del_${username}/request/$myhost group_$stamp
+/pace/etcdput.py sync/user/syncfn_onegroupsync_Del_${username}/request group_$stamp
 /TopStor/logqueue.py `basename "$0"` stop $userreq 
