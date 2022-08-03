@@ -87,9 +87,8 @@ then
     echo $leader | grep $myip
     if [ $? -eq 0 ];
     then
-     ./etcddel.py sync/Partner/Add_ ${Partner}
-     ./etcdput.py sync/Partner/Del_${Partner}_${userreq}_/request/$myhost  Partner_$stamp
-     ./etcdput.py sync/Partner/Del_${Partner}_${userreq}_/request  Partner_$stamp
+      /pace/etcdput.py sync/Partner/`basename "$0"`_$@ $stamp/request/$myhost replipart_$stamp
+      /pace/etcdput.py sync/replipart/`basename "$0"`_$@ $stamp/request replipart_$stamp
     fi
   fi
   /TopStor/logmsg.py Partner1004 info $userreq $Partner

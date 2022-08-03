@@ -18,14 +18,10 @@ def do(*args):
   queuethis('Evacuate','toremove',args[-1])
  logmsg.sendlog('Evacuaest01','info',args[-1],args[-2])
  evacip = get('ActivePartners/'+args[-2])[0]
-# dels('ActivePartners/'+args[-2])
  leader=get('leader','--prefix')[0][0].replace('leader/','')
  stamp = time()
- put('sync/evacuatehost/evacuate_'+args[-2]+'_'+evacip+'_'+leader+'/request/', 'evacuatehost_'+str(stamp))
- put('sync/evacuatehost/evacuate_'+args[-2]+'/request/'+myhost, 'evacuatehost_'+str(stamp))
-# put('modified/evacuatehost/'+args[-2], evacip)
-# broadcasttolocal('sync/evacuatehost/', str(stamp))
-# broadcasttolocal('modified/evacuatehost/'+args[-2], evacip)
+ put('sync/evacuatehost/syncfn_setall_'+args[-2]+'_'+evacip+'_'+leader+'/request/', 'evacuatehost_'+str(stamp))
+ put('sync/evacuatehost/syncfn_setall_'+args[-2]+'_'+evacip+'_'+leader+'/request/'+myhost, 'evacuatehost_'+str(stamp))
  if myhost == leader:
   setall(args[-2],evacip,leader)
 

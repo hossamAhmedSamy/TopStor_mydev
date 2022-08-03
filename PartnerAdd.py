@@ -9,7 +9,7 @@ from logmsg import sendlog
 from socket import gethostname as hostname
 from sendhost import sendhost
 from privthis import privthis 
-from time import time as timestamp
+from time import time as stamp
 from broadcasttolocal import broadcasttolocal
 myhost = hostname()
 myip = get('ready/'+myhost)[0]
@@ -44,9 +44,9 @@ def addpartner(*bargs):
 # broadcasttolocal('Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
  if 'init' in init:
   put('Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
-  dels('sync/Partner/Del_'+partneralias+'_'+replitype, '--prefix')
-  put('sync/Partner/Add_'+partneralias+'_'+replitype+'/request/'+myhost, 'Partner_'+str(timestamp()))
-  put('sync/Partner/Add_'+partneralias+'_'+replitype+'/request', 'Partner_'+str(timestamp()))
+  put('sync/Partnr/''Add_'+partneralias+':::'+replitype'_'partnerip+'::'+replitype+'::'+str(repliport)+'::'+phrase+'/request/'+myhost,'Partnr_str_'+(stamp())) 
+  dels('Partner/'+partneralias+'_'+replitype, '--prefix')
+  put('sync/Partnr/Del_'+partneralias+':::'+replitype+'_--prefix/request/'+myhost,'PartnerDel_'+str(stamp))
 # else:
 #  putlocal(myip,'Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
 

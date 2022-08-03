@@ -10,6 +10,8 @@ hostip=` echo $@ | awk '{ print $4 }'`;
 subnet=` echo $@ | awk '{ print $5 }'`;
 sed -e "s/HOSTY/$hostip/g" /TopStor/sshhttp.conf > /etc/httpd/conf.d/sshhttp.conf
 sed -e "s/HOSTY/$hostip/g" /TopStor/sshhttp.conf > /etc/httpd/conf.d/sshhttp.conf
+
+stamp=`date +%s%N`
 #dev=`/sbin/pcs resource show CC | grep Attrib | awk -F'nic=' '{print $2}' | awk '{print $1}'`
 echo hi > /root/HostCC
 echo shuttingdown 1 $hostip,$myhost, $subnet >> /root/HostCC
