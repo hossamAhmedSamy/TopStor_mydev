@@ -157,7 +157,7 @@ def config(*bargs):
 
 
 if __name__=='__main__':
- arg={'ipaddr': '10.11.11.242', 'ipaddrsubnet': '24', 'configured': 'yes', 'id': '0', 'user': 'admin', 'name': 'dhcp19638', 'token': '26d6d53bb3503f2e7e4515552b60a35f', 'response': 'admin'}
+ arg={'ipaddr': '10.11.11.242', 'ipaddrsubnet': '24', 'configured': 'no', 'id': '0', 'user': 'admin', 'name': 'dhcp19638', 'token': '26d6d53bb3503f2e7e4515552b60a35f', 'response': 'admin'}
  config(arg)
 
 #{'cluster': '10.11.11.250/24', 'tz': 'Kuwait%(GMT+03!00)_Kuwait^_Riyadh^_Baghdad', 'id': '0', 'user': 'admin', 'name': 'dhcp32570', 'token': '501ef1257322d1814125b1e16af95aa9', 'response': 'admin'}

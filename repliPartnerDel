@@ -87,7 +87,7 @@ then
     echo $leader | grep $myip
     if [ $? -eq 0 ];
     then
-      /pace/etcdput.py sync/Partner/`basename "$0"`_$@ $stamp/request/$myhost replipart_$stamp
+      /pace/etcdput.py sync/replipart/`basename "$0"`_$@ $stamp/request/$myhost replipart_$stamp
       /pace/etcdput.py sync/replipart/`basename "$0"`_$@ $stamp/request replipart_$stamp
     fi
   fi
