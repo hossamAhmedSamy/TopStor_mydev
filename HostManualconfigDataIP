@@ -29,7 +29,7 @@ ETCDCTL_API=3 /pace/etcdput.py dataip $hostip/$subnet/$dev
 #ETCDCTL_API=3 /pace/broadcasttolocal.py dataip $hostip/$subnet/$dev
 myhost=$hostname
 stamp=`date +%s%N`
-./etcdput.py sync/dataip/nothing_nothing/request/$myhost dataip_$stamp 
-./etcdput.py sync/dataip/nothing_nothing/request dataip_$stamp 
+./etcdput.py sync/dataip/Add_nothing_nothing/request/$myhost dataip_$stamp 
+./etcdput.py sync/dataip/Add_nothing_nothing/request dataip_$stamp 
 ./etcdput.py sync/datip/$myhost $stamp 
 #./broadcasttolocal.py sync/dataip/$myhost $stamp 
