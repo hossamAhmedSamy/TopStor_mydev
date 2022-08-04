@@ -30,7 +30,6 @@ def etcdget(key, prefix=''):
   else:
    err = 2
    while err == 2:
-    print('problem')
     endpoints=''
     data=json.load(open('/pacedata/runningetcdnodes.txt'));
     for x in data['members']:
