@@ -20,10 +20,10 @@ def do(*args):
  evacip = get('ActivePartners/'+args[-2])[0]
  leader=get('leader','--prefix')[0][0].replace('leader/','')
  stamp = time()
- put('sync/evacuatehost/syncfn_setall_'+args[-2]+'_'+evacip+'_'+leader+'/request/', 'evacuatehost_'+str(stamp))
- put('sync/evacuatehost/syncfn_setall_'+args[-2]+'_'+evacip+'_'+leader+'/request/'+myhost, 'evacuatehost_'+str(stamp))
+ put('sync/evacuatehost/syncfn_setall_'+args[-2]+'_'+evacip+'_'+args[-1]+'/request', 'evacuatehost_'+str(stamp))
+ put('sync/evacuatehost/syncfn_setall_'+args[-2]+'_'+evacip+'_'+args[-1]+'/request/'+myhost, 'evacuatehost_'+str(stamp))
  if myhost == leader:
-  setall(args[-2],evacip,leader)
+  setall(args[-2],evacip,args[-1])
 
 if __name__=='__main__':
  do(*sys.argv[1:])
