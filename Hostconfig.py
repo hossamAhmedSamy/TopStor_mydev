@@ -58,10 +58,9 @@ def config(*bargs):
   print('changing password')
   queuethis('ChangeUserPass','running',arglist['user'])
   #broadcasttolocal('userhash/'+arglist['username'],arglist['password'])
-  cmdlinep=['/TopStor/encthis.sh',arglist['password']]
+  cmdlinep=['/TopStor/encthis.sh',arglist['username'],arglist['password']]
   encthis=subprocess.run(cmdlinep,stdout=subprocess.PIPE).stdout.decode('utf-8').split('_result')[1]
   put('usershash/'+arglist['username'], encthis)
-  return
   cmdlinep=['/TopStor/UnixChangePass',arglist['username'],arglist['user']]
   result=subprocess.run(cmdlinep,stdout=subprocess.PIPE)
   put('sync/passwd/UnixChangePass_'+arglist['username']+'_'+arglist['user']+'/request','passwd_'+str(stamp()))
@@ -165,7 +164,7 @@ def config(*bargs):
 
 
 if __name__=='__main__':
- arg = {'username': 'admin', 'password': '1234', 'token': '4f3223c155ca50d13ae975ea18e930bc', 'response': 'admin', 'user': 'admin'}
+ arg = {'username': 'admin', 'password': '123', 'token': '4f3223c155ca50d13ae975ea18e930bc', 'response': 'admin', 'user': 'admin'}
  config(arg)
 
 #{'cluster': '10.11.11.250/24', 'tz': 'Kuwait%(GMT+03!00)_Kuwait^_Riyadh^_Baghdad', 'id': '0', 'user': 'admin', 'name': 'dhcp32570', 'token': '501ef1257322d1814125b1e16af95aa9', 'response': 'admin'}

@@ -620,8 +620,8 @@ def volumecreate(data):
   data['chappas']='MezoAdmin'
   datastr = data['pool']+' '+data['name']+' '+data['size']+' '+data['ipaddress']+' '+data['Subnet']+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+data['active']+' '+data['user']+' '+data['owner']+' '+data['user']
  elif 'CIFSdom' in data['type']:
-  cmdline=['./encthis.sh',data["dompass"]]
-  data["dompass"]=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode().replace('/','@@sep')[:-1]
+  cmdline=['./encthis.sh',data["domname"],data["dompass"]]
+  data["dompass"]=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode().split('_result')[1].replace('/','@@sep')[:-1]
 
   datastr = data['pool']+' '+data['name']+' '+data['size']+' '+' '+data['ipaddress']+' '+data['Subnet']+' '+data['active']+' '+data['user']+' '+data['owner']+' '+data['user']+' '+ data["domname"]+' '+ data["domsrv"]+' '+ data["domip"]+' '+ data["domadmin"]+' '+ data["dompass"]
  else:
