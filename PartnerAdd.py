@@ -18,7 +18,7 @@ def addpartner(*bargs):
  with open('/root/PartnerAdd','w') as f:
   f.write(str(bargs))
  partnerip = bargs[0]
- partneralias = bargs[1]
+ partneralias = bargs[1].replace('_','').replace('/',':::')
  replitype = bargs[2]
  repliport = bargs[3]
  phrase = bargs[4]
@@ -44,7 +44,7 @@ def addpartner(*bargs):
 # broadcasttolocal('Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
  if 'init' in init:
   put('Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
-  put('sync/Partnr/''Add_'+partneralias+':::'+replitype'_'partnerip+'::'+replitype+'::'+str(repliport)+'::'+phrase+'/request/'+myhost,'Partnr_str_'+(stamp())) 
+  put('sync/Partnr/Add_'+partneralias+':::'+replitype'_'partnerip+'::'+replitype+'::'+str(repliport)+'::'+phrase+'/request/'+myhost,'Partnr_str_'+(stamp())) 
   dels('Partner/'+partneralias+'_'+replitype, '--prefix')
   put('sync/Partnr/Del_'+partneralias+':::'+replitype+'_--prefix/request/'+myhost,'PartnerDel_'+str(stamp))
 # else:
