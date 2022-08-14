@@ -58,6 +58,7 @@ def config(*bargs):
   print('changing password')
   queuethis('ChangeUserPass','running',arglist['user'])
   #broadcasttolocal('userhash/'+arglist['username'],arglist['password'])
+  logmsg.sendlog('Unlin1012','info',arglist['user'],arglist['username'])
   cmdlinep=['/TopStor/encthis.sh',arglist['username'],arglist['password']]
   encthis=subprocess.run(cmdlinep,stdout=subprocess.PIPE).stdout.decode('utf-8').split('_result')[1]
   put('usershash/'+arglist['username'], encthis)
