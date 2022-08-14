@@ -61,7 +61,7 @@ def config(*bargs):
   cmdlinep=['/TopStor/encthis.sh',arglist['password']]
   encthis=subprocess.run(cmdlinep,stdout=subprocess.PIPE).stdout.decode('utf-8')
   put('usershash/'+arglist['username'], encthis)
-  cmdlinep=['/TopStor/UnixChangePass',arglist['password'],arglist['username'],arglist['user']]
+  cmdlinep=['/TopStor/UnixChangePass',arglist['username'],arglist['user']]
   result=subprocess.run(cmdlinep,stdout=subprocess.PIPE)
   put('sync/passwd/UnixChangePass_'+arglist['username']+'_'+arglist['user']+'/request','passwd_'+str(stamp()))
   put('sync/passwd/UnixChangePass_'+arglist['username']+'_'+arglist['user']+'/request/'+myhost,'passwd_'+str(stamp()))
