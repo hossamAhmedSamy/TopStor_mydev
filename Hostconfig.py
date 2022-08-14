@@ -38,7 +38,7 @@ def config(*bargs):
   put('sync/alias/Add_'+arglist['name']+'_'+arglist['alias'].replace('_',':::').replace('/',':::')+'/request','alias_'+str(stamp()))
   put('sync/alias/Add_'+arglist['name']+'_'+arglist['alias'].replace('_',':::').replace('/',':::')+'/request/'+myhost,'alias_'+str(stamp()))
   logmsg.sendlog('HostManual1su5','info',arglist['user'],oldarg, arglist['alias'])
-  queuethis('Hostconfig_Alias','finish',arglist['user'])
+  queuethis('Hostconfig_alias','running',arglist['user'])
 ######### changing cluster address ###############
  if 'cluster' in arglist:
   queuethis('Hostconfig_cluster','running',arglist['user'])
@@ -55,9 +55,17 @@ def config(*bargs):
 
 ############ changing user password ###############
  if 'password' in arglist:
+  print('changing password')
   queuethis('ChangeUserPass','running',arglist['user'])
   #broadcasttolocal('userhash/'+arglist['username'],arglist['password'])
-  put('sync/passwd/UnixChangePass_'+'_'+arglist['password']+'_'+arglsit['username']+'_'+arglist['user']+'/request','passwd_'+str(stamp()))
+  logmsg.sendlog('Unlin1012','info',arglist['user'],arglist['username'])
+  cmdlinep=['/TopStor/encthis.sh',arglist['username'],arglist['password']]
+  encthis=subprocess.run(cmdlinep,stdout=subprocess.PIPE).stdout.decode('utf-8').split('_result')[1]
+  put('usershash/'+arglist['username'], encthis)
+  cmdlinep=['/TopStor/UnixChangePass',arglist['username'],arglist['user']]
+  result=subprocess.run(cmdlinep,stdout=subprocess.PIPE)
+  put('sync/passwd/UnixChangePass_'+arglist['username']+'_'+arglist['user']+'/request','passwd_'+str(stamp()))
+  put('sync/passwd/UnixChangePass_'+arglist['username']+'_'+arglist['user']+'/request/'+myhost,'passwd_'+str(stamp()))
 #  broadcast('UserPassChange','/TopStor/pump.sh','UnixChangePass',arglist['password'],arglist['username'],arglist['user'])
   queuethis('ChangeUserPass','finish',arglist['user'])
 ############ changing time zone ###############
@@ -157,7 +165,7 @@ def config(*bargs):
 
 
 if __name__=='__main__':
- arg={'ipaddr': '10.11.11.242', 'ipaddrsubnet': '24', 'configured': 'no', 'id': '0', 'user': 'admin', 'name': 'dhcp19638', 'token': '26d6d53bb3503f2e7e4515552b60a35f', 'response': 'admin'}
+ arg = {'username': 'admin', 'password': '123', 'token': '4f3223c155ca50d13ae975ea18e930bc', 'response': 'admin', 'user': 'admin'}
  config(arg)
 
 #{'cluster': '10.11.11.250/24', 'tz': 'Kuwait%(GMT+03!00)_Kuwait^_Riyadh^_Baghdad', 'id': '0', 'user': 'admin', 'name': 'dhcp32570', 'token': '501ef1257322d1814125b1e16af95aa9', 'response': 'admin'}

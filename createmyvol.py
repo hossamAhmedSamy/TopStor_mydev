@@ -25,8 +25,8 @@ def createvol(*args):
   domsrv = args[9]
   domip = args[10]
   domadmin = args[11]
-  cmdline=['./encthis.sh',dompass]
-  dompass=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode().replace('/','@@sep')[:-1]
+  cmdline=['./encthis.sh',domname,dompass]
+  dompass=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode().split('_result')[1].replace('/','@@sep')[:-1]
   datastr = pool+' '+name+' '+size+' '+ipaddress+' '+Subnet+' '+user+' '+owner+' '+user+' '+domname+' '+domsrv+' '+ domip+' '+domadmin+' '+dompass 
  else:
   groups = args[7]

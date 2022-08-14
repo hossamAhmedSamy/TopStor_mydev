@@ -33,6 +33,7 @@ def setall(*bargs):
   cmdline=['/TopStor/resettarget.sh',myhost]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   delilocal(myip,"",hostn)
+  delilocal(myip,"sync","--prefix")
   while True:
    cmdline=['/TopStor/rebootme','reset']
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
@@ -47,6 +48,7 @@ def setall(*bargs):
     cmdline=['/pace/removetargetdisks.sh', hostn, hostip]
     result=subprocess.run(cmdline,stdout=subprocess.PIPE)
     delilocal(myip,"",hostn)
+    delilocal(myip,"sync","--prefix")
  logmsg.sendlog('Evacuaesu01','info',userreq ,hostn)
  if '1' in perfmon:
   queuethis('Evacuate','stop','system')
