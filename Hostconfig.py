@@ -38,7 +38,7 @@ def config(*bargs):
   put('sync/alias/Add_'+arglist['name']+'_'+arglist['alias'].replace('_',':::').replace('/',':::')+'/request','alias_'+str(stamp()))
   put('sync/alias/Add_'+arglist['name']+'_'+arglist['alias'].replace('_',':::').replace('/',':::')+'/request/'+myhost,'alias_'+str(stamp()))
   logmsg.sendlog('HostManual1su5','info',arglist['user'],oldarg, arglist['alias'])
-  queuethis('Hostconfig_Alias','finish',arglist['user'])
+  queuethis('Hostconfig_alias','running',arglist['user'])
 ######### changing cluster address ###############
  if 'cluster' in arglist:
   queuethis('Hostconfig_cluster','running',arglist['user'])
