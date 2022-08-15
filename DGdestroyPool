@@ -87,8 +87,8 @@ echo iam in >> /root/tmp2
   ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Del_balance_${pool}/request balancedtype_$stamp 
   ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Del_balance_${pool}/request/$leader balancedtype_$stamp 
   ETCDCTL_API=3 /pace/etcddel.py vol $pool
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/Del_vol_${pool}/request volumes_$stamp 
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/Del_vol_${pool}/request/$leader volumes_$stamp 
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/all volumes_$stamp 
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/all/$leader volumes_$stamp 
 
   echo > /etc/exports
    /TopStor/logmsg.py DGsu5 info $userreq $pool
