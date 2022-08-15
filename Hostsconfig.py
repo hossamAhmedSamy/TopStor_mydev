@@ -1,7 +1,7 @@
 #!/bin/python3.6
 import subprocess,sys, datetime,socket
 from logqueue import queuethis
-from etcdget import etcdget as get
+from etcdgetpy import etcdget as get
 from etcdgetlocal import etcdget as getlocal
 from ast import literal_eval as mtuple
 def getall(*bargs):
@@ -19,6 +19,9 @@ def getall(*bargs):
   hostname = host[0].replace('ready/','')
   hostip = host[1]
   if hostname not in leader:
+   print('###############')
+   print(hostip,hostname)
+   print('###############')
    ntp = getlocal(hostip,'ntp/'+hostname)[0]
    tz = getlocal(hostip,'tz/'+hostname)[0]
    gw = getlocal(hostip,'gw/'+hostname)[0]
