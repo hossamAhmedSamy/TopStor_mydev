@@ -25,6 +25,7 @@ declare -a hostparam=();
 declare -a diskparam=();
 if [[ $contrun == 'true' ]];
 then
+leader=`./etcdget.py leader --prefix | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
 echo $@ > /root/tmp2
  waiting=1
 waitingc=1
@@ -70,10 +71,12 @@ then
    echo success importing  of $nextpool >> /root/tmp2
     ETCDCTL_API=3 /pace/etcdput.py balancetype/$nextpool Availability 
     stamp=`date +%s`
-    ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/$myhost $stamp 
+    ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_${nextpool}_Availability/request balancedtype_$stamp 
+    ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_${nextpool}_Availability/request/$leader balancedtype_$stamp 
     ETCDCTL_API=3 /pace/etcdput.py activepool/$nextpool imported 
-    ETCDCTL_API=3 /pace/etcdput.py sync/activepool/$myhost $stamp 
-    ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/$nextpool imported 
+    ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_${nextpool}_imported/request activepool_$stamp 
+    ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_${nextpool}_imported/request/$leader activepool_$stamp 
+    #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/$nextpool imported 
     ETCDCTL_API=3 /pace/etcdput.py fixpool/$nextpool imported 
    /TopStor/logmsg.py DGsu22 info $userreq ${nextpool} 
   fi
@@ -117,9 +120,10 @@ else
    /TopStor/logmsg.py DGst20 info $userreq ${nextpool} $diskns .
   /sbin/zpool add -f ${nextpool} mirror ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/' $nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
     /TopStor/logmsg.py DGsu20 info $userreq ${nextpool} $diskns .
   else
     /TopStor/logmsg.py DGfa20 error $userreq ${nextpool} $diskns .
@@ -136,9 +140,10 @@ else
   if [ $? -ne 0 ]; then
     /TopStor/logmsg.py DGfa7 error $userreq $diskn2 stripe
   else
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
     /TopStor/logmsg.py DGsu7 info $userreq $diskn2 stripe 
   fi
  fi
@@ -146,9 +151,10 @@ else
    /TopStor/logmsg.py DGst9 info $userreq $diskn1 
   /sbin/zpool remove  ${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
     /TopStor/logmsg.py DGsu9 info $userreq $diskn1 
   else 
      /TopStor/logmsg.py DGfa9 error $userreq $diskn1 
@@ -160,9 +166,10 @@ else
   echo /sbin/zpool add -f ${nextpool} cache ${disk1} 
   /sbin/zpool add -f ${nextpool} cache ${disk1} 
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
     /TopStor/logmsg.py DGsu10 info $userreq $diskn1 
   else 
     /TopStor/logmsg.py DGfa10 error $userreq $diskn1 
@@ -173,9 +180,10 @@ else
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
   /sbin/zpool add -f ${nextpool} log ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
     /TopStor/logmsg.py DGsu11 info $userreq $diskn1 
   else 
     /TopStor/logmsg.py DGfa11 error $userreq $diskn1 
@@ -189,9 +197,10 @@ else
 
   /sbin/zpool add -f ${nextpool} spare ${disk1}
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
     /TopStor/logmsg.py DGsu8 info $userreq $diskn1 
   else 
     /TopStor/logmsg.py DGfa8 error $userreq $diskn1 
@@ -213,10 +222,12 @@ else
      zfs import p$nextpool
      ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/$myhost $stamp 
-     ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
+     #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
      ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
     /TopStor/logmsg.py DG1su6 info $userreq ${nextpool} $diskn1 
   fi
@@ -241,7 +252,8 @@ else
   if [ $? -eq 0 ]; then
      ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
     /TopStor/logmsg.py DGsu12 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa12 error $userreq p${nextpool} $diskns
@@ -273,12 +285,15 @@ else
      zfs import p$nextpool
      ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py balancetype/p$nextpool Availability 
-     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_Availability/request balancedtype_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_Availability/request/$leader balancedtype_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/$myhost $stamp 
-     ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
+     #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
      ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
     /TopStor/logmsg.py DGsu13 info $userreq p${nextpool} $diskns
   else
@@ -302,9 +317,10 @@ else
    /TopStor/logmsg.py DGst14 info $userreq p${nextpool} $diskns
   /sbin/zpool add -f ${nextpool} raidz2 ${disk1} 2>txt/${0:2}$userreq.txt
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
     /TopStor/logmsg.py DGsu14 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa14 error $userreq p${nextpool} $diskns
@@ -336,12 +352,15 @@ else
      zfs import p$nextpool
      ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py balancetype/p$nextpool Availability 
-     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_running/request balancedtype_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_running/request/$leader balancedtype_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/$myhost $stamp 
-     ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
+     #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
      ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
     /TopStor/logmsg.py DGsu15 info $userreq p${nextpool} $diskns
   else
@@ -365,12 +384,13 @@ else
    /TopStor/logmsg.py DGst16 info $userreq p${nextpool} $diskns
   /sbin/zpool add -f ${nextpool} raidz1 ${disk1} 
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
-    /TopStor/logmsg.py DGsu16 info $userreq p${nextpool} $diskns
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
+    /TopStor/logmsg.py DGsu16 info $userreq ${nextpool} $diskns
   else
-    /TopStor/logmsg.py DGfa16 info $userreq p${nextpool} $diskns
+    /TopStor/logmsg.py DGfa16 info $userreq ${nextpool} $diskns
   fi
  fi 
  if [[ $raid == "parity" ]]; then
@@ -407,12 +427,15 @@ else
      zfs import p$nextpool
      ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py balancetype/p$nextpool Availability 
-     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_Availability/request balancedtype_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_Availability/request/$leader balancedtype_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/$myhost $stamp 
-     ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
+     #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
      ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
     /TopStor/logmsg.py DGsu17 info $userreq p${nextpool} $diskns
   else
@@ -427,7 +450,8 @@ else
   if [ $? -eq 0 ]; then
      ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
     /TopStor/logmsg.py DGsu18 info $userreq ${nextpool} $diskn1
   else
     /TopStor/logmsg.py DGfa18 info $userreq ${nextpool} $diskn1
@@ -459,10 +483,12 @@ else
      zfs import p$nextpool
      ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/$myhost $stamp 
-     ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
+     #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
      ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
     /TopStor/logmsg.py DGsu21 info $userreq p${nextpool} $diskns
   else
@@ -495,12 +521,15 @@ else
      zfs import p$nextpool
      ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py balancetype/p$nextpool Availability 
-     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/$myhost $stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_Availability/request balancedtype_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_Availability/request/$leader balancedtype_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/$myhost $stamp 
-     ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
+     #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
      ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
     /TopStor/logmsg.py DGsu19 info $userreq p${nextpool} $diskns
   else
