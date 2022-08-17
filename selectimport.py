@@ -1,8 +1,7 @@
 #!/bin/python3.6
-from etcdget import etcdget as get
+from etcdgetpy import etcdget as get
 from logqueue import queuethis
 from etcdput import etcdput as put 
-from broadcasttolocal import broadcasttolocal 
 from etcddel import etcddel as deli 
 import poolall 
 import socket, sys, datetime, subprocess
@@ -12,32 +11,42 @@ from time import time as timestamp
 
 from ast import literal_eval as mtuple
 #from zpooltoimport import zpooltoimport as importables
+
+def selecthost(minhost,hostname,hostpools):
+	if len(hostpools) < minhost[1]:
+		minhost = (hostname, len(hostpools))
+	return minhost
+
 def electimport(myhost, allpools, leader, *arg):
 	knowns=get('known','--prefix')
 	for poolpair in allpools:
+		if myhost not in poolpair[0]:
+			continue
 		pool=poolpair[0].split('/')[1]
 		chost=poolpair[1]
 		nhost=str(get('poolsnxt/'+pool)[0])
-		if nhost not in str(knowns) or nhost in chost:
-			deli('poolsnxt',nhost)
-			nhost='nothing'
-		if nhost in str(knowns):
+		if nhost in str(knowns) and chost not in nhost:
+			print('continue')
 			continue
-		hosts=poolall.getall(chost)['phosts']
+		stamp=int(datetime.datetime.now().timestamp())	
+		if nhost != '-1':
+			deli('poolsnxt',nhost)
+			put('sync/poolsnxt/Del_poolsnxt_'+nhost+'/request','poolsnxt_'+str(stamp))
+			put('sync/poolsnxt/Del_poolsnxt_'+nhost+'/request/'+leader,'poolsnxt_'+str(stamp))
+		hosts=get('hosts','/current')
+		if len(hosts) < 2:
+			continue   # just to clean the poolsnxt or otherwise it would be 'return'
+		minhost = ('',float('inf'))
 		for host in hosts: 
-			if host != chost:
-				with open('/root/selecttmp','a') as f:
-					f.write('\npoolpair:'+str(poolpair))
-					f.write(' ,host: '+host)
-					f.write(' ,chost:'+chost)
-					f.write(' ,nhost:'+nhost)
-				if len(host) > 2 and len(pool) > 4:
-					put('poolsnxt/'+pool,host)
-					stamp=int(datetime.datetime.now().timestamp())	
-					put('sync/poolsnxt/'+pool+'_'+host+'/request','poolsnxt_'+str(stamp))
-					put('sync/poolsnxt/'+pool+'_'+host+'/request/'+leader,'poolsnxt_'+str(stamp))
-#					broadcasttolocal('poolsnxt/'+pool,host)
-				break
+			hostname = host[0].split('/')[1]
+			if hostname == chost:
+				continue
+			hostpools=mtuple(host[1])
+			minhost = selecthost(minhost,hostname,hostpools)
+			print('minhost',minhost)
+		put('poolsnxt/'+pool,minhost[0])
+		put('sync/poolsnxt/Add_'+pool+'_'+minhost[0]+'/request','poolsnxt_'+str(stamp))
+		put('sync/poolsnxt/Add_'+pool+'_'+minhost[0]+'/request/'+leader,'poolsnxt_'+str(stamp))
 	return
 
  
@@ -49,6 +58,7 @@ def importpls(myhost,allinfo,*args):
 		if 'nothing' in host[1]:
 			continue
 		for pool in mtuple(host[1]):
+
 			pools[pool[0]]=[]
 	for host in allinfo:
 		if 'nothing' in host[1]:
@@ -109,14 +119,15 @@ def importpls(myhost,allinfo,*args):
 
 if __name__=='__main__':
 	myhost=socket.gethostname()
+	leader=get('leader','--prefix')[0][0].replace('leader/','')
 	allpools=get('pools/','--prefix')
-	electimport(myhost,allpools,*sys.argv[1:])
-	allinfo=get('to','--prefix')
+	electimport(myhost,allpools,leader, *sys.argv[1:])
 	cmdline='cat /pacedata/perfmon'
+	
 	perfmon=str(subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout)
 
-	if '1' in perfmon:
-		queuethis('selectimport.py','start','system')
-	importpls(myhost,allinfo,*sys.argv[1:])
-	if '1' in perfmon:
-		queuethis('selectimport.py','stop','system')
+	#if '1' in perfmon:
+	#	queuethis('selectimport.py','start','system')
+	#importpls(myhost,allinfo,*sys.argv[1:])
+	#if '1' in perfmon:
+	#	queuethis('selectimport.py','stop','system')
