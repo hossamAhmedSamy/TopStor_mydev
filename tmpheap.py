@@ -52,7 +52,7 @@ def heapthis(line):
     with open('/TopStordata/taskperftmp','a') as f:
      f.write(ctask)
     
-    nextlead = get('nextlead')[0].split('/')[1]
+    nextlead = get('nextlead/er')[0].split('/')[1]
     z = [ctask]
     msg={'req': 'taskperf', 'reply':z}
     sendhost(nextlead, str(msg),'recvreply',myhost)
