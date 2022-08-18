@@ -191,6 +191,7 @@ then
    zfs set status:mount=$active $pool/$name
    echo $active | grep active
    if [ $? -eq 0 ];
+   then
     zfs mount $pool/$name
    else
     zfs unmount $pool/$name
