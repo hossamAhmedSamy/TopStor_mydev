@@ -20,7 +20,7 @@ def selecthost(minhost,hostname,hostpools):
 def electimport(myhost, allpools, leader, *arg):
 	knowns=get('ready','--prefix')
 	for poolpair in allpools:
-		if myhost not in poolpair[0]:
+		if myhost not in poolpair[1]:
 			continue
 		pool=poolpair[0].split('/')[1]
 		chost=poolpair[1]
