@@ -29,10 +29,10 @@ def electimport(myhost, allpools, leader, *arg):
 			print('continue')
 			continue
 		stamp=int(datetime.datetime.now().timestamp())	
-		if nhost != '-1':
-			deli('poolsnxt',nhost)
-			put('sync/poolsnxt/Del_poolsnxt_'+nhost+'/request','poolsnxt_'+str(stamp))
-			put('sync/poolsnxt/Del_poolsnxt_'+nhost+'/request/'+leader,'poolsnxt_'+str(stamp))
+		#if nhost != '-1':
+		#	deli('poolsnxt',nhost)
+		#	put('sync/poolsnxt/Del_poolsnxt_'+nhost+'/request','poolsnxt_'+str(stamp))
+		#	put('sync/poolsnxt/Del_poolsnxt_'+nhost+'/request/'+leader,'poolsnxt_'+str(stamp))
 		hosts=get('hosts','/current')
 		if len(hosts) < 2:
 			continue   # just to clean the poolsnxt or otherwise it would be 'return'
