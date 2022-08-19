@@ -17,7 +17,11 @@ privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]];
 then
- /TopStor/logmsg.py Unst1024 info $userreq $username
+ echo 'NoUser' | grep $username
+ if [ $? -ne 0 ];
+ then
+  /TopStor/logmsg.py Unst1024 info $userreq $username
+ fi
 leader=`./etcdget.py leader --prefix`
 echo $leader | grep $myhost
 if [ $? -eq 0 ];
@@ -140,7 +144,11 @@ fi
    /pace/etcdput${local}.py $myip usersigroup/$usergroups  $groupres 
  fi
  #/TopStor/broadcast.py UserChange /TopStor/pump.sh UnixChangeUser_sync -d$myhost $@ 
- /TopStor/logmsg.py Unsu1024 info $userreq $username
+ echo 'NoUser' | grep $username
+ if [ $? -ne 0 ];
+ then
+  /TopStor/logmsg.py Unsu1024 info $userreq $username
+ fi
 fi 
 if [ -z $local ];
 then

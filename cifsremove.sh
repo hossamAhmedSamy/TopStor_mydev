@@ -65,4 +65,4 @@ else
 fi
 /TopStor/etcddel.py vol $vol
 /TopStor/etcddel.py replivol $vol
-/TopStor/logqueue.py `basename "$0"` stop $userreq
+/TopStor/logqueue.py `basename "$0"` finish $userreq
