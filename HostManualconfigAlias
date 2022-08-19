@@ -13,5 +13,6 @@ txtres='/TopStordata/'`basename $0`'.txt'
 gateway=`ETCDCTL_API=3 /TopStor/etcdget.py gw/$hostname`
 myhost=$hostname
 stamp=`date +%s%N`
-./etcdput.py sync/$aliast/$myhost $stamp 
-./broadcasttolocal.py sync/$aliast/$myhost $stamp 
+./etcdput.py sync/$aliast/Add_nothing_nothing/request/$myhost ${aliast}_$stamp 
+./etcdput.py sync/$aliast/Add_nothing_nothing/request ${aliast}_$stamp 
+#./broadcasttolocal.py sync/$aliast/$myhost $stamp 

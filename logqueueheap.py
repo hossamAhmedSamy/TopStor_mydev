@@ -51,7 +51,7 @@ def heapthis(line):
    if lenctask > 20: 
     with open('/TopStordata/taskperf','a') as f:
      f.write(ctask)
-    thenextlead =get('nextlead')
+    thenextlead =get('nextlead/er')
     if 'dhcp' in str(thenextlead):
      nextlead = thenextlead[0].split('/')[1]
      z = [ctask]
@@ -66,7 +66,7 @@ def heapthis(line):
  return  
 
 def syncnextlead(lastfile,archive):
- thenextlead =get('nextlead')
+ thenextlead =get('nextlead/er')
  if 'dhcp' not in str(thenextlead):
   return
  myhost=hostname()

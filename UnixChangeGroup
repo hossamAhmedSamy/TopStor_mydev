@@ -25,6 +25,19 @@ contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
  /TopStor/logmsg.py Unst1025 info $userreq $groupname
+leader=`./etcdget.py leader --prefix`
+echo $leader | grep $myhost
+if [ $? -eq 0 ];
+then
+ stamp=`date +%s`;
+ local=''
+ myip=''
+else
+ stamp=` echo $@ | awk '{print $7}'`;
+ local='local'
+ myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+fi
+
  echo $groupusers | grep NoUser
  if [ $? -ne 0 ];
  then
@@ -64,7 +77,7 @@ then
    newusers=$originalusers
    newop=$cusersleft'/'$newusers'/'$cusersright
    groupres=`echo ${newop}`
-   /pace/etcdput.py usersigroup/$groupname  $groupres 
+   /pace/etcdput${local}.py $myip usersigroup/$groupname  $groupres 
   fi 
   usersall=`echo $groupusers`','
   usersl=` echo ${usersall} | sed 's/,/ /g' | wc -w`
@@ -96,9 +109,9 @@ then
  #/TopStor/broadcast.py GroupChange /TopStor/pump.sh UnixChangeGroup_sync -d$myhost $@ 
  /TopStor/logmsg.py Unsu1025 info $userreq $groupname
 fi 
-stamp=`date +%s%N`
-./etcdput.py sync/group/$myhost $stamp 
-./broadcasttolocal.py sync/group/$myhost $stamp 
-./etcdput.py modified/group/$groupname $myhost 
-./broadcasttolocal.py modified/group/$groupname $myhost 
+if [ -z $local ];
+then
+ /pace/etcdput.py sync/user/`basename "$0"`_$@ $stamp/request/$myhost UsrChange_$stamp
+ /pace/etcdput.py sync/user/`basename "$0"`_$@ $stamp/request UsrChange_$stamp
+fi
 /TopStor/logqueue.py `basename "$0"` stop $userreq 

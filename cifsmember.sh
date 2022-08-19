@@ -103,7 +103,7 @@ fi
 #  -e TZ=Etc/UTC \
  #adminpass=`echo $adminpass | sed 's/\@\@sep/\//g' | sed ':a;N;$!ba;s/\n/ /g'`
  adminpass=`echo $adminpass | sed 's/\@\@sep/\//g'`
- adminpass=`./decthis.sh $adminpass `
+ adminpass=`./decthis.sh $domain $adminpass | awk -F'_result' '{print $2}' `
  docker run -d  $mount --privileged --rm --add-host "${membername}.$domain ${membername}":$ipaddr  \
   --hostname ${membername} \
   -v /etc/localtime:/etc/localtime:ro \

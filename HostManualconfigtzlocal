@@ -18,7 +18,7 @@ leader=`./etcdget.py leader --prefix | awk -F'/' '{print $2}' | awk -F"'" '{prin
 myip=`./etcdget.py ready/$hostname`
 fulltz=`./etcdget.py tz/$leader` 
 ./etcdput.py tz/$hostname $fulltz
-./broadcasttolocal.py tz/$hostname $fulltz
+#./broadcasttolocal.py tz/$hostname $fulltz
 #echo 'actualfull',$fulltz
 #fulltz='Kirit%(GMT-10!00)_Hawaii'
 tz=`echo $fulltz | awk -F'%' '{print $1}' `

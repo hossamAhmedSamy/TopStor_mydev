@@ -18,6 +18,19 @@ contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]];
 then
  /TopStor/logmsg.py Unst1024 info $userreq $username
+leader=`./etcdget.py leader --prefix`
+echo $leader | grep $myhost
+if [ $? -eq 0 ];
+then
+ stamp=`date +%s`;
+ local=''
+ myip=''
+else
+ stamp=` echo $@ | awk '{print $7}'`;
+ local='local'
+ myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+fi
+
 # cgrps=`id -Gn $username | sed "s/$username//g"` 
  echo $username | grep NoUser
  if [ $? -ne 0 ];
@@ -54,7 +67,7 @@ then
     newop=$cusersleft'/'$newusers'/'$cusersright
     groupres=`echo ${newop} | sed "s/$username,//g" | sed "s/,$username//g" `
     echo to remove : $cgrp to be $groupres
-    /pace/etcdput.py usersigroup/$cgrp $groupres 
+    /pace/etcdput${local}.py $myip usersigroup/$cgrp $groupres 
    else
     stablegrp=${stablegrp}${cgrp}',';
     echo to keep : $cgrp
@@ -90,14 +103,14 @@ then
       newop=$cusersleft'/'$newusers'/'$cusersright
       groupres=`echo ${newop}`
       echo appending $l to be $groupres
-      /pace/etcdput.py usersigroup/$l $groupres 
+      /pace/etcdput${local}.py $myip usersigroup/$l $groupres 
      else 
       echo I am here: $username
       newusers=$username
       newop=$cusersleft'/'$newusers'/'$cusersright
       groupres=`echo ${newop}`
       echo adding $l to be $groupres
-      /pace/etcdput.py usersigroup/$l $groupres 
+      /pace/etcdput${local}.py $myip usersigroup/$l $groupres 
      fi
     fi
    fi
@@ -124,14 +137,14 @@ then
    newusers='NoUser'
    newop=$cusersleft'/'$newusers'/'$cusersright
    groupres=`echo ${newop}`
-   /pace/etcdput.py usersigroup/$usergroups  $groupres 
+   /pace/etcdput${local}.py $myip usersigroup/$usergroups  $groupres 
  fi
  #/TopStor/broadcast.py UserChange /TopStor/pump.sh UnixChangeUser_sync -d$myhost $@ 
  /TopStor/logmsg.py Unsu1024 info $userreq $username
 fi 
-stamp=`date +%s%N`
-./etcdput.py sync/user/$myhost $stamp 
-./broadcasttolocal.py sync/user/$myhost $stamp 
-./etcdput.py modified/user/$username $myhost 
-./broadcasttolocal.py modified/user/$username $myhost 
+if [ -z $local ];
+then
+ /pace/etcdput.py sync/user/`basename "$0"`_$@ $stamp/request/$myhost UsrChange_$stamp
+ /pace/etcdput.py sync/user/`basename "$0"`_$@ $stamp/request UsrChange_$stamp
+fi
 /TopStor/logqueue.py `basename "$0"` finish $userreq 

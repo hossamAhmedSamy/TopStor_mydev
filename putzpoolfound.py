@@ -58,13 +58,13 @@ def getpoolstoimport():
      if any('/dev/'+b[0] in lss for drive in drives):
       b[0]='scsi-'+lss.split()[6]
       
+  diskhosts = set()
   if "pdhc" in str(b) and  'pool' not in str(b):
    if b[0] in currentpools:
     dels('needtoimport', b[0])
     continue
    disklist=[]
    zdict={}
-   diskhosts = set()
    rdict={}
    ddict={}
    availtype = ''

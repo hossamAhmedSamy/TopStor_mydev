@@ -56,7 +56,11 @@ then
   /TopStor/logmsg.py NFS1001 error $userreq $volname
  else 
   /pace/etcddel.py volumes $volname
-  /pace/delbroadcastlocal.py volumes $volname
+  leaderall=` ./etcdget.py leader --prefix `
+  leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request volumes_1
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request/$leader volumes_1
+  #/pace/delbroadcastlocal.py volumes $volname
   /TopStor/SnapShotPeriodDelete $volname $userreq
   /TopStor/logmsg.py NFS1002 info $userreq $volname
   rm -rf /$DG/exports.$volname

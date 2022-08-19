@@ -14,9 +14,20 @@ logging='/var/www/html/des20/Data/currentinfo2.log';
 runningpools='/pacedata/pools/runningpools';
 glog='/var/www/html/des20/Data/TopStor.log';
 txtres='/TopStordata/'`basename $0`'.txt'
-fulltz=`./etcdget.py tz/$hostname` 
-#echo 'actualfull',$fulltz
-#fulltz='Kirit%(GMT-10!00)_Hawaii'
+leader=`./etcdget.py leader --prefix | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+echo $leader and $hostname
+echo $leader | grep $hostname
+if [ $? -eq 0 ];
+then
+ local=''
+ myip=''
+else
+ local='local'
+fi
+
+fulltz=`./etcdget.py tz/$leader` 
+echo fulltz = $fulltz
 tz=`echo $fulltz | awk -F'%' '{print $1}' `
 tzone=`timedatectl list-timezones | grep $tz` 
 timedatectl set-timezone $tzone
@@ -29,16 +40,15 @@ then
  fulltz='Kuw%(GMT+03!00)_Moscow^_St._Petersburg^_Volgograd'
  tz=`echo $fulltz | awk -F'%' '{print $1}' `
  tzone=`timedatectl list-timezones | grep $tz` 
- echo $tz, $tzone
- timedatectl set-timezone $tzone
- ./etcdput.py tz/$hostname $fulltz 
- 
 fi
+echo $tz, $tzone
+timedatectl set-timezone $tzone
+./etcdput${local}.py $myip tz/$hostname $fulltz 
+./etcdput.py tz/$hostname $fulltz 
+
 echo $perfmon | grep 1
 if [ $? -eq 0 ]; then
  ./logqueue.py HostManaulconfigTZ stop system 
 fi
 myhost=$hostname
 stamp=`date +%s%N`
-./etcdput.py sync/tz/$myhost $stamp 
-./broadcasttolocal.py sync/tz/$myhost $stamp 

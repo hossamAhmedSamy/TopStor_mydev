@@ -15,6 +15,7 @@ echo $contrun | grep 'true'
 if [ $? -eq 0  ]
 then
 echo iam in >> /root/tmp2
+ leader=`./etcdget.py leader --prefix | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
  myhost=`hostname -s`
  waiting=1
  waitingc=1
@@ -68,17 +69,26 @@ echo iam in >> /root/tmp2
  if [ $? -ne 0 ]; then
    /TopStor/logmsg.py DGfa5 error $userreq $pool
  else
+  stamp=`date +%s`
   ETCDCTL_API=3 /pace/etcddel.py pools $pool
-  ETCDCTL_API=3 /TopStor/deltolocal.py pools $pool
+  ETCDCTL_API=3 /pace/etcdput.py sync/pools/Del_pools_${pool}/request pools_$stamp 
+  ETCDCTL_API=3 /pace/etcdput.py sync/pools/Del_pools_${pool}/request/$leader pools_$stamp
+  #ETCDCTL_API=3 /TopStor/deltolocal.py pools $pool
   ETCDCTL_API=3 /pace/etcddel.py fixpool/$pool
   ETCDCTL_API=3 /pace/etcddel.py activepool/$pool 
-  ETCDCTL_API=3 /TopStor/deltolocal.py activepool/$pool activepool
+  ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Del_activepool::${pool}_--prefix/request activepool_$stamp 
+  ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Del_activepool::${pool}_--prefix/request/$leader activepool_$stamp 
+  #ETCDCTL_API=3 /TopStor/deltolocal.py activepool/$pool activepool
   pkill $pool
   crontab -l | grep -v Snap > /TopStordata/cronfile
   crontab -r 
   crontab /TopStordata/cronfile
   ETCDCTL_API=3 /pace/etcddel.py balance $pool
+  ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Del_balance_${pool}/request balancedtype_$stamp 
+  ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Del_balance_${pool}/request/$leader balancedtype_$stamp 
   ETCDCTL_API=3 /pace/etcddel.py vol $pool
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/all volumes_$stamp 
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/all/$leader volumes_$stamp 
 
   echo > /etc/exports
    /TopStor/logmsg.py DGsu5 info $userreq $pool
