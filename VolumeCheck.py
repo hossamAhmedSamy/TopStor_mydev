@@ -7,12 +7,17 @@ from time import time as stamp
 
 from socket import gethostname as hostname
 
-
+leader=get('leader','--prefix')[0][0].split('/')[1]
 myhost = hostname()
-etcds = get('volumes')
-replis = get('replivol')
+etcds = get('volumes','--prefix')
+replis = get('replivol','--prefix')
 cmdline = 'pcs resource'
 pcss = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8') 
+
+def dosync(*args):
+  put(*args)
+  put(args[0]+'/'+leader,args[1])
+  return 
 
 def cifs(*args):
  global myhost, etcds, pcss
@@ -26,9 +31,10 @@ def cifs(*args):
  for res in result:
   reslist=res.split('/')
   if reslist[1] not in str(etcds):
+   print('update',reslist[1], str(etcds))
    left='volumes/CIFS/'+myhost+'/'+'/'.join(reslist[0:2])
    put(left,res)
-   put('sync/volumes/'+myhost,str(stamp()))
+   dosync('sync/volumes/'+myhost+'/request',str(stamp()))
    #broadcasttolocal(left,res)
   if 'active' in res:
    if (('cifs-'+reslist[7]) not in dockers) or (('cifs-'+reslist[7]) not in pcss):
@@ -52,7 +58,7 @@ def homes(*args):
    if reslist[1] not in str(etcds):
     left='volumes/HOME/'+myhost+'/'+'/'.join(reslist[0:2])
     put(left,res)
-    put('sync/volumes/'+myhost,str(stamp()))
+    dosync('sync/volumes/'+myhost+'/request',str(stamp()))
     #broadcasttolocal(left,res)
    if reslist[7] not in dockers or reslist[7] not in pcss:
     print(reslist)
@@ -74,7 +80,7 @@ def iscsi(*args):
   if reslist[1] not in str(etcds):
    left='volumes/ISCSI/'+myhost+'/'+'/'.join(reslist[0:2])
    put(left,res)
-   put('sync/volumes/'+myhost,str(stamp()))
+   dosync('sync/volumes/'+myhost+'/request',str(stamp()))
    #broadcasttolocal(left,res)
   if reslist[1] not in targets or reslist[2] not in pcss:
    print(reslist)
