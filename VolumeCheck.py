@@ -29,7 +29,7 @@ def cifs(*args):
    left='volumes/CIFS/'+myhost+'/'+'/'.join(reslist[0:2])
    put(left,res)
    put('sync/volumes/'+myhost,str(stamp()))
-   broadcasttolocal(left,res)
+   #broadcasttolocal(left,res)
   if 'active' in res:
    if (('cifs-'+reslist[7]) not in dockers) or (('cifs-'+reslist[7]) not in pcss):
     if 'DOMAIN' in res:
@@ -53,7 +53,7 @@ def homes(*args):
     left='volumes/HOME/'+myhost+'/'+'/'.join(reslist[0:2])
     put(left,res)
     put('sync/volumes/'+myhost,str(stamp()))
-    broadcasttolocal(left,res)
+    #broadcasttolocal(left,res)
    if reslist[7] not in dockers or reslist[7] not in pcss:
     print(reslist)
     cmdline='/TopStor/cifs.sh '+reslist[0]+' '+reslist[1]+' '+reslist[7]+' '+reslist[8]+' cifs'
@@ -75,7 +75,7 @@ def iscsi(*args):
    left='volumes/ISCSI/'+myhost+'/'+'/'.join(reslist[0:2])
    put(left,res)
    put('sync/volumes/'+myhost,str(stamp()))
-   broadcasttolocal(left,res)
+   #broadcasttolocal(left,res)
   if reslist[1] not in targets or reslist[2] not in pcss:
    print(reslist)
    cmdline='/TopStor/iscsi.sh '+reslist[0]+' '+reslist[1]+' '+reslist[2]+' '+reslist[3]+' '+ \
