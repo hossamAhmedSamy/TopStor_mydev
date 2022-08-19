@@ -22,6 +22,8 @@ then
  exit
 fi
 
+leaderall=` ./etcdget.py leader --prefix `
+leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
 myhost=`hostname`
 #docker rm -f `docker ps -a | grep -v Up | grep $ipaddr | awk '{print $1}'` 2>/dev/null
 echo cifs $@
@@ -56,7 +58,8 @@ else
 fi
  /pace/etcdput.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
  stamp=`date +%s`;
- /pace/etcdput.py sync/ipaddr/$myhost $stamp
+ /pace/etcdput.py sync/ipaddr/request ipaddr_$stamp
+ /pace/etcdput.py sync/ipaddr/request/$leader ipaddr_$stamp
  /pace/broadcasttolocal.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols 
  /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
  /sbin/pcs resource group add ip-all $resname 

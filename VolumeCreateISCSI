@@ -78,10 +78,11 @@ echo  /sbin/zfs create -V $quota -o dedup=on -o compression=lz4  $DG/$name
  myhost=`hostname -s`
  echo /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$targetiqn/$chapuser/$chappas/$active >> /root/volcreate
  /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$targetiqn/$chapuser/$chappas/$active
+  stamp=`date +%s`
   leaderall=` ./etcdget.py leader --prefix `
   leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request volumes_1
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request/$leader volumes_1
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request volumes_$stamp
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request/$leader volumes_$stamp
  #/pace/broadcasttolocal.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$targetiqn/$chapuser/$chappas/$active
  ./VolumeActivateISCSI vol=$name user=$userreq 
  /pace/putzpool.py 
