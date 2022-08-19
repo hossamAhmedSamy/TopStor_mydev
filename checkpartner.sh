@@ -66,7 +66,6 @@ do
     ssh -oBatchmode=yes -i /TopStordata/${nodei}_keys/${nodei} -p $port $strict ${nodei} ls  >/dev/null 2>/dev/null
    fi
    /TopStor/etcdput.py Partnernode/${partner}_$replitype/$nodei/$myip $noden 
-   #/TopStor/etcdput.py sync/Partnernode/$nodei/$myip $stamp
    leader=`./etcdget.py leader --prefix`
    echo $leader | grep $myip
    if [ $? -ne 0 ];

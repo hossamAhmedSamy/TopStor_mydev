@@ -901,7 +901,7 @@ def groupdel(data):
 def partnerdel(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- cmndstring = '/TopStor/pump.sh repliPartnerDel '+data.get('name')+' yes '+data['user']
+ cmndstring = '/TopStor/pump.sh repliPartnerDel '+data.get('name')+' no '+data['user']
  postchange(cmndstring)
  return data
 

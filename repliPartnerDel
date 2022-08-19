@@ -81,15 +81,11 @@ then
   crontab -l | grep -v $Partner > $cronthis
   crontab $cronthis
   echo $issync | grep yes 
-  if [ $? -eq 0 ];
+  if [ $? -ne 0 ];
   then
     stamp=`date +%s`;
-    echo $leader | grep $myip
-    if [ $? -eq 0 ];
-    then
-      /pace/etcdput.py sync/replipart/`basename "$0"`_$@ $stamp/request/$myhost replipart_$stamp
-      /pace/etcdput.py sync/replipart/`basename "$0"`_$@ $stamp/request replipart_$stamp
-    fi
+    /pace/etcdput.py sync/replipart/`basename "$0"`_${Parnter}_yes_$userreq/request/$myhost replipart_$stamp
+    /pace/etcdput.py sync/replipart/`basename "$0"`_${Parnter}_yes_$userreq/request/$myhost replipart_$stamp
   fi
   /TopStor/logmsg.py Partner1004 info $userreq $Partner
 fi
