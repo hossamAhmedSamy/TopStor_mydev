@@ -226,16 +226,15 @@ then
   /pace/etcdput.py volumes/CIFS/$myhost/$pool/$name $volsvalue
   leaderall=` ./etcdget.py leader --prefix `
   leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${pool}_$name/request volumes
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${pool}_$name/request/$leader volumes
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${pool}_$name/request volumes_1
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${pool}_$name/request/$leader volumes_1
   if [ $volhost != $myhost ];
   then
    /pace/etcddel.py volumes/CIFS/$volhost/$pool/$name
-   ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${pool}_$name/request volumes
    leaderall=` ./etcdget.py leader --prefix `
    leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-   ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${pool}_$name/request volumes
-   ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${pool}_$name/request/$leader volumes
+   ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${pool}_$name/request volumes_1
+   ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${pool}_$name/request/$leader volumes_1
   fi
  done
  echo finished setting volumes regestry >> /root/volactivateparam

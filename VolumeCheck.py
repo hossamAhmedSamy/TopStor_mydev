@@ -34,7 +34,7 @@ def cifs(*args):
    print('update',reslist[1], str(etcds))
    left='volumes/CIFS/'+myhost+'/'+'/'.join(reslist[0:2])
    put(left,res)
-   dosync('sync/volumes/'+myhost+'/request',str(stamp()))
+   dosync('sync/volumes/'+myhost+'/request','volumes_1')
    #broadcasttolocal(left,res)
   if 'active' in res:
    if (('cifs-'+reslist[7]) not in dockers) or (('cifs-'+reslist[7]) not in pcss):
@@ -58,7 +58,7 @@ def homes(*args):
    if reslist[1] not in str(etcds):
     left='volumes/HOME/'+myhost+'/'+'/'.join(reslist[0:2])
     put(left,res)
-    dosync('sync/volumes/'+myhost+'/request',str(stamp()))
+    dosync('sync/volumes/'+myhost+'/request','volumes_1')
     #broadcasttolocal(left,res)
    if reslist[7] not in dockers or reslist[7] not in pcss:
     print(reslist)
@@ -80,7 +80,7 @@ def iscsi(*args):
   if reslist[1] not in str(etcds):
    left='volumes/ISCSI/'+myhost+'/'+'/'.join(reslist[0:2])
    put(left,res)
-   dosync('sync/volumes/'+myhost+'/request',str(stamp()))
+   dosync('sync/volumes/'+myhost+'/request','volumes_1')
    #broadcasttolocal(left,res)
   if reslist[1] not in targets or reslist[2] not in pcss:
    print(reslist)
