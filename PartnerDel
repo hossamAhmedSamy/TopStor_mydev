@@ -10,6 +10,7 @@ privilege="Replication";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
+  myhost=`hostname`
   /TopStor/logmsg.py Partner1003 info $userreq $Partner
  ./etcddel.py "" $Partner
   crontab -l | grep -v $Partner > $cronthis
@@ -18,7 +19,8 @@ then
   if [ $? -ne 0 ];
   then
     stamp=`date +%s`;
-    ./etcdput.py sync/Snapperioddel_${Partner}_${userreq}_/$myhost  $stamp
+    ./etcdput.py sync/replipart/PartnerDel_${Partner}_yes_${userreq}_/request  replipart_$stamp
+    ./etcdput.py sync/replipart/PartnerDel_${Partner}_yes_${userreq}_/request/$myhost  replipart_$stamp
   fi
   /TopStor/logmsg.py Partner1004 info $userreq $Partner
 fi

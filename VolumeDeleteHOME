@@ -78,10 +78,11 @@ then
  else
   rm -rf /$DG/smb.$volname
   /pace/etcddel.py volume $volname
+  stamp=`date +%s`
   leaderall=` ./etcdget.py leader --prefix `
   leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request volumes_1
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request/$leader volumes_1
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request volumes_$stamp
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request/$leader volumes_$stamp
   /TopStor/SnapShotPeriodDelete $volname $userreq
   #/pace/delbroadcastlocal.py volume $volname
   /pace/putzpool.py 
