@@ -9,6 +9,10 @@ fi
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/root
 myhost=`hostname -s `
 thehost=`echo $@ | awk '{print $1}'`
+if [ $myhost -eq $thehost ];
+then
+ exit
+fi
 ./etcdget.py sync/losthost --prefix | grep $thehost
 issync=$?
 if [ $issync -eq 0 ];
