@@ -27,8 +27,8 @@ echo $ntp | grep '\.'
 if [ $? -ne 0 ];
 then
  ntp='0.pool.ntp.org' 
+fi
  ./etcdput${local}.py $myip ntp/$hostname $ntp
  ./etcdput.py ntp/$hostname $ntp
-fi
 sed -i "s/MASTERSERVER/$ntp/g" /etc/chrony.conf
 systemctl restart chronyd

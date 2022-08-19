@@ -541,7 +541,7 @@ fi
 sed -i "/p${nextpool}/c\\" $runningpools
 fi
 /pace/etcddel.py requests/DGsetpool/$myhost $myhost/$userreq
-systemctl restart zfs-zed
+#systemctl restart zfs-zed
 /pace/putzpool.py 
 /TopStor/logqueue.py `basename "$0"` stop $userreq 
 
