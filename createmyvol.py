@@ -32,7 +32,7 @@ def createvol(*args):
   groups = args[7]
   datastr = pool+' '+name+' '+size+' '+groups+' '+ipaddress+' '+Subnet+' disabled '+user+' '+owner+' '+user
  print('#############################')
- print(datastr)
+ print('/TopStor/VolumeCreate'+typep,datastr)
  print('###########################')
  cmndstring = '/TopStor/VolumeCreate'+typep+' '+datastr
  result=subprocess.run(cmndstring.split(),stdout=subprocess.PIPE)

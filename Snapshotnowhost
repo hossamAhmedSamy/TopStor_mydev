@@ -7,12 +7,10 @@ logging='/var/www/html/des20/Data/currentinfo2.log'
 runningpools='/pacedata/pools/runningpools'
 pDG=`echo $@ | awk '{print $1}'`;
 DG=`echo $@ | awk -F/ '{print $1}'`;
-receiver='NoReceiver'
-echo $? | grep NoReceiver
-if [ $? -ne -0 ];
-then
+stype=`echo $@ | awk '{print $2}' | awk -F'.' '{print $1}'`;
+
 receiver=` echo $@ | awk -F'/' '{print $NF'}`
-fi
+shortreceiver=`echo $receiver | awk -F'_' '{print $1}'`
 echo $pDG
 myhost=`hostname -s`
 pp=`/sbin/zpool list | grep $DG`
@@ -22,21 +20,55 @@ if [ $? -ne 0 ];
 then
  echo host not owner
  /TopStor/logqueue.py `basename "$0"` stop_cancel system 
+ exit
 else
  /TopStor/logqueue.py `basename "$0"` running system 
- res=`./Snapshotnow $@`
- echo result is =$res
- receiver='NoReceiver'
- echo $@ | grep NoReceiver
- if [ $? -ne -0 ];
- then
-  receiver=` echo $@ | awk -F'/' '{print $NF'}`
-  snapshot=`echo $res | grep '_newsnap' | awk -F'_newsnap' '{print $2}' `
-  params=`/TopStor/repliparams.py $snapshot`
-  echo $receiver $snapshot > /root/snpshottemp
-  echo snapshot=$snapshot  receiver=$receiver
-  zfs set partner:receiver=$receiver $snapshot
- fi
-#  /TopStor/logmsg.py Snap1045 error $userreq $newsnap 
-/TopStor/logqueue.py `basename "$0"` stop system 
 fi
+echo $receiver | grep NoReceiver
+if [ $? -ne 0 ];
+then 
+ ./logmsg.py Replispacest01 info $userreq $vol $shortreceiver  
+ echo /logmsg.py Replispacest01 info $userreq $vol $shortreceiver  
+fi
+res=`./Snapshotnow $@ | awk -F'_newsnap' '{print $2}'`
+echo $res | grep Erro
+if [ $? -eq 0 ];
+then
+ exit
+fi
+snapshot=$res 
+echo thesnaps: $snapshot , $stype
+zfs set snap:type=$stype $snapshot 
+echo $receiver | grep NoReceiver 
+if [ $? -ne 0 ];
+then 
+ params=`./repliparams.py $snapshot | grep 'result_' | sed 's/result\_//g'`
+ echo ./replitargetget.sh ${receiver} $params  awk -F'result_' '{print $2}'
+ result=`./replitargetget.sh ${receiver} $params | awk -F'result_' '{print $2}'`
+ echo result=$result
+ #result=`./replitargetget.sh ${receiver} sico 2030202 snapsnap | awk -F'result_' '{print $2}'`
+ echo $result | grep 'No_vol_space'
+ if [ $? -eq 0 ];
+ then
+  echo zfs destroy $snapshot
+  zfs destroy $snapshot
+  ./logmsg.py Replispacefa01 error $userreq $shortreceiver $vol
+ else
+  nodeowner=`echo $result | awk -F':' '{print $1}'`
+  poolvol=`echo $result | awk -F':' '{print $2}'`
+  echo newresult $result
+  overallres=`./replistream.sh $receiver $snapshot $nodeowner $poolvol`
+  streamres=`echo $overallres | awk -F'result2_' '{print $2}'`
+  if [ $streamres -eq 0 ];
+  then
+   zfs set partner:receiver=$shortreceiver $snapshot
+   ./logmsg.py Replispacesu01 info $userreq $shortreceiver $vol
+  else
+   echo zfs destroy $snapshot
+   echo $overallres > /root/replicationresult
+   zfs destroy $snapshot
+   ./logmsg.py Streamfa01 error $userreq $vol $shortreceiver
+  fi
+ fi 
+fi
+/TopStor/logqueue.py `basename "$0"` stop system 

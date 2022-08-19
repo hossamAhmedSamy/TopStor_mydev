@@ -17,6 +17,7 @@ volsubnet=` echo $volinfo | awk -F'/' '{print $13}' | awk -F"'" '{print $1}'`
 voltype=`echo $volinfo | awk -F'/' '{print $2}'`
 groups=`echo $volinfo | awk -F'/' '{print $9}'`
 quota=`zfs get quota $myvol -H | awk '{print $3}'`
+echo $nodeloc /TopStor/targetcreatevol.sh $poolvol $volip $volsubnet $quota $voltype $groups
 result=`$nodeloc /TopStor/targetcreatevol.sh $poolvol $volip $volsubnet $quota $voltype $groups`
 echo result = $result
 echo $result | grep 'problem/@problem'
@@ -31,11 +32,13 @@ echo $result | grep 'newvol/@new'
 if [ $? -eq 0 ];
 then
  echo $result
+ echo send -DvPc $snapshot TO $nodeloc zfs recv -F $poolvol 
  zfs send -DvPc $snapshot | $nodeloc zfs recv -F $poolvol 
  result=$?
 else
  echo $result
  lastsnap=`echo $result | awk -F'result_' '{print $4}' | sed 's/ //g'`
+ echo send -DvPc -i $myvol@$lastsnap $snapshot TO $nodeloc zfs recv -F $poolvol 
  zfs send -DvPc -i $myvol@$lastsnap $snapshot | $nodeloc zfs recv -F $poolvol 
  result=$?
  echo 'zfs send -DvPc -i '$myvol'@'$lastsnap $snapshot' | '$nodeloc' zfs recv -F '$poolvol 
@@ -44,6 +47,7 @@ fi
 if [ $result -eq 0 ];
 then
  props=`zfs get all $snapshot | awk '{print $2"="$3}' | grep ':' | grep -v receiver | tr '\n' ','`
+ echo $nodeloc /TopStor/targetsetprop.sh $poolvol $clusterip ${props:0:-1}
  $nodeloc /TopStor/targetsetprop.sh $poolvol $clusterip ${props:0:-1}
 fi
 echo result2_${result}result2__

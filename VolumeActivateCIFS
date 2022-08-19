@@ -140,6 +140,7 @@ then
    echo i=$i
    echo ipc=$ipc for $ip
    echo ipvol=$ipvol
+   echo iam heeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeer
    /TopStor/cifspoolonly.sh $pool $i $ip $ipsubnet
   done
  else
@@ -184,15 +185,15 @@ then
    sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/smb.${name}
    sed -i "s/ACTIVE/$active/g" /TopStordata/smb.${name}
    chmod 770 /$pool/$name
-   echo running cifs.sh=$pool $name $ipaddr $ipsubnet cifs >> /root/volactivateparam
-   echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    yes | cp /TopStordata/smb.$name /$pool/
-   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    zfs set status:mount=$active $pool/$name
    echo $active | grep active
    if [ $? -eq 0 ];
    then
     zfs mount $pool/$name
+    echo running cifs.sh=$pool $name $ipaddr $ipsubnet cifs >> /root/volactivateparam
+    echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
+    /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    else
     zfs unmount $pool/$name
    fi
