@@ -194,13 +194,17 @@ then
    for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done
   fi
   /pace/etcdput.py volumes/HOME/$myhost/$pool/$name $volsvalue
-  stamp=`date +%s`
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/$myhost $stamp 
+  leaderall=` ./etcdget.py leader --prefix `
+  leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${pool}_$name/request volumes
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${pool}_$name/request/$leader volumes
   if [ $volhost != $myhost ];
   then
    /pace/etcddel.py volumes/HOME/$volhost/$pool/$name
-   stamp=`date +%s`
-   ETCDCTL_API=3 /pace/etcdput.py sync/volumes/$myhost $stamp 
+   leaderall=` ./etcdget.py leader --prefix `
+   leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+   ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${pool}_$name/request volumes
+   ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${pool}_$name/request/$leader volumes
   fi
  done
  echo finished setting volumes regestry >> /root/volactivateparamHome

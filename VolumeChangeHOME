@@ -36,8 +36,10 @@ then
  echo /pace/etcdput.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes >> /root/volchange
  ETCDCTL_API=3 /pace/etcddel.py volumes $name
  ETCDCTL_API=3 /pace/etcdput.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
- stamp=`date +%s`
- ETCDCTL_API=3 /pace/etcdput.py sync/volumes/$myhost $stamp 
+  leaderall=` ./etcdget.py leader --prefix `
+  leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request volumes
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request/$leader volumes
  oldipaddr=`zfs get -H ip:addr $DG/$name | awk '{print $3}'`
  oldipsubnet=`zfs get -H ip:subnet $DG/$name | awk '{print $3}'`
  sed -i "s/$oldipaddr/$ipaddr/g" /$DG/smb.$name
