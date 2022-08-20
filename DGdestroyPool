@@ -95,5 +95,6 @@ echo iam in >> /root/tmp2
  fi 
 fi
 /pace/etcddel.py requests/DGdestroypool/$myhost $myhost/$userreq
+systemctl restart zfs-zed
  /pace/putzpool.py
 /TopStor/logqueue.py `basename "$0"` stop $userreq 
