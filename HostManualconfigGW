@@ -30,10 +30,9 @@ then
  then
   oldgateway='NoGateway'
  fi
+else
  ./etcdput${local}.py $myip gw/$hostname $gateway
  ./etcdput.py gw/$hostname $gateway
- 
-else
  echo $oldgateway | grep '\.'
  if [ $? -eq 0 ];
  then
