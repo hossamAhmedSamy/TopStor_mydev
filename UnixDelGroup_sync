@@ -11,6 +11,13 @@ userreq=`echo $@ | awk '{print $2}'`;
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
 myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+echo Everyone | grep $username
+if [ $? -eq 0 ];
+then
+ exit
+fi
+
+
 if [[ $contrun == 'true' ]]
 then
 /TopStor/UnixDelGrouplocal $username $userreq
