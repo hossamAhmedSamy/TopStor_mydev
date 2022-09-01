@@ -13,6 +13,12 @@ userreq=`echo $@ | awk '{print $2}'`;
 /TopStor/logqueue.py `basename "$0"` running $userreq 
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
+echo Everyone | grep $username
+if [ $? -eq 0 ];
+then
+ exit
+fi
+
 if [[ $contrun == 'true' ]]
 then
   /TopStor/logmsg.py Unlin1104 info $userreq $username

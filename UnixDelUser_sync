@@ -8,6 +8,12 @@ myhost=`hostname -s`
 glog='/var/www/html/des20/Data/TopStor.log'
 username=`echo $@ | awk '{print $1}'`;
 userreq=`echo $@ | awk '{print $2}'`;
+echo NoUser | grep $username
+if [ $? -eq 0 ];
+then
+ exit
+fi
+
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
 myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
