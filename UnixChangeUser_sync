@@ -18,7 +18,11 @@ privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
- /TopStor/logmsg.py Unst1124 info $userreq $username
+ echo 'NoUser' | grep $username
+ if [ $? -ne 0 ];
+ then
+  /TopStor/logmsg.py Unst1124 info $userreq $username
+ fi
 # cgrps=`id -Gn $username | sed "s/$username//g"` 
  usermod -G $usergroups $username
  cgrps=`/pace/etcdgetlocal.py $myip usersigroup $username`
@@ -89,6 +93,10 @@ then
    fi
   fi
  done
- /TopStor/logmsg.py Unsu1124 info $userreq $username
+ echo 'NoUser' | grep $username
+ if [ $? -ne 0 ];
+ then
+  /TopStor/logmsg.py Unsu1124 info $userreq $username
+ fi
 fi 
 /TopStor/logqueue.py `basename "$0"` stop $userreq 
