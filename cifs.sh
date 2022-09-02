@@ -99,4 +99,4 @@ fi
   sleep 3
   docker exec $resname sh /hostetc/VolumeCIFSupdate.sh
 
-/TopStor/logqueue.py `basename "$0"` stop $userreq
+/TopStor/logqueue.py `basename "$0"` finish $userreq
