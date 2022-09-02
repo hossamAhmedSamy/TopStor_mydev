@@ -53,5 +53,5 @@ ln -f /etc/group  /opt/passwds/group
 ln -f /etc/shadow  /opt/passwds/shadow
 stamp=`date +%s%N`
 /pace/etcdput.py sync/group/syncfn_onegroupsync_Add_${username}/request/$myhost group_$stamp
-/pace/etcdput.py sync/user/syncfn_onegroupsync_Add_${username}/request group_$stamp
+/pace/etcdput.py sync/group/syncfn_onegroupsync_Add_${username}/request group_$stamp
 /TopStor/logqueue.py `basename "$0"` stop $userreq
