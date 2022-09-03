@@ -19,7 +19,8 @@ every=`echo $@ | awk '{print $5}'` ;
 k=0; keep=`echo $@ | awk '{print $6}'`; keep=$(($keep+$k)); if (($keep < 1)); then keep=1; fi
 pDG=` echo $@ | awk '{print $1}'`; 
 FileS=` echo $@ | awk '{print $2}'`;
-userreq=` echo $@ | awk '{print $7}'`;
+receiver=` echo $@ | awk '{print $7}'`;
+userreq=` echo $@ | awk '{print $8}'`;
 /TopStor/logqueue.py `basename "$0"` running $userreq 
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
 rm $txtres 2>/dev/null
@@ -43,13 +44,13 @@ else
  myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 fi
 crontab -l > $cronthis
-echo $min  $hr "*" "*" $every  /TopStor/Snapshotnowhost $DG/$FileS Weekly.$keep.$hr.$min.$every $stamp 2>txt/SnapshotnowSystem.txt >> $cronthis
+echo $min  $hr "*" "*" $every  /TopStor/Snapshotnowhost $DG/$FileS Weekly.$keep.$hr.$min.$every $stamp $receiver 2>txt/SnapshotnowSystem.txt >> $cronthis
 crontab $cronthis
 if [ $? -ne  0 ]; then
    /TopStor/logmsg.py Snap1032 error $userreq  $DG/$FileS
 else 
   /TopStor/logmsg.py Snap1033 info $userreq Weekly.$keep.$hr.$min.$every.$stamp $DG/$FileS
-  /pace/etcdput${local}.py $myip Snapperiod/Weekly/$DG/$FileS/$stamp  $min%$hr%*%*%$every%/TopStor/Snapshotnowhost%$DG/$FileS%Weekly.$keep.$hr.$min.$every%$stamp
+  /pace/etcdput${local}.py $myip Snapperiod/Weekly/$DG/$FileS/$stamp  $min%$hr%*%*%$every%/TopStor/Snapshotnowhost%$DG/$FileS%Weekly.$keep.$hr.$min.$every%$stamp/$receiver
   if [ -z $local ];
   then
    /pace/etcdput.py sync/Snapperiod/`basename "$0"`_$@ $stamp/request/$myhost Snapperiod_$stamp
