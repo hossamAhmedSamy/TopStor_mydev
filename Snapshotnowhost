@@ -8,8 +8,7 @@ runningpools='/pacedata/pools/runningpools'
 pDG=`echo $@ | awk '{print $1}'`;
 DG=`echo $@ | awk -F/ '{print $1}'`;
 stype=`echo $@ | awk '{print $2}' | awk -F'.' '{print $1}'`;
-
-receiver=` echo $@ | awk -F'/' '{print $NF'}`
+receiver=` echo $@ | awk '{print $NF'}`
 shortreceiver=`echo $receiver | awk -F'_' '{print $1}'`
 echo $pDG
 myhost=`hostname -s`
