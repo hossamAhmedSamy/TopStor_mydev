@@ -11,6 +11,14 @@ from sendhost import sendhost
 from privthis import privthis 
 from time import time as stamp
 from broadcasttolocal import broadcasttolocal
+
+
+def dosync(leader,*args):
+  put(*args)
+  put(args[0]+'/'+leader,args[1])
+  return 
+
+
 myhost = hostname()
 myip = get('ready/'+myhost)[0]
 clusterip = get('namespace/mgmtip')[0].split('/')[0]
@@ -43,10 +51,10 @@ def addpartner(*bargs):
    return
 # broadcasttolocal('Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
  if 'init' in init:
-  put('Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
-  put('sync/Partnr/Add_'+partneralias+':::'+replitype'_'partnerip+'::'+replitype+'::'+str(repliport)+'::'+phrase+'/request/'+myhost,'Partnr_str_'+(stamp())) 
-  dels('Partner/'+partneralias+'_'+replitype, '--prefix')
-  put('sync/Partnr/Del_'+partneralias+':::'+replitype+'_--prefix/request/'+myhost,'PartnerDel_'+str(stamp))
+  #dels('Partner/'+partneralias+'_'+replitype, '--prefix')
+  #dosync(myhost,'sync/Partnr/Del_'+partneralias+':::'+replitype+'_--prefix/request','PartnerDel_'+str(stamp))
+  put('Partner/'+partneralias+'_'+replitype , partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
+  dosync(myhost,'sync/Partnr/Add_'+partneralias+':::'+replitype+'_'+partnerip+'::'+replitype+'::'+str(repliport)+'::'+phrase+'/request','Partnr_str_'+str(stamp())) 
 # else:
 #  putlocal(myip,'Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
 
