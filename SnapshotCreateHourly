@@ -47,8 +47,8 @@ else
   /pace/etcdput${local}.py $myip Snapperiod/Hourly/$DG/$FileS/$stamp  $min%*/$every%*%*%*%/TopStor/Snapshotnowhost%$DG/$FileS%Hourly.$keep.$min.$every.na%$stamp/$receiver
  if [ -z $local ];
  then
-  /pace/etcdput.py sync/Snapperiod/`basename "$0"`_$@ $stamp/request/$myhost Snapperiod_$stamp
-  /pace/etcdput.py sync/Snapperiod/`basename "$0"`_$@ $stamp/request Snapperiod_$stamp
+  /pace/etcdput.py sync/Snapperiod/_____/request/$myhost Snapperiod_$stamp
+  /pace/etcdput.py sync/Snapperiod/_____/request Snapperiod_$stamp
  fi
 
 #ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
