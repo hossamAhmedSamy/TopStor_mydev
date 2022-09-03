@@ -57,16 +57,16 @@ then
   nodeowner=`echo $result | awk -F':' '{print $1}'`
   poolvol=`echo $result | awk -F':' '{print $2}'`
   echo newresult $result
-  overallres=`./replistream.sh $receiver $snapshot $nodeowner $poolvol`
+  overallres=`./replinow.sh $receiver $snapshot $nodeowner $poolvol`
   streamres=`echo $overallres | awk -F'result2_' '{print $2}'`
   if [ $streamres -eq 0 ];
   then
    zfs set partner:receiver=$shortreceiver $snapshot
    ./logmsg.py Replispacesu01 info $userreq $shortreceiver $vol
   else
-   echo zfs destroy $snapshot
-   echo $overallres > /root/replicationresult
-   zfs destroy $snapshot
+   #echo zfs destroy $snapshot
+   #echo $overallres > /root/replicationresult
+   #zfs destroy $snapshot
    ./logmsg.py Streamfa01 error $userreq $vol $shortreceiver
   fi
  fi 
