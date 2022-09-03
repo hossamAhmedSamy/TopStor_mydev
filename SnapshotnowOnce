@@ -14,22 +14,25 @@ snapshot=$pool'/'$vol'@'${name}'.'$stamp
 shortreceiver=`echo $receiver | awk -F'_' '{print $1}'`
 
 
-echo $receiver | grep $name
+echo $receiver | grep NoReceiver
 if [ $? -ne 0 ];
 then 
  ./logmsg.py Replispacest01 info $userreq $vol $shortreceiver  
  echo /logmsg.py Replispacest01 info $userreq $vol $shortreceiver  
 else
- /TopStor/logmsg.py Snap1026 info $userreq $FileS/$name 
+ /TopStor/logmsg.py Snap1026 info $userreq $name 
 fi
 zfs snapshot $snapshot 
 if [ $? -ne 0  ]; then
       echo failed
+      /TopStor/logmsg.py Snap1028 error $userreq $name 
       exit 1;
+else
+ /TopStor/logmsg.py Snap1030 info $userreq $name 
 fi 
 result='init'
 zfs set snap:type=Once $snapshot 
-echo $receiver | grep $name 
+echo $receiver | grep NoReceiver 
 if [ $? -ne 0 ];
 then 
  params=`./repliparams.py $snapshot | grep 'result_' | sed 's/result\_//g'`
