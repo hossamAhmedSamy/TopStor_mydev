@@ -42,7 +42,8 @@ zfs set snap:type=$stype $snapshot
 echo $receiver | grep NoReceiver 
 if [ $? -ne 0 ];
 then 
- params=`./repliparams.py $snapshot | grep 'result_' | sed 's/result\_//g'`
+ params=`./repliparams.py $snapshot | awk -F'result_' '{print $2}'`
+ echo params=$params
  echo ./replitargetget.sh ${receiver} $params  awk -F'result_' '{print $2}'
  result=`./replitargetget.sh ${receiver} $params | awk -F'result_' '{print $2}'`
  echo result=$result

@@ -36,7 +36,7 @@ then
  zfs set status:mount=disabled $pool/$newvol 
  echo ./etcdput.py $volleft $volright
  ./etcdput.py $volleft $volright
- docker rm -f `docker ps | grep $ipaddress | awk '{print $1}' 2>/dev/null`
+ docker rm -f `docker ps | grep $ipaddress | awk '{print $1}'` 2>/dev/null
  echo result_${oldnew}vol/@${oldnew}result_$pool/${newvol}result_${latestsnap}result_
 else
  echo result_problem/@newresult_
