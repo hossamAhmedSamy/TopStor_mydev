@@ -34,7 +34,7 @@ else
  myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 fi
 crontab -l > $cronthis
-echo "*"/$every "*" "*" "*" "*"  /TopStor/Snapshotnowhost $DG/$FileS Minutely.$keep.$every.na.na $stamp 2> txt/err.txt >> $cronthis
+echo "*"/$every "*" "*" "*" "*"  /TopStor/Snapshotnowhost $DG/$FileS Minutely.$keep.$every.na.na $stamp $receiver 2> txt/err.txt >> $cronthis
 crontab $cronthis
 if [ $? -ne 0  ]; then
   /TopStor/logmsg.py Snap1035 error $userreq $FileS
