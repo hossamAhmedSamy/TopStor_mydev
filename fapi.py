@@ -388,8 +388,8 @@ def dskperfs():
 @app.route('/api/v1/volumes/snapshots/snapshotsinfo', methods=['GET','POST'])
 def volumessnapshotsinfo():
  global allvolumes, alldsks, allinfo
- snaplist = {'Once':[], 'Minutely': [], 'Hourly': [], 'Weekly':[]}
- periodlist = {'Minutely': [], 'Hourly': [], 'Weekly':[], 'Trend': [] '-':[]}
+ snaplist = {'Once':[], 'Minutely': [], 'Hourly': [], 'Weekly':[], '-':[]}
+ periodlist = {'Minutely': [], 'Hourly': [], 'Weekly':[], 'Trend': []}
  getalltime()
  allgroups = getgroups()
  alllist = []

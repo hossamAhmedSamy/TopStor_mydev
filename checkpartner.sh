@@ -8,7 +8,8 @@ clusterip=`echo $@ | awk '{print $5}'`
 phrase=`echo $@ | awk '{print $6}'`
 isnew=`echo $@ | awk '{print $7}'`
 count=0
-nodeloc='ssh -oBatchmode=yes -i /TopStordata/'${partnerip}'_keys/'${partnerip}' -p '$port' '${partnerip}
+strict='-o StrictHostKeyChecking=no' 
+nodeloc='ssh -oBatchmode=yes -i /TopStordata/'${partnerip}'_keys/'${partnerip}' -p '$port' '$strict' '${partnerip}
 result='closed'
 myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 myhost=`hostname`
@@ -24,23 +25,22 @@ then
  echo keys are not found so makeing new ones
 fi
 
-ssh -oBatchmode=yes -i /TopStordata/${partnerip}_keys/${partnerip} -p $port ${partnerip} ls  >/dev/null 2>/dev/null
+echo ssh -oBatchmode=yes -oStrictHostKeyChecking=no -i /TopStordata/${partnerip}_keys/${partnerip} -p $port ${partnerip} ls
+ssh -oBatchmode=yes -oStrictHostKeyChecking=no -i /TopStordata/${partnerip}_keys/${partnerip} -p $port ${partnerip} ls
 if [ $? -ne 0 ];
 then
  isnew='new'
  echo partner is not connecting
 fi
-
+strict='-o StrictHostKeyChecking=no' 
 echo $isnew | grep 'new' >/dev/null
 if [ $? -eq 0 ];
 then
+ echo /TopStor/pumpkeys.py $partnerip $replitype $port $phrase
  /TopStor/pumpkeys.py $partnerip $replitype $port $phrase
- strict='-o StrictHostKeyChecking=no' 
  known=`cat /root/.ssh/known_hosts | grep -v $partnerip`
  echo -e "$known" > /root/.ssh/known_hosts
  clusterip=`echo $@ | awk '{print $3}'`
-else
- strict=''
 fi
 while [ $count -le 10 ];
 do

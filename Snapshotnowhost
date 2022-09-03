@@ -44,8 +44,12 @@ then
  params=`./repliparams.py $snapshot | awk -F'result_' '{print $2}'`
  echo params=$params
  echo ./replitargetget.sh ${receiver} $params  awk -F'result_' '{print $2}'
- result=`./replitargetget.sh ${receiver} $params | awk -F'result_' '{print $2}'`
+ result=`./replitargetget.sh ${receiver} $params`
  echo result=$result
+ result=`echo $result | grep 'result_' | awk -F'result_' '{print $2}'`
+ echo .................................................................
+ echo result=$result
+ echo ............................................
  #result=`./replitargetget.sh ${receiver} sico 2030202 snapsnap | awk -F'result_' '{print $2}'`
  echo $result | grep 'No_vol_space'
  if [ $? -eq 0 ];
@@ -57,7 +61,7 @@ then
   nodeowner=`echo $result | awk -F':' '{print $1}'`
   poolvol=`echo $result | awk -F':' '{print $2}'`
   echo newresult $result
-  overallres=`./replinow.sh $receiver $snapshot $nodeowner $poolvol`
+  overallres=`./replistream.sh $receiver $snapshot $nodeowner $poolvol`
   streamres=`echo $overallres | awk -F'result2_' '{print $2}'`
   if [ $streamres -eq 0 ];
   then
