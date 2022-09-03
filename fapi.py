@@ -389,7 +389,7 @@ def dskperfs():
 def volumessnapshotsinfo():
  global allvolumes, alldsks, allinfo
  snaplist = {'Once':[], 'Minutely': [], 'Hourly': [], 'Weekly':[]}
- periodlist = {'Minutely': [], 'Hourly': [], 'Weekly':[], 'Trend': []}
+ periodlist = {'Minutely': [], 'Hourly': [], 'Weekly':[], 'Trend': [] '-':[]}
  getalltime()
  allgroups = getgroups()
  alllist = []

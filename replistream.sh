@@ -8,7 +8,7 @@ partnerinfo=`./etcdget.py Partner/$partner`
 pport=`echo $partnerinfo | awk -F'/' '{print $3}'`
 phrase=`echo $partnerinfo | awk -F'/' '{print $NF}'`
 clusterip=`./etcdget.py namespace/mgmtip | awk -F'/' '{print $1}'`
-isopen=`./checkpartner.sh $partner Receiver $nodeip $pport $clusterip $phrase old`
+#isopen=`./checkpartner.sh $partner Receiver $nodeip $pport $clusterip $phrase old`
 nodeloc='ssh -oBatchmode=yes -i /TopStordata/'${nodeip}'_keys/'${nodeip}' -p '$pport' '${nodeip}
 myvol=`echo $snapshot | awk -F'@' '{print $1}'`
 volinfo=` ./etcdget.py vol $myvol`
