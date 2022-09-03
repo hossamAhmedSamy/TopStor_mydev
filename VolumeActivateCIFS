@@ -187,12 +187,12 @@ then
    echo running cifs.sh=$pool $name $ipaddr $ipsubnet cifs >> /root/volactivateparam
    echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    yes | cp /TopStordata/smb.$name /$pool/
-   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    zfs set status:mount=$active $pool/$name
    echo $active | grep active
    if [ $? -eq 0 ];
    then
     zfs mount $pool/$name
+   /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
    else
     zfs unmount $pool/$name
    fi

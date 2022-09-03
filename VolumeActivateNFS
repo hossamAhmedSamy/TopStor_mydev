@@ -145,11 +145,11 @@ then
     for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done
    fi
    echo running nfs $pool $name $ipaddr $ipsubnet
-   /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
    zfs set status:mount=$active $pool/$name
    echo $active | grep active
    if [ $? -eq 0 ];
     zfs mount $pool/$name
+    /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
    else
     zfs unmount $pool/$name
    fi

@@ -150,11 +150,11 @@ then
    echo running iscsi.sh=$pool $name $ipaddr $ipsubnet $portalport $targetiqn $chapuser $chappas >> /root/volactivateparam
    echo running iscsi.sh=$pool $name $ipaddr $ipsubnet $portalport $targetiqn $chapuser $chappas 
    yes | cp /TopStordata/iscsi.${name} /$pool/
-   /TopStor/iscsi.sh $pool $name $ipaddr $ipsubnet $portalport $targetiqn $chapuser $chappas
    zfs set status:mount=$active $pool/$name
    echo $active | grep active
    if [ $? -eq 0 ];
     zfs mount $pool/$name
+    /TopStor/iscsi.sh $pool $name $ipaddr $ipsubnet $portalport $targetiqn $chapuser $chappas
    else
     zfs unmount $pool/$name
    fi

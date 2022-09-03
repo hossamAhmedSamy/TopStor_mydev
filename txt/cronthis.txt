@@ -1,7 +1,1 @@
-@reboot /TopStor/initcron.sh 
-5 8 * * 0  /TopStor/autoGenPatch
-0 0 1 * * sh /TopStor/clearlog.sh Initialization
-*/5 * * * * /TopStor/ioperf.py performance
-0 */2 * * * sh /TopStor/initcleandb.sh Initialization
-0 */24 * * * /TopStor/Snapshotnowhosttrend pdhcp1995823115/cifcall_459329392 Trend 1662106384
-0 */24 * * * /TopStor/Snapshotnowhosttrend pdhcp1995823115/cifcall_125382567 Trend 1662106396
+0 */24 * * * /TopStor/Snapshotnowhosttrend pdhcp2608430392/cifcall_125382567_129518546 Trend 1662193644
