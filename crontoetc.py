@@ -10,7 +10,7 @@ def crontoetc(*bargs):
  cronsini=[x.replace(' ','%') for x in cronsall if 'hosttrend' in str(x) and len(x) > 2]
  crons=[('Snapperiod/'+x.split('%')[-2]+'/'+x.split('nowhost')[1].split('%')[1]+'/'+x.split('nowhost')[1].split('%')[-1],x) for x in cronsini ]
  cronsini=[x.replace(' ','%') for x in cronsall if 'hosttrend' not in str(x) and len(x) > 2 ]
- crons= crons +  [('Snapperiod/'+x.split('ly.')[0].split('%')[-1]+'ly'+'/'+x.split('nowhost')[1].split('%')[1]+'/'+x.split('nowhost')[1].split('%')[-1],x) for x in cronsini ]
+ crons= crons +  [('Snapperiod/'+x.split('ly.')[0].split('%')[-1]+'ly'+'/'+x.split('nowhost')[1].split('%')[1]+'/'+x.split('%')[-2]+'/'+x.split('%')[-1],x) for x in cronsini ]
  dels('Snapperiod','--prefix')
  for x in crons:
   put(x[0],x[1])
