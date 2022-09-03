@@ -57,7 +57,7 @@ then
  /sbin/zfs create -o overlay=on -o acltype=posixacl -o aclinherit=passthrough -o xattr=sa -o redundant_metadata=most -o atime=off -o quota=$quota -o dedup=on -o compression=lz4  $DG/$name  
  if [ $? -ne 0 ];
  then
-  echo here5 >> /root/volcreate
+  echo here5 
   /TopStor/logmsg.py NFS1006 error $userreq $DG/$name
   /TopStor/logqueue.py `basename "$0"` stop $userreq 
   exit
@@ -67,14 +67,18 @@ then
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
  /sbin/zfs set status:mount=$active $DG/$name
  myhost=`hostname -s`
- echo /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes >> /root/volcreate
+ echo /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet/$active
  ETCDCTL_API=3 /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet/$active
   stamp=`date +%s`
   leaderall=` ./etcdget.py leader --prefix `
   leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+  echo /pace/etcdput.py sync/volumes/${DG}_$name/request volumes_$stamp
   ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request volumes_$stamp
+  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request volumes_$stamp
+  echo etcdput.py sync/volumes/${DG}_$name/request/$leader volumes_$stamp
   ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request/$leader volumes_$stamp
  #/pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet/$active
+ echo ./VolumeActivateCIFS vol=$name user=$userreq
  ./VolumeActivateCIFS vol=$name user=$userreq
  /pace/putzpool.py 
  /TopStor/SnapshotCreateHourlytrend $DG $name 0 24 7 system 

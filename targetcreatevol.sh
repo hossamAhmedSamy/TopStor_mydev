@@ -34,6 +34,7 @@ then
  volright=` echo $volinfo | awk -F"'," '{print $2}' | awk -F"'" '{print $2}'`
  volleft=`echo $volleft | sed 's/active/replica/g'`
  zfs set status:mount=disabled $pool/$newvol 
+ echo ./etcdput.py $volleft $volright
  ./etcdput.py $volleft $volright
  docker rm -f `docker ps | grep $ipaddress | awk '{print $1}' 2>/dev/null`
  echo result_${oldnew}vol/@${oldnew}result_$pool/${newvol}result_${latestsnap}result_
