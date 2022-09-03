@@ -47,6 +47,7 @@ then
   nodeowner=`echo $result | awk -F':' '{print $1}'`
   poolvol=`echo $result | awk -F':' '{print $2}'`
   echo newresult $result
+  echo ./replistream.sh $receiver $snapshot $nodeowner $poolvol
   overallres=`./replistream.sh $receiver $snapshot $nodeowner $poolvol`
   streamres=`echo $overallres | awk -F'result2_' '{print $2}'`
   if [ $streamres -eq 0 ];

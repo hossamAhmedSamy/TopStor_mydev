@@ -10,7 +10,6 @@ replitype=`echo $partnerinfo | awk -F'/' '{print $2}'`
 pport=`echo $partnerinfo | awk -F'/' '{print $3}'`
 clusterip=`./etcdget.py namespace/mgmtip | awk -F'/' '{print $1}'`
 phrase=`echo $partnerinfo | awk -F'/' '{print $NF}'`
-isnew='old'
 isopen='closed'
 echo pport=$pport
 echo ./etcdget.py Partnernode/$partner --prefix
@@ -19,14 +18,23 @@ echo partnersinfo=$partnersinfo
 echo "$partnersinfo" | while read node 
 do
  echo node=$node
+ echo $node | grep '.' 
+ if [ $? -ne 0 ];
+ then
+  partnerip=`echo $partnerinfo | awk -F'/' '{print $1}'`
+  isnew='new'
+ else 
+  partnerip=`echo $node | awk -F'/' '{print $3}'`
+  isnew='old'
+ fi
  echo isopen=$isopen
  echo $isopen | grep open
  if [ $? -eq 0 ];
  then
   break
  fi
- partnerip=`echo $node | awk -F'/' '{print $3}'`
  echo partnerip=$partnerip
+ echo ./checkpartner.sh $partner $replitype $partnerip $pport $clusterip $phrase $isnew
  isopen=`./checkpartner.sh $partner $replitype $partnerip $pport $clusterip $phrase $isnew`
  echo isnew=$isopen 
  echo $isopen | grep open

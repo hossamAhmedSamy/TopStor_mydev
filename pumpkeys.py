@@ -8,6 +8,7 @@ myhost = hostname()
 myip = get('ready/'+myhost)[0]
 clusterip = get('namespace/mgmtip')[0].split('/')[0]
 def pumpkeys(*bargs):
+ print(str(bargs))
  partnerip = bargs[0]
  replitype = bargs[1]
  repliport = bargs[2]
