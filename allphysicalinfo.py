@@ -211,11 +211,6 @@ def getall(alldsks='0', *args):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
-<<<<<<< HEAD
- print('volumes',volumesdict)
-=======
- #print('snapshots',snapshotsdict)
->>>>>>> ad3124a3656ee302e4040583af92fc7bcab6498c
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  
