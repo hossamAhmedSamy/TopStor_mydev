@@ -211,7 +211,7 @@ def getall(alldsks='0', *args):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
- print('snapshots',snapshotsdict)
+ print('volumes',volumesdict)
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  
