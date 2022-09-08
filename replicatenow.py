@@ -55,32 +55,33 @@ def replitargetget(receiver, volume, volused, snapshot):
 
 def replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume):
  global allinfo, phrase, myclusterip, pport, nodeloc, replitype
- myvol = snapshot.split('@')[0] 
+ myvol = pool+'/'+volume 
  volumeline = get('volume', volume)[0]
  volumeinfo = volumeline[1].split('/') 
  volip = volumeinfo[7]
  volsubnet = volumeinfo[8]
  volgrps = volumeinfo[4]
  voltype = volumeline[0].split('/')[1]
- cmd = 'zfs get quota '+pool+'/'+volume+' -H'
+ cmd = 'zfs get quota '+myvol+' -H'
  print(cmd)
  quota=subprocess.run(cmd.split(' '),stdout=subprocess.PIPE).stdout.decode().split('\t')[2]
  print(quota)
  cmd = nodeloc + ' /TopStor/targetcreatevol.sh '+poolvol+' '+volip+' '+volsubnet+' '+quota+' '+voltype+' '+volgrps
  isopen, response = checkpartner(receiver, nodeip, cmd, 'old')
- if 'problem/@problem' in response:
+ response = response.split('result_')
+ response[1] = 'newvol/@new'
+ if 'problem/@problem' in response[1]:
   print(' a problem creating/using the volume in the remote cluster')
   return
- response = response.split('result_')
- if 'old' in response[1]:
-  print('old' )
-  print('lastsna',response[3] )
-  print('poolvol',response[2]) 
- 
+ elif 'newvol/@new' in response[1]:
+  print('./sendzfs.sh new '+ myvol+'@'+snapshot +' '+ poolvol +' '+ nodeloc.replace(' ','%%'))
+  cmd = './sendzfs.sh new '+ myvol+'@'+snapshot +' '+ poolvol +' '+ nodeloc.replace(' ','%%')
  else:
-  print('lastsna',response[1] )
-  print('lastsna',response[3] )
-  print('poolvol',response[2]) 
+  #cmd = './sendzfs.sh old '+myvol+'@'+lastsnap+' '+snapshot+' '+poolvol+' '+nodeloc
+  cmd = './sendzfs.sh old '+myvol+'@'+response[3].replace(' ','')+' '+snapshot+' '+response[2]+' '+nodeloc.replace(' ','%%')
+  print('./sendzfs.sh old '+myvol+'@'+response[3].replace(' ','')+' '+snapshot+' '+response[2]+' '+nodeloc.replace(' ','%%'))
+ stream = subprocess.run(cmd.split(' '),stdout=subprocess.PIPE).stdout.decode()
+ print('streaming: ',stream)
  return
 
 def repliparam(snapshot, receiver):
@@ -89,7 +90,7 @@ def repliparam(snapshot, receiver):
  allinfo = getall(alldsks)
  volume = snapshot.split('/')[1].split('@')[0]
  pool = snapshot.split('/')[0]
- snapshot = snapshot.split('@')[1]
+ snapshot = snapshot.split('@')[1].replace(' ','')
  volused = str(allinfo['volumes'][volume]['referenced'])
  snapused = '0' 
  
