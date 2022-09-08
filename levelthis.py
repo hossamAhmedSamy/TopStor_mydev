@@ -4,7 +4,7 @@ import sys
 def levelthis(fig,power='G'):
  leveldict = {'B':1, 'K':1024, 'M':1048576, 'G':1073741824,'T':1099511627776}
  try:
-  x = float(fig)
+  x = float(fig[:-1])
  except:
   fig = 0
  level = str(fig).replace(',','').upper().replace('MB','M').replace('GB','G').replace('KB','K').replace('TB','T')
