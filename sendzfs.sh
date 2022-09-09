@@ -1,6 +1,6 @@
 #!/bin/sh
 isnew=`echo $@ | awk '{print $1}'`
-
+echo $@ > /root/sendzfstmp
 echo $isnew | grep new
 if [ $? -eq 0 ];
 then
@@ -21,7 +21,7 @@ else
  #zfs send -DvPc -i $myvolsnap $snapshot | $nodeloc zfs recv -F $poolvol
 fi
 right=' '${nodeloc}' zfs recv -F '$poolvol
-zfs send $left | $right
+/usr/sbin/zfs send $left | $right
 if [ $? -eq 0 ]
 then
  echo result_Successresult_

@@ -41,8 +41,9 @@ zfs set snap:type=$stype $snapshot
 echo $receiver | grep NoReceiver 
 if [ $? -ne 0 ];
 then 
- result=`./replicatenow.py $snapshot $receiver`
- echo $result > /root/replicatenow
+ result=`./replicatenow.py $snapshot $receiver 2>/root/replicatenow`
+ echo ./replicatenow.py $snapshot $receiver >> /root/replicatenow
+ echo result=$result >> /root/replicatenow
  result=`echo $result | grep 'result_' | awk -F'result_' '{print $2}'`
  echo .................................................................
  echo result=$result

@@ -68,7 +68,7 @@ def replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume, cs
  volsubnet = volumeinfo[8]
  volgrps = volumeinfo[4]
  voltype = volumeline[0].split('/')[1]
- cmd = 'zfs get quota '+myvol+' -H'
+ cmd = '/usr/sbin/zfs get quota '+myvol+' -H'
  quota=subprocess.run(cmd.split(' '),stdout=subprocess.PIPE).stdout.decode().split('\t')[2]
  cmd = nodeloc + ' /TopStor/targetcreatevol.sh '+poolvol+' '+volip+' '+volsubnet+' '+quota+' '+voltype+' '+volgrps+' '+oldsnap
  isopen, response = checkpartner(receiver, nodeip, cmd, 'old')
@@ -111,9 +111,9 @@ def repliparam(snapshot, receiver):
  csnaps = selection.split('@')[1]
  result = replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume, csnaps)
  if 'fail' in result:
-  cmd = 'zfs set snap:type='+replitype+' '+pool+'/'+volume+'@'+snapshot 
+  cmd = '/usr/sbin/zfs set snap:type='+replitype+' '+pool+'/'+volume+'@'+snapshot 
  else:
-  cmd = 'zfs set partner:receiver='+receiver.split('_')[0]+' '+snapshot
+  cmd = '/usr/sbin/zfs set partner:receiver='+receiver.split('_')[0]+' '+pool+'/'+volume+'@'+snapshot
  subprocess.run(cmd.split(' '),stdout=subprocess.PIPE).stdout.decode()
  #return _'+volume, volused, snapshot+'result_'
  return result
