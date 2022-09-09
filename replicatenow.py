@@ -53,9 +53,15 @@ def replitargetget(receiver, volume, volused, snapshot):
  response = response.split('result_')[1]
  return nodeip, 'closed' if 'open' not in isopen else response
 
-def replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume):
+def replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume, csnaps):
  global allinfo, phrase, myclusterip, pport, nodeloc, replitype
  myvol = pool+'/'+volume 
+ mysnaps = sorted(allinfo['volumes'][volume]['snapshots'], key= lambda x : x.split('.')[-1], reverse=True)
+ oldsnap = 'noold'
+ for snap in mysnaps:
+  if snap in csnaps:
+   oldsnap = snap
+   break
  volumeline = get('volume', volume)[0]
  volumeinfo = volumeline[1].split('/') 
  volip = volumeinfo[7]
@@ -63,13 +69,12 @@ def replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume):
  volgrps = volumeinfo[4]
  voltype = volumeline[0].split('/')[1]
  cmd = 'zfs get quota '+myvol+' -H'
- print(cmd)
  quota=subprocess.run(cmd.split(' '),stdout=subprocess.PIPE).stdout.decode().split('\t')[2]
- print(quota)
- cmd = nodeloc + ' /TopStor/targetcreatevol.sh '+poolvol+' '+volip+' '+volsubnet+' '+quota+' '+voltype+' '+volgrps
+ cmd = nodeloc + ' /TopStor/targetcreatevol.sh '+poolvol+' '+volip+' '+volsubnet+' '+quota+' '+voltype+' '+volgrps+' '+oldsnap
  isopen, response = checkpartner(receiver, nodeip, cmd, 'old')
  response = response.split('result_')
- response[1] = 'newvol/@new'
+ if oldsnap == 'noold':
+  response[1] = 'newvol/@new'
  if 'problem/@problem' in response[1]:
   print(' a problem creating/using the volume in the remote cluster')
   return
@@ -77,12 +82,12 @@ def replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume):
   print('./sendzfs.sh new '+ myvol+'@'+snapshot +' '+ poolvol +' '+ nodeloc.replace(' ','%%'))
   cmd = './sendzfs.sh new '+ myvol+'@'+snapshot +' '+ poolvol +' '+ nodeloc.replace(' ','%%')
  else:
-  #cmd = './sendzfs.sh old '+myvol+'@'+lastsnap+' '+snapshot+' '+poolvol+' '+nodeloc
-  cmd = './sendzfs.sh old '+myvol+'@'+response[3].replace(' ','')+' '+snapshot+' '+response[2]+' '+nodeloc.replace(' ','%%')
-  print('./sendzfs.sh old '+myvol+'@'+response[3].replace(' ','')+' '+snapshot+' '+response[2]+' '+nodeloc.replace(' ','%%'))
+  #cmd = './sendzfs.sh old '+myvol+'@'+lastsnap+' '+myvol+'@'+snapshot+' '+poolvol+' '+nodeloc
+  cmd = './sendzfs.sh old '+myvol+'@'+oldsnap+' '+myvol+'@'+snapshot+' '+response[2]+' '+nodeloc.replace(' ','%%')
+  print('./sendzfs.sh old '+myvol+'@'+oldsnap+' '+myvol+'@'+snapshot+' '+response[2]+' '+nodeloc.replace(' ','%%'))
  stream = subprocess.run(cmd.split(' '),stdout=subprocess.PIPE).stdout.decode()
  print('streaming: ',stream)
- return
+ return stream
 
 def repliparam(snapshot, receiver):
  global allinfo, phrase, myclusterip, pport, nodeloc, replitype
@@ -96,15 +101,22 @@ def repliparam(snapshot, receiver):
  
  nodeip, selection = replitargetget(receiver, volume, volused, snapshot)
  if selection == 'closed':
-  print('no node is open for replicaiton in the '+receiver)
+  print('no node is open for replication in the '+receiver)
   return 'closed'
  if 'No_vol_space' in str(selection):
   print('No space in the receiver: '+receiver)
   return 'No_Space'
  nodeowner = selection.split(':')[0]
- poolvol = selection.split(':')[1]
- replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume)
- return 'result_'+volume, volused, snapshot+'result_'
+ poolvol = selection.split(':')[1].split('@')[0]
+ csnaps = selection.split('@')[1]
+ result = replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume, csnaps)
+ if 'fail' in result:
+  cmd = 'zfs set snap:type='+replitype+' '+pool+'/'+volume+'@'+snapshot 
+ else:
+  cmd = 'zfs set partner:receiver='+receiver.split('_')[0]+' '+snapshot
+ subprocess.run(cmd.split(' '),stdout=subprocess.PIPE).stdout.decode()
+ #return _'+volume, volused, snapshot+'result_'
+ return result
 
 
 
