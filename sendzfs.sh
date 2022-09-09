@@ -17,7 +17,7 @@ else
  poolvol=`echo $@ | awk '{print $4}'`
  nodeloc=`echo $@ | awk '{print $5}' | sed 's/\%\%/ /g' `
  echo zfs send -DvPc -i  $myvolsnap $snapshot \| $nodeloc zfs recv -F $poolvol
- left='-DvPc -i '${myvolsnap}' '$snapshot
+ left='-DvPc -I '${myvolsnap}' '$snapshot
  #zfs send -DvPc -i $myvolsnap $snapshot | $nodeloc zfs recv -F $poolvol
 fi
 right=' '${nodeloc}' zfs recv -F '$poolvol
