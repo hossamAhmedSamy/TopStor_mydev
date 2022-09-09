@@ -11,6 +11,7 @@ import sys
 def getsnapperiods(voldict):
  periodsdict = dict()
  snapperiods = get('Snapperiod','--prefix') 
+ snapperiods = [ x for x in snapperiods if 'hosttrend' not in str(x) ]
  for per in snapperiods:
   leftper = per[0].split('/')
   rightper = per[1].split('/')
@@ -22,8 +23,8 @@ def getsnapperiods(voldict):
    periodsdict[leftper[4]]['pool']=voldict[vol]['pool']
    periodsdict[leftper[4]]['volume']=vol
    periodsdict[leftper[4]]['periodtype']=leftper[1]
-   periodsdict[leftper[4]]['id']=leftper[4]
-   periodsdict[leftper[4]]['receiver']=rightper[-1]
+   periodsdict[leftper[4]]['id']= leftper[4]
+   periodsdict[leftper[4]]['receiver']=leftper[5]
    if 'Minutely' in leftper[1]: 
     periodsdict[leftper[4]]['keep']=rightper[4].split('.')[1]
     periodsdict[leftper[4]]['every']=rightper[4].split('.')[2]
@@ -210,7 +211,6 @@ def getall(alldsks='0', *args):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
- print('snapshots',snapshotsdict)
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  

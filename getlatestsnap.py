@@ -5,7 +5,7 @@ import sys
 def getlatestsnap(volume):
  allinfo = getall('0')
  allsnaps = allinfo['volumes'][volume]['snapshots']
- allsnaps.sort(key= lambda x: float(x.split('.')[1]))
+ allsnaps.sort(key= lambda x: float(x.split('.')[1]), reverse=True)
  print ('latest','result_'+allsnaps[-1]+'result_')
  return allsnaps[-1]
 

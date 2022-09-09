@@ -22,7 +22,7 @@ then
   then
    sed -i 's/active/disabled/g' /$pDG/smb.$name
    dockerps=`docker ps | grep $ipaddr | awk '{print $1}'`
-   docker rm -f $dockerps
+   docker rm -f $dockerps 2>/dev/null
   
    /sbin/pcs resource delete --force cifs-$ipaddr
    zfs set status:mount=disabled $pDG/$name

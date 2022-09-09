@@ -1,6 +1,6 @@
 #!/bin/python3.6
 import sys, subprocess
-from etcdget import etcdget as get 
+from etcdgetpy import etcdget as get 
 from socket import gethostname as hostname
 from sendhost import sendhost
 from privthis import privthis 

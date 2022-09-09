@@ -12,7 +12,7 @@ clusterip=`./etcdget.py namespace/mgmtip | awk -F'/' '{print $1}'`
 phrase=`echo $partnerinfo | awk -F'/' '{print $NF}'`
 isopen='closed'
 echo pport=$pport
-echo ./etcdget.py Partnernode/$partner --prefix
+strict='-oStrictHostKeyChecking=yes' 
 partnersinfo=`./etcdget.py Partnernode/$partner --prefix`
 echo partnersinfo=$partnersinfo
 echo "$partnersinfo" | while read node 
@@ -43,7 +43,7 @@ do
   continue
  fi
  echo $partnerip $pport
- nodeloc='ssh -oBatchmode=yes -i /TopStordata/'${partnerip}'_keys/'${partnerip}' -p '$pport' '${partnerip}
+ nodeloc='ssh -oBatchmode=yes -i /TopStordata/'${partnerip}'_keys/'${partnerip}' -p '$pport' -oStrictHostKeyChecking=yes  '${partnerip}
  echo nodeloc /TopStor/repliSelection.py $volume $volsize $snapshot
  xx=`$nodeloc /TopStor/repliSelection.py $volume $volsize $snapshot`
  echo $xx | grep 'result'_

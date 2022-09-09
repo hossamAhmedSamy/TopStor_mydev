@@ -105,11 +105,12 @@ def selectVol(volname, volsize):
  volinfo = allinfo['volumes']
  volumes='No_vol_Space'
  for vol in volinfo:
-  volshort=str(vol.split('_')[:-1])
+  volshort='_'.join(vol.split('_')[:-1])
   if volshort == volname:
-   if levelthis(volinfo[vol]['available'],'B') > levelthis(volsize,'B') - levelthis(volinfo[vol]['used'],'B'):
+   if levelthis(volinfo[vol]['available']) > levelthis(volsize) - levelthis(volinfo[vol]['used']):
     hostip = allinfo['hosts'][volinfo[vol]['host']]['ipaddress']
-    volumes = hostip+':'+volinfo[vol]['pool']+'/'+vol
+    csnaps = 'csnaps,'+','.join(allinfo['volumes'][vol]['snapshots'])
+    volumes = hostip+':'+volinfo[vol]['pool']+'/'+vol+'@'+csnaps
    else:
     volumes='No_vol_Space'
  return volumes

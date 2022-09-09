@@ -8,8 +8,7 @@ runningpools='/pacedata/pools/runningpools'
 pDG=`echo $@ | awk '{print $1}'`;
 DG=`echo $@ | awk -F/ '{print $1}'`;
 stype=`echo $@ | awk '{print $2}' | awk -F'.' '{print $1}'`;
-
-receiver=` echo $@ | awk -F'/' '{print $NF'}`
+receiver=` echo $@ | awk '{print $NF'}`
 shortreceiver=`echo $receiver | awk -F'_' '{print $1}'`
 echo $pDG
 myhost=`hostname -s`
@@ -42,33 +41,32 @@ zfs set snap:type=$stype $snapshot
 echo $receiver | grep NoReceiver 
 if [ $? -ne 0 ];
 then 
- params=`./repliparams.py $snapshot | grep 'result_' | sed 's/result\_//g'`
- echo ./replitargetget.sh ${receiver} $params  awk -F'result_' '{print $2}'
- result=`./replitargetget.sh ${receiver} $params | awk -F'result_' '{print $2}'`
+ waiting=1
+ while [ $waiting -eq 1 ];
+ do
+  pgrep replicatenow.py 
+  if [ $? -eq 0 ];
+  then
+   echo waiting the current replications to finish
+   sleep 1
+  else
+   waiting=0
+  fi
+ done
+ result=`./replicatenow.py $snapshot $receiver 2>/root/replicatenow`
+ echo ./replicatenow.py $snapshot $receiver >> /root/replicatenow
+ echo result=$result >> /root/replicatenow
+ result=`echo $result | grep 'result_' | awk -F'result_' '{print $2}'`
+ echo .................................................................
  echo result=$result
- #result=`./replitargetget.sh ${receiver} sico 2030202 snapsnap | awk -F'result_' '{print $2}'`
- echo $result | grep 'No_vol_space'
+ echo ............................................
+ echo $result | grep 'fail'
  if [ $? -eq 0 ];
  then
-  echo zfs destroy $snapshot
-  zfs destroy $snapshot
-  ./logmsg.py Replispacefa01 error $userreq $shortreceiver $vol
+  #./logmsg.py Replispacefa01 error $userreq $shortreceiver $vol
+  ./logmsg.py Streamfa01 error $userreq $vol $shortreceiver
  else
-  nodeowner=`echo $result | awk -F':' '{print $1}'`
-  poolvol=`echo $result | awk -F':' '{print $2}'`
-  echo newresult $result
-  overallres=`./replistream.sh $receiver $snapshot $nodeowner $poolvol`
-  streamres=`echo $overallres | awk -F'result2_' '{print $2}'`
-  if [ $streamres -eq 0 ];
-  then
-   zfs set partner:receiver=$shortreceiver $snapshot
    ./logmsg.py Replispacesu01 info $userreq $shortreceiver $vol
-  else
-   echo zfs destroy $snapshot
-   echo $overallres > /root/replicationresult
-   zfs destroy $snapshot
-   ./logmsg.py Streamfa01 error $userreq $vol $shortreceiver
-  fi
  fi 
 fi
 /TopStor/logqueue.py `basename "$0"` stop system 

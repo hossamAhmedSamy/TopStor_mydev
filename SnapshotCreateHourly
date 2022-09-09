@@ -11,7 +11,8 @@ every=0; ev=`echo $@ | awk '{print $4}'`; every=$(($every+$ev)); if (($every < 1
 keep=0; k=`echo $@ | awk '{print $5}'`; keep=$(($keep+$k)); if (($keep < 1)); then keep=1 ; fi
 pDG=` echo $@ | awk '{print $1}'`; 
 FileS=` echo $@ | awk '{print $2}'`;
-userreq=` echo $@ | awk '{print $6}'`;
+receiver=` echo $@ | awk '{print $6}'`;
+userreq=` echo $@ | awk '{print $7}'`;
 /TopStor/logqueue.py `basename "$0"` running $userreq 
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
 rm $txtres 2>/dev/null
@@ -35,7 +36,7 @@ else
  myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
 fi
 crontab -l > $cronthis
-echo $min  "*"/$every "*" "*" "*"  /TopStor/Snapshotnowhost $DG/$FileS Hourly.$keep.$min.$every.na $stamp 2> txt/err.txt >> $cronthis
+echo $min  "*"/$every "*" "*" "*"  /TopStor/Snapshotnowhost $DG/$FileS Hourly.$keep.$min.$every.na $stamp $receiver 2> txt/err.txt >> $cronthis
 crontab $cronthis 2>> $txtres
 err=`wc -c  $txtres | awk '{print $1}'`;
 datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
@@ -43,11 +44,11 @@ if [[ $err -ge  4  ]]; then
   /TopStor/logmsg.py Snap1038 error $userreq $DG/$FileS 
 else 
   /TopStor/logmsg.py Snap1039 info $userreq  Hourly.$keep.$min.$every.$stamp $DG/$FileS
-  /pace/etcdput${local}.py $myip Snapperiod/Hourly/$DG/$FileS/$stamp  $min%*/$every%*%*%*%/TopStor/Snapshotnowhost%$DG/$FileS%Hourly.$keep.$min.$every.na%$stamp
+  /pace/etcdput${local}.py $myip Snapperiod/Hourly/$DG/$FileS/$stamp  $min%*/$every%*%*%*%/TopStor/Snapshotnowhost%$DG/$FileS%Hourly.$keep.$min.$every.na%$stamp/$receiver
  if [ -z $local ];
  then
-  /pace/etcdput.py sync/Snapperiod/`basename "$0"`_$@ $stamp/request/$myhost Snapperiod_$stamp
-  /pace/etcdput.py sync/Snapperiod/`basename "$0"`_$@ $stamp/request Snapperiod_$stamp
+  /pace/etcdput.py sync/Snapperiod/_____/request/$myhost Snapperiod_$stamp
+  /pace/etcdput.py sync/Snapperiod/_____/request Snapperiod_$stamp
  fi
 
 #ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
