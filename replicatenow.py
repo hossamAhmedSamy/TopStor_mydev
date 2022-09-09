@@ -79,7 +79,7 @@ def replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume, cs
   print(' a problem creating/using the volume in the remote cluster')
   return
  elif 'newvol/@new' in response[1]:
-  print('./sendzfs.sh new '+ myvol+'@'+snapshot +' '+ poolvol +' '+ nodeloc.replace(' ','%%'))
+  #print('./sendzfs.sh new '+ myvol+'@'+snapshot +' '+ poolvol +' '+ nodeloc.replace(' ','%%'))
   cmd = './sendzfs.sh new '+ myvol+'@'+snapshot +' '+ poolvol +' '+ nodeloc.replace(' ','%%')
  else:
   #cmd = './sendzfs.sh old '+myvol+'@'+lastsnap+' '+myvol+'@'+snapshot+' '+poolvol+' '+nodeloc
@@ -87,6 +87,17 @@ def replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume, cs
   print('./sendzfs.sh old '+myvol+'@'+oldsnap+' '+myvol+'@'+snapshot+' '+response[2]+' '+nodeloc.replace(' ','%%'))
  stream = subprocess.run(cmd.split(' '),stdout=subprocess.PIPE).stdout.decode()
  print('streaming: ',stream)
+ print('start checking csnaps')
+ csnaps = csnaps.split(',')
+ mysnaps = ",".join(mysnaps)
+ for snap in csnaps:
+  if snap not in mysnaps:
+   cmd = nodeloc + ' /usr/sbin/zfs destroy -r '+poolvol+'@'+snap 
+   print('removing remote:',poolvol+'@'+snap)
+   print(cmd)
+   print(';;;;;;;;;;;;;;;;;;;;;;')
+   #checkpartner(receiver, nodeip, cmd, 'old')
+ print('end checking csnaps')
  return stream
 
 def repliparam(snapshot, receiver):
