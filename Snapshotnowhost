@@ -7,12 +7,13 @@ logging='/var/www/html/des20/Data/currentinfo2.log'
 runningpools='/pacedata/pools/runningpools'
 pDG=`echo $@ | awk '{print $1}'`;
 DG=`echo $@ | awk -F/ '{print $1}'`;
-vol=`echo $@ | awk -F/ '{print $2}'`;
+vol=`echo $@ | awk '{print $1}'| awk -F/ '{print $2}'`;
 stype=`echo $@ | awk '{print $2}' | awk -F'.' '{print $1}'`;
 receiver=` echo $@ | awk '{print $NF'}`
 shortreceiver=`echo $receiver | awk -F'_' '{print $1}'`
 echo $pDG
 myhost=`hostname -s`
+userreq='system'
 pp=`/sbin/zpool list | grep $DG`
 echo pp=$pp
 echo $pp | grep $DG
@@ -42,6 +43,7 @@ zfs set snap:type=$stype $snapshot
 echo $receiver | grep NoReceiver 
 if [ $? -ne 0 ];
 then 
+ echo ./replicatenow.py $snapshot $receiver
  waiting=1
  while [ $waiting -eq 1 ];
  do 
@@ -64,7 +66,6 @@ then
  done
  ./etcdput.py running/$receiver $receiver 
  result=`./replicatenow.py $snapshot $receiver 2>/root/replicatenow`
- echo ./replicatenow.py $snapshot $receiver >> /root/replicatenow
  echo result=$result >> /root/replicatenow
  result=`echo $result | grep 'result_' | awk -F'result_' '{print $2}'`
  echo .................................................................
@@ -76,7 +77,7 @@ then
   #./logmsg.py Replispacefa01 error $userreq $shortreceiver $vol
   ./logmsg.py Streamfa01 error $userreq $vol $shortreceiver
  else
-   ./logmsg.py Replispacesu01 info $userreq $shortreceiver $vol
+   ./logmsg.py Replispacesu01 info $userreq $vol $shortreceiver
  fi 
 fi
 ./etcdput.py running/$receiver finished 
