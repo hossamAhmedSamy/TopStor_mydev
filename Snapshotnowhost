@@ -7,6 +7,7 @@ logging='/var/www/html/des20/Data/currentinfo2.log'
 runningpools='/pacedata/pools/runningpools'
 pDG=`echo $@ | awk '{print $1}'`;
 DG=`echo $@ | awk -F/ '{print $1}'`;
+vol=`echo $@ | awk -F/ '{print $2}'`;
 stype=`echo $@ | awk '{print $2}' | awk -F'.' '{print $1}'`;
 receiver=` echo $@ | awk '{print $NF'}`
 shortreceiver=`echo $receiver | awk -F'_' '{print $1}'`

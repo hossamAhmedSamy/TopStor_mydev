@@ -36,6 +36,12 @@ def notifthis(notifbody,loc=3):
  notifc = 6
  for word in msg[4:]:
   if word == ':':
+   if len(notifbody) <= notifc:
+    print('##################################')
+    print(msgbody)
+    print(notifbody,len(notifbody))
+    print('##################################')
+    notifbody.append('<<fix>>')
    msgbody = msgbody[:-1]+' '+notifbody[notifc]+'.'
    notifc += 1
   elif len(word) > 0:
