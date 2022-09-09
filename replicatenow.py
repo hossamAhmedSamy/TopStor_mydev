@@ -96,7 +96,7 @@ def replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume, cs
   if snap not in mysnaps:
    cmd = nodeloc + ' /usr/sbin/zfs destroy -r '+poolvol+'@'+snap 
    print('removing remote:',poolvol+'@'+snap)
-   with open('/root/destroynow','a') as f:
+   with open('/root/destroynow','w') as f:
     f.write('removing remote: '+poolvol+'@'+snap)
     print(cmd)
     f.write(cmd+'\n')
