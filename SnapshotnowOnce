@@ -35,6 +35,27 @@ zfs set snap:type=Once $snapshot
 echo $receiver | grep NoReceiver 
 if [ $? -ne 0 ];
 then 
+ wiating=1
+ while [ $waiting -eq 1 ];
+ do
+  running=`./etcdget.py running/$receiver`
+  echo $running | grep $receiver
+  if [ $? -eq 0 ];
+  then
+   echo waiting the current replications to finish
+   queue=`ps -ef | grep Snapshotnow | wc -l`
+   if [ $queue -ge 10 ];
+   then
+    ./etcdput.py running/$receiver no
+    exit
+    waiting=0
+   fi
+   sleep 1
+  else
+   waiting=0
+  fi
+ done
+ ./etcdput.py running/$receiver $receiver
  result=`./replicatenow.py $snapshot $receiver`
  result=`echo $result | grep 'result_' | awk -F'result_' '{print $2}'`
  echo .................................................................
@@ -49,4 +70,5 @@ then
    ./logmsg.py Replispacesu01 info $userreq $shortreceiver $vol
  fi 
 fi;
+ ./etcdput.py running/$receiver finish 
 #sleep 2;

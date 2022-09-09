@@ -90,18 +90,17 @@ def replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume, cs
  print('start checking csnaps')
  csnaps = csnaps.split(',')
  mysnaps = ",".join(mysnaps)
+ destroy = ''
  for snap in csnaps:
   if snap == 'csnaps':
    continue
   if snap not in mysnaps:
-   cmd = nodeloc + ' /usr/sbin/zfs destroy -r '+poolvol+'@'+snap 
-   print('removing remote:',poolvol+'@'+snap)
-   with open('/root/destroynow','a') as f:
-    f.write('removing remote: '+poolvol+'@'+snap)
-    print(cmd)
+   destroy = destroy + poolvol+'@'+snap+',' 
+ if len(destroy) > 5:
+  cmd = nodeloc + ' /TopStor/zfsdestroy.sh '+destroy[:-1]
+  with open('/root/destroynow','w') as f:
     f.write(cmd+'\n')
-   print(';;;;;;;;;;;;;;;;;;;;;;')
-   checkpartner(receiver, nodeip, cmd, 'old')
+  checkpartner(receiver, nodeip, cmd, 'old')
  print('end checking csnaps')
  return stream
 

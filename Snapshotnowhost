@@ -43,16 +43,25 @@ if [ $? -ne 0 ];
 then 
  waiting=1
  while [ $waiting -eq 1 ];
- do
-  pgrep replicatenow.py 
+ do 
+  running=`./etcdget.py running/$receiver`
+  echo $running | grep $receiver 
   if [ $? -eq 0 ];
   then
    echo waiting the current replications to finish
+   queue=`ps -ef | grep Snapshotnow | wc -l`
+   if [ $queue -ge 10 ];
+   then
+    ./etcdput.py running/$receiver no
+    exit
+    waiting=0
+   fi
    sleep 1
   else
    waiting=0
   fi
  done
+ ./etcdput.py running/$receiver $receiver 
  result=`./replicatenow.py $snapshot $receiver 2>/root/replicatenow`
  echo ./replicatenow.py $snapshot $receiver >> /root/replicatenow
  echo result=$result >> /root/replicatenow
@@ -69,4 +78,5 @@ then
    ./logmsg.py Replispacesu01 info $userreq $shortreceiver $vol
  fi 
 fi
+./etcdput.py running/$receiver finished 
 /TopStor/logqueue.py `basename "$0"` stop system 
