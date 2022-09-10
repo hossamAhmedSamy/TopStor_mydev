@@ -11,12 +11,13 @@ nameid=$RANDOM$RANDOM
 name=${shortname}_$nameid
 pDG=`echo $@ | awk '{print $1}'`;
 quota=`echo $@ | awk '{print $3}'`;
-writev=`echo $@ | awk '{print $3}'`;
+writev='DOMAIN'
 ipaddr=`echo $@ | awk '{print $4}'`;
 ipsubnet=`echo $@ | awk '{print $5}'`;
-userreq=` echo $@ | awk '{print $8}'`;
-domname=` echo $@ | awk '{print $9}'`;
-domsrvn=` echo $@ | awk '{print $10}'`;
+active=`echo $@ | awk '{print $6}'`;
+userreq=` echo $@ | awk '{print $7}'`;
+domname=` echo $@ | awk '{print $10}'`;
+domsrvn=` echo $@ | awk '{print $11}'`;
 domsrvi=` echo $@ | awk '{print $11}'`;
 domadmin=` echo $@ | awk '{print $12}'`;
 dompass=` echo $@ | awk '{print $13}'`;
@@ -25,7 +26,7 @@ hi=`whoami`
 echo start $hi $userreq > /root/volcreate
 /TopStor/logqueue.py `basename "$0"` running $userreq
 echo queuedrunning >> /root/volcreate
-
+echo user=$userreq
 privilege="CIFS";
 ./privthis.sh $privilege $userreq | grep true ;
 if [ $? -eq 0 ];
@@ -52,10 +53,11 @@ then
  /sbin/zfs set prot:kind=CIFS $DG/$name
  /sbin/zfs set ip:addr=$ipaddr $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
+ /sbin/zfs set status:mount=$active $DG/$name
  myhost=`hostname -s`
- echo /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass >> /root/volcreateparam
- ETCDCTL_API=3 /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass 
- /pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass 
+ echo /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active >> /root/volcreateparam
+ ETCDCTL_API=3 /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active 
+ /pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active
  ./VolumeActivateCIFSdom vol=$name user=$userreq
  /pace/putzpool.py 
  /TopStor/SnapshotCreateHourlytrend $DG $name 0 24 7 system 
