@@ -89,7 +89,8 @@ def replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume, cs
  print('streaming: ',stream)
  print('start checking csnaps')
  csnaps = csnaps.split(',')
- mysnaps = ",".join(mysnaps)
+ cmd = '/usr/sbin/zfs list -t snapshot -o name'
+ mysnaps=subprocess.run(cmd.split(' '),stdout=subprocess.PIPE).stdout.decode()
  destroy = ''
  for snap in csnaps:
   if snap == 'csnaps':
