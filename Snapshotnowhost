@@ -14,6 +14,9 @@ shortreceiver=`echo $receiver | awk -F'_' '{print $1}'`
 echo $pDG
 myhost=`hostname -s`
 userreq='system'
+stamp=`date +%s`
+leaderall=` ./etcdget.py leader --prefix `
+leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
 pp=`/sbin/zpool list | grep $DG`
 echo pp=$pp
 echo $pp | grep $DG
@@ -55,7 +58,12 @@ then
    queue=`ps -ef | grep Snapshotnow | wc -l`
    if [ $queue -ge 10 ];
    then
+    stamp=`date +%s`
+    leaderall=` ./etcdget.py leader --prefix `
+    leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
     ./etcdput.py running/$receiver no
+    ./etcdput.py sync/running/____/request running_$stamp
+    ./etcdput.py sync/running/____/request/$leader running_$stamp
     exit
     waiting=0
    fi
@@ -81,4 +89,6 @@ then
  fi 
 fi
 ./etcdput.py running/$receiver finished 
+./etcdput.py sync/running/____/request running_$stamp
+./etcdput.py sync/running/____/request/$leader running_$stamp
 /TopStor/logqueue.py `basename "$0"` stop system 
