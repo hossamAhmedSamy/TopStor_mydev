@@ -12,7 +12,7 @@ phrase = ''
 myclusterip = ''
 pport = ''
 nodeloc = ''
-replitype = ''
+replitype = 'Receiver'
 
 def checkpartner(receiver, nodeip, cmd, isnew):
  global allinfo, phrase, myclusterip, pport, nodeloc, replitype
@@ -127,7 +127,7 @@ def repliparam(snapshot, receiver):
  csnaps = selection.split('@')[1]
  result = replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume, csnaps)
  if 'fail' in result:
-  cmd = '/usr/sbin/zfs set snap:type='+replitype+' '+pool+'/'+volume+'@'+snapshot 
+  cmd = '/usr/sbin/zfs destroy -r '+' '+pool+'/'+volume+'@'+snapshot 
  else:
   cmd = '/usr/sbin/zfs set partner:receiver='+receiver.split('_')[0]+' '+pool+'/'+volume+'@'+snapshot
  subprocess.run(cmd.split(' '),stdout=subprocess.PIPE).stdout.decode()

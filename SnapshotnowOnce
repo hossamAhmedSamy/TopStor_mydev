@@ -13,6 +13,8 @@ stamp=`date +%s`;
 snapshot=$pool'/'$vol'@'${name}'.'$stamp
 shortreceiver=`echo $receiver | awk -F'_' '{print $1}'`
 
+leaderall=` ./etcdget.py leader --prefix `
+leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
 
 echo $receiver | grep NoReceiver
 if [ $? -ne 0 ];
@@ -56,6 +58,8 @@ then
   fi
  done
  ./etcdput.py running/$receiver $receiver
+ ./etcdput.py sync/running/____/request running_$stamp
+ ./etcdput.py sync/running/____/request/$leader running_$stamp
  result=`./replicatenow.py $snapshot $receiver`
  result=`echo $result | grep 'result_' | awk -F'result_' '{print $2}'`
  echo .................................................................
@@ -71,4 +75,6 @@ then
  fi 
 fi;
  ./etcdput.py running/$receiver finish 
+ ./etcdput.py sync/running/____/request running_$stamp
+ ./etcdput.py sync/running/____/request/$leader running_$stamp
 #sleep 2;

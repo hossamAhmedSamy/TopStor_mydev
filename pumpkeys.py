@@ -6,6 +6,9 @@ from sendhost import sendhost
 from privthis import privthis 
 myhost = hostname()
 myip = get('ready/'+myhost)[0]
+clusterip = get('namespace/mgmtip')[0]
+with open('/root/tmptmp','w') as f:
+ f.write(str(clusterip))
 clusterip = get('namespace/mgmtip')[0].split('/')[0]
 def pumpkeys(*bargs):
  print(str(bargs))
