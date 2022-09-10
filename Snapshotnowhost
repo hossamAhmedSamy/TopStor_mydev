@@ -73,8 +73,9 @@ then
    waiting=0
   fi
  done
- ./etcdput.py running/$receiver $receiver 
-    ./etcdput.py running/$myhost/$receiver $receiver 
+  ./etcdput.py running/$myhost/$receiver $receiver 
+  ./etcdput.py sync/running/____/request running_$stamp
+  ./etcdput.py sync/running/____/request/$leader running_$stamp
  result=`./replicatenow.py $snapshot $receiver 2>/root/replicatenow`
  echo result=$result >> /root/replicatenow
  result=`echo $result | grep 'result_' | awk -F'result_' '{print $2}'`

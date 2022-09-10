@@ -9,7 +9,7 @@ os.environ['ETCDCTL_API']= '3'
 
 def etcdctl(ip,port,key,prefix):
  if port == '2379':
-  cmdline=['/bin/etcdctl','--user=root:YN-Password_123','--endpoints=http://'+ip+':'+port,'get',key,prefix]
+  cmdline=['/usr/bin/etcdctl','--user=root:YN-Password_123','--endpoints=http://'+ip+':'+port,'get',key,prefix]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  else:
   returncode= 2 
@@ -20,7 +20,7 @@ def etcdctl(ip,port,key,prefix):
    data=json.load(open('/pacedata/runningetcdnodes.txt'));
    for x in data['members']:
     endpoints=endpoints+str(x['clientURLs'])[2:][:-2]+','
-   cmdline=['/bin/etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key,prefix]
+   cmdline=['/usr/bin/etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key,prefix]
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
    returncode = int(result.returncode)
    if returncode == 2:
