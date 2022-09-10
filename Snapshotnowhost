@@ -50,7 +50,7 @@ then
  waiting=1
  while [ $waiting -eq 1 ];
  do 
-  running=`./etcdget.py running/$receiver`
+  running=`./etcdget.py running $receiver`
   echo $running | grep $receiver 
   if [ $? -eq 0 ];
   then
@@ -61,7 +61,8 @@ then
     stamp=`date +%s`
     leaderall=` ./etcdget.py leader --prefix `
     leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-    ./etcdput.py running/$receiver no
+    ./etcddel.py running $receiver
+    ./etcdput.py running/stub/$receiver  no
     ./etcdput.py sync/running/____/request running_$stamp
     ./etcdput.py sync/running/____/request/$leader running_$stamp
     exit
@@ -73,6 +74,7 @@ then
   fi
  done
  ./etcdput.py running/$receiver $receiver 
+    ./etcdput.py running/$myhost/$receiver $receiver 
  result=`./replicatenow.py $snapshot $receiver 2>/root/replicatenow`
  echo result=$result >> /root/replicatenow
  result=`echo $result | grep 'result_' | awk -F'result_' '{print $2}'`
@@ -88,7 +90,7 @@ then
    ./logmsg.py Replispacesu01 info $userreq $vol $shortreceiver
  fi 
 fi
-./etcdput.py running/$receiver finished 
+./etcdput.py running/$myhost/$receiver finished 
 ./etcdput.py sync/running/____/request running_$stamp
 ./etcdput.py sync/running/____/request/$leader running_$stamp
 /TopStor/logqueue.py `basename "$0"` stop system 
