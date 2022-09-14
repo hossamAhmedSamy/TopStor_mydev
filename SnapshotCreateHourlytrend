@@ -41,7 +41,10 @@ crontab $cronthis 2>> $txtres
 /pace/etcdput${local}.py $myip sizevol/$DG/$FileS $stamp-0 
 if [ -z $local ];
 then
- /pace/etcdput.py sync/Snapperiod/`basename "$0"`_$@ $stamp/request/$myhost Snapperiod_$stamp
- /pace/etcdput.py sync/Snapperiod/`basename "$0"`_$@ $stamp/request Snapperiod_$stamp
+ #params=`echo $@ | sed 's/ /\_/g'`
+ #/pace/etcdput.py sync/Snapperiod/`basename "$0"`_$@_$stamp/request/$myhost Snapperiod_$stamp
+ /pace/etcdput.py sync/Snapperiod/______/request/$myhost Snapperiod_$stamp
+ /pace/etcdput.py sync/Snapperiod/______/request Snapperiod_$stamp
+ #/pace/etcdput.py sync/Snapperiod/`basename "$0"`_$@_$stamp/request Snapperiod_$stamp
 fi
 fi

@@ -56,9 +56,12 @@ else
  echo found other vols
  rightvols=`/pace/etcdget.py ipaddr/$myhost/$ipaddr/$ipsubnet | sed "s/$resname\///g"`'/'$vol
 fi
+ echo /pace/etcdput.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
  /pace/etcdput.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
  stamp=`date +%s`;
+ echo /pace/etcdput.py sync/ipaddr/request ipaddr_$stamp
  /pace/etcdput.py sync/ipaddr/request ipaddr_$stamp
+ echo /pace/etcdput.py sync/ipaddr/request/$leader ipaddr_$stamp
  /pace/etcdput.py sync/ipaddr/request/$leader ipaddr_$stamp
  /pace/broadcasttolocal.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols 
  /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
