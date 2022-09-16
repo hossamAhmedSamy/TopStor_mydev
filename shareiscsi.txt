@@ -3,7 +3,7 @@
 [SHORTNAME]
 ;ipaddress = IPADDRESS
 ;ipsubnet = IPSUBNET
-path = /POOL/NAMECIFS
+path = /POOL/NAMEISCSI
 read only = no
 browsable = yes
 write list = @everyone
