@@ -31,7 +31,7 @@ def config(*bargs):
  ######### changing alias ###############
  if 'alias' in arglist:
   queuethis('Hostconfig_alias','running',arglist['user'])
-  oldarg = get('alias/'+arglist['name'])[0]
+  oldarg = str(get('alias/'+arglist['name'])[0])
   logmsg.sendlog('HostManual1st5','info',arglist['user'],oldarg, arglist['alias'])
   allhosts = get('ActivePartner','--prefix')
   put('alias/'+arglist['name'],arglist['alias'])
@@ -42,7 +42,7 @@ def config(*bargs):
 ######### changing cluster address ###############
  if 'cluster' in arglist:
   queuethis('Hostconfig_cluster','running',arglist['user'])
-  oldarg = get('namespace/mgmtip')[0]
+  oldarg = str(old(get('namespace/mgmtip')[0]))
   logmsg.sendlog('HostManual1st7','info',arglist['user'],oldarg,arglist['cluster'])
 #  broadcasttolocal('namespace/mgmtip',arglist['cluster'])
   if myhost == leader:
@@ -71,7 +71,7 @@ def config(*bargs):
 ############ changing time zone ###############
  if 'tz' in arglist:
   queuethis('Hostconfig_tzone','running',arglist['user'])
-  oldarg = get('tz/'+myhost)[0]
+  oldarg = str(get('tz/'+myhost)[0])
   argtz = arglist['tz'].split('%')[1]
   logmsg.sendlog('HostManual1st10','info',arglist['user'],oldarg, argtz)
   put('tz/'+leader,arglist['tz'])
@@ -81,7 +81,7 @@ def config(*bargs):
 ########### changing ntp server ###############
  if 'ntp' in arglist:
   queuethis('Hostconfig_ntp','running',arglist['user'])
-  oldarg = get('ntp/'+myhost)[0]
+  oldarg = str(get('ntp/'+myhost)[0])
   logmsg.sendlog('HostManual1st9','info',arglist['user'],oldarg, arglist['ntp'])
   put('ntp/'+leader,arglist['ntp'])
   put('sync/ntp/HostManualconfigNTP_'+'_'+arglist['ntp']+'/request','ntp_'+str(stamp()))
@@ -90,8 +90,8 @@ def config(*bargs):
 ########### changing dns  ###############
  if 'dnsname' in arglist:
   queuethis('Hostconfig_dns','running',arglist['user'])
-  oldargname = get('dnsname/'+myhost)[0]
-  oldargsearch = get('dnssearch/'+myhost)[0]
+  oldargname = str(get('dnsname/'+myhost)[0])
+  oldargsearch = str(get('dnssearch/'+myhost)[0])
   if arglist['dnsname'] == "":
    arglist['dnsname'] = oldargname
   if arglist['dnssearch'] == "":
@@ -106,7 +106,7 @@ def config(*bargs):
 ########### changing gateway  ###############
  if 'gw' in arglist:
   queuethis('Hostconfig_gw','running',arglist['user'])
-  oldarg = get('gw/'+myhost)[0]
+  oldarg = str(get('gw/'+myhost)[0])
   logmsg.sendlog('HostManual1st11','info',arglist['user'],oldarg, arglist['gw'])
   put('gw/'+leader,arglist['gw'])
   put('sync/gw/HostManualconfigGW_'+'_'+arglist['gw']+'/request','gw_'+str(stamp()))
@@ -132,8 +132,8 @@ def config(*bargs):
  if 'ipaddr' in arglist:
   print('changin the ipaddress of the node')
   queuethis('Hostconfig_ip','running',arglist['user'])
-  oldipaddr = get('ready/'+arglist['name'])[0]
-  oldipsubnet=get('ipaddrsubnet/'+arglist['name'])[0]
+  oldipaddr = str(get('ready/'+arglist['name'])[0])
+  oldipsubnet= str(get('ipaddrsubnet/'+arglist['name'])[0])
   logmsg.sendlog('HostManual1st6','info',arglist['user'],str(oldipaddr)+'/'+str(oldipsubnet),arglist['ipaddr']+'/'+arglist['ipaddrsubnet'])
   if '-1' in str(oldipsubnet):
    oldipsubnet = '-1_.'
@@ -165,7 +165,8 @@ def config(*bargs):
 
 
 if __name__=='__main__':
- arg = {'username': 'admin', 'password': '123', 'token': '4f3223c155ca50d13ae975ea18e930bc', 'response': 'admin', 'user': 'admin'}
+ #arg = {'username': 'admin', 'password': 'YousefNadody', 'token': '4f3223c155ca50d13ae975ea18e930bc', 'response': 'admin', 'user': 'admin'}
+ arg = {'dnsname': '10.11.11.11', 'dnssearch': 'qstor.com', 'id': '0', 'user': 'admin', 'name': 'dhcp14895', 'token': 'e9b77595837168e6f0ce77f6cbc8137e', 'response': 'admin'}
  config(arg)
 
 #{'cluster': '10.11.11.250/24', 'tz': 'Kuwait%(GMT+03!00)_Kuwait^_Riyadh^_Baghdad', 'id': '0', 'user': 'admin', 'name': 'dhcp32570', 'token': '501ef1257322d1814125b1e16af95aa9', 'response': 'admin'}

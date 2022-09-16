@@ -14,7 +14,8 @@ datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
 volname=`echo $@ | awk '{print $2}'`;
 pDG=`echo $@ | awk '{print $1}'`;
 pro=`echo $@ | awk '{print $3}'`;
-userreq=` echo $@ | awk '{print $4}'`;
+volip=` echo $@ | awk '{print $4}'`;
+userreq=` echo $@ | awk '{print $5}'`;
 DG=`echo $pDG `;
 myhost=`hostname -s`
 txtres='/TopStordata/'`basename $0`$userreq
