@@ -121,10 +121,14 @@ def repliparam(snapshot, receiver):
   return 'closed'
  if 'No_vol_space' in str(selection):
   print('No space in the receiver: '+receiver)
-  return 'No_Space'
+  return 'No_Sppue'
+ print('selection',selection)
  nodeowner = selection.split(':')[0]
  poolvol = selection.split(':')[1].split('@')[0]
- csnaps = selection.split('@')[1]
+ try:
+  csnaps = selection.split('@')[1]
+ except:
+  csnaps = 'noold'
  result = replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume, csnaps)
  if 'fail' in result:
   cmd = '/usr/sbin/zfs destroy -r '+' '+pool+'/'+volume+'@'+snapshot 
