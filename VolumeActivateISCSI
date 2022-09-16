@@ -138,7 +138,7 @@ then
    sed -i "s/Ripadd/$ipaddr/g"  /TopStordata/iscsi.${name}
    sed -i "s/Ripsub/$ipsubnet/g"  /TopStordata/iscsi.${name}
    sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/iscsi.${name}
-   sed -i "s/NAMECIFS/$name/g"  /TopStordata/iscsi.${name}
+   sed -i "s/NAMEISCSI/$name/g"  /TopStordata/iscsi.${name}
    sed -i "s/POOL/$pool/g" /TopStordata/iscsi.${name}
    sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/iscsi.${name}
    sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/iscsi.${name}
@@ -153,6 +153,7 @@ then
    zfs set status:mount=$active $pool/$name
    echo $active | grep active
    if [ $? -eq 0 ];
+   then
     zfs mount $pool/$name
     /TopStor/iscsi.sh $pool $name $ipaddr $ipsubnet $portalport $targetiqn $chapuser $chappas
    else
