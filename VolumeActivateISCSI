@@ -28,6 +28,7 @@ then
   01)
    echo volume only  for  $vol
     declare  vols=`/pace/etcdget.py volumes/ISCSI $vol`
+    echo /pace/etcdget.py volumes/ISCSI $vol
    ;;
   10)
    echo pool only $pool
@@ -49,8 +50,8 @@ then
   echo No Volumes
   exit
  fi
- echo "${vols[@]}" |  grep "\-1"
- if [ $? -eq 0 ];
+ echo "${vols[@]}" |  grep ISCSI 
+ if [ $? -ne 0 ];
  then
   echo No Volumes -1
   exit
