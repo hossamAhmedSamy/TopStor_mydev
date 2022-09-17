@@ -42,7 +42,7 @@ def config(*bargs):
 ######### changing cluster address ###############
  if 'cluster' in arglist:
   queuethis('Hostconfig_cluster','running',arglist['user'])
-  oldarg = str(old(get('namespace/mgmtip')[0]))
+  oldarg = str(get('namespace/mgmtip')[0])
   logmsg.sendlog('HostManual1st7','info',arglist['user'],oldarg,arglist['cluster'])
 #  broadcasttolocal('namespace/mgmtip',arglist['cluster'])
   if myhost == leader:
@@ -167,6 +167,7 @@ def config(*bargs):
 if __name__=='__main__':
  #arg = {'username': 'admin', 'password': 'YousefNadody', 'token': '4f3223c155ca50d13ae975ea18e930bc', 'response': 'admin', 'user': 'admin'}
  arg = {'dnsname': '10.11.11.11', 'dnssearch': 'qstor.com', 'id': '0', 'user': 'admin', 'name': 'dhcp14895', 'token': 'e9b77595837168e6f0ce77f6cbc8137e', 'response': 'admin'}
+ arg = {'alias': 'Repli_1', 'ipaddr': '10.11.11.245', 'ipaddrsubnet': '24', 'cluster': '10.11.11.249/24', 'tz': 'Kuwait%(GMT+03!00)_Kuwait^_Riyadh^_Baghdad', 'id': '0', 'user': 'admin', 'name': 'dhcp28109', 'token': '73616fae666891c5f420f63c6317b1ba', 'response': 'admin'}
  config(arg)
 
 #{'cluster': '10.11.11.250/24', 'tz': 'Kuwait%(GMT+03!00)_Kuwait^_Riyadh^_Baghdad', 'id': '0', 'user': 'admin', 'name': 'dhcp32570', 'token': '501ef1257322d1814125b1e16af95aa9', 'response': 'admin'}
