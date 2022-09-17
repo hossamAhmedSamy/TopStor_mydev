@@ -277,7 +277,7 @@ def dgsaddtopool(data):
   selecteddisks= disks
  else:
   selecteddisks = selectdisks(disks,dgsinfo['newraid']['single'],allinfo['disks'])
- owner = allinfo['disks'][selecteddisks[0]]['host']
+ owner = allinfo['pools'][data['pool']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
  diskstring = ''
  for dsk in selecteddisks:
