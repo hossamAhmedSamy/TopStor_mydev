@@ -37,7 +37,7 @@ zfs set snap:type=Once $snapshot
 echo $receiver | grep NoReceiver 
 if [ $? -ne 0 ];
 then 
- wiating=1
+ waiting=1
  while [ $waiting -eq 1 ];
  do
   running=`./etcdget.py running/$receiver`
@@ -60,6 +60,7 @@ then
  ./etcdput.py running/$receiver $receiver
  ./etcdput.py sync/running/____/request running_$stamp
  ./etcdput.py sync/running/____/request/$leader running_$stamp
+ echo ./replicatenow.py $snapshot $receiver
  result=`./replicatenow.py $snapshot $receiver`
  result=`echo $result | grep 'result_' | awk -F'result_' '{print $2}'`
  echo .................................................................
