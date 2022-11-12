@@ -1,5 +1,5 @@
-#!/bin/python3.6
-import flask, os, Evacuate, subprocess, Joincluster
+#!/usr/bin/python3
+import flask, os, Evacuate, subprocess, Joincluster, sys
 from getversions import getversions
 from functools import wraps
 from copy import deepcopy
@@ -11,7 +11,6 @@ from UnixChkUser import setlogin
 import sqlite3
 from etcdget2 import etcdgetjson
 from etcdgetpy import etcdget  as get
-from etcdput import etcdput  as put 
 from etcddel import etcddel  as dels 
 from sendhost import sendhost
 from socket import gethostname as hostname
@@ -41,23 +40,21 @@ pooldict = dict()
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 logcatalog = ''
-with open('/var/www/html/des20/msgsglobal.txt') as f:
+with open('/TopStor/msgsglobal.txt') as f:
  logcatalog = f.read().split('\n')
 logdict = dict()
 for log in logcatalog:
  msgcode= log.split(':')[0]
  logdict[msgcode] = log.replace(msgcode+':','').split(' ')
-myhost = hostname()
 allinfo = 0
 
 def getalltime():
- global allinfo,alldsks, getalltimestamp
+ global allinfo,alldsks, getalltimestamp, leaderip
  if (getalltimestamp+30) < timestamp():
-  alldsks = deepcopy(get('host','current'))
-  allinfo = deepcopy(getall(alldsks))
+  alldsks = deepcopy(get(leaderip,'host','current'))
+  allinfo = deepcopy(getall(leaderip, alldsks))
   getalltimestamp = timestamp()
  return
-getalltime()
 
 def login_required(f):
  @wraps(f)
@@ -78,9 +75,10 @@ def login_required(f):
 
 
 def postchange(cmndstring,host='leader'):
+ global leaderip, myhost
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
- ownerip=get(host,'--prefix')
+ ownerip=get(leaderip, host,'--prefix')
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
 
 def dict_factory(cursor, row):
@@ -90,7 +88,8 @@ def dict_factory(cursor, row):
     return d
 
 def getusers():
- userlst = etcdgetjson('usersinfo','--prefix') 
+ global leaderip
+ userlst = etcdgetjson(leaderip,'usersinfo','--prefix') 
  uid = 0
  users = []
  for user in userlst:
@@ -100,7 +99,8 @@ def getusers():
  return users
 
 def getgroups():
- groupslst = etcdgetjson('usersigroup','--prefix') 
+ global leaderip
+ groupslst = etcdgetjson(leaderip,'usersigroup','--prefix') 
  gid = 0
  groups = []
  for group in groupslst:
@@ -116,8 +116,8 @@ def home():
 <p>A prototype API for distant reading of science fiction novels.</p>'''
 
 def getpools():
- global pooldict
- pools = get('pools/','--prefix')
+ global pooldict, leaderip
+ pools = get(leaderip,'pools/','--prefix')
  poolinfo = []
  pid = 0
  for pool in pools:
@@ -129,10 +129,11 @@ def getpools():
 @app.route('/api/v1/volumes/connections', methods=['GET','POST'])
 @login_required
 def getconns(data):
+ global leaderip
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- conns = get('connections/user','--prefix')
- devs = get('connections/dev','--prefix')
+ conns = get(leaderip,'connections/user','--prefix')
+ devs = get(leaderip,'connections/dev','--prefix')
  zippedconns = zip(conns,devs)
  conndict =  {}
  conndict['connections'] = []
@@ -180,8 +181,8 @@ def hostsallinfo():
 
 @app.route('/api/v1/hosts/ready', methods=['GET','POST'])
 def hostsready():
- global allhosts, readyhosts, activehosts, losthosts, possiblehosts
- hosts = get('ready','--prefix')
+ global allhosts, readyhosts, activehosts, losthosts, possiblehosts, leaderip
+ hosts = get(leaderip,'ready','--prefix')
  readyhosts = []
  hid = 0
  for host in hosts:
@@ -193,8 +194,8 @@ def hostsready():
 
 @app.route('/api/v1/hosts/active', methods=['GET','POST'])
 def hostsactive():
- global allhosts, readyhosts, activehosts, losthosts, possiblehosts
- hosts = get('ActivePartners','--prefix')
+ global allhosts, readyhosts, activehosts, losthosts, possiblehosts, leaderip
+ hosts = get(leaderip,'ActivePartners','--prefix')
  activehosts = []
  hid = 0
  for host in hosts:
@@ -206,8 +207,8 @@ def hostsactive():
 
 @app.route('/api/v1/hosts/possible', methods=['GET','POST'])
 def hostspossible():
- global allhosts, readyhosts, activehosts, losthosts, possiblehosts
- hosts = get('possible','--prefix')
+ global allhosts, readyhosts, activehosts, losthosts, possiblehosts, leaderip
+ hosts = get(leaderip,'possible','--prefix')
  possiblehosts = []
  hid = 0
  for host in hosts:
@@ -241,7 +242,7 @@ def dgsinfo():
 @app.route('/api/v1/pools/delpool', methods=['GET','POST'])
 @login_required
 def dgsdelpool(data):
- global allinfo
+ global allinfo, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  getalltime()
@@ -257,7 +258,7 @@ def dgsdelpool(data):
 @app.route('/api/v1/pools/addtopool', methods=['GET','POST'])
 @login_required
 def dgsaddtopool(data):
- global allinfo
+ global allinfo, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  getalltime()
@@ -306,7 +307,7 @@ def dgsaddtopool(data):
 @app.route('/api/v1/pools/newpool', methods=['GET','POST'])
 @login_required
 def dgsnewpool(data):
- global allinfo
+ global allinfo, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  getalltime()
@@ -541,10 +542,11 @@ def renewtoken(data):
 @app.route('/api/v1/info/notification', methods=['GET','POST'])
 @login_required
 def getnotification(data):
+ global leaderip, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- notifbody = get('notification')[0].split(' ')[1:]
- requests = get('request','--prefix')
+ notifbody = get(leaderip,'notification')[0].split(' ')[1:]
+ requests = get(leaderip,'request','--prefix')
  requestdict = {}
  for req in requests:
   reqname = req[0].split('/')[1]
@@ -574,7 +576,7 @@ def getnotification(data):
 @app.route('/api/v1/volumes/snapshots/create', methods=['GET','POST'])
 @login_required
 def volumesnapshotscreate(data):
- global allinfo
+ global allinfo, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  datastr = ''
@@ -608,7 +610,7 @@ def volumesnapshotscreate(data):
 @app.route('/api/v1/volumes/create', methods=['GET','POST'])
 @login_required
 def volumecreate(data):
- global allinfo
+ global allinfo, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  datastr = ''
@@ -637,14 +639,15 @@ def volumecreate(data):
  return data
 
 def getlogin(token):
- logindata = get('login',token)[0]
+ global leaderip
+ logindata = get(leaderip,'login',token)[0]
  if logindata == -1:
   logmsg.sendlog('Lognno0','warning','system',token)
   return 'baduser'
  oldtimestamp = logindata[1].split('/')[1]
  user = logindata[0].split('/')[1]
  if int(oldtimestamp) < int(timestamp()):
-  dels('login',token)
+  dels(leaderip,'login',token)
   loggedusers.pop(token, None)
   logmsg.sendlog('Lognsa0','warning','system',user)
   print('isssss######ss##########33','baduser')
@@ -661,8 +664,9 @@ def getlogin(token):
 
 @app.route('/api/v1/logout', methods=['GET','POST'])
 def logout():
+ global leaderip
  data = request.args.to_dict()
- dels('login',data['token'])
+ dels(leaderip,'login',data['token'])
  loggedusers.pop(data['token'], None)
  return data
 
@@ -705,7 +709,7 @@ def usersauth(data):
 @app.route('/api/v1/volumes/config', methods=['GET','POST'])
 @login_required
 def volumeconfig(data):
- global allinfo
+ global allinfo, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  getalltime()
@@ -792,7 +796,7 @@ def hostevacuate(data):
 @app.route('/api/v1/volumes/snapshots/snaprollback', methods=['GET','POST'])
 @login_required
 def volumesnapshotrol(data):
- global allinfo 
+ global allinfo, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  getalltime()
@@ -814,7 +818,7 @@ def volumesnapshotrol(data):
 @app.route('/api/v1/volumes/snapshots/perioddelete', methods=['GET','POST'])
 @login_required
 def volumesnapshotperioddel(data):
- global allinfo
+ global allinfo, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  getalltime()
@@ -830,7 +834,7 @@ def volumesnapshotperioddel(data):
 @app.route('/api/v1/volumes/snapshots/snapshotdel', methods=['GET','POST'])
 @login_required
 def volumesnapshotdel(data):
- global allinfo 
+ global allinfo, myhost 
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  getalltime()
@@ -851,7 +855,7 @@ def volumesnapshotdel(data):
 @app.route('/api/v1/volumes/volumeactive', methods=['GET','POST'])
 @login_required
 def volumeactive(data):
- global allinfo
+ global allinfo, myhost
  pool = allinfo['volumes'][data['name']]['pool']
  prot = allinfo['volumes'][data['name']]['prot']
  owner = allinfo['volumes'][data['name']]['host']
@@ -870,7 +874,7 @@ def volumeactive(data):
 @app.route('/api/v1/volumes/volumedel', methods=['GET','POST'])
 @login_required
 def volumedel(data):
- global allinfo
+ global allinfo, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  getalltime()
@@ -1017,12 +1021,12 @@ def api_groups_groupslist():
 @app.route('/api/v1/users/userauths', methods=['GET'])
 @login_required
 def userauths(data):
- global allgroups, allusers
+ global allgroups, allusers, leaderip
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  if  data['username'] == 'admin':
   return {'auths':'true','response':data['response']}
- userlst = etcdgetjson('usersinfo','--prefix')
+ userlst = etcdgetjson(leaderip,'usersinfo','--prefix')
  for user in userlst:
   username = user['name'].replace('usersinfo/','')
   if username == data['username']:
@@ -1032,8 +1036,9 @@ def userauths(data):
 
 @app.route('/api/v1/partners/partnerlist', methods=['GET'])
 def api_partners_userslist():
+ global leaderip
  allpartners=[]
- partnerlst = etcdgetjson('Partner/','--prefix')
+ partnerlst = etcdgetjson(leaderip,'Partner/','--prefix')
  for partner in partnerlst:
   alias =  partner["name"].split('/')[1] 
   split = partner["prop"].split('/') 
@@ -1042,8 +1047,8 @@ def api_partners_userslist():
 
 @app.route('/api/v1/users/userlist', methods=['GET'])
 def api_users_userslist():
- global allgroups, allusers
- userlst = etcdgetjson('usersinfo','--prefix')
+ global allgroups, allusers, leaderip
+ userlst = etcdgetjson(leaderip,'usersinfo','--prefix')
  allgroups = getgroups()
  userdict = dict()
  allusers = []
@@ -1144,5 +1149,13 @@ def api_filter():
     results = cur.execute(query, to_filter).fetchall()
 
     return jsonify(results)
+leaderip =0 
+myhost=0
+if __name__=='__main__':
+    #leader = sys.argv[2]
+    leaderip = sys.argv[1]
+    myhost = sys.argv[2]
+    getalltime()
+   #myhostip = sys.argv[5]
 
-app.run(host="0.0.0.0", port=5001)
+    app.run(host="0.0.0.0", port=5001)

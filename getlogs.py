@@ -4,7 +4,7 @@ import subprocess
 from time import time
 import sys
 
-with open('msgsglobal.txt') as f:
+with open('/TopStor/msgsglobal.txt') as f:
  logcatalog = f.read().split('\n')
 logdict = dict()
 for log in logcatalog:

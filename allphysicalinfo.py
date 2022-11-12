@@ -9,8 +9,9 @@ import sys
 
 
 def getsnapperiods(voldict):
+ global hostip
  periodsdict = dict()
- snapperiods = get('Snapperiod','--prefix') 
+ snapperiods = get(hostip,'Snapperiod','--prefix') 
  snapperiods = [ x for x in snapperiods if 'hosttrend' not in str(x) ]
  for per in snapperiods:
   leftper = per[0].split('/')
@@ -44,9 +45,11 @@ def getsnapperiods(voldict):
     periodsdict[leftper[4]]['every']=rightper[3].split('.')[4].split('%')[0]
  return (periodsdict,voldict)
 
-def getall(alldsks='0', *args):
+def getall(leadip, alldsks='0'):
+ global hostip
+ hostip=leadip
  if alldsks == '0':
-  alldsks = get('host','current')
+  alldsks = get(hostip,'host','current')
  hostsdict = dict()
  poolsdict = dict()
  raidsdict = dict()
@@ -57,8 +60,8 @@ def getall(alldsks='0', *args):
  snapshotsdict = dict()
  snapperiodsdict = dict()
  allvols = []
- availability = get('balance','--prefix')
- vols = get('volumes','--prefix')
+ availability = get(hostip,'balance','--prefix')
+ vols = get(hostip,'volumes','--prefix')
  for vol in vols:
   voldict = dict()
   if len(vol[1].split('/')) < 7:
@@ -98,8 +101,8 @@ def getall(alldsks='0', *args):
   host = alldsk[0].split('/')[1]
   pools = mtuple(alldsk[1])
   hostpools = []
-  hostip = get('ActivePartners/'+host)[0]
-  hostsdict[host] = {'name': host,'ipaddress': hostip, 'pools': hostpools }
+  thehostip = get(hostip,'ActivePartners/'+host)[0]
+  hostsdict[host] = {'name': host,'ipaddress': thehostip, 'pools': hostpools }
   for pool in pools:
    pool['used'] = levelthis(pool['used'])
    pool['available'] = levelthis(pool['available'])
@@ -216,5 +219,7 @@ def getall(alldsks='0', *args):
 
  
 if __name__=='__main__':
- alldsks = get('host','current')
- getall(alldsks, *sys.argv[1:])
+ hostip = sys.argv[2]
+ alldsks = get(hostip,'host','current')
+ print(hostip)
+ getall(hostip, alldsks)
