@@ -219,7 +219,7 @@ def getall(leadip, alldsks='0'):
 
  
 if __name__=='__main__':
- hostip = sys.argv[2]
+ hostip = sys.argv[1]
  alldsks = get(hostip,'host','current')
  print(hostip)
  getall(hostip, alldsks)
