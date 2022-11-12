@@ -1,7 +1,8 @@
 #!/bin/python3.6
 import codecs, logmsg
 import binascii
-from base64 import decodestring as decode
+from base64 import decodebytes as decode
+#from base64 import decodestring as decode
 from ast import literal_eval as mtuple
 from etcdget import etcdget as get
 import subprocess, socket
