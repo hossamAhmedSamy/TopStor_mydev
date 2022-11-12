@@ -67,9 +67,9 @@ def login_required(f):
     data['response'] = data['user'] 
     return f(data)
    else:
-    logmsg.sendlog('Lognsa0','warning','system',loggedusers[data['token']]['user'])
+    logmsg.sendlog(leaderip, myhost, 'Lognsa0','warning','system',loggedusers[data['token']]['user'])
   else:
-   logmsg.sendlog('Lognno0','warning','system',data['token'])
+   logmsg.sendlog(leaderip, myhost, 'Lognno0','warning','system',data['token'])
   return f({'response':'baduser'})
  return decorated_function
 
@@ -382,7 +382,7 @@ def volpoolsinfo():
 
 @app.route('/api/v1/stats/dskperf', methods=['GET','POST'])
 def dskperfs():
- ioperf()
+ ioperf(leaderip,myhost)
  return jsonify({'dsk':dskperf(), 'cpu':cpuperf()})
 
 
@@ -534,7 +534,7 @@ def renewtoken(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  user = loggedusers[data['token']]['user']
- setlogin(user,'!',data['token'])
+ setlogin(leaderip,myhost, user,'!',data['token'])
  return data
 
 
@@ -642,19 +642,19 @@ def getlogin(token):
  global leaderip
  logindata = get(leaderip,'login',token)[0]
  if logindata == -1:
-  logmsg.sendlog('Lognno0','warning','system',token)
+  logmsg.sendlog(leaderip,myhost, 'Lognno0','warning','system',token)
   return 'baduser'
  oldtimestamp = logindata[1].split('/')[1]
  user = logindata[0].split('/')[1]
  if int(oldtimestamp) < int(timestamp()):
   dels(leaderip,'login',token)
   loggedusers.pop(token, None)
-  logmsg.sendlog('Lognsa0','warning','system',user)
+  logmsg.sendlog(leaderip,myhost, 'Lognsa0','warning','system',user)
   print('isssss######ss##########33','baduser')
   return 'baduser'
- userdict, token = setlogin(user,'!',token) 
+ userdict, token = setlogin(leaderip, myhost,user,'!',token) 
  if token == 0:
-  logmsg.sendlog('Lognsa0','warning','system',user)
+  logmsg.sendlog(leaderip,myhost, 'Lognsa0','warning','system',user)
   print('#################33','baduser')
    
   return 'baduser'
@@ -682,17 +682,16 @@ def login():
  print('#######################')
  print(data)
  print('#######################')
- userdict, token = setlogin(data['user'],data['pass'])
+ userdict, token = setlogin(leaderip,myhost, data['user'],data['pass'])
  if token != 0:
   loggedusers[token] = userdict.copy()
-  logmsg.sendlog('Lognsu0','info','system',data['user'])
+  logmsg.sendlog(leaderip,myhost, 'Lognsu0','info','system',data['user'])
   print('login okkkkkkk',loggedusers)
  else:
   print('login faileddddddddddddddddddd')
-  logmsg.sendlog('Lognfa0','error','system',data['user'])
+  logmsg.sendlog(leaderip, myhost, 'Lognfa0','error','system',data['user'])
   token = 'baduser'
  return jsonify({'token':token})
- 
 @app.route('/api/v1/users/usersauth', methods=['GET','POST'])
 @login_required
 def usersauth(data):

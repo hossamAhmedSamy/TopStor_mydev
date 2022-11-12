@@ -1,4 +1,4 @@
-#!/bin/python3.6
+#!/usr/bin/python3
 import sys
 from time import time as timestamp
 from secrets import token_hex
@@ -6,19 +6,22 @@ from etcdgetpy import etcdget as get
 from etcdput import etcdput as put 
 import subprocess
 
-def setlogin(user,passw,token=0):
+def setlogin(leaderip,myhost, user,passw,token=0):
  if token == 0:
-  cmdline='/TopStor/UnixChkUser '+user+' '+passw
-  pass1=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
-  oldpass = str(get('usershash/'+user)[0])
-  if oldpass not in pass1:
-   oldpass = str(get('usershashadm/'+user)[0])
-   if oldpass not in pass1:
+  oldpass = get(leaderip, 'usershash/'+user)[0].replace('\\n','')
+  cmdline='/TopStor/decthis.sh '+user+' '+oldpass
+  pass1=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode().split('_result')[1]
+  if passw != pass1 and user=='admin':
+   oldpass = str(get(leaderip, 'usershashadm/'+user)[0]).replace('\n','')
+   cmdline='/TopStor/UnixChkUser '+user+' '+oldpass
+   pass1=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode()
+   if passw != pass1:
     return ({},0)
   token = token_hex(16)
  stamp = int(timestamp() + 3600)
- put('login/'+user,token+'/'+str(stamp))
+ put(leaderip, 'login/'+user,token+'/'+str(stamp))
  userdict = {'user':user, 'timestamp':stamp}
+ print(userdict,token)
  return (userdict, token)
  
 

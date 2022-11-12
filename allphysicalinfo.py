@@ -1,4 +1,4 @@
-#!/bin/python3.6
+#!/usr/bin/python3
 from logqueue import queuethis
 from etcdgetpy import etcdget as get
 from ast import literal_eval as mtuple

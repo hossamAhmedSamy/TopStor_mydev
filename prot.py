@@ -1,4 +1,4 @@
-#!/bin/python3.6
+#!/usr/bin/python3
 from etcdgetpy import etcdget as get
 from etcdput import etcdput as put
 from etcddel import etcddel as deli

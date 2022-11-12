@@ -1,4 +1,5 @@
 #!/bin/sh
 username=`echo $@ | awk '{print $1}'`;
 userpass=`echo $@ | awk '{print $2}'`;
-echo "$userpass" | openssl enc -e -base64 -aes-256-ctr -nopad -nosalt -k '#skMe22'$username
+echo "$userpass" | openssl enc -e -d -base64 -aes-256-ctr -pbkdf2 -nopad  -k '#skMe22'$username
+
