@@ -8,7 +8,7 @@ import time
 
 nowis = int(time.time())
 nowfixed = str(nowis)[:4]
-cmdline='./grepthis.sh '+nowfixed+' /var/www/html/des20/Data/TopStorglobal.log'
+cmdline='/TopStor/grepthis.sh '+nowfixed+' /TopStordata/TopStorglobal.log'
 result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split('\n')
 onedaylog = []
 for res in result:

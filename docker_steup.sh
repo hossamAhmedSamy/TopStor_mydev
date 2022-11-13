@@ -14,11 +14,20 @@ eth1='enp0s8'
 eth2='enp0s8'
 if [ $# -ge 1 ];
 then 
-	echo $1 | egrep 'stop|reboot'
+	echo $1 | egrep 'stop|reboot|reset'
 	if [ $? -eq 0 ];
 	then
 		/TopStor/resetdocker.sh
-		echo $1 | grep reboot 
+		echo $1 | grep reset
+		if [ $? -eq 0 ];
+		then
+			rm  -rf /root/etcddata/* 
+			docker run --rm --name intdns --hostname intdns --net bridge0 -e DNS_DOMAIN=qs.dom -e DNS_IP=10.11.12.7 -e LOG_QUERIES=true -itd --ip 10.11.12.7 -v /root/gitrepo/dnshosts:/etc/hosts moataznegm/quickstor:dns
+			docker run -itd --rm --name etcd --hostname etcd -v /root/gitrepo/resolv.conf:/etc/resolv.conf -v /TopStor/:/TopStor -v /root/etcddata:/default.etcd --net bridge0 moataznegm/quickstor:etcd
+docker run -itd --rm --name etcdclient --hostname etcdclient -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -v /TopStor/:/TopStor -v /pace/:/pace moataznegm/quickstor:etcdclient 
+			docker exec etcdclient /TopStor/UnixsetUser.py etcd `hostname` admin tmatem
+		fi
+		echo $1 | egrep 'reboot|reset'
 		if [ $? -eq 0 ];
 		then
 			reboot
@@ -193,5 +202,5 @@ then
 	docker run --rm --name httpd --hostname shttpd --net bridge0 -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $myclusterip:19999:19999 -p $mynodeip:80:80 -p $mynodeip:443:443 -p $myclusterip:80:80 -p $myclusterip:443:443 -v /TopStor/httpd.conf:/usr/local/apache2/conf/httpd.conf -v /root/topstorwebetc:/usr/local/apache2/topstorwebetc -v /topstorweb:/usr/local/apache2/htdocs/ -itd moataznegm/quickstor:git
 fi
 echo docker run -itd --rm --name flask --hostname apisrv -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /topstorweb/msgsglobal.txt:/TopStor/msgsglobal.txt -v /topstorweb/Data/TopStorglobal.log:/TopStor/TopStorglorbal.log moataznegm/quickstor:flask
-docker run -itd --rm --name flask --hostname apisrv -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /topstorweb/msgsglobal.txt:/TopStor/msgsglobal.txt -v /topstorweb/Data/TopStorglobal.log:/TopStor/TopStorglorbal.log moataznegm/quickstor:flask
+docker run -itd --rm --name flask --hostname apisrv -v /root/logsinfo:/TopStordata -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /topstorweb/msgsglobal.txt:/TopStor/msgsglobal.txt -v /topstorweb/Data/TopStorglobal.log:/TopStor/TopStorglorbal.log moataznegm/quickstor:flask
 /TopStor/ioperf.py $etcd $myhost

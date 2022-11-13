@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 etcd=`echo $@ | awk '{print $1}'`
 myhost=`echo $@ | awk '{print $2}'`
 cores=`lscpu  | grep 'CPU(s):' | grep -v NUMA | awk '{print $2}'`

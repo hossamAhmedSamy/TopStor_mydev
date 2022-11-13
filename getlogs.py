@@ -19,7 +19,7 @@ def onedaylog():
   onedaylog[sev] = []
   nowis = int(time())
   nowfixed = str(nowis)[:4]
-  cmdline='./grepthis.sh '+nowfixed+' '+sev+' TopStorglobal.log'
+  cmdline='/TopStor/grepthis.sh '+nowfixed+' '+sev+' TopStorglobal.log'
   result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split('\n')
   for res in result:
    if len(res.split()) < 4:
