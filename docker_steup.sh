@@ -1,20 +1,43 @@
 myclusterf='/topstorwebetc/mycluster'
 mynodef='/topstorwebetc/mynode'
-mynodedev='enp0s8'
-myclusterdev='enp0s8'
-data1dev='enp0s8'
-data2dev='enp0s8'
-setenforce 0
 myhost=`hostname`
-aliast='alias'
-echo $myhost | grep local
+echo ${myhost}$@ | egrep 'init|local'
 if [ $? -eq 0 ];
 then
 	myhost='dhcp'`echo $RANDOM$RANDOM | cut -c -6`
 	hostname $myhost
 	echo $myhost > /etc/hostname
 	echo InitiatorName=iqn.1994-05.com.redhat:$myhost > /etc/iscsi/initiatorname.iscsi
-fi	
+	reboot
+fi
+eth1='enp0s8'
+eth2='enp0s8'
+if [ $# -ge 1 ];
+then 
+	echo $1 | egrep 'stop|reboot'
+	if [ $? -eq 0 ];
+	then
+		/TopStor/resetdocker.sh
+		echo $1 | grep reboot 
+		if [ $? -eq 0 ];
+		then
+			reboot
+		fi
+		exit
+	fi
+	eth1=$1
+fi
+if [ $# -ge 2 ];
+then
+	eth2=$1
+fi
+
+mynodedev=$eth1
+myclusterdev=$eth1
+data1dev=$eth2
+data2dev=$eth2
+setenforce 0
+aliast='alias'
 targetcli clearconfig confirm=true
 nmcli conn delete clusterstub 
 nmcli conn delete mynode 
