@@ -4,15 +4,16 @@ mynodedev='enp0s8'
 myclusterdev='enp0s8'
 data1dev='enp0s8'
 data2dev='enp0s8'
+
 #hostname localhost
 #echo localhost > /etc/hostname
-systemctl stop rabbitmq-server
 
 pkill iscsiwatchdog
 pkill topstorrecvrep
 pkill syncrequestlooper
 zpool export -a
 targetcli clearconfig confirm=true
+systemctl stop rabbitmq-server
 
 nmcli conn delete mynode
 nmcli conn delete mycluster
