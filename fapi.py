@@ -534,7 +534,7 @@ def renewtoken(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  user = loggedusers[data['token']]['user']
- setlogin(user,'!',data['token'])
+ setlogin(leaderip, user,'!',data['token'])
  return data
 
 
@@ -652,7 +652,7 @@ def getlogin(token):
   logmsg.sendlog('Lognsa0','warning','system',user)
   print('isssss######ss##########33','baduser')
   return 'baduser'
- userdict, token = setlogin(user,'!',token) 
+ userdict, token = setlogin(leaderip, user,'!',token) 
  if token == 0:
   logmsg.sendlog('Lognsa0','warning','system',user)
   print('#################33','baduser')
@@ -682,7 +682,7 @@ def login():
  print('#######################')
  print(data)
  print('#######################')
- userdict, token = setlogin(data['user'],data['pass'])
+ userdict, token = setlogin(leaderip, data['user'],data['pass'])
  if token != 0:
   loggedusers[token] = userdict.copy()
   logmsg.sendlog('Lognsu0','info','system',data['user'])

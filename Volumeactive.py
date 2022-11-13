@@ -1,4 +1,4 @@
-#!/bin/python3.6
+#!/usr/bin/python3
 import sys, logmsg, subprocess
 from privthis import privthis 
 from etcdgetpy import etcdget as get

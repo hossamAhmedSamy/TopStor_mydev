@@ -192,5 +192,6 @@ then
 	sed -i "s/MYCLUSTER/$myclusterip/g" $shttpdf
 	docker run --rm --name httpd --hostname shttpd --net bridge0 -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $myclusterip:19999:19999 -p $mynodeip:80:80 -p $mynodeip:443:443 -p $myclusterip:80:80 -p $myclusterip:443:443 -v /TopStor/httpd.conf:/usr/local/apache2/conf/httpd.conf -v /root/topstorwebetc:/usr/local/apache2/topstorwebetc -v /topstorweb:/usr/local/apache2/htdocs/ -itd moataznegm/quickstor:git
 fi
+echo docker run -itd --rm --name flask --hostname apisrv -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /topstorweb/msgsglobal.txt:/TopStor/msgsglobal.txt -v /topstorweb/Data/TopStorglobal.log:/TopStor/TopStorglorbal.log moataznegm/quickstor:flask
 docker run -itd --rm --name flask --hostname apisrv -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /topstorweb/msgsglobal.txt:/TopStor/msgsglobal.txt -v /topstorweb/Data/TopStorglobal.log:/TopStor/TopStorglorbal.log moataznegm/quickstor:flask
 /TopStor/ioperf.py $etcd $myhost

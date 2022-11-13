@@ -1,4 +1,4 @@
-#!/bin/python3.6
+#!/usr/bin/python3
 from logqueue import queuethis
 import subprocess
 from time import time

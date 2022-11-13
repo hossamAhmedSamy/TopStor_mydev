@@ -1,4 +1,4 @@
-#!/bin/python3.6
+#!/usr/bin/python3
 import subprocess,sys, os
 import json
 from ast import literal_eval as mtuple

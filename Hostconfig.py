@@ -1,4 +1,4 @@
-#!/bin/python3.6
+#!/usr/bin/python3
 import socket, subprocess,sys, datetime
 from time import sleep
 from logqueue import queuethis

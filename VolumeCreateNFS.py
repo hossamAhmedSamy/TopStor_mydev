@@ -1,4 +1,4 @@
-#!/bin/python3.6
+#!/usr/bin/python3
 import sys, datetime
 from logqueue import queuethis
 from etcdget import etcdget as get

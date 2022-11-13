@@ -1,4 +1,4 @@
-#!/bin/python3.6
+#!/usr/bin/python3
 
 from allphysicalinfo import getall 
 from etcdgetpy import etcdget as get

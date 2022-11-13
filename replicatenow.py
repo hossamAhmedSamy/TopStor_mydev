@@ -1,4 +1,4 @@
-#!/bin/python3.6
+#!/usr/bin/python3
 import sys, subprocess
 from time import time as timestamp, sleep
 from allphysicalinfo import getall 
