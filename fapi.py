@@ -358,7 +358,7 @@ def dgsnewpool(data):
 def volumestats():
  global allinfo 
  getalltime()
- volstats = allvolstats(deepcopy(allinfo))
+ volstats = allvolstats(leaderip, deepcopy(allinfo))
  return jsonify(volstats)
 
 @app.route('/api/v1/volumes/volumelist', methods=['GET','POST'])
@@ -382,8 +382,8 @@ def volpoolsinfo():
 
 @app.route('/api/v1/stats/dskperf', methods=['GET','POST'])
 def dskperfs():
- ioperf(leaderip,myhost)
- return jsonify({'dsk':dskperf(), 'cpu':cpuperf()})
+ #ioperf(leaderip,myhost)
+ return jsonify({'dsk':dskperf(leaderip), 'cpu':cpuperf(leaderip)})
 
 
 @app.route('/api/v1/volumes/snapshots/snapshotsinfo', methods=['GET','POST'])
@@ -753,7 +753,7 @@ def changepass(data):
  print('#############################')
  print(data)
  print('###########################')
- config(data)
+ config(leaderip, data)
  return data
 
 
@@ -770,7 +770,7 @@ def hostconfig(data):
  print('#############################')
  print(data)
  print('###########################')
- config(data)
+ config(leaderip, data)
  return data
 
 @app.route('/api/v1/hosts/joincluster', methods=['GET','POST'])

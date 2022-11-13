@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-
+import sys
 from allphysicalinfo import getall 
 from etcdgetpy import etcdget as get
 from levelthis import levelthis
@@ -13,8 +13,8 @@ def volumes(voldict):
    voldict[vol][vollist] = levelthis(voldict[vol][vollist])
  return voldict
 
-def cpuperf():
- perfs = get('cpuperf', '--prefix')
+def cpuperf(leaderip):
+ perfs = get(leaderip,'cpuperf', '--prefix')
  perfslst = []
  for perf in perfs:
   host = perf[0].replace('cpuperf/','')
@@ -24,8 +24,8 @@ def cpuperf():
  return perfslst
 
 
-def dskperf():
- perfs = get('dskperf','--prefix')
+def dskperf(leaderip):
+ perfs = get(leaderip,'dskperf','--prefix')
  perfslst = []
  for perf in perfs:
   host = perf[0].split('/')[1]
@@ -37,14 +37,14 @@ def dskperf():
   perfslst.append(perfdict)
  return perfslst
 
-def statsvol(voldict, limit=3):
+def statsvol(leaderip, voldict, limit=3):
  global vollisting
  statsdict = dict()
  statsdict['trends'] = {}
  for vollist in vollisting:
   pairing = []
   for vol in voldict:
-   statsdict['trends'][vol] = get('sizevol/'+voldict[vol]['pool']+'/'+vol)[0]
+   statsdict['trends'][vol] = get(leaderip,'sizevol/'+voldict[vol]['pool']+'/'+vol)[0]
    pairing.append([vol.split('_')[0], vol, voldict[vol][vollist]])
   pairing.sort(key=lambda x:x[2],reverse=True)
   finalpairing = []
@@ -79,16 +79,17 @@ def statsvol_all(voldict):
  return statsdict 
 
 
-def allvolstats(allinfo):
+def allvolstats(leaderip, allinfo):
  vols = volumes(allinfo['volumes'])
- return statsvol(vols)
+ return statsvol(leaderip, vols)
   
 
 if __name__=='__main__':
- alldsks = get('host','current')
+ leaderip = sys.argv[1]
+ alldsks = get(leaderip,'host','current')
  allinfo = getall(alldsks)
  vols = volumes(allinfo['volumes'])
  #statsvol(vols)
- dskperf()
+ dskperf(leaderip)
  
  
