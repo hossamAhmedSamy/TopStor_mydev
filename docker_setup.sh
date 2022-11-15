@@ -12,12 +12,18 @@ then
 fi
 eth1='enp0s8'
 eth2='enp0s8'
+echo $1 | grep restart
+if [ $? -eq 0 ];
+then
+	/TopStor/docker_setup.py stop
+fi
 if [ $# -ge 1 ];
 then 
 	echo $1 | egrep 'stop|reboot|reset'
 	if [ $? -eq 0 ];
 	then
 		/TopStor/resetdocker.sh
+
 		echo $1 | grep reset
 		if [ $? -eq 0 ];
 		then
@@ -28,13 +34,17 @@ docker run -itd --rm --name etcdclient --hostname etcdclient -v /root/gitrepo/re
 			docker exec etcdclient /TopStor/UnixsetUser.py etcd `hostname` admin tmatem
 			/TopStor/resetdocker.sh	
 		fi
-		exit
 		echo $1 | egrep 'reboot|reset'
 		if [ $? -eq 0 ];
 		then
 			reboot
 		fi
-		exit
+		echo $1 | grep 'stop'
+		if [ $? -eq 0 ];
+		then
+			echo hihihihihi
+			exit
+		fi
 	fi
 	eth1=$1
 fi
