@@ -24,4 +24,5 @@ docker stop flask
 docker stop etcdclient 
 docker stop rmq 
 systemctl stop docker
-rm -rf /root/etcddata/*
+systemctl stop iscsid 
+systemctl stop target 

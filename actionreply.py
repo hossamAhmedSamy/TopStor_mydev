@@ -93,7 +93,7 @@ def do(body):
   conf=conf.decode('utf-8')
   with open('/root/recvlogall','a') as f:
    f.write('logs: '+conf+'\n')
-  with open('/var/www/html/des20/Data/TopStorglobal.log','w') as f:
+  with open('/TopStordata/TopStorglobal.log','w') as f:
    f.write(conf)
   logmsg.sendlog('Actsu1001', 'info', 'system')
 ########## if msg ###############
