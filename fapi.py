@@ -10,8 +10,8 @@ from allphysicalinfo import getall
 from UnixChkUser import setlogin
 import sqlite3
 from etcdget2 import etcdgetjson
-from etcdgetpy import etcdget  as get
-from etcddel import etcddel  as dels 
+from etcdgetlocalpy import etcdget  as get
+from etcddellocal import etcddel  as dels 
 from sendhost import sendhost
 from socket import gethostname as hostname
 from getlogs import getlogs, onedaylog
@@ -51,7 +51,7 @@ allinfo = 0
 def getalltime():
  global allinfo,alldsks, getalltimestamp, leaderip
  if (getalltimestamp+30) < timestamp():
-  alldsks = deepcopy(get(leaderip,'host','current'))
+  alldsks = deepcopy(get('host','current'))
   allinfo = deepcopy(getall(leaderip, alldsks))
   getalltimestamp = timestamp()
  return
@@ -78,7 +78,7 @@ def postchange(cmndstring,host='leader'):
  global leaderip, myhost
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
- ownerip=get(leaderip, host,'--prefix')
+ ownerip=get(host,'--prefix')
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
 
 def dict_factory(cursor, row):
@@ -117,7 +117,7 @@ def home():
 
 def getpools():
  global pooldict, leaderip
- pools = get(leaderip,'pools/','--prefix')
+ pools = get('pools/','--prefix')
  poolinfo = []
  pid = 0
  for pool in pools:
@@ -132,8 +132,8 @@ def getconns(data):
  global leaderip
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- conns = get(leaderip,'connections/user','--prefix')
- devs = get(leaderip,'connections/dev','--prefix')
+ conns = get('connections/user','--prefix')
+ devs = get('connections/dev','--prefix')
  zippedconns = zip(conns,devs)
  conndict =  {}
  conndict['connections'] = []
@@ -182,7 +182,7 @@ def hostsallinfo():
 @app.route('/api/v1/hosts/ready', methods=['GET','POST'])
 def hostsready():
  global allhosts, readyhosts, activehosts, losthosts, possiblehosts, leaderip
- hosts = get(leaderip,'ready','--prefix')
+ hosts = get('ready','--prefix')
  readyhosts = []
  hid = 0
  for host in hosts:
@@ -195,7 +195,7 @@ def hostsready():
 @app.route('/api/v1/hosts/active', methods=['GET','POST'])
 def hostsactive():
  global allhosts, readyhosts, activehosts, losthosts, possiblehosts, leaderip
- hosts = get(leaderip,'ActivePartners','--prefix')
+ hosts = get('ActivePartners','--prefix')
  activehosts = []
  hid = 0
  for host in hosts:
@@ -208,7 +208,7 @@ def hostsactive():
 @app.route('/api/v1/hosts/possible', methods=['GET','POST'])
 def hostspossible():
  global allhosts, readyhosts, activehosts, losthosts, possiblehosts, leaderip
- hosts = get(leaderip,'possible','--prefix')
+ hosts = get('possible','--prefix')
  possiblehosts = []
  hid = 0
  for host in hosts:
@@ -545,8 +545,8 @@ def getnotification(data):
  global leaderip, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- notifbody = get(leaderip,'notification')[0].split(' ')[1:]
- requests = get(leaderip,'request','--prefix')
+ notifbody = get('notification')[0].split(' ')[1:]
+ requests = get('request','--prefix')
  requestdict = {}
  for req in requests:
   reqname = req[0].split('/')[1]
@@ -640,14 +640,14 @@ def volumecreate(data):
 
 def getlogin(token):
  global leaderip
- logindata = get(leaderip,'login',token)[0]
+ logindata = get('login',token)[0]
  if logindata == -1:
   logmsg.sendlog(leaderip,myhost, 'Lognno0','warning','system',token)
   return 'baduser'
  oldtimestamp = logindata[1].split('/')[1]
  user = logindata[0].split('/')[1]
  if int(oldtimestamp) < int(timestamp()):
-  dels(leaderip,'login',token)
+  dels('login',token)
   loggedusers.pop(token, None)
   logmsg.sendlog(leaderip,myhost, 'Lognsa0','warning','system',user)
   print('isssss######ss##########33','baduser')
@@ -666,7 +666,7 @@ def getlogin(token):
 def logout():
  global leaderip
  data = request.args.to_dict()
- dels(leaderip,'login',data['token'])
+ dels('login',data['token'])
  loggedusers.pop(data['token'], None)
  return data
 
@@ -789,7 +789,7 @@ def hostevacuate(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  data['user'] = data['response']
- Evacuate.do(data['name'], data['user']) 
+ Evacuate.do(leaderip, myhost, data['name'], data['user']) 
  return data
 
 @app.route('/api/v1/volumes/snapshots/snaprollback', methods=['GET','POST'])
@@ -1146,15 +1146,15 @@ def api_filter():
     cur = conn.cursor()
 
     results = cur.execute(query, to_filter).fetchall()
-
     return jsonify(results)
 leaderip =0 
 myhost=0
 if __name__=='__main__':
     #leader = sys.argv[2]
-    leaderip = sys.argv[1]
-    myhost = sys.argv[2]
+    #leaderip = sys.argv[1]
+    leaderip = get('myclusterip')[0]
+    myhost = get('clusternode')[0]
+    #myhost = sys.argv[2]
     getalltime()
    #myhostip = sys.argv[5]
-
     app.run(host="0.0.0.0", port=5001)

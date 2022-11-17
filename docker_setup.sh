@@ -15,7 +15,7 @@ eth2='enp0s8'
 echo $1 | grep restart
 if [ $? -eq 0 ];
 then
-	/TopStor/docker_setup.py stop
+	/TopStor/resetdocker.sh
 fi
 if [ $# -ge 1 ];
 then 
@@ -141,10 +141,12 @@ then
 	echo docker exec etcdclient /pace/etcdput.py $myclusterip clusternode $myhost
 	docker exec etcdclient /pace/etcdput.py $myclusterip clusternode $myhost
 	docker exec -it etcdclient /TopStor/etcdput.py $myclusterip ActivePartners/$myhost $mynodeip 
+	docker exec -it etcdclient /TopStor/etcdput.py $myclusterip leaderip $myclusterip 
+
 else
 	echo docker exec etcdclient /pace/etcdget.py $myclusterip clusternode
-	leader=`docker exec etcdclient /pace/etcdget.py $myclusterip clusternode`
-
+	docker exec etcdclient /pace/etcdput.py etcd clusternode $myhost
+	docker exec -it etcdclient /TopStor/etcdput.py etcd leaderip $myclusterip 
 	docker exec etcdclient /pace/etcdget.py $myclusterip Active --prefix | grep $myhsot
 	if [ $? -ne 0 ];
 	then

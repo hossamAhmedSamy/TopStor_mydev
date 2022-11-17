@@ -12,7 +12,6 @@ from UpdateNameSpace import updatenamespace
 import logmsg
 from time import time as stamp
 
-
 def config(leaderip, *bargs):
  rebootme = 0
  arglist = bargs[0]

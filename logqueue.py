@@ -1,19 +1,16 @@
 #!/usr/bin/python3
 import sys, datetime
 from time import time
-from etcdgetpy import etcdget as get
 from etcdput import etcdput as put
+from etcdgetlocal import etcdget as get 
 from ast import literal_eval as mtuple
-from socket import gethostname as hostname
 from sendhost import sendhost
-from socket import gethostname as hostname
 
-myhost = hostname()
 def queuethis(*args):
- global myhost
+ leaderip = get('myclusterip')[0]
+ myhost = get('clusternode')[0]
  z=[]
- put('request/'+args[0]+'/'+myhost,args[1])
- myhost=hostname()
+ put(leaderip,'request/'+args[0]+'/'+myhost,args[1])
  dt=datetime.datetime.now().strftime("%m/%d/%Y")
  tm=datetime.datetime.now().strftime("%H:%M:%S")
  z=['/TopStor/logqueue2.sh', dt, tm, myhost ]
@@ -22,8 +19,6 @@ def queuethis(*args):
  z.append(int(time()*1000))
  with open('/root/logqueuetmp','w') as f:
   f.write(str(z))
- leaderinfo=get('leader','--prefix')
- leaderip = leaderinfo[0][1]
  msg={'req': 'queue', 'reply':z}
  sendhost(leaderip, str(msg),'recvreply',myhost)
  
