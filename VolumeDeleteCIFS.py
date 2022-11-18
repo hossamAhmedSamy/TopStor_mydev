@@ -2,7 +2,7 @@
 import sys, datetime
 from logqueue import queuethis
 import json
-from etcdget import etcdget as get
+from etcdgetpy import etcdget as get
 from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost

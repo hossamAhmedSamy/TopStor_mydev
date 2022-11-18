@@ -520,7 +520,6 @@ def userchange(data):
 def getonedaylog():
  result = onedaylog() 
  return result 
-
 @app.route('/api/v1/info/logs', methods=['GET','POST'])
 def getalllogs():
  notif = getlogs()

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import sys
-from etcdgetlocal import etcdget as get
+from etcdgetlocalpy import etcdget as get
 from etcdputlocal import etcdput as putlocal 
 
 def broadcasttolocal(*args):

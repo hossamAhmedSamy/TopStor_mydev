@@ -214,11 +214,11 @@ def getall(leadip, alldsks='0'):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
+ print('hosts',hostsdict)
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  
 if __name__=='__main__':
  hostip = sys.argv[1]
  alldsks = get(hostip,'host','current')
- print(hostip)
  getall(hostip, alldsks)

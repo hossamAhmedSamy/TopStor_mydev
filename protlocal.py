@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from etcdgetlocal import etcdget as get
+from etcdgetlocalpy import etcdget as get
 from etcdputlocal import etcdput as put
 from etcddellocal import etcddel as deli
 from delbroadcastlocallocal import delbroadcastlocal as delilocal 

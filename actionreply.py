@@ -4,7 +4,7 @@ import binascii
 from base64 import decodebytes as decode
 #from base64 import decodestring as decode
 from ast import literal_eval as mtuple
-from etcdget import etcdget as get
+from etcdgetpy import etcdget as get
 import subprocess, socket
 import logmsg
 from logqueueheap import heapthis, syncnextlead
@@ -12,9 +12,10 @@ from syncq import syncq
 
 archive = 1 
 
-def do(body):
+def do(myip, body):
  global archive
- myhost=socket.gethostname()
+ myhost = get(myip, 'clusternode')[0]
+ leaderip = get(myip, 'leaderip')[0]
  z=[]
  with open('/root/recv','w') as f:
   f.write('Recevied a reply:'+str(body[2:][:-1])+'\n')
@@ -124,7 +125,7 @@ def do(body):
     print('wirtten archive')
    #cmdline=['/sbin/logrotate','logqueue.cfg','-f']
    #subprocess.run(cmdline,stdout=subprocess.PIPE)
-   leader = get('primary/address')[0]
+   leader = get(myip, 'leader','--prefix')[0][0].split('/')[1]
    syncq(leader,myhost,archive)
    if archive:
     archive = 0
@@ -133,7 +134,7 @@ def do(body):
   with open('/root/recvqueue','w') as f:
    f.write('received queue from parnter :'+str(r["reply"])+'\n')
    f.write('type of message :'+str(type(r["reply"]))+'\n')
-  heapthis(r["reply"][1:])
+  heapthis(leaderip, myhost, r["reply"][1:])
 ########## if evacuate ###############
  elif r["req"]=='Evacuate':  
   with open('/root/recv','a') as f:
@@ -175,7 +176,7 @@ def do(body):
  elif r["req"]=='syncq':  
   with open('/root/recvsyncq','w') as f:
    f.write('recieved request to sync:'+str(r["reply"]))
-  syncnextlead(r["reply"][0],r["reply"][1])
+  syncnextlead(leaderip, myhost, r["reply"][0],r["reply"][1])
 ########## if syncthisfile ###############
  elif r["req"]=='syncthisfile':  
   with open('/root/recvsyncthis','a') as f:

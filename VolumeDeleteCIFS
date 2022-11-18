@@ -39,8 +39,7 @@ then
   ./etcdput.py $leaderip $ipaddrleft $ipaddrright
  fi
   stamp=`date +%s`
-  leaderall=` ./etcdgetlocal.py leader --prefix `
-  leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+  leader=` ./etcdgetlocal.py leader `
   ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${pDG}_$name/request volumes_$stamp
   ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${pDG}_$name/request/$leader volumes_$stamp
  /TopStor/cifsremove.sh $pDG $volname $volip cifs 2>/root/errcifsremove

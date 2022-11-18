@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import sys, datetime
 from logqueue import queuethis
-from etcdgetlocal import etcdget as get
+from etcdgetlocalpy import etcdget as get
 from ast import literal_eval as mtuple
 from sendhost import sendhost
 def send(*bargs):

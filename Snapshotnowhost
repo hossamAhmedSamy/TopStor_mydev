@@ -16,8 +16,7 @@ myhost=` ./etcdgetlocal.py clusternode`
 leaderip=` ./etcdgetlocal.py leaderip`
 userreq='system'
 stamp=`date +%s`
-leaderall=` ./etcdgetlocal.py leader --prefix `
-leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+leader=` ./etcdgetlocal.py leader `
 pp=`/sbin/zpool list | grep $DG`
 echo pp=$pp
 echo $pp | grep $DG

@@ -2,7 +2,7 @@
 import subprocess,sys, datetime
 from logqueue import queuethis
 import json
-from etcdget import etcdget as get
+from etcdgetpy import etcdget as get
 from etcdput import etcdput as put 
 from broadcast import broadcast as broadcast 
 from ast import literal_eval as mtuple

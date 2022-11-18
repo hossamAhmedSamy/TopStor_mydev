@@ -2,7 +2,7 @@
 import sys, datetime
 from time import time
 from etcdput import etcdput as put
-from etcdgetlocal import etcdget as get 
+from etcdgetlocalpy import etcdget as get 
 from ast import literal_eval as mtuple
 from sendhost import sendhost
 

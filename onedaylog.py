@@ -14,4 +14,4 @@ for res in result:
   continue
  if int(res.split()[-1]) > (nowis-3600):
   onedaylog.append(res)
-
+print(onedaylog)

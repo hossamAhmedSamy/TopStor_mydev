@@ -32,8 +32,7 @@ then
  echo /pace/etcdput.py $leaderip volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas/$active
  /pace/etcdput.py $leaderip volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas/$active
   stamp=`date +%s`
-  leaderall=` ./etcdgetlocal.py leader --prefix `
-  leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+  leader=` ./etcdgetlocal.py leader `
   ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request volumes_$stamp
   ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request/$leader volumes_$stamp
  #/pace/broadcasttolocal.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas/$active

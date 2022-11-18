@@ -48,8 +48,7 @@ then
  echo ./etcdputlocal.py $volleft $volright
  ./etcdput.py $leaderip $volleft $volright
  stamp=`date +%s`
- leaderall=` ./etcdgetlocal.py leader --prefix `
- leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+ leader=`./etcdgetlocal.py leader `
  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${pool}_$newvol/request volumes_$stamp
  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${pool}_$newvol/request/$leader volumes_$stamp
  docker rm -f `docker ps | grep $ipaddress | awk '{print $1}'` 2>/dev/null

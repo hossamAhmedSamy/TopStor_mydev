@@ -23,7 +23,7 @@ contrun=`./privthis.sh $privilege $userreq`;
 echo contrun $contrun
 if [[ $contrun == 'true' ]]
 then
- leader=`./etcdgetlocal.py leader --prefix`
+ leader=` ./etcdgetlocal.py leader `
  echo $leader | grep $myhost
  if [ $? -eq 0 ];
  then

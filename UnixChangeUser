@@ -23,7 +23,7 @@ then
  then
   /TopStor/logmsg.py Unst1024 info $userreq $username
  fi
-leader=`./etcdgetlocal.py leader --prefix`
+leader=` ./etcdgetlocal.py leader `
 echo $leader | grep $myhost
 if [ $? -eq 0 ];
 then

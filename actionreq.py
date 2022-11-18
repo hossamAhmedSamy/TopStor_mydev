@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import codecs
 from ast import literal_eval as mtuple
-from etcdget import etcdget as get
+from etcdgetpy import etcdget as get
 from sendhost import sendhost as send
 def do(body,myhost):
  z=[]

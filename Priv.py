@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import sys, subprocess
-from etcdgetlocal import etcdget as get
+from etcdgetlocalpy import etcdget as get
 from etcdput import etcdput as put
 from time import time as stamp
 import logmsg

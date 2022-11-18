@@ -5,7 +5,7 @@ from etcddel import etcddel as deli
 from time import time as stamp
 import sys
 myhost = get('clusternode')[0]
-leader=get('leader','--prefix')[0][0].split('/')[1]
+leader=get('leader')[0]
 leaderip=get('leaderip')[0]
 def getipstatus(ipaddr,ipsubnet,vol):
  allvols=get('ipaddr/'+ipaddr+'/'+ipsubnet)

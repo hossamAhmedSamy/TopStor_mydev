@@ -143,7 +143,7 @@ then
 	echo docker exec etcdclient /pace/etcdput.py $myclusterip clusternode $myhost
 	docker exec -it etcdclient /TopStor/etcdput.py $myclusterip ActivePartners/$myhost $mynodeip 
 	docker exec -it etcdclient /TopStor/etcdput.py $myclusterip leaderip $myclusterip 
-	docker exec -it etcdclient /TopStor/etcdput.py $myclusterip leader/$myhost $myclusterip 
+	docker exec -it etcdclient /TopStor/etcdput.py $myclusterip leader $myhost 
 	docker exec -it etcdclient /TopStor/etcdput.py $myclusterip nextlead/er 'None' 
 
 else
@@ -221,5 +221,5 @@ then
 	sed -i "s/MYCLUSTER/$myclusterip/g" $shttpdf
 	docker run --rm --name httpd --hostname shttpd --net bridge0 -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $myclusterip:19999:19999 -p $mynodeip:80:80 -p $mynodeip:443:443 -p $myclusterip:80:80 -p $myclusterip:443:443 -v /TopStor/httpd.conf:/usr/local/apache2/conf/httpd.conf -v /root/topstorwebetc:/usr/local/apache2/topstorwebetc -v /topstorweb:/usr/local/apache2/htdocs/ -itd moataznegm/quickstor:git
 fi
-docker run -itd --rm --name flask --hostname apisrv -v /pace/:/pace -v /root/pacedata:/pacedata/ -v /root/logsinfo:/TopStordata -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /TopStordata/TopStorglobal.log:/TopStordata/TopStorglorbal.log moataznegm/quickstor:flask
+docker run -itd --rm --name flask --hostname apisrv -v /pace/:/pace -v /root/pacedata:/pacedata/ -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /TopStordata/:/TopStordata moataznegm/quickstor:flask
 /TopStor/ioperf.py $etcd $myhost

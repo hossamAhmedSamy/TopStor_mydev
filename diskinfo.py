@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import sys,subprocess
 import json
-from etcdgetlocal import etcdget as get
+from etcdgetlocalpy import etcdget as get
 
 leaderip = get('leaderip')[0]
 
