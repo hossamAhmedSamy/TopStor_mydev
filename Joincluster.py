@@ -9,7 +9,7 @@ import logmsg
 myhost = get('clusternode')[0] 
 myip = get('clusternodeip')[0] 
 leaderip = get('leaderip')[0]
-leader = get('leader','--prefix')[0][0].split('/')[1]
+leader = get('leader')[0]
 def dosync(leader,*args):
   global leaderip
   put(leaderip, *args)

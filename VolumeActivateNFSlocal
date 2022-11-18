@@ -112,8 +112,7 @@ then
   fi
  done
   stamp=`date +%s`
-  leaderall=` ./etcdgetlocal.py leader --prefix `
-  leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+  leader=` ./etcdgetlocal.py leader `
   ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${pool}_$name/request volumes_$stamp
   ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${pool}_$name/request/$leader volumes_$stamp
  

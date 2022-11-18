@@ -12,9 +12,10 @@ from syncq import syncq
 
 archive = 1 
 
-def do(body):
+def do(myip, body):
  global archive
- myhost=socket.gethostname()
+ myhost = get(myip, 'clusternode')[0]
+ leaderip = get(myip, 'leaderip')[0]
  z=[]
  with open('/root/recv','w') as f:
   f.write('Recevied a reply:'+str(body[2:][:-1])+'\n')
@@ -124,7 +125,7 @@ def do(body):
     print('wirtten archive')
    #cmdline=['/sbin/logrotate','logqueue.cfg','-f']
    #subprocess.run(cmdline,stdout=subprocess.PIPE)
-   leader = get('primary/address')[0]
+   leader = get(myip, 'leader','--prefix')[0][0].split('/')[1]
    syncq(leader,myhost,archive)
    if archive:
     archive = 0

@@ -32,7 +32,7 @@ contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
    /TopStor/logmsg.py Snap1031 info $userreq Weekly.$hr.$min.$every.$keep $DG/$FileS
-leader=`./etcdgetlocal.py leader --prefix`
+leader=`./etcdgetlocal.py leader`
 echo $leader | grep $myhost
 if [ $? -eq 0 ];
 then

@@ -14,8 +14,7 @@ stamp=`date +%s`;
 snapshot=$pool'/'$vol'@'${name}'.'$stamp
 shortreceiver=`echo $receiver | awk -F'_' '{print $1}'`
 
-leaderall=` ./etcdgetlocal.py leader --prefix `
-leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+leader=`./etcdgetlocal.py leader `
 
 echo $receiver | grep NoReceiver
 if [ $? -ne 0 ];

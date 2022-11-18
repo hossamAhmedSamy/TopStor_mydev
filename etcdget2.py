@@ -11,13 +11,12 @@ def etcdgetjson(*argv):
   prefix=argv[1]
  except:
   prefix='nothing'
- endpoints='http://etcd:3279'
- if 'prefix' in prefix:
-  cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key,prefix]
- elif 'nothing' in prefix: 
-  cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key]
+ endpoints = '--endpoints=http://etcd:2379'
+ if 'nothing' in prefix: 
+  cmdline=['etcdctl','--user=root:YN-Password_123',endpoints,'get',key]
+  cmdline=['etcdctl',endpoints,'get',key]
  else: 
-  cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key,'--prefix']
+  cmdline=['etcdctl',endpoints,'get',key,prefix]
  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
  err = result.returncode
  ilist=[]

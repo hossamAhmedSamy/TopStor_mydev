@@ -62,8 +62,7 @@ then
  ETCDCTL_API=3 /pace/etcddel.py $leaderip volumes $name
  ETCDCTL_API=3 /pace/etcdput.py $leaderip volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/${ipsubnet}$extraparms/$active
  stamp=`date +%s`
- leaderall=` ./etcdgetlocal.py leader --prefix `
- leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+ leader=` ./etcdgetlocal.py leader `
  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request volumes_$stamp
  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request/$leader volumes_$stamp
  /TopStor/VolumefixChangeCIFS $pDG $name CIFS $oldipaddr $userreq 
