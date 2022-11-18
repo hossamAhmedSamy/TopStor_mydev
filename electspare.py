@@ -2,19 +2,20 @@
 from allphysicalinfo import getall 
 import sys, subprocess, json
 from ast import literal_eval as mtuple
-from etcdget2 import etcdgetjson
 from etcdgetpy import etcdget  as get
+from etcdgetlocalpy import etcdget  as getlocal
 from etcddel import etcddel  as dels
 from etcdput import etcdput  as put
+from etcdputlocal import etcdput  as putlocal
 from sendhost import sendhost
-from socket import gethostname
 from getlogs import getlogs
 from fapistats import allvolstats, levelthis
 from datetime import datetime
 from getallraids import newraids, selectdisks, selectnewmirror
 from copy import deepcopy 
 import logmsg
-myhost = ''
+myhost = getlocal('clusternode')[0] 
+leaderip = getlocal('leaderip')[0]
 faultydisks = []
 alltemplate = {'hosts':{}, 'pools':{ 'status', 'host'}, 'raids': {'status'},'disks':{'status'},  'volumes':{ 'groups', 'ipaddress', 'Subnet', 'quota'}}
 parsetemplate = {'hosts':{'identity': { '__added__':('Sys01','the host :: is registered in the system'), '__removed__':('Sys02','the host :: is removed from the system')}}, 
@@ -62,7 +63,7 @@ def mirrorattach(pool,cdisk,ndisk,raid):
   subprocess.check_call(cmd)
   if 'attach' in cmd:
    logmsg.sendlog('Disu6','info','system', ndisk,raid,pool,myhost)
-   put('fixpool/'+pool,'1')
+   putlocal('fixpool/'+pool,'1')
   else:
    logmsg.sendlog('Disu2','info','system', cdisk, ndisk,myhost)
  except subprocess.CalledProcessError:
@@ -76,7 +77,7 @@ def takedecision(allmsgs):
    logmsg.sendlog(msg[0],'warning','system',*msg[1:])
   else:
    logmsg.sendlog(msg[0],'info','system',*msg[1:])
- faultydisks = get('disks','FAULT')
+ faultydisks = get(leaderip, 'disks','FAULT')
  if '-1' in str(faultydisks):
   faultydisks = [] 
  for disk in allinfo['disks']:
@@ -140,8 +141,7 @@ def getoptimaldisk(fdisk,raidinfo):
 
 def replacedisks():
  global allinfo, faultydisks
- myhost=gethostname()
- availability = get('balance','--prefix')
+ availability = getlocal('balance','--prefix')
  print(faultydisks)
  for disk in faultydisks:
   diskname = disk[0].split('/')[2]
@@ -159,30 +159,30 @@ def replacedisks():
 
 def checkhosts():
  global allinfo, alllastinfo
- alldsks = get('host','current')
+ alldsks = get(leaderip, 'host','current')
  allinfo = getall(alldsks)
- lastalldsks = get('hosts','last')
+ lastalldsks = get(leaderip, 'hosts','last')
  if lastalldsks[0] == -1:
-  put('hosts/last',json.dumps(allinfo) )
+  put(leaderip, 'hosts/last',json.dumps(allinfo) )
   return
  alllastinfo = mtuple(lastalldsks[0][1])
  allchange = allcompare() 
  if allchange:
-  changec = int(get('hosts/change')[0])
+  changec = int(get(leaderip, 'hosts/change')[0])
   if changec not in [1,2,3,4,5]:
    changec = 0 
   if changec < 5:
    changec += 1
-   put('hosts/change',str(changec))
+   put(leaderip, 'hosts/change',str(changec))
    return
-  put('hosts/change','0')
+  put(leaderip, 'hosts/change','0')
   with open('/root/electtmp','w') as f:
    f.write(str(alllastinfo))
    f.write('\n'+str(len(allinfo['hosts'])))
   print('found a change')
  allmsgs = parsechange()
  takedecision(allmsgs)
- put('hosts/last',json.dumps(allinfo))
+ put(leaderip, 'hosts/last',json.dumps(allinfo))
  #replacedisks()
  return allchange
 

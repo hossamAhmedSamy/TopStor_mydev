@@ -10,7 +10,7 @@ if [[ $sysuser == $userreq || $superuser == $userreq ]];
 then
   echo true;
 else
- userinfo=`/TopStor/etcdget.py usersinfo/$userreq | awk -F"$modpriv" '{print $2}'`
+ userinfo=`/TopStor/etcdgetlocal.py usersinfo/$userreq | awk -F"$modpriv" '{print $2}'`
  priv=`echo $userinfo | cut -c 2- |  awk -F'/' '{print $1}'`
  echo $priv | grep 'true' >/dev/null
  if [ $? -eq 0 ];

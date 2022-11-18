@@ -12,10 +12,11 @@ stype=`echo $@ | awk '{print $2}' | awk -F'.' '{print $1}'`;
 receiver=` echo $@ | awk '{print $NF'}`
 shortreceiver=`echo $receiver | awk -F'_' '{print $1}'`
 echo $pDG
-myhost=`hostname -s`
+myhost=` ./etcdgetlocal.py clusternode`
+leaderip=` ./etcdgetlocal.py leaderip`
 userreq='system'
 stamp=`date +%s`
-leaderall=` ./etcdget.py leader --prefix `
+leaderall=` ./etcdgetlocal.py leader --prefix `
 leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
 pp=`/sbin/zpool list | grep $DG`
 echo pp=$pp
@@ -50,7 +51,7 @@ then
  waiting=1
  while [ $waiting -eq 1 ];
  do 
-  running=`./etcdget.py running $receiver`
+  running=`./etcdget.py $leaderip running $receiver`
   echo $running | grep $receiver 
   if [ $? -eq 0 ];
   then
@@ -59,12 +60,10 @@ then
    if [ $queue -ge 10 ];
    then
     stamp=`date +%s`
-    leaderall=` ./etcdget.py leader --prefix `
-    leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-    ./etcddel.py running $receiver
-    ./etcdput.py running/stub/$receiver  no
-    ./etcdput.py sync/running/____/request running_$stamp
-    ./etcdput.py sync/running/____/request/$leader running_$stamp
+    ./etcddel.py $leaderip running $receiver
+    ./etcdput.py $leaderip running/stub/$receiver  no
+    ./etcdput.py $leaderip sync/running/____/request running_$stamp
+    ./etcdput.py $leaderip sync/running/____/request/$leader running_$stamp
     exit
     waiting=0
    fi
@@ -73,9 +72,9 @@ then
    waiting=0
   fi
  done
-  ./etcdput.py running/$myhost/$receiver $receiver 
-  ./etcdput.py sync/running/____/request running_$stamp
-  ./etcdput.py sync/running/____/request/$leader running_$stamp
+  ./etcdput.py $leaderip running/$myhost/$receiver $receiver 
+  ./etcdput.py $leaderip sync/running/____/request running_$stamp
+  ./etcdput.py $leaderip sync/running/____/request/$leader running_$stamp
  result=`./replicatenow.py $snapshot $receiver 2>/root/replicatenow`
  echo result=$result >> /root/replicatenow
  result=`echo $result | grep 'result_' | awk -F'result_' '{print $2}'`
@@ -91,7 +90,7 @@ then
    ./logmsg.py Replispacesu01 info $userreq $vol $shortreceiver
  fi 
 fi
-./etcdput.py running/$myhost/$receiver finished 
-./etcdput.py sync/running/____/request running_$stamp
-./etcdput.py sync/running/____/request/$leader running_$stamp
+./etcdput.py $leaderip running/$myhost/$receiver finished 
+./etcdput.py $leaderip sync/running/____/request running_$stamp
+./etcdput.py $leaderip sync/running/____/request/$leader running_$stamp
 /TopStor/logqueue.py `basename "$0"` stop system 

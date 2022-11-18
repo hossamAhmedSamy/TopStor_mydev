@@ -12,9 +12,11 @@ domainsrvn=`echo $@ | awk '{print $7}'`
 domainsrvi=`echo $@ | awk '{print $8}'`
 domadmin=`echo $@ | awk '{print $9}'`
 adminpass=`echo $@ | awk '{print $10}'`
+leaderip=` ./etcdgetlocal.py leaderip `
+myhost=` ./etcdgetlocal.py clusternode `
 echo $@ > /root/cifsmember
 echo $@ > /root/cifsparam
-allvols=`./etcdget.py volumes --prefix`
+allvols=`./etcdgetlocal.py volumes --prefix`
 replivols=`echo $allvols | grep $vol`
 echo $replivols | grep active
 if [ $? -ne 0 ];
@@ -22,14 +24,13 @@ then
  exit
 fi
 
-leaderall=` ./etcdget.py leader --prefix `
+leaderall=` ./etcdgetlocal.py leader --prefix `
 leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-myhost=`hostname`
 #docker rm -f `docker ps -a | grep -v Up | grep $ipaddr | awk '{print $1}'` 2>/dev/null
 echo cifs $@
-rightip=`/pace/etcdget.py ipaddr/$myhost $vtype-$ipaddr | grep -v $vol`
-otherip=`/pace/etcdget.py ipaddr $vtype-$ipaddr | grep -v $myhost | wc -c`
-othervtype=`/pace/etcdget.py ipaddr $ipaddr | grep -v $vtype | wc -c` 
+rightip=`/pace/etcdgetlocal.py ipaddr/$myhost $vtype-$ipaddr | grep -v $vol`
+otherip=`/pace/etcdgetlocal.py ipaddr $vtype-$ipaddr | grep -v $myhost | wc -c`
+othervtype=`/pace/etcdgetlocal.py ipaddr $ipaddr | grep -v $vtype | wc -c` 
 /TopStor/logqueue.py `basename "$0"` running $userreq
 if [ $otherip -ge 5 ];
 then 
@@ -54,18 +55,18 @@ then
  rightvols=$vol
 else
  echo found other vols
- rightvols=`/pace/etcdget.py ipaddr/$myhost/$ipaddr/$ipsubnet | sed "s/$resname\///g"`'/'$vol
+ rightvols=`/pace/etcdgetlocal.py ipaddr/$myhost/$ipaddr/$ipsubnet | sed "s/$resname\///g"`'/'$vol
 fi
- echo /pace/etcdput.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
- /pace/etcdput.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
+ echo /pace/etcdput.py $leaderip ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
+ /pace/etcdput.py $leaderip ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
  stamp=`date +%s`;
- echo /pace/etcdput.py sync/ipaddr/request ipaddr_$stamp
- /pace/etcdput.py sync/ipaddr/request ipaddr_$stamp
- echo /pace/etcdput.py sync/ipaddr/request/$leader ipaddr_$stamp
- /pace/etcdput.py sync/ipaddr/request/$leader ipaddr_$stamp
- /pace/broadcasttolocal.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols 
- /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
- /sbin/pcs resource group add ip-all $resname 
+ echo /pace/etcdput.py $leaderip sync/ipaddr/request ipaddr_$stamp
+ /pace/etcdput.py $leaderip sync/ipaddr/request ipaddr_$stamp
+ echo /pace/etcdput.py $leaderip sync/ipaddr/request/$leader ipaddr_$stamp
+ /pace/etcdput.py $leaderip sync/ipaddr/request/$leader ipaddr_$stamp
+ #/pace/broadcasttolocal.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols 
+ #/sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
+ #/sbin/pcs resource group add ip-all $resname 
  mounts=`echo $rightvols | sed 's/\// /g'`
  echo rightvol=$rightvols
  echo mounts=$mounts

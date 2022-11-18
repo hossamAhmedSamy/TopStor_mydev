@@ -19,7 +19,7 @@ def onedaylog():
   onedaylog[sev] = []
   nowis = int(time())
   nowfixed = str(nowis)[:4]
-  cmdline='/TopStor/grepthis.sh '+nowfixed+' '+sev+' TopStorglobal.log'
+  cmdline='/TopStor/grepthis.sh '+nowfixed+' '+sev+' /TopStordata/TopStorglobal.log'
   result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split('\n')
   for res in result:
    if len(res.split()) < 4:
@@ -53,7 +53,7 @@ def notifthis(notifbody,loc=3):
 
 def getlogs(lines=100, *args):
  notiflist = []
- cmd = 'tail -n '+str(lines)+' TopStorglobal.log'
+ cmd = 'tail -n '+str(lines)+' /TopStordata/TopStorglobal.log'
  result=subprocess.run(cmd.split(' '),stdout=subprocess.PIPE)
  result = str(result.stdout.decode('utf8')).split('\n')
  for line in result:

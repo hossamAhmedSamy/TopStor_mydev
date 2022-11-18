@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 import subprocess,sys, datetime
-from etcdget import etcdget as get
-from etcdput import etcdput as put 
-from etcddel import etcddel as dels 
+from etcdputlocal import etcdput as put 
+from etcddellocal import etcddel as dels 
 
 def crontoetc(*bargs):
  cmdline='/bin/crontab -l'

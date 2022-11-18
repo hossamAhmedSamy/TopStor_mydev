@@ -1,6 +1,7 @@
 #!/bin/sh
 cd /TopStor
 export ETCDCTL_API=3
+leaderip=` ./etcdgetlocal.py leaderip `
 perfmon=`cat /pacedata/perfmon`
 echo $perfmon | grep 1
 if [ $? -eq 0 ]; then
@@ -55,12 +56,12 @@ then
  if [ $? -ne 0  ]; then
   /TopStor/logmsg.py NFS1001 error $userreq $volname
  else 
-  /pace/etcddel.py volumes $volname
+  /pace/etcddel.py $leaderip volumes $volname
   stamp=`date +%s`
-  leaderall=` ./etcdget.py leader --prefix `
+  leaderall=` ./etcdgetlocal.py leader --prefix `
   leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request volumes_$stamp
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request/$leader volumes_$stamp
+  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request volumes_$stamp
+  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request/$leader volumes_$stamp
   #/pace/delbroadcastlocal.py volumes $volname
   /TopStor/SnapShotPeriodDelete $volname $userreq
   /TopStor/logmsg.py NFS1002 info $userreq $volname

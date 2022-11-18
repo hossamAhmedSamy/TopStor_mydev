@@ -2,6 +2,7 @@
 export ETCDCTL_API=3
 cd /TopStor/
 echo $@ > /root/volchange
+leaderip=` ./etcdgetlocal.py leaderip `
 perfmon=`cat /pacedata/perfmon`
 echo $perfmon | grep 1
 if [ $? -eq 0 ]; then
@@ -27,14 +28,14 @@ then
  /TopStor/logmsg.py VolCst01 info $userreq $name
  echo name=$name
  myhost=`hostname -s`
- older=`ETCDCTL_API=3 /pace/etcdget.py volumes $name `
- echo /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas/$active
- /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas/$active
+ older=`ETCDCTL_API=3 /pace/etcdgetlocal.py volumes $name `
+ echo /pace/etcdput.py $leaderip volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas/$active
+ /pace/etcdput.py $leaderip volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas/$active
   stamp=`date +%s`
-  leaderall=` ./etcdget.py leader --prefix `
+  leaderall=` ./etcdgetlocal.py leader --prefix `
   leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request volumes_$stamp
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request/$leader volumes_$stamp
+  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request volumes_$stamp
+  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request/$leader volumes_$stamp
  #/pace/broadcasttolocal.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$initiators/$chapuser/$chappas/$active
  oldipaddr=`zfs get -H ip:addr $DG/$name | awk '{print $3}'`
  echo got ip $ipaddr

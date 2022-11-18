@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import sys, subprocess
-from etcdgetpy import etcdget as get
+from etcdgetlocalpy import etcdget as get
 
 def createvol(*args):
  datastr = ''

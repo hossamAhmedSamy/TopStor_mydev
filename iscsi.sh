@@ -11,9 +11,10 @@ targetiqn=`echo $@ | awk '{print $6}'`
 chapuser=`echo $@ | awk '{print $7}'`
 chappas=`echo $@ | awk '{print $8}'`
 vtype='iscsi'
-myhost=`hostname`
+leaderip=` ./etcdgetlocal.py leaderip `
+myhost=` ./etcdgetlocal.py clusternode `
 echo $@ > /root/iscsiparam
-allvols=`./etcdget.py volumes --prefix`
+allvols=`./etcdgetlocal.py volumes --prefix`
 replivols=`echo $allvols | grep $vol`
 echo $replivols | grep active
 if [ $? -ne 0 ];
@@ -21,9 +22,9 @@ then
  exit
 fi
 
-rightip=`/pace/etcdget.py ipaddr/$myhost $vtype-$ipaddr | grep -v $vol`
-otherip=`/pace/etcdget.py ipaddr $vtype-$ipaddr | grep -v $myhost | wc -c`
-othervtype=`/pace/etcdget.py ipaddr $ipaddr | grep -v $vtype | wc -c` 
+rightip=`/pace/etcdgetlocal.py ipaddr/$myhost $vtype-$ipaddr | grep -v $vol`
+otherip=`/pace/etcdgetlocal.py ipaddr $vtype-$ipaddr | grep -v $myhost | wc -c`
+othervtype=`/pace/etcdgetlocal.py ipaddr $ipaddr | grep -v $vtype | wc -c` 
 if [ $otherip -ge 5 ];
 then 
  echo another host is holding the ip
@@ -44,13 +45,13 @@ then
  rightvols=$vol
 else
  echo found other vols
-rightvols=`/pace/etcdget.py ipaddr/$myhost/$ipaddr/$ipsubnet | sed "s/$resname\///g"`'/'$vol
+rightvols=`/pace/etcdgetlocal.py ipaddr/$myhost/$ipaddr/$ipsubnet | sed "s/$resname\///g"`'/'$vol
 fi
- /pace/etcdput.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
- /pace/broadcasttolocal.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols 
- /sbin/pcs resource delete --force $resname  2>/dev/null
- /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
- /sbin/pcs resource group add ip-all $resname 
+ /pace/etcdput.py $leaderip ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
+ #/pace/broadcasttolocal.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols 
+ #/sbin/pcs resource delete --force $resname  2>/dev/null
+ #/sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
+ #/sbin/pcs resource group add ip-all $resname 
 echo continue
 echo /pace/addzfsvolumeastarget.sh $pool ${vol} $ipaddr $portalport $targetiqn $chapuser $chappas
  for i in $(echo $targetiqn | sed "s/,/ /g")

@@ -1,13 +1,12 @@
 #!/usr/bin/python3
 import sys, subprocess
-from etcdget import etcdget as get
+from etcdgetlocal import etcdget as get
 from etcdput import etcdput as put
-from socket import gethostname as hostname
 from time import time as stamp
-from broadcasttolocal import broadcasttolocal 
 import logmsg
 
-myhost=hostname()
+myhost = get('clusternode')[0]
+leaderip = get('leaderip')[0]
 def changepriv(user,priv,request='admin'):
  syspriv = 'UserPrivilegesch'
  cmdline = ['/TopStor/privthis.sh',syspriv, request]
@@ -17,9 +16,9 @@ def changepriv(user,priv,request='admin'):
  logmsg.sendlog('Priv1002 ','info',request,user)
  userinfo = get('usersinfo/'+user)
  leftpart = userinfo[0].split('/')[0:4]
- put('usersinfo/'+user, '/'.join(leftpart)+'/'+priv)
- put('user/'+myhost,str(stamp()))
- broadcasttolocal('usersinfo/'+user, '/'.join(leftpart)+'/'+priv)
+ put(leaderip, 'usersinfo/'+user, '/'.join(leftpart)+'/'+priv)
+ put(leaderip, 'user/'+myhost,str(stamp()))
+ #broadcasttolocal('usersinfo/'+user, '/'.join(leftpart)+'/'+priv)
  print('/'.join(leftpart)+'/'+priv)
  logmsg.sendlog('Priv1003','info',request,user)
  

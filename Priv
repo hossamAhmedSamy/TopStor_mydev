@@ -10,6 +10,7 @@ userreq=` echo $@ | awk -F'/' '{print $NF}'`;
 contrun=` ./privthis.sh $privilege $userreq ` ;
 if [[ $contrun == 'true' ]];
 then
+leaderip=`/TopStor/etcdgetlocal.py leaderip`
 web='/var/www/html/des20/Data/Privstatus.log';
 userpriv='/var/www/html/des20/Data/userpriv.txt';
 currentpriv='/TopStordata/userpriv.txt';
@@ -17,10 +18,10 @@ resweb='/var/www/html/des20/Data/userprivdate.txt';
 logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStor.log';
  /TopStor/logmsg.py Priv1002 info $userreq $user &
-size=`/pace/etcdget.py usersinfo/$user | awk -F"/" '{print $4}'`
-userinfo=`/pace/etcdget.py usersinfo/$user | awk -F"/$size" '{print $1}'`'/'$size
+size=`/pace/etcdgetlocal.py usersinfo/$user | awk -F"/" '{print $4}'`
+userinfo=`/pace/etcdgetlocal.py usersinfo/$user | awk -F"/$size" '{print $1}'`'/'$size
 userinfo=${userinfo}'/'`echo $@ | awk -F'/' 'BEGIN{FS=OFS="/"}{$NF="";print}'`
-/pace/etcdput.py usersinfo/$user $userinfo
+/pace/etcdput.py $leaderip usersinfo/$user $userinfo
 /TopStor/logmsg.py Priv1003 info $userreq $user &
 fi
 /TopStor/logqueue.py `basename "$0"` stop $userreq 

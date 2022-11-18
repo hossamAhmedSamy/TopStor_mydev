@@ -57,7 +57,7 @@ def do(body,myhost):
  elif r["req"]=='logall':
   with open('/root/recv','a') as f:
    f.write('preparing logfile \n')
-  with open('/var/www/html/des20/Data/TopStorglobal.log') as f:
+  with open('/TopStordata/TopStorglobal.log') as f:
    conf=f.read()
   conf=conf.encode()
   bconf=codecs.encode(conf,'hex')

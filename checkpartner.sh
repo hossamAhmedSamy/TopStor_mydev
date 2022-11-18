@@ -11,9 +11,10 @@ count=0
 strict='-o StrictHostKeyChecking=no' 
 nodeloc='ssh -oBatchmode=yes -i /TopStordata/'${partnerip}'_keys/'${partnerip}' -p '$port' '$strict' '${partnerip}
 result='closed'
-myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
-myhost=`hostname`
-/TopStor/etcdget.py Partnernode/${partner}_$replitype $partnerip | grep $myip
+leaderip=` ./etcdgetlocal.py leaderip `
+myhost=` ./etcdgetlocal.py clusternode `
+myip=` ./etcdgetlocal.py clusternodeip `
+/TopStor/etcdgetlocal.py Partnernode/${partner}_$replitype $partnerip | grep $myip
 if [ $? -ne 0 ];
 then
  isnew='new'
@@ -53,7 +54,7 @@ do
   if [ $? -eq 0 ];
   then
    noden=`$nodeloc /usr/bin/hostname` 
-   nodei=`$nodeloc /TopStor/etcdget.py ready/$noden` 
+   nodei=`$nodeloc /TopStor/etcdgetlocal.py ready/$noden` 
 #   /TopStor/pumpkeys.py $nodei $replitype $port $phrase
    echo nodei=$nodei
    sleep 2
@@ -65,12 +66,12 @@ do
     echo -e "$known" > /root/.ssh/known_hosts
     ssh -oBatchmode=yes -i /TopStordata/${nodei}_keys/${nodei} -p $port $strict ${nodei} ls  >/dev/null 2>/dev/null
    fi
-   /TopStor/etcdput.py Partnernode/${partner}_$replitype/$nodei/$myip $noden 
-   leader=`./etcdget.py leader --prefix`
+   /TopStor/etcdput.py $leaderip Partnernode/${partner}_$replitype/$nodei/$myip $noden 
+   leader=`./etcdgetlocal.py leader --prefix`
    echo $leader | grep $myip
    if [ $? -ne 0 ];
    then
-    /TopStor/etcdputlocal.py $myip Partnernode/${partner}_$replitype/$nodei/$myip $noden 
+    /TopStor/etcdputlocal.py $Partnernode/${partner}_$replitype/$nodei/$myip $noden 
    fi
   fi
   count=11

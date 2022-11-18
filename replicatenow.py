@@ -1,9 +1,7 @@
 #!/usr/bin/python3
 import sys, subprocess
-from time import time as timestamp, sleep
 from allphysicalinfo import getall 
-from etcdgetpy import etcdget as get
-from getallraids import newraids, selectdisks
+from etcdgetlocalpy import etcdget as get
 from pumpkeys import pumpkeys
 
 
@@ -36,7 +34,7 @@ def replitargetget(receiver, volume, volused, snapshot):
  replitype = partnerinfo[1]
  pport = partnerinfo[2]
  phrase = partnerinfo[-1]
- myclusterip =  get('namespace/mgmtip')[0].split('/')[0]
+ myclusterip =  get('leaderip')[0]
  print(replitype, pport, phrase, myclusterip )
  nodesinfo = get('Partnernode/'+receiver,'--prefix')
  print('hi',nodesinfo)
@@ -142,9 +140,3 @@ def repliparam(snapshot, receiver):
 
 if __name__=='__main__':
  result = repliparam(*sys.argv[1:])
-   
-  
-# disks = allinfo['disks']
-# raids = newraids(disks)
-# print(raids)
- 

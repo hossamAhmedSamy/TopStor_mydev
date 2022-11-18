@@ -77,7 +77,7 @@ then
     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_${nextpool}_imported/request activepool_$stamp 
     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_${nextpool}_imported/request/$leader activepool_$stamp 
     #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/$nextpool imported 
-    ETCDCTL_API=3 /pace/etcdput.py fixpool/$nextpool imported 
+    ETCDCTL_API=3 /pace/etcdputlocal.py fixpool/$nextpool imported 
    /TopStor/logmsg.py DGsu22 info $userreq ${nextpool} 
   fi
  else
@@ -228,7 +228,7 @@ else
      ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
      #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdputlocal.py fixpool/p$nextpool running 
     /TopStor/logmsg.py DG1su6 info $userreq ${nextpool} $diskn1 
   fi
  fi 
@@ -294,7 +294,7 @@ else
      ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
      #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdputlocal.py fixpool/p$nextpool running 
     /TopStor/logmsg.py DGsu13 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa13 info $userreq p${nextpool} $diskns
@@ -361,7 +361,7 @@ else
      ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
      #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdputlocal.py fixpool/p$nextpool running 
     /TopStor/logmsg.py DGsu15 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa15 info $userreq p${nextpool} $diskns
@@ -436,7 +436,7 @@ else
      ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
      #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdputlocal.py fixpool/p$nextpool running 
     /TopStor/logmsg.py DGsu17 info $userreq p${nextpool} $diskns
   else
     echo itis not done >> /root/tmp2
@@ -489,7 +489,7 @@ else
      ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
      #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdputlocal.py fixpool/p$nextpool running 
     /TopStor/logmsg.py DGsu21 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa21 error $userreq p${nextpool} $diskns
@@ -530,7 +530,7 @@ else
      ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
      ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
      #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py fixpool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdputlocal.py fixpool/p$nextpool running 
     /TopStor/logmsg.py DGsu19 info $userreq p${nextpool} $diskns
   else
     /TopStor/logmsg.py DGfa19  error $userreq p${nextpool} $diskns

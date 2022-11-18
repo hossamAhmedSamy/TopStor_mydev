@@ -1,10 +1,5 @@
 #!/usr/bin/python3
-import sys, subprocess,os
-from etcdget import etcdget as get
-from etcdput import etcdput as put 
-from etcddel import etcddel as dels 
-from socket import gethostname as hostname
-from sendhost import sendhost
+import sys
 def syncnextlead(lastfile):
  filelist = os.listdir('/TopStordata/')
  filelist = [ x for x in filelist if 'taskperf' in x ]

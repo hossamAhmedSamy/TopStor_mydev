@@ -3,7 +3,8 @@ echo $@ > /root/snapnowparam
 cd /TopStor
 web='/var/www/html/des20/Data/statusglobal.log';
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
-myhost=$myhost;
+myhost=` ./etcdgetlocal.py clusternode`
+leaderip=` ./etcdgetlocal.py leaderip`
 pool=`echo $@ | awk '{print $1}'`;
 vol=`echo $@ | awk '{print $2}'`;
 name=`echo $@ | awk '{print $3}'` ;
@@ -13,7 +14,7 @@ stamp=`date +%s`;
 snapshot=$pool'/'$vol'@'${name}'.'$stamp
 shortreceiver=`echo $receiver | awk -F'_' '{print $1}'`
 
-leaderall=` ./etcdget.py leader --prefix `
+leaderall=` ./etcdgetlocal.py leader --prefix `
 leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
 
 echo $receiver | grep NoReceiver
@@ -40,7 +41,7 @@ then
  waiting=1
  while [ $waiting -eq 1 ];
  do
-  running=`./etcdget.py running/$receiver`
+  running=`./etcdget.py $leaderip running/$receiver`
   echo $running | grep $receiver
   if [ $? -eq 0 ];
   then
@@ -48,7 +49,7 @@ then
    queue=`ps -ef | grep Snapshotnow | wc -l`
    if [ $queue -ge 10 ];
    then
-    ./etcdput.py running/$receiver no
+    ./etcdput.py $leaderip running/$receiver no
     exit
     waiting=0
    fi
@@ -57,9 +58,9 @@ then
    waiting=0
   fi
  done
- ./etcdput.py running/$receiver $receiver
- ./etcdput.py sync/running/____/request running_$stamp
- ./etcdput.py sync/running/____/request/$leader running_$stamp
+ ./etcdput.py $leaderip running/$receiver $receiver
+ ./etcdput.py $leaderip sync/running/____/request running_$stamp
+ ./etcdput.py $leaderip sync/running/____/request/$leader running_$stamp
  echo ./replicatenow.py $snapshot $receiver
  result=`./replicatenow.py $snapshot $receiver`
  result=`echo $result | grep 'result_' | awk -F'result_' '{print $2}'`
@@ -75,7 +76,7 @@ then
    ./logmsg.py Replispacesu01 info $userreq $shortreceiver $vol
  fi 
 fi;
- ./etcdput.py running/$receiver finish 
- ./etcdput.py sync/running/____/request running_$stamp
- ./etcdput.py sync/running/____/request/$leader running_$stamp
+ ./etcdput.py $leaderip running/$receiver finish 
+ ./etcdput.py $leaderip sync/running/____/request running_$stamp
+ ./etcdput.py $leaderip sync/running/____/request/$leader running_$stamp
 #sleep 2;

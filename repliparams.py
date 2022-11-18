@@ -1,9 +1,7 @@
 #!/usr/bin/python3
 import sys
-from time import time as timestamp, sleep
 from allphysicalinfo import getall 
-from etcdgetpy import etcdget as get
-from getallraids import newraids, selectdisks
+from etcdgetlocalpy import etcdget as get
 
 allinfo = {}
 
@@ -22,8 +20,3 @@ if __name__=='__main__':
  allinfo = getall(alldsks)
  result = repliparam(*sys.argv[1:])
    
-  
-# disks = allinfo['disks']
-# raids = newraids(disks)
-# print(raids)
- 

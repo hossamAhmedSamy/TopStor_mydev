@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 import sys, datetime
 from logqueue import queuethis
-from etcdget import etcdget as get
+from etcdgetlocal import etcdget as get
 from ast import literal_eval as mtuple
-from socket import gethostname as hostname
 from sendhost import sendhost
 def send(*bargs):
- queuethis('SnapShotDelete.py','running',bargs[-1])
+ queuethis('SnapshotDelete.py','running',bargs[-1])
  if(len(bargs) < 3):
   args=bargs[0].split()
  else:
@@ -24,27 +23,27 @@ def send(*bargs):
   print(ownerlist)
   owner=ownerlist[0]
  else:
-  queuethis('SnapShotDelete.py','stop_canceled',bargs[-1])
+  queuethis('SnapshotDelete.py','stop_canceled',bargs[-1])
   return 1
  with open('/root/SnapshotDelete','a') as f:
   f.write('owner='+owner+'\n')
- myhost=hostname()
+ myhost=get('clusternode')[0]
  with open('/root/SnapshotDelete','a') as f:
   f.write('myhost='+myhost+'\n')
  owneriplist=get('ready/'+owner)
  if str(owneriplist[0])!= '-1':
   ownerip=owneriplist[0]
  else:
-   queuethis('SnapShotDelete.py','stop_canceled',bargs[-1])
+   queuethis('SnapshotDelete.py','stop_canceled',bargs[-1])
    return 3
- z=['/TopStor/pump.sh','SnapShotDelete']
+ z=['/TopStor/pump.sh','SnapshotDelete']
  for arg in args:
   z.append(arg)
  msg={'req': 'SnapshotDelete', 'reply':z}
  with open('/root/SnapshotDelete','a') as f:
   f.write('myhost='+ownerip+' '+myhost+' '+str(z)+'\n')
  sendhost(ownerip, str(msg),'recvreply',myhost)
- queuethis('SnapShotDelete.py','stop',bargs[-1])
+ queuethis('SnapshotDelete.py','stop',bargs[-1])
  return 1
 
 if __name__=='__main__':

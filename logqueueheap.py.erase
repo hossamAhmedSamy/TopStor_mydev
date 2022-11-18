@@ -1,9 +1,8 @@
 #!/usr/bin/python3
 import sys, subprocess, os
-from etcdget import etcdget as get
+from etcdgetlocal import etcdget as get
 from etcdput import etcdput as put 
 from etcddel import etcddel as dels 
-from socket import gethostname as hostname
 from sendhost import sendhost
 stamps = dict()
 stampseq = []
@@ -12,7 +11,8 @@ ctask = ''
 lenctask = 0
 def heapthis(line):
  global stamps,lenctask, stampseq, otask, ctask
- myhost=hostname()
+ myhost=get('clusternode')[0]
+ leaderip=get('leaderip')[0]
  try:
   linestamp = int(line[-1])
  except:
@@ -35,7 +35,7 @@ def heapthis(line):
  # ctask[line[2]][st['task']] = [] 
  if 'stop' not in st['status']:
   otask[line[2]][st['task']][st['status']] = {'stamp':linestamp,'at':st['at'],'on':st['on']}
-  put('OpenTasks/'+line[2]+'/'+st['task']+'/'+st['status'], str(linestamp)+'/'+st['at']+'/'+st['on'])
+  put(leaderip, 'OpenTasks/'+line[2]+'/'+st['task']+'/'+st['status'], str(linestamp)+'/'+st['at']+'/'+st['on'])
  else:
   cutask = otask[line[2]][st['task']].copy()
   if not cutask:
@@ -46,12 +46,12 @@ def heapthis(line):
     ctask +=line[2]+' '+st['task']+' '+stall+' '+str(cutask[stall]['stamp'])+' '+cutask[stall]['at']+' '+cutask[stall]['on']+'\n'
    #ctask[line[2]][st['task']].append(cutask)
    otask[line[2]][st['task']] = dict() 
-   dels('OpenTasks/'+line[2],st['task'])
+   dels(leaderip,'OpenTasks/'+line[2],st['task'])
    lenctask += 1 
    if lenctask > 20: 
     with open('/TopStordata/taskperf','a') as f:
      f.write(ctask)
-    thenextlead =get('nextlead/er')
+    thenextlead =get('nextlead/er')[0]
     if 'dhcp' in str(thenextlead):
      nextlead = thenextlead[0].split('/')[1]
      z = [ctask]
@@ -66,7 +66,7 @@ def heapthis(line):
  return  
 
 def syncnextlead(lastfile,archive):
- thenextlead =get('nextlead/er')
+ thenextlead =get('nextlead/er')[0]
  if 'dhcp' not in str(thenextlead):
   return
  myhost=hostname()

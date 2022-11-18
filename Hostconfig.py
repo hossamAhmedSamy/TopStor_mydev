@@ -12,7 +12,6 @@ from UpdateNameSpace import updatenamespace
 import logmsg
 from time import time as stamp
 
-
 def config(leaderip, *bargs):
  rebootme = 0
  arglist = bargs[0]
@@ -74,7 +73,7 @@ def config(leaderip, *bargs):
   logmsg.sendlog(leaderip, 'HostManual1st10','info',arglist['user'],oldarg, argtz)
   put(leaderip, 'tz/'+leader,arglist['tz'])
   put(leaderip, 'sync/tz/HostManualConfigTZ_'+'_'+arglist['tz']+'/request','tz_'+str(stamp()))
-  logmsg.sendlog(leaderip 'HostManual1su10','info',arglist['user'], oldarg, argtz)
+  logmsg.sendlog(leaderip, 'HostManual1su10','info',arglist['user'], oldarg, argtz)
   queuethis('Hostconfig_tzone','finish',arglist['user'])
 ########### changing ntp server ###############
  if 'ntp' in arglist:

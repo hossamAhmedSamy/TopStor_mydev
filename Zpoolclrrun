@@ -7,8 +7,8 @@ if [ $? -eq 0 ]; then
  /TopStor/logqueue.py Zpoolclrrun start system 
 fi
 #x=` ETCDCTL_API=3 /TopStor/etcdget.py cleareddisk/$@`
-x=`hostname`
-y=`ETCDCTL_API=3 /TopStor/etcdget.py clearplsdisk/$@`
+x=get('clusternode')
+y=`ETCDCTL_API=3 /TopStor/etcdgetlocal.py clearplsdisk/$@`
 myhost=`hostname`
 err=''
 echo y=$y
@@ -25,7 +25,7 @@ then
  /sbin/zpool  labelclear $@ -f 
  fi
  echo err=$err
- /pace/etcdput.py cleareddisk/$@ $myhost
+ /pace/etcdputlocal.py cleareddisk/$@ $myhost
 fi
 echo $perfmon | grep 1
 if [ $? -eq 0 ]; then

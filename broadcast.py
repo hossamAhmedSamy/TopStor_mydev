@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 import subprocess,sys, datetime
 import json
-from etcdget import etcdget as get
+from etcdgetlocal import etcdget as get
 from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost
 def broadcast(*args):
-	dontsend=[str(x).replace('-d','') for x in args if '-d' in str(x)]
-	datainfo=[str(x) for x in args if '-d' not in str(x)]
+	dontsend=[x.replace('-d','') for x in args if '-d' in x]
+	datainfo=[x for x in args if '-d' not in x]
 	print('datainfo',datainfo)
 	z=[]
 	knowns=[]

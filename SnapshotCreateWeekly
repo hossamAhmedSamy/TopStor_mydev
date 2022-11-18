@@ -1,4 +1,6 @@
 #!/bin/sh
+myhost=` ./etcdgetlocal.py clusternode`
+leaderip=` ./etcdgetlocal.py leaderip`
 echo $@ weekly > /root/tmp
 export ETCDCTL_API=3
 web='/var/www/html/des20/Data/Snapsstatus.log';
@@ -25,23 +27,22 @@ userreq=` echo $@ | awk '{print $8}'`;
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
 rm $txtres 2>/dev/null
 DG=`echo $pDG`;
-myhost=`hostname -s`;
 privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
    /TopStor/logmsg.py Snap1031 info $userreq Weekly.$hr.$min.$every.$keep $DG/$FileS
-leader=`./etcdget.py leader --prefix`
+leader=`./etcdgetlocal.py leader --prefix`
 echo $leader | grep $myhost
 if [ $? -eq 0 ];
 then
  stamp=`date +%s`;
  local=''
- myip=''
+ myip='$leaderip'
 else
  stamp=` echo $@ | awk '{print $7}'`;
  local='local'
- myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+ myip=$leaderip
 fi
 crontab -l > $cronthis
 echo $min  $hr "*" "*" $every  /TopStor/Snapshotnowhost $DG/$FileS Weekly.$keep.$hr.$min.$every $stamp $receiver 2>txt/SnapshotnowSystem.txt >> $cronthis
@@ -53,8 +54,8 @@ else
   /pace/etcdput${local}.py $myip Snapperiod/Weekly/$DG/$FileS/$stamp  $min%$hr%*%*%$every%/TopStor/Snapshotnowhost%$DG/$FileS%Weekly.$keep.$hr.$min.$every%$stamp/$receiver
   if [ -z $local ];
   then
-   /pace/etcdput.py sync/Snapperiod/______/request/$myhost Snapperiod_$stamp
-   /pace/etcdput.py sync/Snapperiod/_____/request Snapperiod_$stamp
+   /pace/etcdput.py $leaderip sync/Snapperiod/______/request/$myhost Snapperiod_$stamp
+   /pace/etcdput.py $leaderip sync/Snapperiod/_____/request Snapperiod_$stamp
   fi
 fi;
  /pace/putzpool.py 

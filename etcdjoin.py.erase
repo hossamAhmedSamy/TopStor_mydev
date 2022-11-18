@@ -1,11 +1,11 @@
 #!/usr/bin/python3
-import subprocess,socket
+import subprocess
 from ast import literal_eval as mtuple
 import json
 from time import sleep
 
-myname=socket.gethostname()
-myip=socket.gethostbyname(myname)
+myname = get('clusternode')[0]
+myip= get('clusternodeip')[0]
 endpoints=''
 cluster=''
 data=json.load(open('/pacedata/runningetcdnodes.txt'))

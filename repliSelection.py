@@ -1,16 +1,13 @@
 #!/usr/bin/python3
 import sys
-from time import time as timestamp, sleep
 from allphysicalinfo import getall 
-from etcdgetpy import etcdget as get
+from etcdgetlocalpy import etcdget as get
 from getallraids import newraids, selectdisks
 from levelthis import levelthis
 from sendhost import sendhost
-from copy import deepcopy 
-from socket import gethostname as hostname
 
 allinfo = {}
-myhost = hostname()
+myhost = get('clusternode')[0] 
 
 def selectDG(volname , volsize):
  global allinfo, myhost

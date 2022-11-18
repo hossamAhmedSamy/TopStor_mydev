@@ -6,7 +6,8 @@ vol=`echo $@ | awk '{print $2}'`
 ipaddr=`echo $@ | awk '{print $3}'`
 ipsubnet=`echo $@ | awk '{print $4}'`
 echo $@ > /root/nfsparam
-allvols=`./etcdget.py volumes --prefix`
+leaderip=` ./etcdgetlocal.py leaderip `
+allvols=`./etcdgetlocal.py volumes --prefix`
 replivols=`echo $allvols | grep $vol`
 echo $replivols | grep active
 if [ $? -ne 0 ];
@@ -45,12 +46,12 @@ then
   mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
  done
 fi 
-rightip=`/pace/etcdget.py ipaddr/$ipaddr/$ipsubnet`
+rightip=`/pace/etcdgetlocal.py ipaddr/$ipaddr/$ipsubnet`
 resname=`echo $rightip | awk -F'/' '{print $1}'`
  echo iam here 2
  resname=nfs-$pool-$vol-$ipaddr
- /pace/etcdput.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
- /pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
+ /pace/etcdput.py $leaderip ipaddr/$ipaddr/$ipsubnet $resname/$vol 
+ #/pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
  #yes | cp /etc/{passwd,group,shadow} /etc
  cp /TopStordata/exports.${vol} /TopStordata/exports.$ipaddr; 
  cat /etc/exports | grep -v $vol  > /TopStordata/exports;

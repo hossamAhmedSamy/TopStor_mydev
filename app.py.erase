@@ -11,6 +11,7 @@ from UnixChkUser import setlogin
 import sqlite3
 from etcdget2 import etcdgetjson
 from etcdgetpy import etcdget  as get
+from etcdgetlocalpy import etcdget  as getlocal
 from etcdput import etcdput  as put 
 from etcddel import etcddel  as dels 
 from sendhost import sendhost
@@ -27,6 +28,7 @@ import logmsg
 getalltimestamp = 0
 
 os.environ['ETCDCTL_API'] = '3'
+leaderip = getlocal('leaderip')[0]
 loggedusers = {}
 alldsks = []
 allpools = 0
@@ -53,7 +55,7 @@ allinfo = 0
 def getalltime():
  global allinfo,alldsks, getalltimestamp
  if (getalltimestamp+30) < timestamp():
-  alldsks = deepcopy(get('host','current'))
+  alldsks = deepcopy(get(leaderip, 'host','current'))
   allinfo = deepcopy(getall(alldsks))
   getalltimestamp = timestamp()
  return
@@ -80,7 +82,7 @@ def login_required(f):
 def postchange(cmndstring,host='leader'):
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
- ownerip=get(host,'--prefix')
+ ownerip=getlocal(host,'--prefix')
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
 
 def dict_factory(cursor, row):
@@ -117,7 +119,7 @@ def home():
 
 def getpools():
  global pooldict
- pools = get('pools/','--prefix')
+ pools = getlocal('pools/','--prefix')
  poolinfo = []
  pid = 0
  for pool in pools:
@@ -131,8 +133,8 @@ def getpools():
 def getconns(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- conns = get('connections/user','--prefix')
- devs = get('connections/dev','--prefix')
+ conns = getlocal('connections/user','--prefix')
+ devs = getlocal('connections/dev','--prefix')
  zippedconns = zip(conns,devs)
  conndict =  {}
  conndict['connections'] = []
@@ -181,7 +183,7 @@ def hostsallinfo():
 @app.route('/api/v1/hosts/ready', methods=['GET','POST'])
 def hostsready():
  global allhosts, readyhosts, activehosts, losthosts, possiblehosts
- hosts = get('ready','--prefix')
+ hosts = getlocal('ready','--prefix')
  readyhosts = []
  hid = 0
  for host in hosts:
@@ -194,7 +196,7 @@ def hostsready():
 @app.route('/api/v1/hosts/active', methods=['GET','POST'])
 def hostsactive():
  global allhosts, readyhosts, activehosts, losthosts, possiblehosts
- hosts = get('ActivePartners','--prefix')
+ hosts = getlocal('ActivePartners','--prefix')
  activehosts = []
  hid = 0
  for host in hosts:
@@ -207,7 +209,7 @@ def hostsactive():
 @app.route('/api/v1/hosts/possible', methods=['GET','POST'])
 def hostspossible():
  global allhosts, readyhosts, activehosts, losthosts, possiblehosts
- hosts = get('possible','--prefix')
+ hosts = get(leaderip, 'possible','--prefix')
  possiblehosts = []
  hid = 0
  for host in hosts:
@@ -543,8 +545,8 @@ def renewtoken(data):
 def getnotification(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- notifbody = get('notification')[0].split(' ')[1:]
- requests = get('request','--prefix')
+ notifbody = get(leaderip, 'notification')[0].split(' ')[1:]
+ requests = get(leaderip, 'request','--prefix')
  requestdict = {}
  for req in requests:
   reqname = req[0].split('/')[1]
@@ -637,7 +639,7 @@ def volumecreate(data):
  return data
 
 def getlogin(token):
- logindata = get('login',token)[0]
+ logindata = get(leaderip, 'login',token)[0]
  if logindata == -1:
   logmsg.sendlog('Lognno0','warning','system',token)
   return 'baduser'
@@ -838,7 +840,7 @@ def volumesnapshotdel(data):
  pool = allinfo['snapshots'][data['name']]['pool']
  owner = allinfo['snapshots'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/pump.sh SnapShotDelete "+pool+" "+volume+" "+data['name']+" "+data['user']
+ cmndstring = "/TopStor/pump.sh SnapshotDelete "+pool+" "+volume+" "+data['name']+" "+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  print('##################################')

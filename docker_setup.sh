@@ -12,12 +12,18 @@ then
 fi
 eth1='enp0s8'
 eth2='enp0s8'
+echo $1 | grep restart
+if [ $? -eq 0 ];
+then
+	/TopStor/resetdocker.sh
+fi
 if [ $# -ge 1 ];
 then 
 	echo $1 | egrep 'stop|reboot|reset'
 	if [ $? -eq 0 ];
 	then
 		/TopStor/resetdocker.sh
+
 		echo $1 | grep reset
 		if [ $? -eq 0 ];
 		then
@@ -26,13 +32,19 @@ then
 			docker run -itd --rm --name etcd --hostname etcd -v /root/gitrepo/resolv.conf:/etc/resolv.conf -v /TopStor/:/TopStor -v /root/etcddata:/default.etcd --net bridge0 moataznegm/quickstor:etcd
 docker run -itd --rm --name etcdclient --hostname etcdclient -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -v /TopStor/:/TopStor -v /pace/:/pace moataznegm/quickstor:etcdclient 
 			docker exec etcdclient /TopStor/UnixsetUser.py etcd `hostname` admin tmatem
+			/TopStor/resetdocker.sh	
 		fi
 		echo $1 | egrep 'reboot|reset'
 		if [ $? -eq 0 ];
 		then
 			reboot
 		fi
-		exit
+		echo $1 | grep 'stop'
+		if [ $? -eq 0 ];
+		then
+			echo hihihihihi
+			exit
+		fi
 	fi
 	eth1=$1
 fi
@@ -90,8 +102,10 @@ if [ $? -eq 0 ];
 then
 	if [ $isprimary -ne 0 ];
 	then
+		echo I am prmary
 		nmcli conn add con-name cmynode type ethernet ifname $mynodedev ip4 $mynode ip4 $mycluster
 	else
+		echo I am a cluster node 
 		nmcli conn add con-name cmynode type ethernet ifname $mynodedev ip4 $mynode
 	fi
 else
@@ -105,6 +119,7 @@ else
 fi
 nmcli conn up cmynode
 systemctl start target
+systemctl start iscsid 
 systemctl start docker
 
 docker run --rm --name intdns --hostname intdns --net bridge0 -e DNS_DOMAIN=qs.dom -e DNS_IP=10.11.12.7 -e LOG_QUERIES=true -itd --ip 10.11.12.7 -v /root/gitrepo/dnshosts:/etc/hosts moataznegm/quickstor:dns
@@ -120,14 +135,19 @@ docker run -itd --rm --name etcdclient --hostname etcdclient -v /root/gitrepo/re
 systemctl start rabbitmq-server
 rabbitmqctl add_user rabb_Mezo YousefNadody 2>/dev/null
 rabbitmqctl set_permissions -p / rabb_Mezo ".*" ".*" ".*" 2>/dev/null
+docker exec etcdclient /pace/etcdputlocal.py clusternodeip $mynodeip
+docker exec etcdclient /pace/etcdputlocal.py clusternode $myhost
 if [ $isprimary -eq 1 ];
 then
 	leader=$myhost
-	docker exec etcdclient /pace/etcdput.py $myclusterip clusternode $myhost
+	echo docker exec etcdclient /pace/etcdput.py $myclusterip clusternode $myhost
 	docker exec -it etcdclient /TopStor/etcdput.py $myclusterip ActivePartners/$myhost $mynodeip 
-else
-	leader=`docker exec etcdclient /pace/etcdget.py $myclusterip clusternode`
+	docker exec -it etcdclient /TopStor/etcdput.py $myclusterip leaderip $myclusterip 
+	docker exec -it etcdclient /TopStor/etcdput.py $myclusterip leader/$myhost $myclusterip 
+	docker exec -it etcdclient /TopStor/etcdput.py $myclusterip nextlead/er 'None' 
 
+else
+	echo docker exec etcdclient /pace/etcdget.py $myclusterip clusternode
 	docker exec etcdclient /pace/etcdget.py $myclusterip Active --prefix | grep $myhsot
 	if [ $? -ne 0 ];
 	then
@@ -201,6 +221,5 @@ then
 	sed -i "s/MYCLUSTER/$myclusterip/g" $shttpdf
 	docker run --rm --name httpd --hostname shttpd --net bridge0 -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $myclusterip:19999:19999 -p $mynodeip:80:80 -p $mynodeip:443:443 -p $myclusterip:80:80 -p $myclusterip:443:443 -v /TopStor/httpd.conf:/usr/local/apache2/conf/httpd.conf -v /root/topstorwebetc:/usr/local/apache2/topstorwebetc -v /topstorweb:/usr/local/apache2/htdocs/ -itd moataznegm/quickstor:git
 fi
-echo docker run -itd --rm --name flask --hostname apisrv -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /topstorweb/msgsglobal.txt:/TopStor/msgsglobal.txt -v /topstorweb/Data/TopStorglobal.log:/TopStor/TopStorglorbal.log moataznegm/quickstor:flask
-docker run -itd --rm --name flask --hostname apisrv -v /root/logsinfo:/TopStordata -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /topstorweb/msgsglobal.txt:/TopStor/msgsglobal.txt -v /topstorweb/Data/TopStorglobal.log:/TopStor/TopStorglorbal.log moataznegm/quickstor:flask
+docker run -itd --rm --name flask --hostname apisrv -v /pace/:/pace -v /root/pacedata:/pacedata/ -v /root/logsinfo:/TopStordata -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /TopStordata/TopStorglobal.log:/TopStordata/TopStorglorbal.log moataznegm/quickstor:flask
 /TopStor/ioperf.py $etcd $myhost

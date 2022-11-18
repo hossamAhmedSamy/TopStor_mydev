@@ -42,5 +42,5 @@ then
 # systemctl start smb
 else
  echo pool $pool is working normally >>/root/fixpool
- /pace/etcddel.py fixpool/$pool
+ /pace/etcddellocal.py fixpool/$pool
 fi

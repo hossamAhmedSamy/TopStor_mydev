@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import subprocess,sys
-from etcdget import etcdget as get
+from etcdgetpy import etcdget as getp
+from etcdgetlocalpy import etcdget as get
 from ast import literal_eval as mtuple
 from etcdputlocal import etcdput as putlocal 
 from etcddellocal import etcddel as dellocal 
@@ -10,7 +11,8 @@ thehost=sys.argv[1]
 key=sys.argv[2]
 tokey=sys.argv[3]
 print('thehost',thehost,tokey)
-mylist=get(key,'--prefix')
+leaderip = get('leaderip')
+mylist=getp(leaderip,key,'--prefix')
 dellocal(thehost,tokey,'--prefix')
 
 print('mylist:',mylist)
@@ -26,5 +28,5 @@ for item in mylist:
  keysplit=item[0].split(key)
  if len(keysplit) > 1:
   restitem=keysplit[1]
- putlocal(thehost, tokey+restitem, item[1])
+ putlocal(tokey+restitem, item[1])
  
