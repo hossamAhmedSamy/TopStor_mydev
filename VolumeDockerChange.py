@@ -1,11 +1,5 @@
 #!/usr/bin/python3
-import subprocess,sys, os
-from etcdgetpy import etcdget as get
-from etcdput import etcdput as put 
-from broadcasttolocal import broadcasttolocal 
-
-from socket import gethostname as hostname
-
+import subprocess,sys
 
 
 def delcifs(*args):

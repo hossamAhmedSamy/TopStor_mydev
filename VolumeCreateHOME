@@ -17,6 +17,9 @@ ipsubnet=`echo $@ | awk '{print $6}'`;
 userreq=` echo $@ | awk '{print $7}'`;
 DG=$pDG;
 hi=`whoami`
+
+leaderip=` ./etcdgetlocal.py leaderip `
+myhost=`/TopStor/etcdgetlocal.py clusternode`
 echo start $hi $userreq > /root/volcreate
 /TopStor/logqueue.py `basename "$0"` running $userreq 
 echo queuedrunning >> /root/volcreate
@@ -26,23 +29,6 @@ privilege="HOME";
 if [ $? -eq 0 ];
 then
  echo privileged $name >> /root/volcreate
-# /pace/etcdget.py volumes --prefix | grep $shortname
-# if [ $? -eq 0 ];
-# then
-#  echo here >> /root/volcreate
-#  /TopStor/logmsg.py Unlin1021vv warning $userreq $shortname
-#  /TopStor/logqueue.py `basename "$0"` stop_canceled $userreq 
-#  exit
-# fi
-#  echo aftervolumes >> /root/volcreate
-# /pace/etcdget.py usersinfo --prefix | grep $shortname
-# if [ $? -eq 0 ];
-# then
-#  echo here2 >> /root/volcreate
-#  /TopStor/logmsg.py Unlin1021vu warning $userreq $shrotname
-#  /TopStor/logqueue.py VolumeCreateHome stop_canceled $userreq 
-#  exit
-# fi
  echo afterusersinfo >> /root/volcreate
  echo name=$name
  /sbin/zfs list | grep  "$shortname" 
@@ -64,14 +50,13 @@ then
  /sbin/zfs set prot:kind=HOME $DG/$name
  /sbin/zfs set ip:addr=$ipaddr $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
- myhost=`hostname -s`
- echo /pace/etcdput.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes >> /root/volcreate
- ETCDCTL_API=3 /pace/etcdput.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
+ echo /pace/etcdput.py $leaderip volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes >> /root/volcreate
+ ETCDCTL_API=3 /pace/etcdput.py $leaderip volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
   stamp=`date +%s`
-  leaderall=` ./etcdget.py leader --prefix `
+  leaderall=` ./etcdgetlocal.py leader --prefix `
   leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request volumes_$stamp
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request/$leader volumes_$stamp
+  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request volumes_$stamp
+  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request/$leader volumes_$stamp
  #/pace/broadcasttolocal.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet 
  ./VolumeActivateHome vol=$name user=$userreq
  /pace/putzpool.py 

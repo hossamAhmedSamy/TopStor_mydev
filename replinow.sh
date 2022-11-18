@@ -1,17 +1,18 @@
 #!/bin/sh
+
 echo $@ > /root/replistream
 partner=`echo $@ | awk '{print $1}'`
 snapshot=`echo $@ | awk '{print $2}'`
 nodeip=`echo $@ | awk '{print $3}'`
 poolvol=`echo $@ | awk '{print $4}'`
-partnerinfo=`./etcdget.py Partner/$partner`
+partnerinfo=`./etcdgetlocal.py Partner/$partner`
 pport=`echo $partnerinfo | awk -F'/' '{print $3}'`
 phrase=`echo $partnerinfo | awk -F'/' '{print $NF}'`
-clusterip=`./etcdget.py namespace/mgmtip | awk -F'/' '{print $1}'`
+clusterip=`./etcdgetlocal.py leaderip`
 #isopen=`./checkpartner.sh $partner Receiver $nodeip $pport $clusterip $phrase old`
 nodeloc='ssh -oBatchmode=yes -i /TopStordata/'${nodeip}'_keys/'${nodeip}' -p '$pport' '${nodeip}
 myvol=`echo $snapshot | awk -F'@' '{print $1}'`
-volinfo=` ./etcdget.py vol $myvol`
+volinfo=` ./etcdgetlocal.py vol $myvol`
 volip=`echo $volinfo | awk -F'/' '{print $12}'`
 volsubnet=` echo $volinfo | awk -F'/' '{print $13}' | awk -F"'" '{print $1}'` 
 voltype=`echo $volinfo | awk -F'/' '{print $2}'`

@@ -838,7 +838,7 @@ def volumesnapshotdel(data):
  pool = allinfo['snapshots'][data['name']]['pool']
  owner = allinfo['snapshots'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/pump.sh SnapShotDelete "+pool+" "+volume+" "+data['name']+" "+data['user']
+ cmndstring = "/TopStor/pump.sh SnapshotDelete "+pool+" "+volume+" "+data['name']+" "+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  print('##################################')

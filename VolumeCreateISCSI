@@ -17,6 +17,9 @@ active=`echo $@ | awk '{print $10}'`;
 userreq=` echo $@ | awk '{print $11}'`;
 DG=$pDG;
 hi=`whoami`
+
+leaderip=` ./etcdgetlocal.py leaderip `
+myhost=`/TopStor/etcdgetlocal.py clusternode`
 echo start $hi $userreq > /root/volcreate
 ETCDCTL_API=3 /TopStor/logqueue.py VolumeCreateISCSI running $userreq 
 echo queuedrunning >> /root/volcreate
@@ -26,7 +29,7 @@ privilege="ISCSI";
 if [ $? -eq 0 ];
 then
  echo privileged $name >> /root/volcreate
- /pace/etcdget.py volumes --prefix | grep $shortname
+ /pace/etcdgetlocal.py volumes --prefix | grep $shortname
  if [ $? -eq 0 ];
  then
   echo here >> /root/volcreate
@@ -35,7 +38,7 @@ then
   exit
  fi
   echo aftervolumes >> /root/volcreate
- /pace/etcdget.py usersinfo --prefix | grep $shortname
+ /pace/etcdgetlocal.py usersinfo --prefix | grep $shortname
  if [ $? -eq 0 ];
  then
   echo here2 >> /root/volcreate
@@ -75,15 +78,9 @@ echo  /sbin/zfs create -V $quota -o dedup=on -o compression=lz4  $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
  /sbin/zfs set ip:portalport=$portalport $DG/$name
  /sbin/zfs set status:mount=$active $DG/$name
- myhost=`hostname -s`
- echo /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$targetiqn/$chapuser/$chappas/$active >> /root/volcreate
- /pace/etcdput.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$targetiqn/$chapuser/$chappas/$active
-  stamp=`date +%s`
-  leaderall=` ./etcdget.py leader --prefix `
-  leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request volumes_$stamp
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${DG}_$name/request/$leader volumes_$stamp
- #/pace/broadcasttolocal.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$targetiqn/$chapuser/$chappas/$active
+ echo /pace/etcdput.py $leaderip volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$targetiqn/$chapuser/$chappas/$active >> /root/volcreate
+ /pace/etcdput.py $leaderip volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$targetiqn/$chapuser/$chappas/$active
+#/pace/broadcasttolocal.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$targetiqn/$chapuser/$chappas/$active
  ./VolumeActivateISCSI vol=$name user=$userreq 
  /pace/putzpool.py 
  /TopStor/logmsg.py NFS1007 info $userreq $DG/$name

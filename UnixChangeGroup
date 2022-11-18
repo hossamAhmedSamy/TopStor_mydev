@@ -11,6 +11,8 @@ groupname=`echo $@ | awk '{print $1}'`;
 groupusers=`echo $@ | awk  '{print $2}' | sed 's/users//g' `
 allusres=`echo $groupusers | sed 's/\,/ /g'`;
 allusersel=`echo $allusers | wc -w`;
+leaderip=` ./etcdgetlocal.py leaderip `
+myhost=`/TopStor/etcdgetlocal.py clusternode`
 groupusersn=`echo $groupusers | wc -c `
 if [ $groupusersn -le 2 ];
 then
@@ -18,31 +20,30 @@ then
 fi
 userreq=`echo $@  | awk '{print $3}'`;
 /TopStor/logqueue.py `basename "$0"` running $userreq 
-myhost=`hostname -s`
 stableuser="na"
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
  /TopStor/logmsg.py Unst1025 info $userreq $groupname
-leader=`./etcdget.py leader --prefix`
+leader=`./etcdgetlocal.py leader --prefix`
 echo $leader | grep $myhost
 if [ $? -eq 0 ];
 then
  stamp=`date +%s`;
  local=''
- myip=''
+ myip=$leaderip
 else
  stamp=` echo $@ | awk '{print $7}'`;
  local='local'
- myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+ myip=''
 fi
 
  echo $groupusers | grep NoUser
  if [ $? -ne 0 ];
  then
 #### getting users need to removed
-  originalgroup=`/pace/etcdget.py usersigroup/$groupname`
+  originalgroup=`/pace/etcdget${local}.py $myip usersigroup/$groupname`
   originalusers=`echo $originalgroup | awk -F'/' '{print $3}'`
   memoryallusers=$originalusers
   oldusers=$originalusers','
@@ -111,7 +112,7 @@ fi
 fi 
 if [ -z $local ];
 then
- /pace/etcdput.py sync/user/`basename "$0"`_$@ $stamp/request/$myhost UsrChange_$stamp
- /pace/etcdput.py sync/user/`basename "$0"`_$@ $stamp/request UsrChange_$stamp
+ /pace/etcdput.py $myip sync/user/`basename "$0"`_$@ $stamp/request/$myhost UsrChange_$stamp
+ /pace/etcdput.py $myip sync/user/`basename "$0"`_$@ $stamp/request UsrChange_$stamp
 fi
 /TopStor/logqueue.py `basename "$0"` stop $userreq 

@@ -2,8 +2,6 @@
 import traceback, hashlib
 import subprocess
 from ast import literal_eval as mtuple
-from etcddel import etcddel as dels
-from etcdput import etcdput as put 
 import time 
 
 nowis = int(time.time())

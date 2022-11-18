@@ -11,7 +11,8 @@ username=`echo $@ | awk '{print $1}'`;
 usergroups=`echo $@ | awk  '{print $2}' | sed 's/groups//g' `;
 userreq=`echo $@  | awk '{print $3}'`;
 /TopStor/logqueue.py `basename "$0"` running $userreq 
-myhost=`hostname -s`
+leaderip=` ./etcdgetlocal.py leaderip `
+myhost=`/TopStor/etcdgetlocal.py clusternode`
 stablegrp=""
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
@@ -22,19 +23,16 @@ then
  then
   /TopStor/logmsg.py Unst1024 info $userreq $username
  fi
-leader=`./etcdget.py leader --prefix`
+leader=`./etcdgetlocal.py leader --prefix`
 echo $leader | grep $myhost
 if [ $? -eq 0 ];
 then
- stamp=`date +%s`;
  local=''
- myip=''
+ myip=$leaderip
 else
- stamp=` echo $@ | awk '{print $7}'`;
  local='local'
- myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
+ myip=''
 fi
-
 # cgrps=`id -Gn $username | sed "s/$username//g"` 
  echo $username | grep NoUser
  if [ $? -ne 0 ];
@@ -47,7 +45,7 @@ fi
    usermod -G $usergroups $username
   fi
   usermod -a -G Everyone $username
-  cgrps=`/pace/etcdget.py usersigroup $username`
+  cgrps=`/pace/etcdget${local}.py $myip usersigroup $username`
   cgrpsl=${#cgrps}
   while [ $cgrpsl  -gt 4 ];
   do
@@ -58,7 +56,7 @@ fi
    echo $usergroups | grep -w $cgrp  &>/dev/null
    if [ $? -ne 0 ];
    then
-    usersall=`/pace/etcdget.py usersigroup/$cgrp`
+    usersall=`/pace/etcdget.py $leaderip usersigroup/$cgrp`
     cusers=`echo $usersall | awk -F'/' '{print $3}'`
     cusersleft=`echo $usersall | cut -d/ -f1-2`
     cusersright=`echo $usersall | cut -d/ -f4-`
@@ -96,7 +94,7 @@ fi
     echo $stablegrp | grep -w $l >/dev/null
     if [ $? -ne 0 ];
     then
-     usersall=`/pace/etcdget.py usersigroup/$l`
+     usersall=`/pace/etcdget.py $leaderip usersigroup/$l`
      cusers=`echo $usersall | awk -F'/' '{print $3}'`
      cusersleft=`echo $usersall | cut -d/ -f1-2`
      cusersright=`echo $usersall | cut -d/ -f4-`
@@ -121,7 +119,7 @@ fi
   done
 ######### or else username=NoUser.. Remove all users form this usergroups
  else
-  allusers=`/pace/etcdget.py usersigroup/$usergroups`
+  allusers=`/pace/etcdget.py $leaderip usersigroup/$usergroups`
   usersall=`echo $allusers | awk -F'/' '{print $3}'`','
   usersl=` echo ${usersall} | sed 's/,/ /g' | wc -w`
   while [ $usersl -gt 0 ]; 
@@ -152,7 +150,8 @@ fi
 fi 
 if [ -z $local ];
 then
- /pace/etcdput.py sync/user/`basename "$0"`_$@ $stamp/request/$myhost UsrChange_$stamp
- /pace/etcdput.py sync/user/`basename "$0"`_$@ $stamp/request UsrChange_$stamp
+ stamp=`date +%s`;
+ /pace/etcdput.py $myip sync/user/`basename "$0"`_$@ $stamp/request/$myhost UsrChange_$stamp
+ /pace/etcdput.py $myip sync/user/`basename "$0"`_$@ $stamp/request UsrChange_$stamp
 fi
 /TopStor/logqueue.py `basename "$0"` finish $userreq 

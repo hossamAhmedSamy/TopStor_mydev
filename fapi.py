@@ -24,7 +24,6 @@ from time import time as timestamp
 import logmsg
 
 getalltimestamp = 0
-
 os.environ['ETCDCTL_API'] = '3'
 loggedusers = {}
 alldsks = []
@@ -89,7 +88,7 @@ def dict_factory(cursor, row):
 
 def getusers():
  global leaderip
- userlst = etcdgetjson(leaderip,'usersinfo','--prefix') 
+ userlst = etcdgetjson('usersinfo','--prefix') 
  uid = 0
  users = []
  for user in userlst:
@@ -100,7 +99,7 @@ def getusers():
 
 def getgroups():
  global leaderip
- groupslst = etcdgetjson(leaderip,'usersigroup','--prefix') 
+ groupslst = etcdgetjson('usersigroup','--prefix') 
  gid = 0
  groups = []
  for group in groupslst:
@@ -841,7 +840,7 @@ def volumesnapshotdel(data):
  pool = allinfo['snapshots'][data['name']]['pool']
  owner = allinfo['snapshots'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/pump.sh SnapShotDelete "+pool+" "+volume+" "+data['name']+" "+data['user']
+ cmndstring = "/TopStor/pump.sh SnapshotDelete "+pool+" "+volume+" "+data['name']+" "+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  print('##################################')

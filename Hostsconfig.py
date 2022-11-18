@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import subprocess,sys, datetime,socket
 from logqueue import queuethis
-from etcdgetpy import etcdget as get
+from etcdgetlocalpy import etcdget as get
 from etcdgetlocal import etcdget as getlocal
 from ast import literal_eval as mtuple
 def getall(*bargs):

@@ -1,12 +1,9 @@
 #!/usr/bin/python3
-from etcddel import etcddel as etcddel
-from etcdput import etcdput as put 
-from etcdget import etcdget as get 
-import socket, sys, subprocess
+from etcdgetlocal import etcdget as get 
+import sys, subprocess
 
 def toonline(*args):
-# myhostorg=socket.gethostname()
-# myhost='run/'+myhostorg
+ leaderip=get('leaderip')[0]
  allinfo=get('run','--prefix')
  disks=[x for x in allinfo if 'uuid' in str(x)]
  free=[x for x in disks if 'free' in str(x) and '/-1/' not in str(x)]
@@ -75,6 +72,3 @@ def toonline(*args):
  return
 if __name__=='__main__':
  toonline(*sys.argv[1:])
-#msg='no pools \n'
-#with open('/root/putzpooltmp','a') as f:
-# f.write(str(msg)+"\n")

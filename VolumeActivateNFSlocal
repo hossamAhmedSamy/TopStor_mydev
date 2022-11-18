@@ -11,8 +11,8 @@ host=`echo $@ | awk -F'host=' '{print $2}' | awk '{print $1}'`;
 vol=`echo $@ | awk -F'vol=' '{print $2}' | awk '{print $1}'`;
 pool=`echo $@ | awk -F'pool=' '{print $2}' | awk '{print $1}'`;
 userreq=`echo $@ | awk -F'user=' '{print $2}' | awk '{print $1}'`;
-myhost=`hostname -s`
-
+leaderip=` ./etcdgetlocal.py leaderip `
+myhost=`/TopStor/etcdgetlocal.py clusternode`
 privilege="CIFS";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
@@ -27,20 +27,20 @@ then
  case $stat in
   01)
    echo volume only  for  $vol
-    declare  vols=`/pace/etcdgetlocal.py $myip volumes/NFS $vol`
+    declare  vols=`/pace/etcdgetlocal.py volumes/NFS $vol`
    ;;
   10)
    echo pool only $pool
-    declare  ips=`/pace/etcdgetlocal.py $myip ipaddr $pool`
-    declare  vols=`/pace/etcdgetlocal.py $myip volumes/NFS  $pool`
+    declare  ips=`/pace/etcdgetlocal.py ipaddr $pool`
+    declare  vols=`/pace/etcdgetlocal.py volumes/NFS  $pool`
    ;;
   11)
    echo 'volume and pool only'
-    declare  vols=`/pace/etcdgetlocal.py $myip volumes/NFS/$host/$pool/$vol`
+    declare  vols=`/pace/etcdgetlocal.py volumes/NFS/$host/$pool/$vol`
    ;;
   00)
    echo 'host only'
-   declare  vols=`/pace/etcdgetlocal.py $myip volumes/NFS/$host --prefix`
+   declare  vols=`/pace/etcdgetlocal.py volumes/NFS/$host --prefix`
  esac
  echo vols="${vols[@]}"
  volsc=`echo $vols | wc -c`
@@ -101,14 +101,20 @@ then
   name=`echo $l | awk -F'/' '{print $2}'`
   writev=`echo $l | awk -F'/' '{print $9}'`
   writev=`echo $writev | sed 's/\,/ /g' `;
-  volhost=`/pace/etcdgetlocal.py $myip volumes/NFS/ $name | awk -F'/' '{print $3}'`
-  volsvalue=`/pace/etcdgetlocal.py $myip volumes/NFS/$volhost/$pool/$name`
-  volhost=`/pace/etcdgetlocal.py $myip volumes/NFS/ $name | awk -F'/' '{print $3}'`
-  volsvalue=`/pace/etcdgetlocal.py $myip volumes/NFS/$volhost/$pool/$name`
-  /pace/etcdputlocal.py $myip volumes/NFS/$myhost/$pool/$name $volsvalue
+  volhost=`/pace/etcdgetlocal.py volumes/NFS/ $name | awk -F'/' '{print $3}'`
+  volsvalue=`/pace/etcdgetlocal.py volumes/NFS/$volhost/$pool/$name`
+  volhost=`/pace/etcdgetlocal.py volumes/NFS/ $name | awk -F'/' '{print $3}'`
+  volsvalue=`/pace/etcdgetlocal.py volumes/NFS/$volhost/$pool/$name`
+  /pace/etcdput.py $leaderip volumes/NFS/$myhost/$pool/$name $volsvalue
   if [ $volhost != $myhost ];
   then
-   /pace/etcddellocal.py $myip volumes/NFS/$volhost/$pool/$name
+   /pace/etcddel.py $leaderip volumes/NFS/$volhost/$pool/$name
   fi
  done
+  stamp=`date +%s`
+  leaderall=` ./etcdgetlocal.py leader --prefix `
+  leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${pool}_$name/request volumes_$stamp
+  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${pool}_$name/request/$leader volumes_$stamp
+ 
 fi

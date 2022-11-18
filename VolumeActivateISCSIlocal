@@ -9,8 +9,9 @@ host=`echo $@ | awk -F'host=' '{print $2}' | awk '{print $1}'`;
 vol=`echo $@ | awk -F'vol=' '{print $2}' | awk '{print $1}'`;
 pool=`echo $@ | awk -F'pool=' '{print $2}' | awk '{print $1}'`;
 userreq=`echo $@ | awk -F'user=' '{print $2}' | awk '{print $1}'`;
-myhost=`hostname -s`
 
+leaderip=` ./etcdgetlocal.py leaderip `
+myhost=`/TopStor/etcdgetlocal.py clusternode`
 privilege="ISCSI";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
@@ -26,21 +27,21 @@ then
  case $stat in
   01)
    echo volume only  for  $vol
-    declare  vols=`/pace/etcdgetlocal.py $myip volumes/ISCSI $vol`
+    declare  vols=`/pace/etcdgetlocal.py volumes/ISCSI $vol`
    ;;
   10)
    echo pool only $pool
-    declare  ips=`/pace/etcdgetlocal.py $myip ipaddr $pool`
-    declare  vols=`/pace/etcdgetlocal.py $myip volumes/ISCSI  $pool`
+    declare  ips=`/pace/etcdgetlocal.py ipaddr $pool`
+    declare  vols=`/pace/etcdgetlocal.py volumes/ISCSI  $pool`
     echo done
    ;;
   11)
    echo 'volume and pool only'
-    declare  vols=`/pace/etcdgetlocal.py $myip volumes/ISCSI/$host/$pool/$vol`
+    declare  vols=`/pace/etcdgetlocal.py volumes/ISCSI/$host/$pool/$vol`
    ;;
   00)
    echo 'host only'
-   declare  vols=`/pace/etcdgetlocal.py $myip volumes/ISCSI/$host --prefix`
+   declare  vols=`/pace/etcdgetlocal.py volumes/ISCSI/$host --prefix`
  esac
  echo vols="${vols[@]}"
  volsc=`echo $vols | wc -c`
@@ -97,12 +98,18 @@ then
  do
   pool=`echo $l | awk -F'/' '{print $1}'`
   name=`echo $l | awk -F'/' '{print $2}'`
-  volhost=`/pace/etcdgetlocal.py $myip volumes/ISCSI/ $name | awk -F'/' '{print $3}'`
-  volsvalue=`/pace/etcdgetlocal.py $myip volumes/ISCSI/$volhost/$pool/$name`
-  /pace/etcdputlocal.py $myip volumes/ISCSI/$myhost/$pool/$name $volsvalue
+  volhost=`/pace/etcdgetlocal.py volumes/ISCSI/ $name | awk -F'/' '{print $3}'`
+  volsvalue=`/pace/etcdgetlocal.py volumes/ISCSI/$volhost/$pool/$name`
+  /pace/etcdput.py $leaderip volumes/ISCSI/$myhost/$pool/$name $volsvalue
   if [ $volhost != $myhost ];
   then
-   /pace/etcddellocal.py $myip volumes/ISCSI/$volhost/$pool/$name
+   /pace/etcddel.py $leaderip volumes/ISCSI/$volhost/$pool/$name
   fi
  done
+ stamp=`date +%s`
+ leaderall=` ./etcdgetlocal.py leader --prefix `
+ leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+ ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${pool}_$name/request volumes_$stamp
+ ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${pool}_$name/request/$leader volumes_$stamp
+ 
 fi

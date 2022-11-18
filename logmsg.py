@@ -1,19 +1,24 @@
 #!/usr/bin/python3
 import subprocess,sys, datetime
 import json
+from etcdgetlocal import etcdget as getlocal
 from etcdget import etcdget as get
 from etcdput import etcdput as put 
 from ast import literal_eval as mtuple
 from sendhost import sendhost
-def sendlog(leaderip,myhost, *args):
+def sendlog(leaderip, myhost, *args):
  z=[]
  knowns=[]
  dt=datetime.datetime.now().strftime("%m/%d/%Y")
  tm=datetime.datetime.now().strftime("%H:%M:%S")
- z=['/TopStor/logmsg2.sh', dt, tm, myhost ]
+ if 'dhcp' in leaderip: 
+  z=['/TopStor/logmsg2.sh', dt, tm, leaderip, myhost ]
+  leaderip = getlocal('leaderip')[0]
+ else:
+  z=['/TopStor/logmsg2.sh', dt, tm, myhost ]
  for arg in args:
   z.append(arg)
- knowninfo=get(leaderip, 'known','--prefix')
+ knowninfo=getlocal('known','--prefix')
  for k in knowninfo:
   knowns.append(k[1])
  msg={'req': 'msg2', 'reply':z}
@@ -24,4 +29,5 @@ def sendlog(leaderip,myhost, *args):
   knowns.append(k[1])
 
 if __name__=='__main__':
- sendlog(*sys.argv[1:])
+ leaderip = getlocal('leaderip')[0]
+ sendlog(leaderip, *sys.argv[1:])

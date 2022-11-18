@@ -135,18 +135,19 @@ docker run -itd --rm --name etcdclient --hostname etcdclient -v /root/gitrepo/re
 systemctl start rabbitmq-server
 rabbitmqctl add_user rabb_Mezo YousefNadody 2>/dev/null
 rabbitmqctl set_permissions -p / rabb_Mezo ".*" ".*" ".*" 2>/dev/null
+docker exec etcdclient /pace/etcdputlocal.py clusternodeip $mynodeip
+docker exec etcdclient /pace/etcdputlocal.py clusternode $myhost
 if [ $isprimary -eq 1 ];
 then
 	leader=$myhost
 	echo docker exec etcdclient /pace/etcdput.py $myclusterip clusternode $myhost
-	docker exec etcdclient /pace/etcdput.py $myclusterip clusternode $myhost
 	docker exec -it etcdclient /TopStor/etcdput.py $myclusterip ActivePartners/$myhost $mynodeip 
 	docker exec -it etcdclient /TopStor/etcdput.py $myclusterip leaderip $myclusterip 
+	docker exec -it etcdclient /TopStor/etcdput.py $myclusterip leader/$myhost $myclusterip 
+	docker exec -it etcdclient /TopStor/etcdput.py $myclusterip nextlead/er 'None' 
 
 else
 	echo docker exec etcdclient /pace/etcdget.py $myclusterip clusternode
-	docker exec etcdclient /pace/etcdput.py etcd clusternode $myhost
-	docker exec -it etcdclient /TopStor/etcdput.py etcd leaderip $myclusterip 
 	docker exec etcdclient /pace/etcdget.py $myclusterip Active --prefix | grep $myhsot
 	if [ $? -ne 0 ];
 	then
@@ -220,5 +221,5 @@ then
 	sed -i "s/MYCLUSTER/$myclusterip/g" $shttpdf
 	docker run --rm --name httpd --hostname shttpd --net bridge0 -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $myclusterip:19999:19999 -p $mynodeip:80:80 -p $mynodeip:443:443 -p $myclusterip:80:80 -p $myclusterip:443:443 -v /TopStor/httpd.conf:/usr/local/apache2/conf/httpd.conf -v /root/topstorwebetc:/usr/local/apache2/topstorwebetc -v /topstorweb:/usr/local/apache2/htdocs/ -itd moataznegm/quickstor:git
 fi
-docker run -itd --rm --name flask --hostname apisrv -v /root/pacedata:/pacedata/ -v /root/logsinfo:/TopStordata -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /topstorweb/msgsglobal.txt:/TopStor/msgsglobal.txt -v /topstorweb/Data/TopStorglobal.log:/TopStordata/TopStorglorbal.log moataznegm/quickstor:flask
+docker run -itd --rm --name flask --hostname apisrv -v /pace/:/pace -v /root/pacedata:/pacedata/ -v /root/logsinfo:/TopStordata -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /TopStordata/TopStorglobal.log:/TopStordata/TopStorglorbal.log moataznegm/quickstor:flask
 /TopStor/ioperf.py $etcd $myhost

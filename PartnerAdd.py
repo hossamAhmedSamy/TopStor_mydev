@@ -1,28 +1,27 @@
 #!/usr/bin/python3
 import sys, subprocess
 from etcdput import etcdput as put
-from etcdputlocal import etcdput as putlocal
-from etcdget import etcdget as get 
-from etcddel import etcddel as dels 
+from etcdgetlocal import etcdget as get 
 from logqueue import queuethis
 from logmsg import sendlog
-from socket import gethostname as hostname
 from sendhost import sendhost
 from privthis import privthis 
 from time import time as stamp
-from broadcasttolocal import broadcasttolocal
 
+
+myhost = get('clusternode')[0] 
+myip = get('clusternodeip')[0]
+clusterip = get('leaderip')[0]
 
 def dosync(leader,*args):
-  put(*args)
-  put(args[0]+'/'+leader,args[1])
+  global leaderip
+  put(leaderip, *args)
+  put(leaderip, args[0]+'/'+leader,args[1])
   return 
 
 
-myhost = hostname()
-myip = get('ready/'+myhost)[0]
-clusterip = get('namespace/mgmtip')[0].split('/')[0]
 def addpartner(*bargs):
+ global leaderip, myhost, myip
  with open('/root/PartnerAdd','w') as f:
   f.write(str(bargs))
  partnerip = bargs[0]
@@ -51,12 +50,8 @@ def addpartner(*bargs):
    return
 # broadcasttolocal('Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
  if 'init' in init:
-  #dels('Partner/'+partneralias+'_'+replitype, '--prefix')
-  #dosync(myhost,'sync/Partnr/Del_'+partneralias+':::'+replitype+'_--prefix/request','PartnerDel_'+str(stamp))
-  put('Partner/'+partneralias+'_'+replitype , partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
+  put(leaderip, 'Partner/'+partneralias+'_'+replitype , partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
   dosync(myhost,'sync/Partnr/Add_'+partneralias+':::'+replitype+'_'+partnerip+'::'+replitype+'::'+str(repliport)+'::'+phrase+'/request','Partnr_str_'+str(stamp())) 
-# else:
-#  putlocal(myip,'Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
 
  sendlog('Partner1002','info',userreq,partneralias,replitype)
  

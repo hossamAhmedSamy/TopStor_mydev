@@ -1,4 +1,7 @@
 #!/bin/sh
+
+myhost=` ./etcdgetlocal.py clusternode`
+leaderip=` ./etcdgetlocal.py leaderip`
 echo $@ > /root/createhourlyperiods
 export ETCDCTL_API=3
 web='/var/www/html/des20/Data/Snapsstatus.log';
@@ -17,13 +20,12 @@ userreq=` echo $@ | awk '{print $7}'`;
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
 rm $txtres 2>/dev/null
 DG=$pDG; 
-myhost=`hostname -s`
 privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
   /TopStor/logmsg.py Snap1037 info $userreq  
-leader=`./etcdget.py leader --prefix`
+leader=`./etcdgetlocal.py leader --prefix`
 echo $leader | grep $myhost
 if [ $? -eq 0 ];
 then
@@ -47,8 +49,8 @@ else
   /pace/etcdput${local}.py $myip Snapperiod/Hourly/$DG/$FileS/$stamp  $min%*/$every%*%*%*%/TopStor/Snapshotnowhost%$DG/$FileS%Hourly.$keep.$min.$every.na%$stamp/$receiver
  if [ -z $local ];
  then
-  /pace/etcdput.py sync/Snapperiod/_____/request/$myhost Snapperiod_$stamp
-  /pace/etcdput.py sync/Snapperiod/_____/request Snapperiod_$stamp
+  /pace/etcdput.py $leaderip sync/Snapperiod/_____/request/$myhost Snapperiod_$stamp
+  /pace/etcdput.py $leaderip sync/Snapperiod/_____/request Snapperiod_$stamp
  fi
 
 #ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 

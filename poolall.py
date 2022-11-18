@@ -2,23 +2,26 @@
 import subprocess,sys,socket
 import json
 from ast import literal_eval as mtuple
-from etcdget import etcdget as get
+from etcdgetpy import etcdget as get
+from etcdgetlocalpy import etcdget as getlocal
 from etcdput import etcdput as put
 from etcddel import etcddel as dels 
 import logmsg
 disksvalue=[]
-
+leaderip = getlocal('leaderip')[0]
 def delall(*args):
+ global leaderip
  if len(args) > 1:
-  dels(args[1]+'/lists/'+args[0])
+  dels(leaderip, args[1]+'/lists/'+args[0])
  else:
-  dels('lists/'+args[0])
+  dels(leaderip, 'lists/'+args[0])
 
 def getall(*args):
+ global leaderip
  if len(args) > 1:
-  alls=get(args[1]+'/lists/'+args[0])
+  alls=get(leaderip, args[1]+'/lists/'+args[0])
  else:
-  alls=get('lists/'+args[0])
+  alls=get(leaderip, 'lists/'+args[0])
  if len(alls) > 0 and alls[0] != -1:
   alls=mtuple(alls[0])
   return alls
@@ -26,8 +29,9 @@ def getall(*args):
   return [-1]
 
 def putall(*args):
+ global leaderip
  alls=getall(args[0])
- put(args[1]+'/lists/'+args[0],json.dumps(alls))
+ put(leaderip, args[1]+'/lists/'+args[0],json.dumps(alls))
 
 def norm(val):
  units={'B':1/1024**2,'K':1/1024, 'M': 1, 'G':1024 , 'T': 1024**2 }

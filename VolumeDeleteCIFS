@@ -1,6 +1,7 @@
 #!/bin/sh
 cd /TopStor
 echo $@ > ~/`basename "$0"`
+leaderip=` ./etcdgetlocal.py leaderip `
 web='/var/www/html/des20/Data/CIFSstatus.log';
 logging='/var/www/html/des20/Data/currentinfo2.log'
 glog='/var/www/html/des20/Data/TopStor.log';
@@ -21,7 +22,7 @@ if [[ $contrun == 'true' ]]
 then
  /TopStor/logmsg.py NFS1000 info $userreq $pDG/$volname
  /TopStor/logqueue.py `basename "$0"` running $userreq
- ipaddr=`./etcdget.py ipaddr $volname | sed "s/$volname\///g" | sed "s/\/$volname//g"`
+ ipaddr=`./etcdgetlocal.py ipaddr $volname | sed "s/$volname\///g" | sed "s/\/$volname//g"`
  ipaddrleft=` echo $ipaddr | awk -F"'," '{print $1}' | awk -F"'" '{print $2}'`
  ipaddrright=` echo $ipaddr | awk -F"'," '{print $2}' | awk -F"'" '{print $2}'`
  echo ip=$ipaddr
@@ -32,16 +33,16 @@ then
   echo $ipaddrleft | grep '/'
   if [ $? -eq 0 ];
   then
-   ./etcddel.py $ipaddrleft
+   ./etcddel.py $leaderip $ipaddrleft
   fi
  else
-  ./etcdput.py $ipaddrleft $ipaddrright
+  ./etcdput.py $leaderip $ipaddrleft $ipaddrright
  fi
   stamp=`date +%s`
-  leaderall=` ./etcdget.py leader --prefix `
+  leaderall=` ./etcdgetlocal.py leader --prefix `
   leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${pDG}_$name/request volumes_$stamp
-  ETCDCTL_API=3 /pace/etcdput.py sync/volumes/${pDG}_$name/request/$leader volumes_$stamp
+  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${pDG}_$name/request volumes_$stamp
+  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${pDG}_$name/request/$leader volumes_$stamp
  /TopStor/cifsremove.sh $pDG $volname $volip cifs 2>/root/errcifsremove
  echo /sbin/zfs destroy -rf $pDG/$volname 
  /sbin/zfs unmount -f $pDG/$volname 

@@ -5,15 +5,15 @@ partner=`echo $@ | awk '{print $1}'`
 volume=`echo $@ | awk '{print $2}'`
 volsize=`echo $@ | awk '{print $3}'`
 snapshot=`echo $@ | awk '{print $4}'`
-partnerinfo=`./etcdget.py Partner/$partner`
+partnerinfo=`./etcdgetlocal.py Partner/$partner`
 replitype=`echo $partnerinfo | awk -F'/' '{print $2}'`
 pport=`echo $partnerinfo | awk -F'/' '{print $3}'`
-clusterip=`./etcdget.py namespace/mgmtip | awk -F'/' '{print $1}'`
+clusterip=`./etcdgetlocal.py namespace/mgmtip | awk -F'/' '{print $1}'`
 phrase=`echo $partnerinfo | awk -F'/' '{print $NF}'`
 isopen='closed'
 echo pport=$pport
 strict='-oStrictHostKeyChecking=yes' 
-partnersinfo=`./etcdget.py Partnernode/$partner --prefix`
+partnersinfo=`./etcdgetlocal.py Partnernode/$partner --prefix`
 echo partnersinfo=$partnersinfo
 echo "$partnersinfo" | while read node 
 do

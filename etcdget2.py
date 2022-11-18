@@ -5,13 +5,13 @@ from time import sleep
 
 os.environ['ETCDCTL_API']= '3'
 
-def etcdgetjson(etcd, *argv):
+def etcdgetjson(*argv):
  key=argv[0]
  try:
   prefix=argv[1]
  except:
   prefix='nothing'
- endpoints='http://'+etcd+':3279'
+ endpoints='http://etcd:3279'
  if 'prefix' in prefix:
   cmdline=['etcdctl','--user=root:YN-Password_123','--endpoints='+endpoints,'get',key,prefix]
  elif 'nothing' in prefix: 

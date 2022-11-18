@@ -21,6 +21,8 @@ domsrvn=` echo $@ | awk '{print $11}'`;
 domsrvi=` echo $@ | awk '{print $11}'`;
 domadmin=` echo $@ | awk '{print $12}'`;
 dompass=` echo $@ | awk '{print $13}'`;
+leaderip=` ./etcdgetlocal.py leaderip `
+myhost=`/TopStor/etcdgetlocal.py clusternode`
 DG=$pDG;
 hi=`whoami`
 echo start $hi $userreq > /root/volcreate
@@ -54,10 +56,9 @@ then
  /sbin/zfs set ip:addr=$ipaddr $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
  /sbin/zfs set status:mount=$active $DG/$name
- myhost=`hostname -s`
- echo /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active >> /root/volcreateparam
- ETCDCTL_API=3 /pace/etcdput.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active 
- /pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active
+ echo /pace/etcdput.py $leaderip volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active >> /root/volcreateparam
+ ETCDCTL_API=3 /pace/etcdput.py $leaderip volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active 
+ #/pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active
  ./VolumeActivateCIFSdom vol=$name user=$userreq
  /pace/putzpool.py 
  /TopStor/SnapshotCreateHourlytrend $DG $name 0 24 7 system 

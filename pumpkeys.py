@@ -1,15 +1,12 @@
 #!/usr/bin/python3
 import sys, subprocess
-from etcdgetpy import etcdget as get 
-from socket import gethostname as hostname
+from etcdgetlocalpy import etcdget as get 
 from sendhost import sendhost
-from privthis import privthis 
-myhost = hostname()
-myip = get('ready/'+myhost)[0]
-clusterip = get('namespace/mgmtip')[0]
+myhost = get('clusternode')[0] 
+myip = get('clusternodeip')[0]
+clusterip = get('leaderip')[0]
 with open('/root/tmptmp','w') as f:
  f.write(str(clusterip))
-clusterip = get('namespace/mgmtip')[0].split('/')[0]
 def pumpkeys(*bargs):
  print(str(bargs))
  partnerip = bargs[0]

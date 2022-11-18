@@ -7,20 +7,22 @@ Partner=`echo $@ | awk '{print $1}'`;
 issync=`echo $@ | awk '{print $2}'`;
 userreq=`echo $@  | awk '{print $3}'`;
 privilege="Replication";
+
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
-  myhost=`hostname`
+  leaderip=` ./etcdgetlocal.py leaderip `
+  myhost=`/TopStor/etcdgetlocal.py clusternode`
   /TopStor/logmsg.py Partner1003 info $userreq $Partner
- ./etcddel.py "" $Partner
+ ./etcddel.py $leaderip "" $Partner
   crontab -l | grep -v $Partner > $cronthis
   crontab $cronthis
   echo $issync | grep yes 
   if [ $? -ne 0 ];
   then
     stamp=`date +%s`;
-    ./etcdput.py sync/replipart/PartnerDel_${Partner}_yes_${userreq}_/request  replipart_$stamp
-    ./etcdput.py sync/replipart/PartnerDel_${Partner}_yes_${userreq}_/request/$myhost  replipart_$stamp
+    ./etcdput.py $leaderip sync/replipart/PartnerDel_${Partner}_yes_${userreq}_/request  replipart_$stamp
+    ./etcdput.py $leaderip sync/replipart/PartnerDel_${Partner}_yes_${userreq}_/request/$myhost  replipart_$stamp
   fi
   /TopStor/logmsg.py Partner1004 info $userreq $Partner
 fi

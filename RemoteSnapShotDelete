@@ -8,7 +8,7 @@ pDG=` echo $@ | awk '{print $1}'`;
 snapdel=` echo $@ | awk '{print $2}'`;
 userreq=` echo $@ | awk '{print $3}'`;
   /TopStor/logmsg.py Replica1048 info $userreq $snapdel
-./SnapShotDelete $pDG $snapdel $userreq 
+./SnapshotDelete $pDG $snapdel $userreq 
 ./GetSnaplist
 privilege="SnapShots";
 contrun=`./privthis.sh $privilege $userreq`;
