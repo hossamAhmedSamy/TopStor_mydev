@@ -7,7 +7,7 @@ import subprocess, copy
 from levelthis import levelthis
 import sys
 
-
+hostip = ''
 def getsnapperiods(voldict):
  global hostip
  periodsdict = dict()

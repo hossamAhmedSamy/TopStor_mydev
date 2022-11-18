@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from etcdget import etcdget as get
+from etcdgetlocalpy import etcdget as get
 import subprocess, socket
 
 myhost=socket.gethostname()

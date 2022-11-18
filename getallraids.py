@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from allphysicalinfo import getall 
-from etcdgetpy import etcdget as get
+from etcdgetlocalpy import etcdget as get
 from levelthis import levelthis
 from copy import deepcopy 
 
@@ -172,7 +172,9 @@ def selectdisks(disks,singles, disksinfo):
 
 
 if __name__=='__main__':
- alldsks = get('host','current')
+ from etcdget import etcdget as getp
+ leaderip = get('leaderip')[0]
+ alldsks = getp(leaderip, 'host','current')
  allinfo = getall(alldsks)
  disks = allinfo['disks']
  raids = newraids(disks)

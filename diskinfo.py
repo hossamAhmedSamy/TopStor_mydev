@@ -1,8 +1,11 @@
 #!/usr/bin/python3
 import sys,subprocess
 import json
+from etcdgetlocal import etcdget as get
 
-cmdline=['/pace/etcdgets.py',sys.argv[1],'--prefix']
+leaderip = get('leaderip')[0]
+
+cmdline=['/pace/etcdgets.py',leaderip, sys.argv[1],'--prefix']
 result=subprocess.run(cmdline,stdout=subprocess.PIPE)
 data=json.loads('{'+str(result.stdout)[2:][:-3].replace('\\','').replace("',","':").replace('[','').replace(']','').replace('"','').replace("'",'"')+'}');
 if sys.argv[2] in 'getkey':

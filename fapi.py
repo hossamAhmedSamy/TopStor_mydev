@@ -1024,7 +1024,7 @@ def userauths(data):
   return {'response': 'baduser'}
  if  data['username'] == 'admin':
   return {'auths':'true','response':data['response']}
- userlst = etcdgetjson(leaderip,'usersinfo','--prefix')
+ userlst = etcdgetjson('usersinfo','--prefix')
  for user in userlst:
   username = user['name'].replace('usersinfo/','')
   if username == data['username']:
@@ -1036,7 +1036,7 @@ def userauths(data):
 def api_partners_userslist():
  global leaderip
  allpartners=[]
- partnerlst = etcdgetjson(leaderip,'Partner/','--prefix')
+ partnerlst = etcdgetjson('Partner/','--prefix')
  for partner in partnerlst:
   alias =  partner["name"].split('/')[1] 
   split = partner["prop"].split('/') 
@@ -1046,7 +1046,7 @@ def api_partners_userslist():
 @app.route('/api/v1/users/userlist', methods=['GET'])
 def api_users_userslist():
  global allgroups, allusers, leaderip
- userlst = etcdgetjson(leaderip,'usersinfo','--prefix')
+ userlst = etcdgetjson('usersinfo','--prefix')
  allgroups = getgroups()
  userdict = dict()
  allusers = []

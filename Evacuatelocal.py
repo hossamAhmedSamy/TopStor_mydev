@@ -4,8 +4,8 @@ from logqueue import queuethis
 from etcdput import etcdput as put 
 from time import sleep
 from etcdputlocal import etcdput as putlocal
-from etcdget import etcdget as get 
-from etcdgetlocal import etcdget as getlocal
+from etcdget import etcdget as getp 
+from etcdgetlocal import etcdget as get
 from etcddel import etcddel as deli 
 from etcddellocal import etcddel as delilocal 
 from socket import gethostname as hostname
@@ -15,10 +15,9 @@ def setall(*bargs):
   perfmon = f.readline()
  if '1' in perfmon:
   queuethis('Evacuate','running','system')
- myhost=hostname()
- cmdline=['/pace/getmyip.sh']
- myip=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode('utf-8').replace('\n','')
- print('myip',myip)
+ myhost = get('clusternode')[0]
+ leaderip = get('leaderip')[0]
+ myip = get('clusternodeip')[0]
  hostn=bargs[0]
  hostip=bargs[1]
  userreq=bargs[2]
@@ -32,8 +31,8 @@ def setall(*bargs):
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
   cmdline=['/TopStor/resettarget.sh',myhost]
   result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-  delilocal(myip,"",hostn)
-  delilocal(myip,"sync","--prefix")
+  delilocal("",hostn)
+  delilocal("sync","--prefix")
   while True:
    cmdline=['/TopStor/rebootme','reset']
    result=subprocess.run(cmdline,stdout=subprocess.PIPE)
@@ -43,12 +42,12 @@ def setall(*bargs):
     print('iam here', hostn, hostip)
     cmdline=['/pace/removetargetdisks.sh', hostn, hostip]
     result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-    deli("",hostn)
+    deli(leaderip, "",hostn)
   else:
     cmdline=['/pace/removetargetdisks.sh', hostn, hostip]
     result=subprocess.run(cmdline,stdout=subprocess.PIPE)
-    delilocal(myip,"",hostn)
-    delilocal(myip,"sync","--prefix")
+    delilocal("",hostn)
+    delilocal("sync","--prefix")
  logmsg.sendlog('Evacuaesu01','info',userreq ,hostn)
  if '1' in perfmon:
   queuethis('Evacuate','stop','system')

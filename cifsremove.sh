@@ -7,13 +7,15 @@ vol=`echo $@ | awk '{print $2}'`
 volip=`echo $@ | awk '{print $3}'`
 vtype=`echo $@ | awk '{print $4}'`
 echo $@ > /root/`basename "$0"`
-myhost=`hostname -s`
+
+leaderip=` ./etcdgetlocal.py leaderip `
+myhost=` ./etcdgetlocal.py clusternode `
 /TopStor/logqueue.py `basename "$0"` running $userreq
-/TopStor/etcddel.py vol $vol
-/TopStor/etcddel.py replivol $vol
-/TopStor/etcddel.py size $vol 
-/TopStor/deltolocal.py size $vol 
-/TopStor/deltolocal.py vol $vol 
+/TopStor/etcddel.py $leaderip vol $vol
+/TopStor/etcddel.py $leaderip replivol $vol
+/TopStor/etcddel.py $leaderip size $vol 
+#/TopStor/deltolocal.py size $vol 
+#/TopStor/deltolocal.py vol $vol 
 /TopStor/crondelete $vol
 rm -rf /TopStordata/smb.${volip}.new
 echo vol = $vol
@@ -63,6 +65,6 @@ else
   docker exec $resname sh /hostetc/VolumeCIFSupdate.sh
   /TopStor/logqueue.py `basename "$0"` stop $userreq
 fi
-/TopStor/etcddel.py vol $vol
-/TopStor/etcddel.py replivol $vol
+/TopStor/etcddel.py $leaderip vol $vol
+/TopStor/etcddel.py $leaderip replivol $vol
 /TopStor/logqueue.py `basename "$0"` finish $userreq

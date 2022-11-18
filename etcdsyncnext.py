@@ -1,14 +1,16 @@
 #!/usr/bin/python3
 import subprocess,sys
 from ast import literal_eval as mtuple
-from etcdget import etcdget as get
+from etcdgetpy import etcdget as getp
+from etcdgetlocalpy import etcdget as get
 from etcdputlocal import etcdputlocal
 
 
 thehost=sys.argv[1]
 key=sys.argv[2]
 tokey=sys.argv[3]
-result=get(key,'--prefix')
+leaderip = get('leaderip')
+result=getp(leaderip, key,'--prefix')
 print("the result",result)
 if result==[]:
  print('-1')
@@ -20,4 +22,4 @@ for item in result:
    adding='';
  else:
    adding='/'+x
- etcdputlocal(thehost, tokey+adding, item[1])
+ etcdputlocal(tokey+adding, item[1])
