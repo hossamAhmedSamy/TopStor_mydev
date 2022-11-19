@@ -72,9 +72,36 @@ then
  /sbin/zfs set ip:addr=$ipaddr $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
  /sbin/zfs set status:mount=$active $DG/$name
+ shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
+ yes | cp sharecifs.txt /TopStordata/smb.${name}
+ sed -i "s/Vtype/CIFS/g"  /TopStordata/smb.${name}
+ sed -i "s/Rpool/$DG/g"  /TopStordata/smb.${name}
+ sed -i "s/Rname/$name/g"  /TopStordata/smb.${name}
+ sed -i "s/Rreadv/no/g"  /TopStordata/smb.${name}
+ sed -i "s/Rbrows/yes/g"  /TopStordata/smb.${name}
+ sed -i "s/Rwritev/$writev/g"  /TopStordata/smb.${name}
+ sed -i "s/Radmin/administrator/g"  /TopStordata/smb.${name}
+ sed -i "s/Rwritea/yes/g"  /TopStordata/smb.${name}
+ sed -i "s/Ripadd/$ipaddr/g"  /TopStordata/smb.${name}
+ sed -i "s/Ripsub/$ipsubnet/g"  /TopStordata/smb.${name}
+ sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/smb.${name}
+ sed -i "s/NAMECIFS/$name/g"  /TopStordata/smb.${name}
+ sed -i "s/POOL/$DG/g" /TopStordata/smb.${name}
+ sed -i "s/no/no/g" /TopStordata/smb.${name}
+ sed -i "s/yes/yes/g" /TopStordata/smb.${name}
+ sed -i "s/administrator/administrator/g" /TopStordata/smb.${name}
+ sed -i "s/Yes/yes/g" /TopStordata/smb.${name}
+ sed -i "s/\@everyone/$writev/g" /TopStordata/smb.${name}
+ sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/smb.${name}
+ sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/smb.${name}
+ sed -i "s/ACTIVE/$active/g" /TopStordata/smb.${name}
+ yes | cp /TopStordata/smb.$name /$DG/
+ 
  echo /pace/etcdput.py $leaderip volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet/$active
  ETCDCTL_API=3 /pace/etcdput.py $leaderip volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet/$active
- ./VolumeActivateCIFS $leaderip vol=$name user=$userreq
+ /TopStor/cifs.py $leader $leaderip $myhost $myhostip $etcd $DG $name $ipaddr $ipsubnet CIFS
+    #/TopStor/cifs.sh $leaderip $pool $name $ipaddr $ipsubnet cifs
+ #./VolumeActivateCIFS $leaderip vol=$name user=$userreq
 #/pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet/$active
  echo ./VolumeActivateCIFS vol=$name user=$userreq
  /pace/putzpool.py $leaderip 

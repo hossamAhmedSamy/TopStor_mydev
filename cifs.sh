@@ -79,6 +79,7 @@ else
   		-p $ipaddr:445:445/tcp \
   		--name $resname moataznegm/quickstor:membersmb 
 	#cat /TopStordata/resolv.conf > /etc/resolv.conf
-	docker exec $resname sh /hostetc/smb${membername}.sh &
+	echo /TopStor/dockmember.sh $resname sh /hostetc/smb${membername}.sh 
+	/TopStor/dockmember.sh $resname sh /hostetc/smb${membername}.sh & disown
 
 fi
