@@ -29,13 +29,13 @@ then
  else
  /bin/crontab -l | grep -v "$periodel" > /TopStordata/thiscron
  /bin/crontab /TopStordata/thiscron
- /pace/etcddel.py Snapperiod $periodel 
+ /pace/etcddel.py $leaderip Snapperiod $periodel 
  stamp=`date +%s`;
- /pace/etcdput.py sync/Snapperiod/Del_$periodel/request/$myhost Snapperiod_$stamp
- /pace/etcdput.py sync/Snapperiod/Del_$periodel/request Snapperiod_$stamp
+ /pace/etcdput.py $leaderip sync/Snapperiod/Del_$periodel/request/$myhost Snapperiod_$stamp
+ /pace/etcdput.py $leaderip sync/Snapperiod/Del_$periodel/request Snapperiod_$stamp
 # ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
  docker exec etcdclient /TopStor/logmsg.py Snap1045 info $userreq $periodel
 fi;
-/pace/putzpool.py & 
+/pace/putzpool.py $leaderip & 
 fi
  docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq 

@@ -32,33 +32,7 @@ then
 			rm  -rf /root/etcddata/* 
 			echo yes | cp /TopStor/passwd /etc/
 			echo yes | cp /TopStor/group /etc/
-#			etcdip=`nmcli -g ip4.address connection show mynode | awk -F'/' '{print $1}'`
-#			docker run --rm --name intdns --hostname intdns --net bridge0 -e DNS_DOMAIN=qs.dom -e DNS_IP=10.11.12.7 -e LOG_QUERIES=true -itd --ip 10.11.12.7 -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/dnshosts:/etc/hosts moataznegm/quickstor:dns
-#			docker run -itd --rm --name etcd --hostname etcd -p $etcdip:2379:2379 -v /root/gitrepo/resolv.conf:/etc/resolv.conf -v /TopStor/:/TopStor -v /root/etcddata:/default.etcd --net bridge0 moataznegm/quickstor:etcd
-#docker run -itd --rm --name etcdclient --hostname etcdclient -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -v /TopStor/:/TopStor -v /pace/:/pace moataznegm/quickstor:etcdclient 
-#			systemctl start rabbitmq-server
-#			rabbitmqctl add_user rabb_Mezo YousefNadody 2>/dev/null
-#			rabbitmqctl set_permissions -p / rabb_Mezo ".*" ".*" ".*" 2>/dev/null
-#			started=0
- #       		while [ $started -eq 0 ];
-  #      		do
-#                		docker logs etcd | grep 'successfully notified init daemon'
- #               		if [ $? -eq 0 ];
- #               		then
- #                       		started=1
- #               		else
- #                       		sleep 1
- #               		fi
- #       		done
-#			
-#			docker exec etcdclient /TopStor/etcdputlocal.py leader $myhost 
-#			docker exec etcdclient /TopStor/etcdputlocal.py leaderip $etcdip 
-#			docker exec etcdclient /TopStor/etcdputlocal.py clusternode $myhost 
-#			docker exec etcdclient /TopStor/etcdputlocal.py clusternodeip $etcdip 
 			echo reset > /root/nodestatus
-#			docker exec etcdclient /TopStor/UnixsetUser.py $etcdip `hostname` admin tmatem
-#			/TopStor/UnixAddGroup $etcdip Everyone usersNoUser admin
-#			echo hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 			systemctl start target
 			targetcli clearconfig confirm=True	
 			targetcli saveconfig 
@@ -261,15 +235,15 @@ do
 	myalias=`echo $myalias | sed 's/\_/\:\:\:/g'`
 	docker exec etcdclient /pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request ${aliast}_$stamp.
 	docker exec etcdclient /pace/etcdput.py sync/$aliast/Add_${myhost}_$myalias/request/$myhost ${aliast}_$stamp.
-	issync=`docker exec etcdclient /pace/etcdget.py $myip sync initial`initial
+	issync=`/pace/etcdget.py $myclusterip sync initial`initial
 	echo $issync | grep $myhost
 	if [ $? -eq 0 ];
 	then
 		echo syncrequests only
-    		docker exec etcdclient /pace/checksyncs.py syncrequest $mycluster $myclusterip $myhost $myip
+    		docker exec etcdclient /pace/checksyncs.py syncrequest $myclusterip $myhost $myip
        	else
 		echo have to syncall
-		docker exec etcdclient /pace/checksyncs.py syncall $mycluster $myclusterip $myhost $myip
+		docker exec etcdclient /pace/checksyncs.py syncall $myclusterip $myhost $myip
 	fi
 	checkcluster=`docker exec etcdclient /TopStor/etcdgetlocal.py leaderip`
 	echo $checkcluster >> /root/dockerlogs.txt

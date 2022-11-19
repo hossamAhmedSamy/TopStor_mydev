@@ -426,7 +426,10 @@ def volumesinfo(prot='all'):
     print('##################')
     print(allinfo['volumes'][volume])
     print('##################')
-    volgrouplist =  deepcopy(allinfo['volumes'][volume]['groups'])
+    try:
+        volgrouplist =  deepcopy(allinfo['volumes'][volume]['groups'])
+    except:
+        volgrouplist=[]
     if type(volgrouplist) != list:
       volgrouplist = volgrouplist.split(',')
     for group in allgroups:
@@ -624,7 +627,7 @@ def volumecreate(data):
   data['chappas']='MezoAdmin'
   datastr = data['pool']+' '+data['name']+' '+data['size']+' '+data['ipaddress']+' '+data['Subnet']+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+data['active']+' '+data['user']+' '+data['owner']+' '+data['user']
  elif 'CIFSdom' in data['type']:
-  cmdline=['./encthis.sh',data["domname"],data["dompass"]]
+  cmdline=['/TopStor/encthis.sh',data["domname"],data["dompass"]]
   data["dompass"]=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode().split('_result')[1].replace('/','@@sep')
 
   datastr = data['pool']+' '+data['name']+' '+data['size']+' '+' '+data['ipaddress']+' '+data['Subnet']+' '+data['active']+' '+data['user']+' '+data['owner']+' '+data['user']+' '+ data["domname"]+' '+ data["domsrv"]+' '+ data["domip"]+' '+ data["domadmin"]+' '+ data["dompass"]
@@ -713,10 +716,14 @@ def volumeconfig(data):
  global allinfo, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
+
  getalltime()
  volume = allinfo['volumes'][data['volume']]
  owner = volume['host']
- ownerip = allinfo['hosts'][owner]['ipaddress']
+ if owner == leader:
+  ownerip = leaderip
+ else:
+  ownerip = allinfo['hosts'][owner]['ipaddress']
  datastr = ''
  data['owner'] = allinfo['hosts'][allinfo['pools'][volume['pool']]['host']]['name']
  if 'ISCSI' in data['type']:
@@ -728,18 +735,21 @@ def volumeconfig(data):
    data['initiators'] = volume['initiators']
   if 'portalport' not in data:
    data['portalport'] = volume['portalport']
-  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+data['ipaddress']+' '+str(volume['Subnet'])+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+data['active']+' '+data['user']+' '+data['owner']+' '+data['user']
+  for ele in data:
+   volume[ele] = data[ele] 
+  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+data['ipaddress']+' '+str(volume['Subnet'])+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+volume['statusmount']+' '+data['user']+' '+data['owner']+' '+data['user']
  else:
+
   if 'groups' in data and len(data['groups']) < 1: 
    data['groups'] = 'NoGroup'
   for ele in data:
    volume[ele] = data[ele] 
-  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+volume['groups']+' '+volume['ipaddress']+' '+str(volume['Subnet'])+' '+data['active']+' '+volume['host']+' '+volume['user']
- print('#############################')
- print(data)
- print(datastr)
- print('###########################')
- cmndstring = '/TopStor/VolumeChange'+data['type']+' '+datastr
+  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+volume['groups']+' '+volume['ipaddress']+' '+str(volume['Subnet'])+' '+volume['statusmount']+' '+volume['host']+' '+volume['user']
+  print('33333333333333333333333333333333333333333333333#############################')
+  print('volume',volume)
+  print('owner',ownerip)
+  print('33333333333333333333333333333333333333333333333#############################')
+ cmndstring = '/TopStor/VolumeChange'+data['type']+' '+leaderip+' '+datastr
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
@@ -882,7 +892,7 @@ def volumedel(data):
  pool = allinfo['volumes'][data['name']]['pool']
  owner = allinfo['volumes'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/VolumeDelete"+data['type']+" "+leaderip+" "+pool+" "+data['name']+" "+data['type']+" "+allinfo['volumes'][data['name']]['ipaddress']+" "+data['user']
+ cmndstring = "/TopStor/VolumeDelete"+data['type']+" "+leaderip+" "+pool+" "+data['name']+" "+data['type']+" "+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  print('##################################')

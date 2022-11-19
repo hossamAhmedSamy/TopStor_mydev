@@ -67,7 +67,7 @@ def getall(leadip, alldsks='0'):
   if len(vol[1].split('/')) < 7:
    continue
   voldict = {'name': vol[1].split('/')[1], 'pool': vol[1].split('/')[0], 'groups': '', 'ipaddress': '', 'Subnet': '', 'prot': '', 'fullname': '', 'host': '', 'creation': '', 'time': '', 'used': 0, 'quota': 0, 'usedbysnapshots': 0, 'refcompressratio': '1.0x', 'snapperiod': [], 'snapshots': []}
-  if vol[0].split('/')[1] == 'CIFS' or vol[0].split('/')[1] == 'HOME' :
+  if 'CIFS' in vol[0].split('/')[1] or 'HOME' in vol[0].split('/')[1] :
    voldict['groups'] = vol[1].split('/')[4]
    if 'DOMAIN' in voldict['groups']:
     voldict['groups']= 'DOMAIN'
@@ -214,7 +214,7 @@ def getall(leadip, alldsks='0'):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
- print('hosts',{'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict})
+ print('volumes',volumesdict)
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  

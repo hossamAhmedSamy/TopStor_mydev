@@ -58,16 +58,16 @@ then
   docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq 
   exit
  fi
- /sbin/zfs set prot:kind=CIFS $DG/$name
+ /sbin/zfs set prot:kind=CIFS_$domname $DG/$name
  /sbin/zfs set ip:addr=$ipaddr $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
  /sbin/zfs set status:mount=$active $DG/$name
- echo /pace/etcdput.py $leaderip volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active >> /root/volcreateparam
- ETCDCTL_API=3 /pace/etcdput.py $leaderip volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active 
+ echo /pace/etcdput.py $leaderip volumes/CIFS_$domname/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active >> /root/volcreateparam
+ ETCDCTL_API=3 /pace/etcdput.py $leaderip volumes/CIFS_$domname/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active 
  #/pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active
- ./VolumeActivateCIFSdom vol=$name user=$userreq
- /pace/putzpool.py 
- /TopStor/SnapshotCreateHourlytrend $DG $name 0 24 7 system 
+ ./VolumeActivateCIFSdom $leaderip vol=$name user=$userreq
+ /pace/putzpool.py $leaderip 
+ /TopStor/SnapshotCreateHourlytrend $leaderip $DG $name 0 24 7 system 
  docker exec etcdclient /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
 fi
  docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq 
