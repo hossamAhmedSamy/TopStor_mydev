@@ -149,7 +149,7 @@ then
    echo $active | grep active
    if [ $? -eq 0 ];
     zfs mount $pool/$name
-    /TopStor/nfs.sh $pool $name $ipaddr $ipsubnet
+    /TopStor/nfs.sh $leaderip $pool $name $ipaddr $ipsubnet
    else
     zfs unmount $pool/$name
    fi

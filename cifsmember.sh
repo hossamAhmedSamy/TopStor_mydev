@@ -2,21 +2,32 @@
 cd /TopStor
 export ETCDCTL_API=3
 enpdev='enp0s8'
-pool=`echo $@ | awk '{print $1}'`
-vol=`echo $@ | awk '{print $2}'`
-ipaddr=`echo $@ | awk '{print $3}'`
-ipsubnet=`echo $@ | awk '{print $4}'`
-vtype=`echo $@ | awk '{print $5}'`
-domain=`echo $@ | awk '{print $6}'`
-domainsrvn=`echo $@ | awk '{print $7}'`
-domainsrvi=`echo $@ | awk '{print $8}'`
-domadmin=`echo $@ | awk '{print $9}'`
-adminpass=`echo $@ | awk '{print $10}'`
-leaderip=` ./etcdgetlocal.py leaderip `
-myhost=` ./etcdgetlocal.py clusternode `
+leaderip=`echo $@ | awk '{print $1}'`
+pool=`echo $@ | awk '{print $2}'`
+vol=`echo $@ | awk '{print $3}'`
+ipaddr=`echo $@ | awk '{print $4}'`
+ipsubnet=`echo $@ | awk '{print $5}'`
+vtype=`echo $@ | awk '{print $6}'`
+domain=`echo $@ | awk '{print $7}'`
+domainsrvn=`echo $@ | awk '{print $8}'`
+domainsrvi=`echo $@ | awk '{print $9}'`
+domadmin=`echo $@ | awk '{print $10}'`
+adminpass=`echo $@ | awk '{print $11}'`
+	myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
+	myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
+	leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
+	echo $leader | grep $myhost
+	if [ $? -ne 0 ];
+	then
+ 		etcd=$myhostip
+	else
+ 		etcd=$leaderip
+ 	fi
+
+
 echo $@ > /root/cifsmember
 echo $@ > /root/cifsparam
-allvols=`./etcdgetlocal.py volumes --prefix`
+allvols=`./etcdget.py $etcd volumes --prefix`
 replivols=`echo $allvols | grep $vol`
 echo $replivols | grep active
 if [ $? -ne 0 ];
@@ -24,25 +35,21 @@ then
  exit
 fi
 
-leaderall=` ./etcdgetlocal.py leader --prefix `
-leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-#docker rm -f `docker ps -a | grep -v Up | grep $ipaddr | awk '{print $1}'` 2>/dev/null
-echo cifs $@
-rightip=`/pace/etcdgetlocal.py ipaddr/$myhost $vtype-$ipaddr | grep -v $vol`
-otherip=`/pace/etcdgetlocal.py ipaddr $vtype-$ipaddr | grep -v $myhost | wc -c`
-othervtype=`/pace/etcdgetlocal.py ipaddr $ipaddr | grep -v $vtype | wc -c` 
-/TopStor/logqueue.py `basename "$0"` running $userreq
+rightip=`/pace/etcdget.py $etcd ipaddr/$myhost $vtype-$ipaddr | grep -v $vol`
+otherip=`/pace/etcdget.py $etcd ipaddr $vtype-$ipaddr | grep -v $myhost | wc -c`
+othervtype=`/pace/etcdget.py $etcd ipaddr $ipaddr | grep -v $vtype | wc -c` 
+ docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq
 if [ $otherip -ge 5 ];
 then 
  echo another host is holding the ip
  echo otherip=$otherip
- /TopStor/logqueue.py `basename "$0"` stop $userreq
+ docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq
  exit
 fi
 if [ $othervtype -ge 5 ];
 then 
  echo the ip is used by another protocol 
- /TopStor/logqueue.py `basename "$0"` stop $userreq
+ docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq
  exit
 fi
 #clearvol=`./prot.py clearvol $vol | awk -F'result=' '{print $2}'`
@@ -55,7 +62,7 @@ then
  rightvols=$vol
 else
  echo found other vols
- rightvols=`/pace/etcdgetlocal.py ipaddr/$myhost/$ipaddr/$ipsubnet | sed "s/$resname\///g"`'/'$vol
+ rightvols=`/pace/etcdget.py $etcd ipaddr/$myhost/$ipaddr/$ipsubnet | sed "s/$resname\///g"`'/'$vol
 fi
  echo /pace/etcdput.py $leaderip ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
  /pace/etcdput.py $leaderip ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
@@ -65,8 +72,6 @@ fi
  echo /pace/etcdput.py $leaderip sync/ipaddr/request/$leader ipaddr_$stamp
  /pace/etcdput.py $leaderip sync/ipaddr/request/$leader ipaddr_$stamp
  #/pace/broadcasttolocal.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols 
- #/sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
- #/sbin/pcs resource group add ip-all $resname 
  mounts=`echo $rightvols | sed 's/\// /g'`
  echo rightvol=$rightvols
  echo mounts=$mounts
@@ -130,4 +135,4 @@ cat /TopStordata/resolv.conf > /etc/resolv.conf
 docker exec $resname sh /hostetc/smb${vol}.sh &
 
 
-/TopStor/logqueue.py `basename "$0"` stop $userreq
+ docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq

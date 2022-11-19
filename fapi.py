@@ -634,7 +634,7 @@ def volumecreate(data):
  print(data)
  print(datastr)
  print('###########################')
- cmndstring = '/TopStor/pump.sh VolumeCreate'+data['type']+' '+datastr
+ cmndstring = '/TopStor/VolumeCreate'+data['type']+' '+leaderip+' '+datastr
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
@@ -861,7 +861,7 @@ def volumeactive(data):
  prot = allinfo['volumes'][data['name']]['prot']
  owner = allinfo['volumes'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/pump.sh Volumeactive.py "+pool+" "+data['name']+" "+prot+" "+data['active']+" "+data['user']
+ cmndstring = "/TopStor/Volumeactive.py "+leaderip+" "+pool+" "+data['name']+" "+prot+" "+data['active']+" "+data['user']
  print('##################################')
  print('volumeactive',cmndstring)
  print('##################################')
@@ -882,7 +882,7 @@ def volumedel(data):
  pool = allinfo['volumes'][data['name']]['pool']
  owner = allinfo['volumes'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/pump.sh VolumeDelete"+data['type']+" "+pool+" "+data['name']+" "+data['type']+" "+allinfo['volumes'][data['name']]['ipaddress']+" "+data['user']
+ cmndstring = "/TopStor/VolumeDelete"+data['type']+" "+leaderip+" "+pool+" "+data['name']+" "+data['type']+" "+allinfo['volumes'][data['name']]['ipaddress']+" "+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  print('##################################')

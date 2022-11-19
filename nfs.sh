@@ -1,13 +1,24 @@
 #!/bin/sh
 export ETCDCTL_API=3
 enpdev='enp0s8'
-pool=`echo $@ | awk '{print $1}'`
-vol=`echo $@ | awk '{print $2}'`
-ipaddr=`echo $@ | awk '{print $3}'`
-ipsubnet=`echo $@ | awk '{print $4}'`
+leaderip=`echo $@ | awk '{print $1}'`
+pool=`echo $@ | awk '{print $2}'`
+vol=`echo $@ | awk '{print $3}'`
+ipaddr=`echo $@ | awk '{print $4}'`
+ipsubnet=`echo $@ | awk '{print $5}'`
+	myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
+	myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
+	leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
+	echo $leader | grep $myhost
+	if [ $? -ne 0 ];
+	then
+ 		etcd=$myhostip
+	else
+ 		etcd=$leaderip
+ 	fi
+
 echo $@ > /root/nfsparam
-leaderip=` ./etcdgetlocal.py leaderip `
-allvols=`./etcdgetlocal.py volumes --prefix`
+allvols=`./etcdget.py $leaderip volumes --prefix`
 replivols=`echo $allvols | grep $vol`
 echo $replivols | grep active
 if [ $? -ne 0 ];
@@ -46,7 +57,7 @@ then
   mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
  done
 fi 
-rightip=`/pace/etcdgetlocal.py ipaddr/$ipaddr/$ipsubnet`
+rightip=`/pace/etcdget.py $etcd ipaddr/$ipaddr/$ipsubnet`
 resname=`echo $rightip | awk -F'/' '{print $1}'`
  echo iam here 2
  resname=nfs-$pool-$vol-$ipaddr

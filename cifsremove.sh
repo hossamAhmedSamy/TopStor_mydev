@@ -2,14 +2,13 @@
 cd /TopStor
 export ETCDCTL_API=3
 enpdev='enp0s8'
-pool=`echo $@ | awk '{print $1}'`
-vol=`echo $@ | awk '{print $2}'`
-volip=`echo $@ | awk '{print $3}'`
-vtype=`echo $@ | awk '{print $4}'`
+leaderip=`echo $@ | awk '{print $1}'`
+pool=`echo $@ | awk '{print $2}'`
+vol=`echo $@ | awk '{print $3}'`
+volip=`echo $@ | awk '{print $4}'`
+vtype=`echo $@ | awk '{print $5}'`
 echo $@ > /root/`basename "$0"`
 
-leaderip=` ./etcdgetlocal.py leaderip `
-myhost=` ./etcdgetlocal.py clusternode `
 /TopStor/logqueue.py `basename "$0"` running $userreq
 /TopStor/etcddel.py $leaderip vol $vol
 /TopStor/etcddel.py $leaderip replivol $vol

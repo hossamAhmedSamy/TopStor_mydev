@@ -12,7 +12,7 @@ privilege=$prot;
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
- /TopStor/logqueue.py `basename "$0"` running $userreq
+ docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq
  echo prot=$prot, $active
  echo $prot | grep CIFS
  if [ $? -eq 0 ]
@@ -24,7 +24,6 @@ then
    dockerps=`docker ps | grep $ipaddr | awk '{print $1}'`
    docker rm -f $dockerps 2>/dev/null
   
-   /sbin/pcs resource delete --force cifs-$ipaddr
    zfs set status:mount=disabled $pDG/$name
    zfs unmount -f $pDG/$name
   else
@@ -35,4 +34,4 @@ then
   fi
  fi
 fi
- /TopStor/logqueue.py `basename "$0"` stop $userreq
+ docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq
