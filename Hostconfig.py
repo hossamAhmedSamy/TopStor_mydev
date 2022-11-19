@@ -44,6 +44,7 @@ def config(leader, leaderip, myhost, *bargs):
   oldarg = str(get(leaderip, 'namespace/mgmtip')[0])
   logmsg.sendlog('HostManual1st7','info',arglist['user'],oldarg,arglist['cluster'])
 #  broadcasttolocal('namespace/mgmtip',arglist['cluster'])
+  leader = get(leaderip, 'leader')[0]
   if myhost == leader:
    updatenamespace(arglist['cluster'],oldarg)
   dels(leaderip, 'sync', 'namespace_')
@@ -75,6 +76,7 @@ def config(leader, leaderip, myhost, *bargs):
   oldarg = str(get(leaderip, 'tz/'+myhost)[0])
   argtz = arglist['tz'].split('%')[1]
   logmsg.sendlog('HostManual1st10','info',arglist['user'],oldarg, argtz)
+  leader = get(leaderip, 'leader')[0]
   put(leaderip, 'tz/'+leader,arglist['tz'])
   dels(leaderip, 'sync', 'tz_')
   put(leaderip, 'sync/tz/HostManualconfigTZ_'+'_'+arglist['tz']+'/request','tz_'+str(stamp()))
@@ -85,6 +87,7 @@ def config(leader, leaderip, myhost, *bargs):
   queuethis('Hostconfig_ntp','running',arglist['user'])
   oldarg = str(get(leaderip, 'ntp/'+myhost)[0])
   logmsg.sendlog('HostManual1st9','info',arglist['user'],oldarg, arglist['ntp'])
+  leader = get(leaderip, 'leader')[0]
   put(leaderip, 'ntp/'+leader,arglist['ntp'])
   dels(leaderip, 'sync', 'ntp_')
   put(leaderip, 'sync/ntp/HostManualconfigNTP_'+'_'+arglist['ntp']+'/request','ntp_'+str(stamp()))
@@ -100,6 +103,7 @@ def config(leader, leaderip, myhost, *bargs):
   if arglist['dnssearch'] == "":
    arglist['dnssearch'] = oldargsearch
   logmsg.sendlog('HostManual1st13','info',arglist['user'],oldargname, oldargsearch, arglist['dnsname'],arglist['dnssearch'])
+  leader = get(leaderip, 'leader')[0]
   put(leaderip, 'dnsname/'+leader,arglist['dnsname'])
   put(leaderip, 'dnssearch/'+leader,arglist['dnssearch'])
   dels(leaderip, 'sync', 'dns_')
@@ -112,6 +116,7 @@ def config(leader, leaderip, myhost, *bargs):
   queuethis('Hostconfig_gw','running',arglist['user'])
   oldarg = str(get(leaderip, 'gw/'+myhost)[0])
   logmsg.sendlog('HostManual1st11','info',arglist['user'],oldarg, arglist['gw'])
+  leader = get(leaderip, 'leader')[0]
   put(leaderip, 'gw/'+leader,arglist['gw'])
   dels(leaderip, 'sync', 'gw_')
   put(leaderip, 'sync/gw/HostManualconfigGW_'+'_'+arglist['gw']+'/request','gw_'+str(stamp()))
