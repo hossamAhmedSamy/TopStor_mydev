@@ -214,7 +214,7 @@ def getall(leadip, alldsks='0'):
  print('#############')
  print('snapperiods',snapperiodsdict) 
  '''
- print('hosts',hostsdict)
+ print('hosts',{'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict})
  return {'hosts':hostsdict, 'pools':poolsdict, 'raids':raidsdict, 'disks':disksdict, 'volumes':volumesdict, 'snapshots':snapshotsdict, 'snapperiods':snapperiodsdict}
 
  

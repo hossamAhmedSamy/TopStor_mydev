@@ -1,16 +1,16 @@
 #!/usr/bin/python3
 import subprocess,sys, datetime,socket
-from logqueue import queuethis
 from etcdgetlocalpy import etcdget as get
 from ast import literal_eval as mtuple
+
 def getall(*bargs):
- with open('/pacedata/perfmon') as f:
-  perfmon=f.read()
- if perfmon:
-  queuethis('HostManualconfig.py','running')
-  with open('/root/tmp','w') as f:
+ #with open('/pacedata/perfmon') as f:
+ # perfmon=f.read()
+ #if perfmon:
+ # queuethis('HostManualconfig.py','running')
+ with open('/root/tmp','w') as f:
    f.write('bargs'+str(bargs)+'\n')
- leader = get('leader', '--prefix')[0][0].replace('leader/','')
+ leader = get('leader')[0]
  hosts = get('ready', '--prefix')
  allhosts= [] 
  hostsdict = dict()

@@ -35,6 +35,7 @@ ipaddrinfo=`/pace/etcdget.py $etcd ipaddr/$myhost $vtype-ipaddr`
 rightip=`echo $ipaddrinfo | awk -F"'," '{print $2}' | awk -F"'" '{print $2}' | sed "s/${vol}\///g" | sed "s/\/${vol}//g" | sed "s/${vtype}\-${ipaddr}\///g" | sed "s/${vtype}\-$ipaddr//g"`
 otherip=`/pace/etcdget.py $etcd ipaddr $vtype-$ipaddr | grep -v $myhost | wc -c`
 othervtype=`/pace/etcdget.py $etcd ipaddr $ipaddr | grep -v $vtype | wc -c`
+ echo docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq
  docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq
 if [ $otherip -ge 5 ];
 then 
@@ -97,7 +98,7 @@ fi
  fi
  nmcli conn mod cmynode +ipv4.addresses ${ipaddr}/$ipsubnet
  nmcli conn up cmynode
- docker run -d $mount --privileged \
+ docker run -d $mount --rm --privileged \
   -e "HOSTIP=$ipaddr"  \
   -p $ipaddr:135:135 \
   -p $ipaddr:137:137/udp \
@@ -105,7 +106,7 @@ fi
   -p $ipaddr:139:139 \
   -p $ipaddr:445:445 \
   -v /TopStordata/smb.${ipaddr}:/config/smb.conf:rw \
-  -v /TopStordata/smb.${ipaddr}:/etc/samba/smb.conf:rw \
+  -v /TopStor/smb.conf:/etc/samba/smb.conf:rw \
   -v /etc/:/hostetc/   \
   -v /var/lib/samba/private:/var/lib/samba/private:rw \
   --name $resname moataznegm/quickstor:smb

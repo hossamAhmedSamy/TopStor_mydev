@@ -69,7 +69,9 @@ echo useradd \-c"TopStor"$pas $homebase \-p $userpass \-s /usr/sbin/nologin $use
  #currentcifs=`pcs resource | grep cifs | awk '{print $1}'`
  #echo "$currentcifs" | while read y; do docker exec $y  sh /hostetc/smbuserfix.sh x $username $userpass;  done; 
  #/bin/smbpasswd -x $username
- docker exec etcdsmb ( echo $userpass; echo $userpass) | /bin/smbpasswd -s -a $username
+ docker exec intsmb /root/smbuser.sh $username $userpass
+ #docker exec etcdsmb "( echo $userpass; echo $userpass) | /bin/smbpasswd -s -a $username"
+
  #mkdir -p /Data/Common/$username;
  #chown $username /Data/Common/$username;
  userline=`cat /etc/passwd | grep $username`
