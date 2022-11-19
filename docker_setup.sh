@@ -44,8 +44,9 @@ docker run -itd --rm --name etcdclient --hostname etcdclient -v /root/gitrepo/re
         		done
 
 			docker exec etcdclient /TopStor/UnixsetUser.py etcd `hostname` admin tmatem
-			systemctal start target
+			systemctl start target
 			targetcli clearconfig confirm=True	
+			targetcli saveconfig 
 			/TopStor/resetdocker.sh	
 			nmcli conn up clusterstub 
 			nmcli conn delete mynode 

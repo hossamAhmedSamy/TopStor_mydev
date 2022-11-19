@@ -12,8 +12,7 @@ pkill iscsiwatchdog
 pkill topstorrecvrep
 pkill syncrequestlooper
 zpool export -a
-targetcli clearconfig confirm=true
-targetcli saveconfig confirm=true
+targetcli clearconfig 
 systemctl stop rabbitmq-server
 
 #nmcli conn delete mynode
