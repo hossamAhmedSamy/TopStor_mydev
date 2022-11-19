@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from etcdgetlocal import etcdget as get 
+from etcdgetlocalpy import etcdget as get 
 import sys, subprocess
 
 def toonline(*args):

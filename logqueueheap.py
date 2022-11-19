@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import sys, subprocess, os
-from etcdgetlocal import etcdget as get
+from etcdgetpy import etcdget as get
 from etcdput import etcdput as put 
 from etcddel import etcddel as dels 
 from sendhost import sendhost
@@ -9,10 +9,8 @@ stampseq = []
 otask = dict()
 ctask = ''
 lenctask = 0
-def heapthis(line):
+def heapthis(leaderip, myhost, line):
  global stamps,lenctask, stampseq, otask, ctask
- myhost=get('clusternode')[0]
- leaderip=get('leaderip')[0]
  try:
   linestamp = int(line[-1])
  except:
@@ -51,7 +49,7 @@ def heapthis(line):
    if lenctask > 20: 
     with open('/TopStordata/taskperf','a') as f:
      f.write(ctask)
-    thenextlead =get('nextlead/er')[0]
+    thenextlead =get(leaderip, 'nextlead/er')[0]
     if 'dhcp' in str(thenextlead):
      nextlead = thenextlead[0].split('/')[1]
      z = [ctask]
@@ -65,11 +63,10 @@ def heapthis(line):
     lenctask = 0
  return  
 
-def syncnextlead(lastfile,archive):
- thenextlead =get('nextlead/er')[0]
+def syncnextlead(leaderip, myhost, lastfile,archive):
+ thenextlead =get(leaderip, 'nextlead/er')[0]
  if 'dhcp' not in str(thenextlead):
   return
- myhost=hostname()
  filelist = os.listdir('/TopStordata/')
  filelist = [ x for x in filelist if 'taskperf' in x ]
  filelist.sort()

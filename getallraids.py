@@ -172,10 +172,10 @@ def selectdisks(disks,singles, disksinfo):
 
 
 if __name__=='__main__':
- from etcdget import etcdget as getp
+ from etcdgetpy import etcdget as getp
  leaderip = get('leaderip')[0]
  alldsks = getp(leaderip, 'host','current')
- allinfo = getall(alldsks)
+ allinfo = getall(leaderip, alldsks)
  disks = allinfo['disks']
  raids = newraids(disks)
  print(raids)

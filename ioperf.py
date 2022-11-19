@@ -8,13 +8,15 @@ def ioperf(myclusterip,myhost):
 
  cmdline="/TopStor/loadavg.sh"
  cores, load =subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split(' ')
- print( 'cores',str(100*float(cores)/float(load)))
+ print( 'cores',str(100*float(load)/float(cores)))
  cmdline='iostat -k'
  result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split('\n')
  #cpures = result[:4][-1].split()[:-1]
  #tcpu = 0
  #tcpu = round(float(cpures[0])+float(cpures[2]),2)
  tcpu = 100*float(cores)/float(load)
+ tcpu = str(100*float(load)/float(cores))
+ print(float(cores), tcpu)
  cmdline='docker exec etcdclient /TopStor/etcdput.py '+myclusterip+' cpuperf/'+myhost+' '+str(tcpu)
  #put(myclusterip,'cpuperf/'+myhost,str(tcpu))
  result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')

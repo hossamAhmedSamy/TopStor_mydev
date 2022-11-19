@@ -87,9 +87,14 @@ def allvolstats(leaderip, allinfo):
 if __name__=='__main__':
  leaderip = sys.argv[1]
  alldsks = get(leaderip,'host','current')
- allinfo = getall(alldsks)
+ allinfo = getall(leaderip, alldsks)
  vols = volumes(allinfo['volumes'])
  #statsvol(vols)
- dskperf(leaderip)
+ res = dskperf(leaderip)
+ print(res)
+ res = cpuperf(leaderip)
+ print(res)
+ res = allvolstats(leaderip, allinfo)
+ print(res)
  
  

@@ -4,7 +4,7 @@ import binascii
 from base64 import decodebytes as decode
 #from base64 import decodestring as decode
 from ast import literal_eval as mtuple
-from etcdget import etcdget as get
+from etcdgetpy import etcdget as get
 import subprocess, socket
 import logmsg
 from logqueueheap import heapthis, syncnextlead
@@ -134,7 +134,7 @@ def do(myip, body):
   with open('/root/recvqueue','w') as f:
    f.write('received queue from parnter :'+str(r["reply"])+'\n')
    f.write('type of message :'+str(type(r["reply"]))+'\n')
-  heapthis(r["reply"][1:])
+  heapthis(leaderip, myhost, r["reply"][1:])
 ########## if evacuate ###############
  elif r["req"]=='Evacuate':  
   with open('/root/recv','a') as f:
@@ -176,7 +176,7 @@ def do(myip, body):
  elif r["req"]=='syncq':  
   with open('/root/recvsyncq','w') as f:
    f.write('recieved request to sync:'+str(r["reply"]))
-  syncnextlead(r["reply"][0],r["reply"][1])
+  syncnextlead(leaderip, myhost, r["reply"][0],r["reply"][1])
 ########## if syncthisfile ###############
  elif r["req"]=='syncthisfile':  
   with open('/root/recvsyncthis','a') as f:

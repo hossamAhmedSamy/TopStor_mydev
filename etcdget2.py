@@ -37,12 +37,12 @@ def etcdgetjson(*argv):
     if 'prefix' not in prefix:
      hosts=[x for x in hosts if prefix in str(x)]
    #return str(hosts).replace('"','').replace("'",'"')
-   print(hosts)
+   #print(hosts)
 
    return hosts
    
   else:
-   print(dict(str(result.stdout).split(key)[1][2:][:-3].replace("'",'"')))
+   #print(dict(str(result.stdout).split(key)[1][2:][:-3].replace("'",'"')))
 
    return dict(str(result.stdout).split(key)[1][2:][:-3].replace("'",'"'))
  

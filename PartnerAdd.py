@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import sys, subprocess
 from etcdput import etcdput as put
-from etcdgetlocal import etcdget as get 
+from etcdgetlocalpy import etcdget as get 
 from logqueue import queuethis
 from logmsg import sendlog
 from sendhost import sendhost
