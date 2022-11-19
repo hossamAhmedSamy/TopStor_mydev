@@ -4,6 +4,11 @@ from privthis import privthis
 from etcdgetlocalpy import etcdget as get
 from etcdput import etcdput as put 
 
+
+leaderip = get('leaderip')[0]
+myhost = get('clusternode')[0]
+logmsg.initlog(leaderip, myhsot)
+
 def volumeactive(pool,volname,prot,active,userreq):
  if privthis(prot,userreq) != 'true':
   print('not authorized user to do this task ')
@@ -23,7 +28,6 @@ def volumeactive(pool,volname,prot,active,userreq):
  volleft = volinfo[0]
  cmdline='/TopStor/Volumeactivesh.sh '+pool+' '+volname+' '+prot+' '+active+' '+ipaddr+' '+userreq
  result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
- leaderip = get('leaderip')[0]
  put(leaderip, volleft,volright)
  logmsg.sendlog('Unmoutsu01','info',userreq,volname,active)
  return

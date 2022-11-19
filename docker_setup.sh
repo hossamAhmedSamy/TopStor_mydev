@@ -44,8 +44,14 @@ docker run -itd --rm --name etcdclient --hostname etcdclient -v /root/gitrepo/re
         		done
 
 			docker exec etcdclient /TopStor/UnixsetUser.py etcd `hostname` admin tmatem
+			systemctl start target
+			targetcli clearconfig confirm=True	
+			targetcli saveconfig 
 			/TopStor/resetdocker.sh	
+<<<<<<< HEAD
 			
+=======
+>>>>>>> 908b91419ddd7c174f01dbb8b86c16361ccd87cc
 			nmcli conn up clusterstub 
 			nmcli conn delete mynode 
 			nmcli conn delete mycluster 
@@ -207,8 +213,13 @@ do
 
 		myalias=`docker exec etcdclient /pace/etcdget.py $mynodeip $aliast/$myhost`
 		docker exec etcdclient /pace/etcddel.py $myip leader --prefix
+<<<<<<< HEAD
 		leader=`docker exec etcdclient /pace/etcdget.py $myclusterip clusternode`
 		docker exec etcdclient /pace/etcdput.py $myip clusternode $leader
+=======
+		leader=`docker exec etcdclient /pace/etcdget.py $myclusterip leader`
+		docker exec etcdclient /pace/etcdput.py $myip clusternode $myhost
+>>>>>>> 908b91419ddd7c174f01dbb8b86c16361ccd87cc
 		docker exec etcdclient /pace/etcddel.py $myip sync/pools request/$myhost 2>/dev/null
 		docker exec etcdclient /pace/etcddel.py $myip sync/Snapperiod/initial $myhost request/$myhost 2>/dev/null
         	docker exec etcdclient /pace/etcddel.py $myip pools --prefix 2>/dev/null
@@ -266,3 +277,8 @@ then
 fi
 docker run -itd --rm --name flask --hostname apisrv -v /pace/:/pace -v /pacedata/:/pacedata/ -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /TopStordata/:/TopStordata moataznegm/quickstor:flask
 /TopStor/ioperf.py $etcd $myhost
+docker exec etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
+stamp=`date +%s%N`
+docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_$myhost_$mynodeip/request ready_$stamp
+docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_$myhost_$mynodeip/request/$leader ready_$stamp
+
