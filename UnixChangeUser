@@ -2,38 +2,33 @@
 echo $@ > /root/unixchangeuser
 export ETCDCTL_API=3
 cd /TopStor
-web='/var/www/html/des20/Data/Usersstatus.log';
-logging='/var/www/html/des20/Data/currentinfo2.log';
-txtres='/TopStordata/'`basename $0`'.txt'
-rm -rf $txtres &>/dev/null
-glog='/var/www/html/des20/Data/TopStor.log';
-username=`echo $@ | awk '{print $1}'`;
-usergroups=`echo $@ | awk  '{print $2}' | sed 's/groups//g' `;
-userreq=`echo $@  | awk '{print $3}'`;
-/TopStor/logqueue.py `basename "$0"` running $userreq 
-leaderip=` ./etcdgetlocal.py leaderip `
-myhost=`/TopStor/etcdgetlocal.py clusternode`
+leaderip=`echo $@ | awk '{print $1}'`;
+username=`echo $@ | awk '{print $2}'`;
+usergroups=`echo $@ | awk  '{print $3}' | sed 's/groups//g' `;
+userreq=`echo $@  | awk '{print $4}'`;
+ischange=`echo $@  | awk '{print $5}'`;
 stablegrp=""
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]];
 then
+	docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq 
+	myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
+	myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
+	leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
+	echo $leader | grep $myhost
+	if [ $? -eq 0 ];
+	then
+	 	etcd=$leaderip
+	else
+		etcd=$myhostip
+	fi
+
  echo 'NoUser' | grep $username
  if [ $? -ne 0 ];
  then
-  /TopStor/logmsg.py Unst1024 info $userreq $username
+  docker exec etcdclient /TopStor/logmsg.py Unst1024 info $userreq $username
  fi
-leader=` ./etcdgetlocal.py leader `
-echo $leader | grep $myhost
-if [ $? -eq 0 ];
-then
- local=''
- myip=$leaderip
-else
- local='local'
- myip=''
-fi
-# cgrps=`id -Gn $username | sed "s/$username//g"` 
  echo $username | grep NoUser
  if [ $? -ne 0 ];
  then
@@ -45,7 +40,7 @@ fi
    usermod -G $usergroups $username
   fi
   usermod -a -G Everyone $username
-  cgrps=`/pace/etcdget${local}.py $myip usersigroup $username`
+  cgrps=`/pace/etcdget.py $etcd usersigroup $username`
   cgrpsl=${#cgrps}
   while [ $cgrpsl  -gt 4 ];
   do
@@ -56,7 +51,7 @@ fi
    echo $usergroups | grep -w $cgrp  &>/dev/null
    if [ $? -ne 0 ];
    then
-    usersall=`/pace/etcdget.py $leaderip usersigroup/$cgrp`
+    usersall=`/pace/etcdget.py $etcd usersigroup/$cgrp`
     cusers=`echo $usersall | awk -F'/' '{print $3}'`
     cusersleft=`echo $usersall | cut -d/ -f1-2`
     cusersright=`echo $usersall | cut -d/ -f4-`
@@ -69,7 +64,8 @@ fi
     newop=$cusersleft'/'$newusers'/'$cusersright
     groupres=`echo ${newop} | sed "s/$username,//g" | sed "s/,$username//g" `
     echo to remove : $cgrp to be $groupres
-    /pace/etcdput${local}.py $myip usersigroup/$cgrp $groupres 
+ echo $etcd '333333333333333333333333333333333333333333333333333333333333333'
+    /pace/etcdput.py $etcd usersigroup/$cgrp $groupres 
    else
     stablegrp=${stablegrp}${cgrp}',';
     echo to keep : $cgrp
@@ -91,10 +87,10 @@ fi
    echo $l | grep -w NoGroup 
    if [ $? -ne 0 ];
    then
-    echo $stablegrp | grep -w $l >/dev/null
+    echo 'kdsl' $stablegrp | grep -w $l >/dev/null
     if [ $? -ne 0 ];
     then
-     usersall=`/pace/etcdget.py $leaderip usersigroup/$l`
+     usersall=`/pace/etcdget.py $etcd usersigroup/$l`
      cusers=`echo $usersall | awk -F'/' '{print $3}'`
      cusersleft=`echo $usersall | cut -d/ -f1-2`
      cusersright=`echo $usersall | cut -d/ -f4-`
@@ -105,21 +101,22 @@ fi
       newop=$cusersleft'/'$newusers'/'$cusersright
       groupres=`echo ${newop}`
       echo appending $l to be $groupres
-      /pace/etcdput${local}.py $myip usersigroup/$l $groupres 
+      /pace/etcdput.py $etcd usersigroup/$l $groupres 
      else 
       echo I am here: $username
       newusers=$username
       newop=$cusersleft'/'$newusers'/'$cusersright
       groupres=`echo ${newop}`
       echo adding $l to be $groupres
-      /pace/etcdput${local}.py $myip usersigroup/$l $groupres 
+
+      /pace/etcdput.py $etcd usersigroup/$l $groupres 
      fi
     fi
    fi
   done
 ######### or else username=NoUser.. Remove all users form this usergroups
  else
-  allusers=`/pace/etcdget.py $leaderip usersigroup/$usergroups`
+  allusers=`/pace/etcdget.py $etcd usersigroup/$usergroups`
   usersall=`echo $allusers | awk -F'/' '{print $3}'`','
   usersl=` echo ${usersall} | sed 's/,/ /g' | wc -w`
   while [ $usersl -gt 0 ]; 
@@ -139,19 +136,23 @@ fi
    newusers='NoUser'
    newop=$cusersleft'/'$newusers'/'$cusersright
    groupres=`echo ${newop}`
-   /pace/etcdput${local}.py $myip usersigroup/$usergroups  $groupres 
+   /pace/etcdput.py $etcd usersigroup/$usergroups  $groupres 
  fi
  #/TopStor/broadcast.py UserChange /TopStor/pump.sh UnixChangeUser_sync -d$myhost $@ 
  echo 'NoUser' | grep $username
  if [ $? -ne 0 ];
  then
-  /TopStor/logmsg.py Unsu1024 info $userreq $username
+  docker exec etcdclient /TopStor/logmsg.py Unsu1024 info $userreq $username
  fi
 fi 
-if [ -z $local ];
+echo ${ischange}$leader | grep change$myhost
+if [ $? -eq 0 ];
 then
  stamp=`date +%s`;
- /pace/etcdput.py $myip sync/user/`basename "$0"`_$@ $stamp/request/$myhost UsrChange_$stamp
- /pace/etcdput.py $myip sync/user/`basename "$0"`_$@ $stamp/request UsrChange_$stamp
+ myscript=`basename "$0"`
+ params=`echo $myscript $@ $stamp | sed 's\ \\_\g'`
+ echo params=$params
+ /pace/etcdput.py $etcd sync/user/$params/request/$myhost UsrChange_$stamp
+ /pace/etcdput.py $etcd sync/user/$params/request UsrChange_$stamp
 fi
-/TopStor/logqueue.py `basename "$0"` finish $userreq 
+docker exec etcdclient /TopStor/logqueue.py `basename "$0"` finish $userreq 
