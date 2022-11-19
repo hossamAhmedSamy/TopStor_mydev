@@ -3,7 +3,7 @@ import sys, subprocess
 from etcdput import etcdput as put
 from etcdgetlocalpy import etcdget as get 
 from logqueue import queuethis
-from logmsg import sendlog
+from logmsg import sendlog, initlog
 from sendhost import sendhost
 from privthis import privthis 
 from time import time as stamp
@@ -12,6 +12,7 @@ from time import time as stamp
 myhost = get('clusternode')[0] 
 myip = get('clusternodeip')[0]
 clusterip = get('leaderip')[0]
+initlog(clusterip, myhsot)
 
 def dosync(leader,*args):
   global leaderip

@@ -16,6 +16,7 @@ def do(myip, body):
  global archive
  myhost = get(myip, 'clusternode')[0]
  leaderip = get(myip, 'leaderip')[0]
+ logmsg.initlog(leaderip, myhost)
  z=[]
  with open('/root/recv','w') as f:
   f.write('Recevied a reply:'+str(body[2:][:-1])+'\n')

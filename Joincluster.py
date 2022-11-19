@@ -10,6 +10,8 @@ myhost = get('clusternode')[0]
 myip = get('clusternodeip')[0] 
 leaderip = get('leaderip')[0]
 leader = get('leader')[0]
+leaderip = get('leaderip')[0]
+logmsg.initlog(leaderip, myhost)
 def dosync(leader,*args):
   global leaderip
   put(leaderip, *args)
