@@ -816,7 +816,7 @@ def volumesnapshotrol(data):
  pool = allinfo['snapshots'][data['name']]['pool']
  owner = allinfo['snapshots'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/pump.sh SnapShotRollback "+pool+" "+volume+" "+data['name']+" "+data['user']
+ cmndstring = "/TopStor/SnapShotRollback "+pool+" "+volume+" "+data['name']+" "+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  print('##################################')
@@ -836,7 +836,7 @@ def volumesnapshotperioddel(data):
  getalltime()
  owner = allinfo['snapperiods'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/pump.sh SnapShotPeriodDelete "+data['name']+" "+data['user']
+ cmndstring = "/TopStor/SnapShotPeriodDelete "+leaderip+" "+data['name']+" "+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
@@ -854,7 +854,7 @@ def volumesnapshotdel(data):
  pool = allinfo['snapshots'][data['name']]['pool']
  owner = allinfo['snapshots'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/pump.sh SnapshotDelete "+pool+" "+volume+" "+data['name']+" "+data['user']
+ cmndstring = "/TopStor/SnapShotDelete "+pool+" "+volume+" "+data['name']+" "+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  print('##################################')
