@@ -1,6 +1,7 @@
 #!/usr/bin/python3
-import subprocess,sys
+import sys
 from etcdgetlocalpy import etcdget as get
+from time import time as stamp
 from etcdputlocal import etcdput as put 
 from etcdput import etcdput as putp 
 
@@ -11,10 +12,6 @@ def updatenamespace(*args):
   put('namespace/mgmtip',args[0])
   putp(leaderip, 'sync/namespace/mgmtip_'+args[0]+'/request/'+myhost,'namespace_'+str(stamp()))
   putp(leaderip, 'sync/namespace/mgmtip_'+args[0]+'/request','namespace_'+str(stamp()))
-  cmdline='/sbin/pcs resource update mgmtip ip='+args[0].split('/')[0]+' cidr_netmask='+args[0].split('/')[1]
-  subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
-  cmdline='/sbin/ip addr del '+args[1].split('/')[0]+' dev '+dev
-  subprocess.run(cmdline.split(),stdout=subprocess.PIPE)
   
 if __name__=='__main__':
  updatenamespace(*sys.argv[1:])

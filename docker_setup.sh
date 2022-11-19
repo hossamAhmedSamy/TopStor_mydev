@@ -1,6 +1,7 @@
 myclusterf='/topstorwebetc/mycluster'
 mynodef='/topstorwebetc/mynode'
 myhost=`hostname`
+nmclie conn up mynode
 targetcli clearconfig confirm=True	
 echo ${myhost}$@ | egrep 'init|local'
 if [ $? -eq 0 ];
@@ -84,7 +85,6 @@ targetcli clearconfig confirm=true
 #nmcli conn delete clusterstub 
 #nmcli conn delete mynode 
 #nmcli conn delete mycluster 
-nmcli conn add con-name clusterstub type ethernet ifname $myclusterdev ip4 169.168.12.12 
 nmcli conn up clusterstub
 nmcli conn up mynode
 nmcli conn delete cmynode
@@ -94,6 +94,9 @@ if [ $isinitn -le 5 ];
 then
 	mynode='10.11.11.244/24'
 	nmcli conn add con-name mynode type ethernet ifname $mynodedev ip4 $mynode
+	nmcli conn delete clusterstub
+	nmcli conn add con-name clusterstub type ethernet ifname $myclusterdev ip4 169.168.12.12 
+	nmcli conn up clusterstub 
 	targetcli clearconfig confirm=True	
 	targetcli saveconfig 
 else

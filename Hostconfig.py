@@ -24,8 +24,8 @@ def config(leader, leaderip, myhost, *bargs):
  for key in arglist:
   if arglist[key] == -1:
    arglist[key] = '-1'
- #with open('/TopStordata/Hostconfig','w') as f:
- # f.write(str(arglist)+'\n')
+ with open('/TopStordata/Hostconfig','w') as f:
+  f.write(str(arglist)+'\n')
  ######### changing alias ###############
  if 'alias' in arglist:
   queuethis('Hostconfig_alias','running',arglist['user'])
@@ -45,8 +45,8 @@ def config(leader, leaderip, myhost, *bargs):
   logmsg.sendlog('HostManual1st7','info',arglist['user'],oldarg,arglist['cluster'])
 #  broadcasttolocal('namespace/mgmtip',arglist['cluster'])
   leader = get(leaderip, 'leader')[0]
-  if myhost == leader:
-   updatenamespace(arglist['cluster'],oldarg)
+  #if myhost == leader:
+  # updatenamespace(arglist['cluster'],oldarg)
   dels(leaderip, 'sync', 'namespace_')
   put(leaderip, 'sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster']+'/request','namespace_'+str(stamp()))
   put(leaderip, 'sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster']+'/request/'+myhost,'namespace_'+str(stamp()))
@@ -137,25 +137,28 @@ def config(leader, leaderip, myhost, *bargs):
   else:
    logmsg.sendlog('HostManual2su12','info',arglist['user'])
   queuethis('LocalManualConfig.py','stop',bargs[-1])
-  rebootme=1
  ########## changing box address ###############
  if 'ipaddr' in arglist:
   print('changin the ipaddress of the node')
   queuethis('Hostconfig_ip','running',arglist['user'])
-  oldipaddr = str(get(leaderip, 'ready/'+arglist['name'])[0])
-  oldipsubnet= str(get(leaderip, 'ipaddrsubnet/'+arglist['name'])[0])
-  logmsg.sendlog('HostManual1st6','info',arglist['user'],str(oldipaddr)+'/'+str(oldipsubnet),arglist['ipaddr']+'/'+arglist['ipaddrsubnet'])
-  if '-1' in str(oldipsubnet):
-   oldipsubnet = '-1_.'
-  logmsg.sendlog('HostManual1su6','info',arglist['user'], str(oldipaddr)+'/'+str(oldipsubnet),arglist['ipaddr']+'/'+arglist['ipaddrsubnet'])
-  rebootme = 2
+  oldipaddr = str(get(leaderip, 'ipaddr/'+arglist['name'])[0])
+  logmsg.sendlog('HostManual1st6','info',arglist['user'],str(oldipaddr),arglist['ipaddr']+'/'+arglist['ipaddrsubnet'])
+  put(leaderip, 'ipaddr/'+arglist['name'],arglist['ipaddr']+'/'+arglist['ipaddrsubnet'])
+  dels(leaderip, 'sync', 'ActivePartners_'+arglist['name'])
+  dels(leaderip, 'ActivePartners/'+arglist['name'])
+  put(leaderip, 'ActivePartners/'+arglist['name'],arglist['ipaddr'])
+  dels(leaderip, 'sync', 'ipaddr_'+arglist['name'])
+  put(leaderip, 'sync/ipaddr/HostManualconfigIPADDR_'+'_'+arglist['name']+'/request','ipaddr_'+arglist['name']+'_'+str(stamp()))
+  put(leaderip, 'sync/ipaddr/Add_ActivePartners_'+arglist['name']+'_'+arglist['ipaddr']+'/request','ActivePartners_'+arglist['name']+'_'+str(stamp()))
+  put(leaderip, 'sync/ipaddr/Add_ActivePartners_'+arglist['name']+'_'+arglist['ipaddr']+'/request/'+leader,'ActivePartners_'+arglist['name']+'_'+str(stamp()))
+  logmsg.sendlog('HostManual1su6','info',arglist['user'], str(oldipaddr),arglist['ipaddr']+'/'+arglist['ipaddrsubnet'])
 ######################################
 ############# need to reboot  ###############
  if rebootme > 0:
   print('sending reboot')
   sendip = get(leaderip, 'ready/'+arglist['name'])[0]
   if rebootme == 2:
-   z=['/TopStor/pump.sh','rebootme', 'ipchange', oldipaddr, oldipsubnet, arglist['ipaddr'], arglist['ipaddrsubnet']]
+   z=['/TopStor/pump.sh','rebootme', 'ipchange', oldipaddr, arglist['ipaddr']+'/'+arglist['ipaddrsubnet']]
   else:
    z=['/TopStor/pump.sh','rebootme', 'now']
   queuethis('Hostconfig_cf','finish',arglist['user'])
@@ -183,6 +186,9 @@ if __name__=='__main__':
  arg = {'dnsname': '10.11.11.11', 'dnssearch': 'qstor.com', 'id': '0', 'user': 'admin', 'name': 'dhcp14895', 'token': 'e9b77595837168e6f0ce77f6cbc8137e', 'response': 'admin'}
  arg = {'alias': 'Repli_1', 'ipaddr': '10.11.11.245', 'ipaddrsubnet': '24', 'cluster': '10.11.11.249/24', 'tz': 'Kuwait%(GMT+03!00)_Kuwait^_Riyadh^_Baghdad', 'id': '0', 'user': 'admin', 'name': 'dhcp28109', 'token': '73616fae666891c5f420f63c6317b1ba', 'response': 'admin'}
  arg={'alias': 'node_2', 'id': '0', 'user': 'admin', 'name': 'dhcp141762', 'token': '7aaffece0d6602393b42b5ef34164c8b', 'response': 'admin'}
+ arg={'cluster': '10.11.11.252/24', 'id': '0', 'user': 'admin', 'name': 'dhcp207722', 'token': '2f9124d029074800677590f565c7cb5a', 'response': 'admin'}
+ arg={'ipaddr': '10.11.11.240', 'ipaddrsubnet': '24', 'id': '0', 'user': 'admin', 'name': 'dhcp207722', 'token': 'c20580a16e1c42a2d63f68719ab40ea9', 'response': 'admin'}
+ arg={'ipaddr': '10.11.11.240', 'ipaddrsubnet': '24', 'id': '0', 'user': 'admin', 'name': 'dhcp207722', 'token': '9df4c7384591ccb9e699d0c4ec4321ac', 'response': 'admin'}
  config(leader, leaderip, myhost, arg)
 
 #{'cluster': '10.11.11.250/24', 'tz': 'Kuwait%(GMT+03!00)_Kuwait^_Riyadh^_Baghdad', 'id': '0', 'user': 'admin', 'name': 'dhcp32570', 'token': '501ef1257322d1814125b1e16af95aa9', 'response': 'admin'}

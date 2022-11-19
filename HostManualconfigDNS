@@ -1,23 +1,17 @@
 #!/bin/sh
 export ETCDCTL_API=3
 cd /TopStor/
-echo $@ > ~/`basename "$0"`
-hostname=`hostname -s`
+echo $@ > ~/tmp
+leader=`echo $@ | awk '{print $1}'`
+leaderip=`echo $@ | awk '{print $2}'`
+myhost=`echo $@ | awk '{print $3}'`
+myip=`echo $@ | awk '{print $4}'`
+hostname=$myhost
 dev='enp0s8'
-leader=`./etcdget.py leader --prefix | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-dns=`ETCDCTL_API=3 /TopStor/etcdget.py dnsname/$leader`
-searchdns=`ETCDCTL_API=3 /TopStor/etcdget.py dnssearch/$leader`
+dns=`ETCDCTL_API=3 /TopStor/etcdget.py $leaderip dnsname/$leader`
+searchdns=`ETCDCTL_API=3 /TopStor/etcdget.py $leaderip dnssearch/$leader`
 olddns=`cat /etc/resolv.conf | grep nameserver | head -1 | awk '{print $2}'`
 olddnssearch=`cat /etc/resolv.conf | grep search | head -1 | awk '{print $2}'`
-myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
-echo $leader | grep $hostname
-if [ $? -eq 0 ];
-then
- local=''
- myip=''
-else
- local='local'
-fi
 echo $dns | grep .
 if [ $? -ne 0 ];
 then
@@ -28,10 +22,10 @@ echo leader=$leader, dns=$dns, searchdns=$searchdns
   olddns='NoDNS'
  fi
 else
- ./etcdput${local}.py $myip dnssearch/$hostname $searchdns
- ./etcdput${local}.py $myip dnsname/$hostname $dns
- ./etcdput.py dnssearch/$hostname $searchdns
- ./etcdput.py dnsname/$hostname $dns
+ ./etcdput.py $myip dnssearch/$hostname $searchdns
+ ./etcdput.py $myip dnsname/$hostname $dns
+ ./etcdput.py $leaderip dnssearch/$hostname $searchdns
+ ./etcdput.py $leaderip dnsname/$hostname $dns
  echo 'supersede domain-name-server '$dns';' > /etc/dhcp/dhclient.conf
  echo nameserver $dns > /etc/resolv.conf
  echo $searchdns | grep '\-1'
@@ -39,6 +33,17 @@ else
  then
   echo 'supersede domain-search "'$searchdns'";' >> /etc/dhcp/dhclient.conf
   echo search $searchdns >> /etc/resolv.conf
+  nmcli con mod mynode ipv4.dns-search $searchdns 
+  nmcli con mod cmynode ipv4.dns-search $searchdns
+  nmcli con mod mycluster ipv4.dns-search $searchdns 
+ else
+  sed -i '/search/d' /root/resolv.conf 
+  nmcli con mod mynode ipv4.dns-search '' 
+  nmcli con mod cmynode ipv4.dns-search '' 
+  nmcli con mod mycluster ipv4.dns-search '' 
  fi
+ nmcli con mod mynode ipv4.dns $dns 
+ nmcli con mod cmynode ipv4.dns $dns 
+ nmcli con mod mycluster ipv4.dns $dns 
  #systemctl restart network
 fi

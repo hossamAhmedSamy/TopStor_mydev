@@ -1150,6 +1150,7 @@ myhost=0
 if __name__=='__main__':
     #leader = sys.argv[2]
     #leaderip = sys.argv[1]
+    print('hihihi')
     leaderip = get('myclusterip')[0]
     myhost = get('clusternode')[0]
     leader = get('leader')[0]
