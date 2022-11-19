@@ -2,6 +2,7 @@
 import sys, subprocess
 from etcdput import etcdput as put
 from etcdgetlocalpy import etcdget as get 
+from etcddel import etcddel as dels
 from logqueue import queuethis
 from logmsg import sendlog, initlog
 from sendhost import sendhost
@@ -14,8 +15,9 @@ myip = get('clusternodeip')[0]
 clusterip = get('leaderip')[0]
 initlog(clusterip, myhsot)
 
-def dosync(leader,*args):
+def dosync(leader,sync,  *args):
   global leaderip
+  dels(leaderip, sync) 
   put(leaderip, *args)
   put(leaderip, args[0]+'/'+leader,args[1])
   return 
@@ -52,7 +54,7 @@ def addpartner(*bargs):
 # broadcasttolocal('Partner/'+partneralias+'_'+replitype,partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
  if 'init' in init:
   put(leaderip, 'Partner/'+partneralias+'_'+replitype , partnerip+'/'+replitype+'/'+str(repliport)+'/'+phrase) 
-  dosync(myhost,'sync/Partnr/Add_'+partneralias+':::'+replitype+'_'+partnerip+'::'+replitype+'::'+str(repliport)+'::'+phrase+'/request','Partnr_str_'+str(stamp())) 
+  dosync(myhost,'Partnr_str_', 'sync/Partnr/Add_'+partneralias+':::'+replitype+'_'+partnerip+'::'+replitype+'::'+str(repliport)+'::'+phrase+'/request','Partnr_str_'+str(stamp())) 
 
  sendlog('Partner1002','info',userreq,partneralias,replitype)
  
