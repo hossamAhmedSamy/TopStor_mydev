@@ -7,6 +7,7 @@ import logmsg
 
 myhost = get('clusternode')[0]
 leaderip = get('leaderip')[0]
+logmsg.initlog(leaderip,myhost)
 def changepriv(user,priv,request='admin'):
  syspriv = 'UserPrivilegesch'
  cmdline = ['/TopStor/privthis.sh',syspriv, request]

@@ -66,9 +66,9 @@ def login_required(f):
     data['response'] = data['user'] 
     return f(data)
    else:
-    logmsg.sendlog(leaderip, myhost, 'Lognsa0','warning','system',loggedusers[data['token']]['user'])
+    logmsg.sendlog('Lognsa0','warning','system',loggedusers[data['token']]['user'])
   else:
-   logmsg.sendlog(leaderip, myhost, 'Lognno0','warning','system',data['token'])
+   logmsg.sendlog('Lognno0','warning','system',data['token'])
   return f({'response':'baduser'})
  return decorated_function
 
@@ -640,19 +640,19 @@ def getlogin(token):
  global leaderip
  logindata = get('login',token)[0]
  if logindata == -1:
-  logmsg.sendlog(leaderip,myhost, 'Lognno0','warning','system',token)
+  logmsg.sendlog('Lognno0','warning','system',token)
   return 'baduser'
  oldtimestamp = logindata[1].split('/')[1]
  user = logindata[0].split('/')[1]
  if int(oldtimestamp) < int(timestamp()):
   dels('login',token)
   loggedusers.pop(token, None)
-  logmsg.sendlog(leaderip,myhost, 'Lognsa0','warning','system',user)
+  logmsg.sendlog('Lognsa0','warning','system',user)
   print('isssss######ss##########33','baduser')
   return 'baduser'
  userdict, token = setlogin(leaderip, myhost,user,'!',token) 
  if token == 0:
-  logmsg.sendlog(leaderip,myhost, 'Lognsa0','warning','system',user)
+  logmsg.sendlog('Lognsa0','warning','system',user)
   print('#################33','baduser')
    
   return 'baduser'
@@ -683,11 +683,11 @@ def login():
  userdict, token = setlogin(leaderip,myhost, data['user'],data['pass'])
  if token != 0:
   loggedusers[token] = userdict.copy()
-  logmsg.sendlog(leaderip,myhost, 'Lognsu0','info','system',data['user'])
+  logmsg.sendlog('Lognsu0','info','system',data['user'])
   print('login okkkkkkk',loggedusers)
  else:
   print('login faileddddddddddddddddddd')
-  logmsg.sendlog(leaderip, myhost, 'Lognfa0','error','system',data['user'])
+  logmsg.sendlog('Lognfa0','error','system',data['user'])
   token = 'baduser'
  return jsonify({'token':token})
 @app.route('/api/v1/users/usersauth', methods=['GET','POST'])
@@ -751,7 +751,7 @@ def changepass(data):
  print('#############################')
  print(data)
  print('###########################')
- config(leaderip, data)
+ config(leaderip,myhost, data)
  return data
 
 
@@ -768,7 +768,7 @@ def hostconfig(data):
  print('#############################')
  print(data)
  print('###########################')
- config(leaderip, data)
+ config(leaderip, myhost, data)
  return data
 
 @app.route('/api/v1/hosts/joincluster', methods=['GET','POST'])
@@ -1152,6 +1152,7 @@ if __name__=='__main__':
     #leaderip = sys.argv[1]
     leaderip = get('myclusterip')[0]
     myhost = get('clusternode')[0]
+    logmsg.initlog(leaderip,myhost)
     #myhost = sys.argv[2]
     getalltime()
    #myhostip = sys.argv[5]
