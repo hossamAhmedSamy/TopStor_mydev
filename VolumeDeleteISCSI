@@ -1,15 +1,13 @@
 #!/bin/sh
 cd /TopStor
 export ETCDCTL_API=3
-leaderip=` ./etcdgetlocal.py leaderip `
 echo $@ > /root/VolumeDeleteISCSI 
 datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
 volname=`echo $@ | awk '{print $3}'`;
 leaderip=`echo $@ | awk '{print $1}'`;
 pDG=`echo $@ | awk '{print $2}'`;
 pro=`echo $@ | awk '{print $4}'`;
-volip=` echo $@ | awk '{print $5}'`;
-userreq=` echo $@ | awk '{print $6}'`;
+userreq=` echo $@ | awk '{print $5}'`;
 DG=`echo $pDG `;
 privilege=$pro;
 contrun=`./privthis.sh $privilege $userreq`;
@@ -47,6 +45,7 @@ then
   /TopStor/SnapShotPeriodDelete $leaderip $volname $userreq
   #/pace/delbroadcastlocal.py volume $volname
   /pace/putzpool.py $leaderip
+  docker exec etcdclient /TopStor/etcdputlocal.py dirty/volume 0
   docker exec etcdclient /TopStor/logmsg.py NFS1002 info  $userreq $volname
  fi
  rm -rf /$DG/iscsi.$volname

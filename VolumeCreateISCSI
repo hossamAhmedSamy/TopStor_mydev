@@ -81,10 +81,39 @@ echo  /sbin/zfs create -V $quota -o dedup=on -o compression=lz4  $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
  /sbin/zfs set ip:portalport=$portalport $DG/$name
  /sbin/zfs set status:mount=$active $DG/$name
+ pool=$DG
+ path='/'${pool}'/'${name}
+ yes | cp shareiscsi.txt /TopStordata/iscsi.${name}
+ sed -i "s/Vtype/ISCSI/g"  /TopStordata/iscsi.${name}
+ sed -i "s/Rpool/$pool/g"  /TopStordata/iscsi.${name}
+ sed -i "s/Rname/$name/g"  /TopStordata/iscsi.${name}
+ sed -i "s/Ripadd/$ipaddr/g"  /TopStordata/iscsi.${name}
+ sed -i "s/Ripsub/$ipsubnet/g"  /TopStordata/iscsi.${name}
+ sed -i "s/SHORTNAME/$shortname/g"  /TopStordata/iscsi.${name}
+ sed -i "s/NAMEISCSI/$name/g"  /TopStordata/iscsi.${name}
+ sed -i "s/POOL/$pool/g" /TopStordata/iscsi.${name}
+ sed -i "s/IPADDRESS/$ipaddr/g" /TopStordata/iscsi.${name}
+ sed -i "s/IPSUBNET/$ipsubnet/g" /TopStordata/iscsi.${name}
+ sed -i "s/PORTALPORT/$portalport/g" /TopStordata/iscsi.${name}
+ sed -i "s/TARGETIQN/$targetiqn/g" /TopStordata/iscsi.${name}
+ sed -i "s/CHAPUSER/$chapuser/g" /TopStordata/iscsi.${name}
+ sed -i "s/CHAPPAS/$chappas/g" /TopStordata/iscsi.${name}
+ sed -i "s/ACTIVE/$active/g" /TopStordata/iscsi.${name}
+ echo running iscsi.sh=$pool $name $ipaddr $ipsubnet $portalport $targetiqn $chapuser $chappas >> /root/volactivateparam
+ echo running iscsi.sh=$pool $name $ipaddr $ipsubnet $portalport $targetiqn $chapuser $chappas 
+ yes | cp /TopStordata/iscsi.${name} /$pool/
+ zfs set status:mount=$active $pool/$name
  echo /pace/etcdput.py $leaderip volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$targetiqn/$chapuser/$chappas/$active >> /root/volcreate
  /pace/etcdput.py $leaderip volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$targetiqn/$chapuser/$chappas/$active
-#/pace/broadcasttolocal.py volumes/ISCSI/$myhost/$DG/$name $DG/$name/$ipaddr/$ipsubnet/$portalport/$targetiqn/$chapuser/$chappas/$active
- ./VolumeActivateISCSI vol=$name user=$userreq 
+ echo $active | grep active
+ if [ $? -eq 0 ];
+ then
+  zfs mount $pool/$name
+
+  /TopStor/iscsi.py $leader $leaderip $myhost $myhostip $etcd $DG $name $ipaddr $ipsubnet ISCSI $portalport $targetiqn $chapuser $chappas
+ else
+  zfs unmount $pool/$name
+ fi
  /pace/putzpool.py 
  docker exec etcdclient /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
  echo ready ;

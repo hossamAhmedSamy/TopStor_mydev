@@ -224,12 +224,12 @@ do
 	docker exec etcdclient /pace/etcdputlocal.py leaderip $myclusterip
 	docker exec etcdclient /pace/etcdputlocal.py clusternode $myhost
 	docker exec etcdclient /pace/etcddellocal.py sync/Snapperiod/initial $myhost request/$myhost 2>/dev/null
-        docker exec etcdclient /pace/etcddellocal.py pools --prefix 2>/dev/null
-	docker exec etcdclient /pace/etcddellocal.py volumes --prefix 2>/dev/null
-	docker exec etcdclient /pace/etcddellocal.py sync/pools Add_ 2>/dev/null
-	docker exec etcdclient /pace/etcddellocal.py sync/pools Del_ 2>/dev/null
-	docker exec etcdclient /pace/etcddellocal.py sync/volumes Add_ 2>/dev/null
-	docker exec etcdclient /pace/etcddellocal.py sync/volumes Del_ 2>/dev/null
+        docker exec etcdclient /pace/etcddellocal.py pool --prefix 2>/dev/null
+	docker exec etcdclient /pace/etcddellocal.py volume --prefix 2>/dev/null
+	docker exec etcdclient /pace/etcddellocal.py sync/pool Add_ 2>/dev/null
+	docker exec etcdclient /pace/etcddellocal.py sync/pool Del_ 2>/dev/null
+	docker exec etcdclient /pace/etcddellocal.py sync/volume Add_ 2>/dev/null
+	docker exec etcdclient /pace/etcddellocal.py sync/volume Del_ 2>/dev/null
         docker exec etcdclient /pace/etcdput.py $myclusterip $aliast/$myhost $myalias
 	#/TopStor/syncq.py $myclusterip $myhost 2>/root/syncqerror
 	myalias=`echo $myalias | sed 's/\_/\:\:\:/g'`

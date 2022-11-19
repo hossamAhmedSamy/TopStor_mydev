@@ -587,9 +587,10 @@ def volumesnapshotscreate(data):
  datastr = ''
  getalltime()
  ownerip = allinfo['hosts'][data['owner']]['ipaddress']
- switch = { 'Once':['snapsel','name','pool','volume'], 'Minutely':['snapsel', 'pool', 'volume', 'every', 'keep'],
-	'Hourly':['snapsel', 'pool', 'volume', 'sminute', 'every', 'keep'], 
-	'Weekly':['snapsel', 'pool', 'volume', 'stime', 'every', 'keep'] }
+ data['leaderip'] = leaderip
+ switch = { 'Once':['snapsel','leaderip', 'name','pool','volume'], 'Minutely':['snapsel', 'leaderip', 'pool', 'volume', 'every', 'keep'],
+	'Hourly':['snapsel', 'leaderip', 'pool', 'volume', 'sminute', 'every', 'keep'], 
+	'Weekly':['snapsel', 'leaderip', 'pool', 'volume', 'stime', 'every', 'keep'] }
  datastr = ''
  for param in switch[data['snapsel']]:
   datastr +=data[param]+' '
@@ -602,7 +603,7 @@ def volumesnapshotscreate(data):
  print(data)
  print(datastr)
  print('###########################')
- cmndstring = '/TopStor/pump.sh SnapshotCreate'+datastr+' '+data['user']
+ cmndstring = '/TopStor/SnapshotCreate'+datastr+' '+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
