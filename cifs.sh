@@ -39,6 +39,12 @@ else
 	adminpass=`echo $@ | awk '{print $10}'`
  	wrkgrp=`echo $domain | awk -F'.' '{print $1}'`  
 	membername=${wrkgrp}-$RANDOM
+	cp /TopStor/smbmember.conf /etc/smbmember.conf_$membername
+	sed -i "s/WRKGRP/$wrkgrp/g" /etc/smbmember.conf_$membername
+	sed -i "s/DOMAINIP/$domainsrvi/g" /etc/smbmember.conf_$membername
+	sed -i "s/DOMAIN/${domain^^}/g" /etc/smbmember.conf_$membername
+  	cat /TopStordata/smb.${ipaddr} >> /etc/smbmember.conf_$membername
+	#cp /TopStordata/smbmember.conf_$membername /etc/smbmember.conf_$membername
  	echo -e 'notyet=1 \nwhile [ $notyet -eq 1 ];\ndo\nsleep 3' > /etc/smb${membername}.sh
  	echo -e 'cat /etc/samba/smb.conf | grep' "'\[public\]'" >> /etc/smb${membername}.sh
  	echo -e 'if [ $? -eq 0 ];\nthen' >> /etc/smb${membername}.sh
@@ -46,8 +52,7 @@ else
  	echo -e ' if [ $? -eq 0 ];\nthen' >> /etc/smb${membername}.sh
  	echo -e '  cat /etc/samba/smb.conf | grep' "'\[home\]'" >> /etc/smb${membername}.sh
  	echo -e '  if [ $? -eq 0 ];\nthen\nnotyet=0\nfi\nfi\nfi\ndone' >> /etc/smb${membername}.sh
- 	echo  "sed -in '/stop/q;p' /etc/samba/smb.conf"  >> /etc/smb${membername}.sh
- 	echo  "cat /etc/smb.conf >> /etc/samba/smb.conf"  >> /etc/smb${membername}.sh
+	echo -e "cat /hostetc/smbmember.conf_$membername > /etc/samba/smb.conf" >> /etc/smb${membername}.sh
  	echo  "service samba --full-restart"  >> /etc/smb${membername}.sh
  	chmod +w /etc/smb${membername}.sh
  	sync
