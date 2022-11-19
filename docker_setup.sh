@@ -48,10 +48,6 @@ docker run -itd --rm --name etcdclient --hostname etcdclient -v /root/gitrepo/re
 			targetcli clearconfig confirm=True	
 			targetcli saveconfig 
 			/TopStor/resetdocker.sh	
-<<<<<<< HEAD
-			
-=======
->>>>>>> 908b91419ddd7c174f01dbb8b86c16361ccd87cc
 			nmcli conn up clusterstub 
 			nmcli conn delete mynode 
 			nmcli conn delete mycluster 
@@ -213,13 +209,8 @@ do
 
 		myalias=`docker exec etcdclient /pace/etcdget.py $mynodeip $aliast/$myhost`
 		docker exec etcdclient /pace/etcddel.py $myip leader --prefix
-<<<<<<< HEAD
-		leader=`docker exec etcdclient /pace/etcdget.py $myclusterip clusternode`
-		docker exec etcdclient /pace/etcdput.py $myip clusternode $leader
-=======
 		leader=`docker exec etcdclient /pace/etcdget.py $myclusterip leader`
 		docker exec etcdclient /pace/etcdput.py $myip clusternode $myhost
->>>>>>> 908b91419ddd7c174f01dbb8b86c16361ccd87cc
 		docker exec etcdclient /pace/etcddel.py $myip sync/pools request/$myhost 2>/dev/null
 		docker exec etcdclient /pace/etcddel.py $myip sync/Snapperiod/initial $myhost request/$myhost 2>/dev/null
         	docker exec etcdclient /pace/etcddel.py $myip pools --prefix 2>/dev/null
