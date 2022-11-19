@@ -13,10 +13,11 @@ pkill topstorrecvrep
 pkill syncrequestlooper
 zpool export -a
 targetcli clearconfig confirm=true
+targetcli saveconfig confirm=true
 systemctl stop rabbitmq-server
 
-nmcli conn delete mynode
-nmcli conn delete mycluster
+#nmcli conn delete mynode
+#nmcli conn delete mycluster
 docker stop intdns
 docker stop etcd
 docker stop httpd

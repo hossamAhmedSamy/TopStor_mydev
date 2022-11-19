@@ -51,10 +51,10 @@ def getalltime():
  global allinfo,alldsks, getalltimestamp, leaderip
  if (getalltimestamp+30) < timestamp():
   alldsks = deepcopy(get('host','current'))
+  print(leaderip)
   allinfo = deepcopy(getall(leaderip, alldsks))
   getalltimestamp = timestamp()
  return
-
 def login_required(f):
  @wraps(f)
  def decorated_function(*args, **kwargs):
