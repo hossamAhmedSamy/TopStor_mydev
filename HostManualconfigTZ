@@ -13,12 +13,14 @@ if [ $? -eq 0 ]; then
 fi
 dev='enp0s8'
 txtres='/TopStordata/'`basename $0`'.txt'
-
 echo ./etcdget.py $myip tz/$leader
 fulltz=`./etcdget.py $myip tz/$leader` 
 echo fulltz = $fulltz
 tz=`echo $fulltz | awk -F'%' '{print $1}' `
-tzone=`timedatectl list-timezones | grep $tz` 
+echo tz=$tz
+tzone=`timedatectl list-timezones | grep $tz | head -1` 
+echo tzone=$tzone
+echo timedatectl set-timezone $tzone
 timedatectl set-timezone $tzone
 ctz=`timedatectl | grep zone | awk -F'zone:' '{print $2}' | awk '{print $1}'`
 echo ctz=$ctz  tzone=$tzone etcdtz=$tz
@@ -31,6 +33,7 @@ then
  tzone=`timedatectl list-timezones | grep $tz` 
 fi
 echo $tz, $tzone
+echo timedatectl set-timezone $tzone
 timedatectl set-timezone $tzone
 echo $leader | grep $myhost
 if [ $? -ne 0 ];
