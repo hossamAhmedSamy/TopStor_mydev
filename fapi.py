@@ -751,7 +751,7 @@ def changepass(data):
  print('#############################')
  print(data)
  print('###########################')
- config(leaderip,myhost, data)
+ config(leader, leaderip,myhost, data)
  return data
 
 
@@ -768,7 +768,7 @@ def hostconfig(data):
  print('#############################')
  print(data)
  print('###########################')
- config(leaderip, myhost, data)
+ config(leader, leaderip, myhost, data)
  return data
 
 @app.route('/api/v1/hosts/joincluster', methods=['GET','POST'])
@@ -1152,6 +1152,7 @@ if __name__=='__main__':
     #leaderip = sys.argv[1]
     leaderip = get('myclusterip')[0]
     myhost = get('clusternode')[0]
+    leader = get('leader')[0]
     logmsg.initlog(leaderip,myhost)
     #myhost = sys.argv[2]
     getalltime()

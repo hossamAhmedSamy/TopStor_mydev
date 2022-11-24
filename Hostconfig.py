@@ -4,6 +4,7 @@ from time import sleep
 from logqueue import queuethis
 from etcdgetpy import etcdget as get
 from etcdput import etcdput as put
+from etcddel import etcddel as dels 
 from broadcasttolocal import broadcasttolocal
 from broadcast import broadcast
 from ast import literal_eval as mtuple
@@ -12,7 +13,7 @@ from UpdateNameSpace import updatenamespace
 import logmsg
 from time import time as stamp
 
-def config(leaderip, myhost, *bargs):
+def config(leader, leaderip, myhost, *bargs):
  rebootme = 0
  arglist = bargs[0]
  logmsg.initlog(leaderip, myhost)
@@ -32,6 +33,7 @@ def config(leaderip, myhost, *bargs):
   logmsg.sendlog('HostManual1st5','info',arglist['user'],oldarg, arglist['alias'])
   allhosts = get(leaderip, 'ActivePartner','--prefix')
   put(leaderip, 'alias/'+arglist['name'],arglist['alias'])
+  dels(leaderip, 'sync', 'alias_')
   put(leaderip, 'sync/alias/Add_'+arglist['name']+'_'+arglist['alias'].replace('_',':::').replace('/',':::')+'/request','alias_'+str(stamp()))
   put(leaderip, 'sync/alias/Add_'+arglist['name']+'_'+arglist['alias'].replace('_',':::').replace('/',':::')+'/request/'+myhost,'alias_'+str(stamp()))
   logmsg.sendlog('HostManual1su5','info',arglist['user'],oldarg, arglist['alias'])
@@ -45,6 +47,7 @@ def config(leaderip, myhost, *bargs):
   leader = get(leaderip, 'leader')[0]
   if myhost == leader:
    updatenamespace(arglist['cluster'],oldarg)
+  dels(leaderip, 'sync', 'namespace_')
   put(leaderip, 'sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster']+'/request','namespace_'+str(stamp()))
   put(leaderip, 'sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster']+'/request/'+myhost,'namespace_'+str(stamp()))
   put(leaderip, 'namespace/mgmtip',arglist['cluster'])
@@ -62,6 +65,7 @@ def config(leaderip, myhost, *bargs):
   put(leaderip, 'usershash/'+arglist['username'], encthis)
   cmdlinep=['/TopStor/UnixChangePass',arglist['username'],arglist['user']]
   result=subprocess.run(cmdlinep,stdout=subprocess.PIPE)
+  dels(leaderip, 'sync', 'passwd_')
   put(leaderip, 'sync/passwd/UnixChangePass_'+arglist['username']+'_'+arglist['user']+'/request','passwd_'+str(stamp()))
   put(leaderip, 'sync/passwd/UnixChangePass_'+arglist['username']+'_'+arglist['user']+'/request/'+myhost,'passwd_'+str(stamp()))
 #  broadcast('UserPassChange','/TopStor/pump.sh','UnixChangePass',arglist['password'],arglist['username'],arglist['user'])
@@ -74,7 +78,8 @@ def config(leaderip, myhost, *bargs):
   logmsg.sendlog('HostManual1st10','info',arglist['user'],oldarg, argtz)
   leader = get(leaderip, 'leader')[0]
   put(leaderip, 'tz/'+leader,arglist['tz'])
-  put(leaderip, 'sync/tz/HostManualConfigTZ_'+'_'+arglist['tz']+'/request','tz_'+str(stamp()))
+  dels(leaderip, 'sync', 'tz_')
+  put(leaderip, 'sync/tz/HostManualconfigTZ_'+'_'+arglist['tz']+'/request','tz_'+str(stamp()))
   logmsg.sendlog('HostManual1su10','info',arglist['user'], oldarg, argtz)
   queuethis('Hostconfig_tzone','finish',arglist['user'])
 ########### changing ntp server ###############
@@ -84,6 +89,7 @@ def config(leaderip, myhost, *bargs):
   logmsg.sendlog('HostManual1st9','info',arglist['user'],oldarg, arglist['ntp'])
   leader = get(leaderip, 'leader')[0]
   put(leaderip, 'ntp/'+leader,arglist['ntp'])
+  dels(leaderip, 'sync', 'ntp_')
   put(leaderip, 'sync/ntp/HostManualconfigNTP_'+'_'+arglist['ntp']+'/request','ntp_'+str(stamp()))
   logmsg.sendlog('HostManual1su9','info',arglist['user'],oldarg, arglist['ntp'])
   queuethis('Hostconfig_ntp','finish',arglist['user'])
@@ -100,6 +106,7 @@ def config(leaderip, myhost, *bargs):
   leader = get(leaderip, 'leader')[0]
   put(leaderip, 'dnsname/'+leader,arglist['dnsname'])
   put(leaderip, 'dnssearch/'+leader,arglist['dnssearch'])
+  dels(leaderip, 'sync', 'dns_')
   put(leaderip, 'sync/dns/HostManualconfigDNS'+'_'+arglist['dnsname']+'_'+arglist['dnssearch']+'/request','dns_'+str(stamp()))
   logmsg.sendlog('HostManual1su13','info',arglist['user'],oldargname, oldargsearch, arglist['dnsname'],arglist['dnssearch'])
   queuethis('Hostconfig_dns','finish',arglist['user'])
@@ -111,6 +118,7 @@ def config(leaderip, myhost, *bargs):
   logmsg.sendlog('HostManual1st11','info',arglist['user'],oldarg, arglist['gw'])
   leader = get(leaderip, 'leader')[0]
   put(leaderip, 'gw/'+leader,arglist['gw'])
+  dels(leaderip, 'sync', 'gw_')
   put(leaderip, 'sync/gw/HostManualconfigGW_'+'_'+arglist['gw']+'/request','gw_'+str(stamp()))
   logmsg.sendlog('HostManual1su11','info',arglist['user'],oldarg, arglist['gw'])
   queuethis('Hostconfig_gw','finish',arglist['user'])
@@ -168,10 +176,13 @@ def config(leaderip, myhost, *bargs):
 
 if __name__=='__main__':
  leaderip = sys.argv[1]
+ leader = get(leaderip, 'leader')[0]
+ leaderip = get(leaderip, 'leaderip')[0]
+ myhost = leader
  #arg = {'username': 'admin', 'password': 'YousefNadody', 'token': '4f3223c155ca50d13ae975ea18e930bc', 'response': 'admin', 'user': 'admin'}
  arg = {'dnsname': '10.11.11.11', 'dnssearch': 'qstor.com', 'id': '0', 'user': 'admin', 'name': 'dhcp14895', 'token': 'e9b77595837168e6f0ce77f6cbc8137e', 'response': 'admin'}
  arg = {'alias': 'Repli_1', 'ipaddr': '10.11.11.245', 'ipaddrsubnet': '24', 'cluster': '10.11.11.249/24', 'tz': 'Kuwait%(GMT+03!00)_Kuwait^_Riyadh^_Baghdad', 'id': '0', 'user': 'admin', 'name': 'dhcp28109', 'token': '73616fae666891c5f420f63c6317b1ba', 'response': 'admin'}
  arg={'alias': 'node_2', 'id': '0', 'user': 'admin', 'name': 'dhcp141762', 'token': '7aaffece0d6602393b42b5ef34164c8b', 'response': 'admin'}
- config(leaderip, arg)
+ config(leader, leaderip, myhost, arg)
 
 #{'cluster': '10.11.11.250/24', 'tz': 'Kuwait%(GMT+03!00)_Kuwait^_Riyadh^_Baghdad', 'id': '0', 'user': 'admin', 'name': 'dhcp32570', 'token': '501ef1257322d1814125b1e16af95aa9', 'response': 'admin'}
