@@ -1,6 +1,7 @@
 myclusterf='/topstorwebetc/mycluster'
 mynodef='/topstorwebetc/mynode'
 myhost=`hostname`
+nmclie conn up mynode
 targetcli clearconfig confirm=True	
 echo ${myhost}$@ | egrep 'init|local'
 if [ $? -eq 0 ];

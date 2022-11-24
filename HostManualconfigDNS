@@ -33,10 +33,17 @@ else
  then
   echo 'supersede domain-search "'$searchdns'";' >> /etc/dhcp/dhclient.conf
   echo search $searchdns >> /etc/resolv.conf
+  nmcli con mod mynode ipv4.dns-search $searchdns 
+  nmcli con mod cmynode ipv4.dns-search $searchdns
+  nmcli con mod mycluster ipv4.dns-search $searchdns 
+ else
+  sed -i '/search/d' /root/resolv.conf 
+  nmcli con mod mynode ipv4.dns-search '' 
+  nmcli con mod cmynode ipv4.dns-search '' 
+  nmcli con mod mycluster ipv4.dns-search '' 
  fi
  nmcli con mod mynode ipv4.dns $dns 
  nmcli con mod cmynode ipv4.dns $dns 
  nmcli con mod mycluster ipv4.dns $dns 
- nmcli connection reload
  #systemctl restart network
 fi
