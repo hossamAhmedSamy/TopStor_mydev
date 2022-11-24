@@ -2,25 +2,13 @@
 export ETCDCTL_API=3
 cd /TopStor/
 echo $@ > ~/tmp
+leader=`echo $@ | awk '{print $1}'`
+leaderip=`echo $@ | awk '{print $2}'`
+myhost=`echo $@ | awk '{print $3}'`
+myip=`echo $@ | awk '{print $4}'`
 dev='enp0s8'
-web='/var/www/html/des20/Data/HostManualconfigstatus.log';
-logging='/var/www/html/des20/Data/currentinfo2.log';
-runningpools='/pacedata/pools/runningpools';
-glog='/var/www/html/des20/Data/TopStor.log';
-txtres='/TopStordata/'`basename $0`'.txt'
-hostname=`hostname -s`
-leader=`./etcdget.py leader --prefix | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-ntp=`ETCDCTL_API=3 ./etcdget.py ntp/$leader`
-myip=`/sbin/pcs resource show CC | grep Attrib | awk -F'ip=' '{print $2}' | awk '{print $1}'`
-echo $leader | grep $hostname
-if [ $? -eq 0 ];
-then
- local=''
- myip=''
-else
- local='local'
-fi
-
+hostname=$myhost
+ntp=`ETCDCTL_API=3 ./etcdget.py $leaderip ntp/$leader`
 rm -rf /etc/chrony.conf
 cp /TopStor/chrony.conf /etc/
 echo $ntp | grep '\.'
@@ -28,7 +16,7 @@ if [ $? -ne 0 ];
 then
  ntp='0.pool.ntp.org' 
 fi
- ./etcdput${local}.py $myip ntp/$hostname $ntp
- ./etcdput.py ntp/$hostname $ntp
+ ./etcdput.py $myip ntp/$hostname $ntp
+ ./etcdput.py $leaderip ntp/$hostname $ntp
 sed -i "s/MASTERSERVER/$ntp/g" /etc/chrony.conf
 systemctl restart chronyd

@@ -28,10 +28,10 @@ echo leader=$leader, dns=$dns, searchdns=$searchdns
   olddns='NoDNS'
  fi
 else
- ./etcdput${local}.py $myip dnssearch/$hostname $searchdns
- ./etcdput${local}.py $myip dnsname/$hostname $dns
- ./etcdput.py dnssearch/$hostname $searchdns
- ./etcdput.py dnsname/$hostname $dns
+ ./etcdput.py $myip dnssearch/$hostname $searchdns
+ ./etcdput.py $myip dnsname/$hostname $dns
+ ./etcdput.py $leaderip dnssearch/$hostname $searchdns
+ ./etcdput.py $leaderip dnsname/$hostname $dns
  echo 'supersede domain-name-server '$dns';' > /etc/dhcp/dhclient.conf
  echo nameserver $dns > /etc/resolv.conf
  echo $searchdns | grep '\-1'
@@ -40,5 +40,9 @@ else
   echo 'supersede domain-search "'$searchdns'";' >> /etc/dhcp/dhclient.conf
   echo search $searchdns >> /etc/resolv.conf
  fi
+ nmcli con mod mynode ipv4.dns $dns 
+ nmcli con mod cmynode ipv4.dns $dns 
+ nmcli con mod mycluster ipv4.dns $dns 
+ nmcli connection reload
  #systemctl restart network
 fi
