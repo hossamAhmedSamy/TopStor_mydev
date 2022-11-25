@@ -73,11 +73,13 @@ def login_required(f):
  return decorated_function
 
 
-def postchange(cmndstring,host='leader'):
+def postchange(cmndstring,host='myhost'):
  global leaderip, myhost
+ if host=='myhost':
+  host = myhost
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
- ownerip=get(host,'--prefix')
+ ownerip=get('ready/'+host,'--prefix')
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
 
 def dict_factory(cursor, row):
@@ -952,7 +954,7 @@ def AddPartner(data):
 @app.route('/api/v1/users/UnixAddUser', methods=['GET','POST'])
 @login_required
 def UnixAddUser(data):
- global allgroups
+ global allgroups, leaderip
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  if 'NoHome' in data['Volpool']:
@@ -970,7 +972,7 @@ def UnixAddUser(data):
   for grp in grps.split(','):
    groupstr += allgroups[int(grp)][0]+','
   groupstr = groupstr[:-1]
- cmndstring = '/TopStor/pump.sh UnixAddUser '+data.get('name')+' '+pool+' groups'+groupstr+' ' \
+ cmndstring = '/TopStor/UnixAddUser '+leaderip+' '+data.get('name')+' '+pool+' groups'+groupstr+' ' \
      +data.get('Password')+' '+data.get('Volsize')+'G '+data.get('HomeAddress')+' '+data.get('HomeSubnet')+' hoststub'+' '+data['user']
  postchange(cmndstring)
  return data 

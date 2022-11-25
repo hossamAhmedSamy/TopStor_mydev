@@ -38,6 +38,7 @@ def etcdget(key, prefix=''):
      z.append(-1)
  except:
   z.append(-1)
+ print(z)
  return z
 if __name__=='__main__':
  etcdget(*sys.argv[1:])
