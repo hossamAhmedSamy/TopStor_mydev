@@ -1,7 +1,7 @@
 myclusterf='/topstorwebetc/mycluster'
 mynodef='/topstorwebetc/mynode'
 myhost=`hostname`
-nmclie conn up mynode
+nmcli conn up mynode
 targetcli clearconfig confirm=True	
 echo ${myhost}$@ | egrep 'init|local'
 if [ $? -eq 0 ];
@@ -68,7 +68,11 @@ docker run -itd --rm --name etcdclient --hostname etcdclient -v /etc/localtime:/
 			exit
 		fi
 	fi
-	eth1=$1
+	echo $1 | grep restart 
+	if [ $? -ne 0 ];
+	then
+		eth1=$1
+	fi
 fi
 if [ $# -ge 2 ];
 then
@@ -128,6 +132,7 @@ then
 	if [ $isprimary -ne 0 ];
 	then
 		echo I am prmary
+		echo nmcli conn add con-name cmynode type ethernet ifname $mynodedev ip4 $mynode ip4 $mycluster
 		nmcli conn add con-name cmynode type ethernet ifname $mynodedev ip4 $mynode ip4 $mycluster
 	else
 		echo I am a cluster node 
@@ -156,6 +161,7 @@ then
 else
 	etcd=$mynodeip
 fi
+echo docker run -itd --rm --name etcd --hostname etcd -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $etcd:2379:2379 -v /TopStor/:/TopStor -v /root/etcddata:/default.etcd --net bridge0 moataznegm/quickstor:etcd
 docker run -itd --rm --name etcd --hostname etcd -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $etcd:2379:2379 -v /TopStor/:/TopStor -v /root/etcddata:/default.etcd --net bridge0 moataznegm/quickstor:etcd
 docker run -itd --rm --name etcdclient --hostname etcdclient -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -v /TopStor/:/TopStor -v /pace/:/pace moataznegm/quickstor:etcdclient 
 #docker run -d --rm --name rmq --hostname rmq  -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $etcd:5672:5672 -v /TopStor/:/TopStor -v /pace/:/pace moataznegm/quickstor:rabbitmq 
@@ -252,8 +258,8 @@ docker exec etcdclient /TopStor/etcdput.py $etcd isprimary $isprimary
 rm -rf /TopStor/key/adminfixed.gpg && cp /TopStor/factory/factoryadmin /TopStor/key/adminfixed.gpg
 if [ $isprimary -eq 1 ];
 then
-	echo docker exec etcdclient /pace/checksyncs.py syncinit $leader $etcd $myhost $etcd
-	docker exec etcdclient /pace/checksyncs.py syncinit $leader $etcd $myhost $etcd
+	echo docker exec etcdclient /pace/checksyncs.py syncinit $etcd
+	docker exec etcdclient /pace/checksyncs.py syncinit $etcd 
 fi
  /TopStor/topstorrecvreply.py $etcd & disown
 /pace/iscsiwatchdog.sh $etcd >/dev/null 2>/dev/null & disown 
