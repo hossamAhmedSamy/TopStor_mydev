@@ -263,15 +263,19 @@ docker exec -it etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip
 
 
 #docker run --restart unless-stopped --name git -v /root/gitrepo:/usr/local/apache2/htdocs/ --hostname sgit -p 10.11.11.252:80:80 -v /root/gitrepo/httpd.conf:/usr/local/apache2/conf/httpd.conf -itd -v /root/gitrepo/resolv.conf:/etc/resolv.conf moataznegm/quickstor:git
+templhttp='/TopStor/httpd_template.conf'
+shttpdf='/TopStor/httpd.conf'
+docker rm -f httpd
+docker rm -f flask
+rm -rf $httpdf
 if [ $isprimary -ne 0 ];
 then
-	templhttp='/TopStor/httpd_template.conf'
-	shttpdf='/TopStor/httpd.conf'
 	cp $templhttp $shttpdf
+	sed -i "s/MYCLUSTERH/$myclusterip/g" $shttpdf
 	sed -i "s/MYCLUSTER/$myclusterip/g" $shttpdf
-	docker run --rm --name httpd --hostname shttpd --net bridge0 -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $myclusterip:19999:19999 -p $mynodeip:80:80 -p $mynodeip:443:443 -p $myclusterip:80:80 -p $myclusterip:443:443 -v /TopStor/httpd.conf:/usr/local/apache2/conf/httpd.conf -v /root/topstorwebetc:/usr/local/apache2/topstorwebetc -v /topstorweb:/usr/local/apache2/htdocs/ -itd moataznegm/quickstor:git
+	docker run --rm --name httpd --hostname shttpd --net bridge0 -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $myclusterip:19999:19999 -p $myclusterip:80:80 -p $myclusterip:443:443 -v $shttpdf:/usr/local/apache2/conf/httpd.conf -v /root/topstorwebetc:/usr/local/apache2/topstorwebetc -v /topstorweb:/usr/local/apache2/htdocs/ -itd moataznegm/quickstor:git
+	docker run -itd --rm --name flask --hostname apisrv -v /etc/localtime:/etc/localtime:ro -v /pace/:/pace -v /pacedata/:/pacedata/ -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /TopStordata/:/TopStordata moataznegm/quickstor:flask
 fi
-docker run -itd --rm --name flask --hostname apisrv -v /etc/localtime:/etc/localtime:ro -v /pace/:/pace -v /pacedata/:/pacedata/ -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /TopStordata/:/TopStordata moataznegm/quickstor:flask
 /TopStor/ioperf.py $etcd $myhost
 docker exec etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
 stamp=`date +%s%N`

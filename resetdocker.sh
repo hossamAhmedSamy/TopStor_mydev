@@ -20,6 +20,7 @@ systemctl stop rabbitmq-server
 docker stop intdns
 docker stop etcd
 docker stop httpd
+docker stop httpd_local
 docker stop flask
 docker stop etcdclient 
 docker stop rmq 
