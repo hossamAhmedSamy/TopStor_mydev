@@ -11,6 +11,7 @@ data2dev='enp0s8'
 pkill iscsiwatchdog
 pkill topstorrecvrep
 pkill syncrequestlooper
+pkill fapilooper
 zpool export -a
 targetcli clearconfig 
 systemctl stop rabbitmq-server
