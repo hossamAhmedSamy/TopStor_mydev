@@ -6,22 +6,24 @@ leaderip=`echo $@ | awk '{print $1}'`;
 username=`echo $@ | awk '{print $2}'`;
 usergroups=`echo $@ | awk  '{print $3}' | sed 's/groups//g' `;
 userreq=`echo $@  | awk '{print $4}'`;
-docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq 
-myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
-myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
-leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
-echo $leader | grep $myhost
-if [ $? -eq 0 ];
-then
- etcd=$leaderip
-else
- etcd=$myhostip
-fi
+ischange=`echo $@  | awk '{print $5}'`;
 stablegrp=""
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]];
 then
+	docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq 
+	myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
+	myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
+	leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
+	echo $leader | grep $myhost
+	if [ $? -eq 0 ];
+	then
+	 	etcd=$leaderip
+	else
+		etcd=$myhostip
+	fi
+
  echo 'NoUser' | grep $username
  if [ $? -ne 0 ];
  then
@@ -143,15 +145,14 @@ then
   docker exec etcdclient /TopStor/logmsg.py Unsu1024 info $userreq $username
  fi
 fi 
-#echo $leader | grep $myhost
-#if [ $? -eq 0 ];
-#then
-# echo sslskdds'd333333333333333333333333333333333333333333333333333333333333333'
-# stamp=`date +%s`;
-# myscript=`basename "$0"`
-# params=`echo $myscript $@ $stamp | sed 's\ \\_\g'`
-# echo params=$params
-# /pace/etcdput.py $etcd sync/user/`basename "$0"`_$@ $stamp/request/$myhost UsrChange_$stamp
-# /pace/etcdput.py $etcd sync/user/`basename "$0"`_$@ $stamp/request UsrChange_$stamp
-#fi
+echo ${ischange}$leader | grep change$myhost
+if [ $? -eq 0 ];
+then
+ stamp=`date +%s`;
+ myscript=`basename "$0"`
+ params=`echo $myscript $@ $stamp | sed 's\ \\_\g'`
+ echo params=$params
+ /pace/etcdput.py $etcd sync/user/$params/request/$myhost UsrChange_$stamp
+ /pace/etcdput.py $etcd sync/user/$params/request UsrChange_$stamp
+fi
 docker exec etcdclient /TopStor/logqueue.py `basename "$0"` finish $userreq 

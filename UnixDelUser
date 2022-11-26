@@ -79,7 +79,9 @@ echo $leader | grep $myhost
 if [ $? -eq 0 ];
 then
 	stamp=`date +%s%N`
-	/pace/etcdput.py $etcd sync/user/syncfn_oneusersync_Del_${username}/request/$myhost user_$stamp
-	/pace/etcdput.py $etcd sync/user/syncfn_oneusersync_Del_${username}/request user_$stamp
+	myscript=`basename "$0"`
+	params=`echo $myscript $@ $stamp | sed 's\ \\_\g'`
+	/pace/etcdput.py $etcd sync/user/$params/request/$myhost user_${username}_$stamp
+	/pace/etcdput.py $etcd sync/user/$params/request user_${username}_$stamp
 fi
  docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq 

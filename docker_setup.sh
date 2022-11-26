@@ -25,27 +25,39 @@ then
 	if [ $? -eq 0 ];
 	then
 		/TopStor/resetdocker.sh
-
 		echo $1 | grep reset
 		if [ $? -eq 0 ];
 		then
 			rm  -rf /root/etcddata/* 
-			docker run --rm --name intdns --hostname intdns --net bridge0 -e DNS_DOMAIN=qs.dom -e DNS_IP=10.11.12.7 -e LOG_QUERIES=true -itd --ip 10.11.12.7 -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/dnshosts:/etc/hosts moataznegm/quickstor:dns
-			docker run -itd --rm --name etcd --hostname etcd -v /root/gitrepo/resolv.conf:/etc/resolv.conf -v /TopStor/:/TopStor -v /root/etcddata:/default.etcd --net bridge0 moataznegm/quickstor:etcd
-docker run -itd --rm --name etcdclient --hostname etcdclient -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -v /TopStor/:/TopStor -v /pace/:/pace moataznegm/quickstor:etcdclient 
-			started=0
-        		while [ $started -eq 0 ];
-        		do
-                		docker logs etcd | grep 'successfully notified init daemon'
-                		if [ $? -eq 0 ];
-                		then
-                        		started=1
-                		else
-                        		sleep 1
-                		fi
-        		done
-
-			docker exec etcdclient /TopStor/UnixsetUser.py etcd `hostname` admin tmatem
+			echo yes | cp /TopStor/passwd /etc/
+			echo yes | cp /TopStor/group /etc/
+#			etcdip=`nmcli -g ip4.address connection show mynode | awk -F'/' '{print $1}'`
+#			docker run --rm --name intdns --hostname intdns --net bridge0 -e DNS_DOMAIN=qs.dom -e DNS_IP=10.11.12.7 -e LOG_QUERIES=true -itd --ip 10.11.12.7 -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/dnshosts:/etc/hosts moataznegm/quickstor:dns
+#			docker run -itd --rm --name etcd --hostname etcd -p $etcdip:2379:2379 -v /root/gitrepo/resolv.conf:/etc/resolv.conf -v /TopStor/:/TopStor -v /root/etcddata:/default.etcd --net bridge0 moataznegm/quickstor:etcd
+#docker run -itd --rm --name etcdclient --hostname etcdclient -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -v /TopStor/:/TopStor -v /pace/:/pace moataznegm/quickstor:etcdclient 
+#			systemctl start rabbitmq-server
+#			rabbitmqctl add_user rabb_Mezo YousefNadody 2>/dev/null
+#			rabbitmqctl set_permissions -p / rabb_Mezo ".*" ".*" ".*" 2>/dev/null
+#			started=0
+ #       		while [ $started -eq 0 ];
+  #      		do
+#                		docker logs etcd | grep 'successfully notified init daemon'
+ #               		if [ $? -eq 0 ];
+ #               		then
+ #                       		started=1
+ #               		else
+ #                       		sleep 1
+ #               		fi
+ #       		done
+#			
+#			docker exec etcdclient /TopStor/etcdputlocal.py leader $myhost 
+#			docker exec etcdclient /TopStor/etcdputlocal.py leaderip $etcdip 
+#			docker exec etcdclient /TopStor/etcdputlocal.py clusternode $myhost 
+#			docker exec etcdclient /TopStor/etcdputlocal.py clusternodeip $etcdip 
+			echo reset > /root/nodestatus
+#			docker exec etcdclient /TopStor/UnixsetUser.py $etcdip `hostname` admin tmatem
+#			/TopStor/UnixAddGroup $etcdip Everyone usersNoUser admin
+#			echo hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 			systemctl start target
 			targetcli clearconfig confirm=True	
 			targetcli saveconfig 
@@ -253,9 +265,18 @@ done
 zpool export -a
 docker exec etcdclient /TopStor/etcdput.py $etcd mynodeip $mynodeip 
 docker exec etcdclient /TopStor/etcdput.py $etcd mynode $mynode 
-docker exec etcdclient /TopStor/etcdput.py $etcd myclusterip $myclusterip 
+docker exec etcdclient /TopStor/etcdput.py $etcd leaderip $myclusterip 
 docker exec etcdclient /TopStor/etcdput.py $etcd isprimary $isprimary 
-rm -rf /TopStor/key/adminfixed.gpg && cp /TopStor/factory/factoryadmin /TopStor/key/adminfixed.gpg
+isreset=`cat /root/nodestatus`
+echo ${isreset}$isprimary | grep reset1
+if [ $? -eq 0 ];
+then
+
+	docker exec etcdclient /TopStor/UnixsetUser.py $myclusterip `hostname` admin tmatem
+	/TopStor/UnixAddGroup $etcd Everyone usersNoUser admin
+	echo runningnode > /root/nodestatus
+fi
+#rm -rf /TopStor/key/adminfixed.gpg && cp /TopStor/factory/factoryadmin /TopStor/key/adminfixed.gpg
 if [ $isprimary -eq 1 ];
 then
 	echo docker exec etcdclient /pace/checksyncs.py syncinit $etcd

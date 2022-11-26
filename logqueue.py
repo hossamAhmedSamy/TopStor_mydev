@@ -7,7 +7,7 @@ from ast import literal_eval as mtuple
 from sendhost import sendhost
 
 def queuethis(*args):
- leaderip = get('myclusterip')[0]
+ leaderip = get('leaderip')[0]
  myhost = get('clusternode')[0]
  z=[]
  put(leaderip,'request/'+args[0]+'/'+myhost,args[1])

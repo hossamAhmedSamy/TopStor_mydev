@@ -486,7 +486,7 @@ def pgroupchange(data):
     if str(suser['id']) == str(usr):
      usrstr += suser['name']+',' 
   usrstr = usrstr[:-1]
- cmndstring = '/TopStor/pump.sh UnixChangeGroup '+data.get('name')+' users'+usrstr+' '+data['user']
+ cmndstring = '/TopStor/UnixChangeGroup '+leaderip+' '+data.get('name')+' users'+usrstr+' '+data['user']+' '+'change'
  postchange(cmndstring)
  return data
 
@@ -513,7 +513,7 @@ def userchange(data):
   for grp in grps.split(','):
    groupstr += allgroups[int(grp)][0]+','
   groupstr = groupstr[:-1]
- cmndstring = '/TopStor/pump.sh UnixChangeUser '+data.get('name')+' groups'+groupstr+' '+data['user'] 
+ cmndstring = '/TopStor/UnixChangeUser '+leaderip+' '+data.get('name')+' groups'+groupstr+' '+data['user']+' '+'change'
  postchange(cmndstring)
  return data
 
@@ -895,7 +895,7 @@ def volumedel(data):
 def groupdel(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- cmndstring = '/TopStor/pump.sh UnixDelGroup '+data.get('name')+' '+data['user'] 
+ cmndstring = '/TopStor/UnixDelGroup '+leaderip+' '+data.get('name')+' '+data['user'] 
  postchange(cmndstring)
  return data
 
@@ -935,7 +935,7 @@ def UnixAddGroup(data):
     if str(suser['id']) == str(usr):
      usrstr += suser['name']+',' 
   usrstr = usrstr[:-1]
- cmndstring = '/TopStor/pump.sh UnixAddGroup '+data['name']+' '+' users'+usrstr+' '+data['user']
+ cmndstring = '/TopStor/UnixAddGroup '+leaderip+' '+data['name']+' '+' users'+usrstr+' '+data['user']
  postchange(cmndstring)
  return data
 
@@ -1152,8 +1152,7 @@ myhost=0
 if __name__=='__main__':
     #leader = sys.argv[2]
     #leaderip = sys.argv[1]
-    print('hihihi')
-    leaderip = get('myclusterip')[0]
+    leaderip = get('leaderip')[0]
     myhost = get('clusternode')[0]
     leader = get('leader')[0]
     logmsg.initlog(leaderip,myhost)
