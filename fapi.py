@@ -915,7 +915,7 @@ def partnerdel(data):
 def userdel(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- cmndstring = '/TopStor/pump.sh UnixDelUser '+data.get('name')+' '+data['user']
+ cmndstring = '/TopStor/UnixDelUser '+leaderip+' '+data.get('name')+' '+data['user']
  postchange(cmndstring)
  return data
 

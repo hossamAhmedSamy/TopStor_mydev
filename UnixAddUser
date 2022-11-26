@@ -13,14 +13,14 @@ HomeAddr=`echo $@  | awk '{print $7}' `;
 HomeSubnet=`echo $@  | awk '{print $8}'`;
 host=`echo $@ | awk '{print $9}'`;
 userreq=`echo $@  | awk '{print $10}'`;
-myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
-myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
-leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
-docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
+	myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
+	myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
+	leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
+	docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq
 	echo $leader | grep $myhost
 	if [ $? -ne 0 ];
 	then
