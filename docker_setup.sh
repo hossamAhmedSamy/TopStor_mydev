@@ -176,7 +176,16 @@ else
 fi
 echo docker run -itd --rm --name etcd --hostname etcd -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $etcd:2379:2379 -v /TopStor/:/TopStor -v /root/etcddata:/default.etcd --net bridge0 moataznegm/quickstor:etcd
 docker run -itd --rm --name etcd --hostname etcd -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $etcd:2379:2379 -v /TopStor/:/TopStor -v /root/etcddata:/default.etcd --net bridge0 moataznegm/quickstor:etcd
+
 docker run -itd --rm --name etcdclient --hostname etcdclient -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -v /TopStor/:/TopStor -v /pace/:/pace moataznegm/quickstor:etcdclient 
+
+docker run -itd --privileged \
+  -v /etc/:/hostetc/   \
+  -v /var/lib/samba/private:/var/lib/samba/private:rw \
+  -v /etc/localtime:/etc/localtime:ro \
+  -v /root/gitrepo/resolv.conf:/etc/resolv.conf
+  -net bridge0
+  --name intsmb --hostname etcdsmb moataznegm/quickstor:smb
 #docker run -d --rm --name rmq --hostname rmq  -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $etcd:5672:5672 -v /TopStor/:/TopStor -v /pace/:/pace moataznegm/quickstor:rabbitmq 
 systemctl start rabbitmq-server
 rabbitmqctl add_user rabb_Mezo YousefNadody 2>/dev/null

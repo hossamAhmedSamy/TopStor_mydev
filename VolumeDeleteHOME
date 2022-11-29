@@ -1,31 +1,30 @@
 #!/bin/sh
 cd /TopStor
 export ETCDCTL_API=3
-leaderip=` ./etcdgetlocal.py leaderip `
 echo $@ > /root/VolumeDeleteHOME 
-perfmon=`cat /pacedata/perfmon`
-echo $perfmon | grep 1
-if [ $? -eq 0 ]; then
- /TopStor/logqueue.py VolumeDeleteHOME start system 
-fi
-web='/var/www/html/des20/Data/HOMEstatus.log';
-logging='/var/www/html/des20/Data/currentinfo2.log'
-glog='/var/www/html/des20/Data/TopStor.log';
-runningpools='/pacedata/pools/runningpools'
 datenow=`date +%m/%d/%Y`; timenow=`date +%T`;
-volname=`echo $@ | awk '{print $2}'`;
-pDG=`echo $@ | awk '{print $1}'`;
-pro=`echo $@ | awk '{print $3}'`;
-userreq=` echo $@ | awk '{print $4}'`;
+volname=`echo $@ | awk '{print $3}'`;
+leaderip=`echo $@ | awk '{print $1}'`;
+pDG=`echo $@ | awk '{print $2}'`;
+pro=`echo $@ | awk '{print $4}'`;
+userreq=` echo $@ | awk '{print $5}'`;
 DG=`echo $pDG `;
-myhost=`hostname -s`
-txtres='/TopStordata/'`basename $0`$userreq
-rm -rf $txtres &>/dev/null
 privilege='HOME';
 contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
-  /TopStor/logmsg.py NFS1000 info $userreq $volname
+	myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
+	myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
+	leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
+	echo $leader | grep $myhost
+	if [ $? -ne 0 ];
+	then
+ 		etcd=$myhostip
+	else
+ 		etcd=$leaderip
+ 	fi
+
+  docker exec etcdclient /TopStor/logmsg.py NFS1000 info $userreq $volname
  cd /TopStor
  clearvol=`./prot.py clearvol $volname | awk -F'result=' '{print $2}'`
  if [ $clearvol != '-1' ];
@@ -74,23 +73,18 @@ then
  echo $DG/$volname
  /sbin/zfs destroy -rf $DG/$volname 
  if [ $? -ne 0  ]; then
-   /TopStor/logmsg.py NFS1001 error $userreq $volname
+   docker exec etcdclient /TopStor/logmsg.py NFS1001 error $userreq $volname
    echo /sbin/zfs destroy -rf $DG/$volname >/root/errorVolumeDeleteHOME
  else
   rm -rf /$DG/smb.$volname
   /pace/etcddel.py $leaderip volume $volname
   stamp=`date +%s`
-  leader=` ./etcdgetlocal.py leader`
   ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request volumes_$stamp
   ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request/$leader volumes_$stamp
   /TopStor/SnapShotPeriodDelete $volname $userreq
   #/pace/delbroadcastlocal.py volume $volname
-  /pace/putzpool.py 
-  /TopStor/logmsg.py NFS1002 info  $userreq $volname
+  /pace/putzpool.py $leaderip
+  docker exec etcdclient /TopStor/logmsg.py NFS1002 info  $userreq $volname
  fi
  rm -rf /$DG/smb.$volname
-fi
-echo $perfmon | grep 1
-if [ $? -eq 0 ]; then
- /TopStor/logqueue.py VolumeDeleteHOME stop system 
 fi

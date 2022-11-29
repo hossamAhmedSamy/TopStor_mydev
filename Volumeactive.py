@@ -1,20 +1,16 @@
 #!/usr/bin/python3
 import sys, logmsg, subprocess
 from privthis import privthis 
-from etcdgetlocalpy import etcdget as get
+from etcdgetpy import etcdget as get
 from etcdput import etcdput as put 
 
 
-leaderip = get('leaderip')[0]
-myhost = get('clusternode')[0]
-logmsg.initlog(leaderip, myhsot)
-
-def volumeactive(pool,volname,prot,active,userreq):
+def volumeactive(leaderip, pool,volname,prot,active,userreq):
  if privthis(prot,userreq) != 'true':
   print('not authorized user to do this task ')
   return
  logmsg.sendlog('Unmoutst01','info',userreq,volname,active)
- volinfo=get('volumes',volname)[0]
+ volinfo=get(leaderip, 'volumes',volname)[0]
  if prot == 'CIFS':
   print('prot is',prot)
   activpos= maxpos = 9
@@ -33,4 +29,6 @@ def volumeactive(pool,volname,prot,active,userreq):
  return
  
 if __name__=='__main__':
+ leaderip = sys.argv[1]
+ logmsg.initlog(leaderip, myhost)
  volumeactive(*sys.argv[1:])
