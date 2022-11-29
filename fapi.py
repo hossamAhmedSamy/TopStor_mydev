@@ -250,7 +250,7 @@ def dgsdelpool(data):
  owner = allinfo['pools'][data['pool']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
  datastr = data['pool']+' '+data['user'] 
- cmndstring = '/TopStor/pump.sh DGdestroyPool '+datastr
+ cmndstring = '/TopStor/DGdestroyPool '+leaderip+' '+datastr
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
@@ -298,7 +298,7 @@ def dgsaddtopool(data):
  print(selecteddisks)
  print(datastr)
  print('#########################333')
- cmndstring = '/TopStor/pump.sh DGsetPool '+datastr
+ cmndstring = '/TopStor/DGsetPool '+leaderip+' '+datastr
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
@@ -348,7 +348,7 @@ def dgsnewpool(data):
  print('#############################3')
  print(selecteddisks)
  print('#########################333')
- cmndstring = '/TopStor/pump.sh DGsetPool '+datastr+' '+data['user']
+ cmndstring = '/TopStor/DGsetPool '+leaderip+' '+datastr+' '+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
@@ -563,7 +563,9 @@ def getnotification(data):
    try:
     msgbody = msgbody[:-1]+' '+notifbody[notifc]+'.'
    except:
-    msgbody = msgbody +' '+notifbody+'parseerror.'
+    msgbody = str(msgbody) +' '+str(notifbody)+'parseerror.'
+    with open('/root/fapierror','w') as f:
+     f.write(msgbody+'\n'+str(msg))
     print('notification parse error')
     print('############################')
    notifc += 1

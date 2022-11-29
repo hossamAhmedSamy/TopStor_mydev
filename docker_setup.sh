@@ -1,6 +1,7 @@
 myclusterf='/topstorwebetc/mycluster'
 mynodef='/topstorwebetc/mynode'
 myhost=`hostname`
+zpool export -a
 nmcli conn up mynode
 targetcli clearconfig confirm=True	
 echo ${myhost}$@ | egrep 'init|local'
@@ -262,7 +263,7 @@ do
 	echo hihi$checkcluster | grep $myclusterip
 done
 #############################3
-zpool export -a
+docker exec etcdclient /TopStor/etcddel.py $etcd pools --prefix 
 docker exec etcdclient /TopStor/etcdput.py $etcd mynodeip $mynodeip 
 docker exec etcdclient /TopStor/etcdput.py $etcd mynode $mynode 
 docker exec etcdclient /TopStor/etcdput.py $etcd leaderip $myclusterip 
