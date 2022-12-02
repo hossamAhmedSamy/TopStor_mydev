@@ -4,10 +4,10 @@ from logqueue import queuethis, initqueue
 from etcdgetpy import etcdget as get
 from sendhost import sendhost
 
-def create(leader, leaderip, myhost, myhostip, etcdip, pool, name, ipaddr, ipsubnet, vtype):
+def create(leader, leaderip, myhost, myhostip, etcdip, pool, name, ipaddr, ipsubnet, vtype,*args):
     volsip = get(etcdip,'volume',ipaddr)
     nodesip = get(etcdip, 'Active',ipaddr) 
-    notsametype = [ x for x in volsip if vtype.upper() not in str(x) ]
+    notsametype = [ x for x in volsip if vtype not in str(x) ]
     if (len(nodesip) > 0 and 'Active' in str(nodesip))or len(notsametype) > 0:
         print(ipaddr)
         print(len(nodesip), nodesip)
@@ -28,9 +28,10 @@ def create(leader, leaderip, myhost, myhostip, etcdip, pool, name, ipaddr, ipsub
                 fip.write(fvol.read())
     cmdline = 'cp /TopStordata/tempsmb.'+ipaddr+' /TopStordata/smb.'+ipaddr
     subprocess.run(cmdline.split(),stdout=subprocess.PIPE)  
-    cmdline = 'cp /TopStor/VolumeCIFSupdate.sh /etc/'
-    subprocess.run(cmdline.split(),stdout=subprocess.PIPE)  
-    cmdline = '/TopStor/cifs.sh '+resname+' '+mounts+' '+ipaddr+' '+ipsubnet
+    if '_' not in vtype:
+        cmdline = 'cp /TopStor/VolumeCIFSupdate.sh /etc/'
+        subprocess.run(cmdline.split(),stdout=subprocess.PIPE)  
+    cmdline = '/TopStor/cifs.sh '+resname+' '+mounts+' '+ipaddr+' '+ipsubnet+' '+vtype+" ".join(args)
     subprocess.run(cmdline.split(),stdout=subprocess.PIPE)  
     print(mounts)
     return
@@ -52,4 +53,4 @@ if __name__=='__main__':
  initqueue(leaderip, myhost)
  with open('/root/cifspytmp','w') as f:
   f.write(str(sys.argv))
- create(leader, leaderip, myhost, myhostip, etcdip, pool, name, ipaddr, ipsubnet, vtype)
+ create(leader, leaderip, myhost, myhostip, etcdip, pool, name, ipaddr, ipsubnet, vtype,*sys.argv[11:])

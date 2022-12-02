@@ -198,7 +198,7 @@ then
     echo running cifs.sh=$pool $name $ipaddr $ipsubnet cifs >> /root/volactivateparam
     echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
     #/TopStor/cifs.sh $leaderip $pool $name $ipaddr $ipsubnet cifs
-    /TopStor/cifs.py $leader $leaderip $myhost $myhostip $etcd $pool $name $ipaddr $ipsubnet cifs
+    /TopStor/cifs.py $leader $leaderip $myhost $myhostip $etcd $pool $name $ipaddr $ipsubnet CIFS 
    else
     zfs unmount $pool/$name
    fi

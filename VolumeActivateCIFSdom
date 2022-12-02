@@ -161,7 +161,7 @@ then
    active=`echo $l | awk -F'/' '{print $15}'`
    yes | cp sharecifsdom.txt /TopStordata/smb.${name}
    shortname=`echo ${name} | rev | cut -d_ -f2- | rev`
-   sed -i "s/Vtype/CIFS/g"  /TopStordata/smb.${name}
+   sed -i "s/Vtype/CIFS_$domain/g"  /TopStordata/smb.${name}
    sed -i "s/Rpool/$pool/g"  /TopStordata/smb.${name}
    sed -i "s/Rname/$name/g"  /TopStordata/smb.${name}
    sed -i "s/Rreadv/$readv/g"  /TopStordata/smb.${name}
@@ -195,7 +195,8 @@ then
    if [ $? -eq 0 ];
    then
     zfs mount $pool/$name
-    /TopStor/cifsmember.sh $pool $name $ipaddr $ipsubnet cifs $domain $adwinn $adwini $winadm $winpass
+    #/TopStor/cifsmember.sh $pool $name $ipaddr $ipsubnet cifs $domain $adwinn $adwini $winadm $winpass
+    /TopStor/cifs.py $leader $leaderip $myhost $myhostip $etcd $pool $name $ipaddr $ipsubnet CIFS_$domain $domain $adwinn $adwini $winadm $winpass
    else
     zfs unmount $pool/$name
    fi
@@ -217,7 +218,7 @@ then
   name=`echo $l | awk -F'/' '{print $2}'`
   writev=`echo $l | awk -F'/' '{print $5}'`
   writev=`echo $writev | sed 's/\,/ /g' `;
-  volhost=`/pace/etcdget.py $etcd volumes/CIFS/ $name | awk -F'/' '{print $3}'`
+  volhost=`/pace/etcdget.py $etcd volumes $name | grep CIFS | awk -F'/' '{print $3}'`
   volsvalue=`/pace/etcdget.py $etcd volumes/CIFS/$volhost/$pool/$name`
   chmod 777 /$pool/$name
   sleep 1 
@@ -227,11 +228,11 @@ then
   #then
   # for grp in $writev; do setfacl -m g:$grp:rwx /$pool/$name; done
   #fi
-  echo /pace/etcdput.py $leaderip volumes/CIFS/$myhost/$pool/$name $volsvalue
-  /pace/etcdput.py $leaderip volumes/CIFS/$myhost/$pool/$name $volsvalue
+  echo /pace/etcdput.py $leaderip volumes/CIFS_$domain/$myhost/$pool/$name $volsvalue
+  /pace/etcdput.py $leaderip volumes/CIFS_$domain/$myhost/$pool/$name $volsvalue
   if [ $volhost != $myhost ];
   then
-   /pace/etcddel.py $leaderip volumes/CIFS/$volhost/$pool/$name
+   /pace/etcddel.py $leaderip volumes/CIFS_$domain/$volhost/$pool/$name
   fi
  done
  stamp=`date +%s`
