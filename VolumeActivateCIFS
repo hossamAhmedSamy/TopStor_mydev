@@ -145,7 +145,6 @@ then
    echo i=$i
    echo ipc=$ipc for $ip
    echo ipvol=$ipvol
-   echo iam heeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeer
    /TopStor/cifspoolonly.sh $pool $i $ip $ipsubnet
   done
  else
@@ -198,7 +197,8 @@ then
     zfs mount $pool/$name
     echo running cifs.sh=$pool $name $ipaddr $ipsubnet cifs >> /root/volactivateparam
     echo /TopStor/cifs.sh $pool $name $ipaddr $ipsubnet cifs
-    /TopStor/cifs.sh $leaderip $pool $name $ipaddr $ipsubnet cifs
+    #/TopStor/cifs.sh $leaderip $pool $name $ipaddr $ipsubnet cifs
+    /TopStor/cifs.py $leader $leaderip $myhost $myhostip $etcd $pool $name $ipaddr $ipsubnet cifs
    else
     zfs unmount $pool/$name
    fi

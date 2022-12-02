@@ -713,10 +713,14 @@ def volumeconfig(data):
  global allinfo, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
+
  getalltime()
  volume = allinfo['volumes'][data['volume']]
  owner = volume['host']
- ownerip = allinfo['hosts'][owner]['ipaddress']
+ if owner == leader:
+  ownerip = leaderip
+ else:
+  ownerip = allinfo['hosts'][owner]['ipaddress']
  datastr = ''
  data['owner'] = allinfo['hosts'][allinfo['pools'][volume['pool']]['host']]['name']
  if 'ISCSI' in data['type']:
@@ -728,18 +732,21 @@ def volumeconfig(data):
    data['initiators'] = volume['initiators']
   if 'portalport' not in data:
    data['portalport'] = volume['portalport']
-  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+data['ipaddress']+' '+str(volume['Subnet'])+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+data['active']+' '+data['user']+' '+data['owner']+' '+data['user']
+  for ele in data:
+   volume[ele] = data[ele] 
+  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+data['ipaddress']+' '+str(volume['Subnet'])+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+volume['statusmount']+' '+data['user']+' '+data['owner']+' '+data['user']
  else:
+
   if 'groups' in data and len(data['groups']) < 1: 
    data['groups'] = 'NoGroup'
   for ele in data:
    volume[ele] = data[ele] 
-  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+volume['groups']+' '+volume['ipaddress']+' '+str(volume['Subnet'])+' '+data['active']+' '+volume['host']+' '+volume['user']
- print('#############################')
- print(data)
- print(datastr)
- print('###########################')
- cmndstring = '/TopStor/VolumeChange'+data['type']+' '+datastr
+  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+volume['groups']+' '+volume['ipaddress']+' '+str(volume['Subnet'])+' '+volume['statusmount']+' '+volume['host']+' '+volume['user']
+  print('33333333333333333333333333333333333333333333333#############################')
+  print('volume',volume)
+  print('owner',ownerip)
+  print('33333333333333333333333333333333333333333333333#############################')
+ cmndstring = '/TopStor/VolumeChange'+data['type']+' '+leaderip+' '+datastr
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)

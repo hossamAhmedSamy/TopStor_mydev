@@ -16,8 +16,10 @@ def delcifs(*args):
    cmdline = 'docker rm -f '+res
    result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
    theip = res.split('-')[1]
-   nmcli conn mod cmynode -ipv4.addresses $theip 
-   nmcli conn up cmynode
+   cmdline='nmcli conn mod cmynode -ipv4.addresses '+theip
+   result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
+   cmdline='nmcli conn up cmynode'
+   result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
    
    
 if __name__=='__main__':
