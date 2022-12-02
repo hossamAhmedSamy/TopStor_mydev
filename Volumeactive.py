@@ -5,7 +5,8 @@ from etcdgetpy import etcdget as get
 from etcdput import etcdput as put 
 
 
-def volumeactive(leaderip, pool,volname,prot,active,userreq):
+def volumeactive(leaderip, myhost, pool,volname,prot,active,userreq):
+ logmsg.initlog(leaderip, myhost)
  if privthis(prot,userreq) != 'true':
   print('not authorized user to do this task ')
   return
@@ -26,9 +27,15 @@ def volumeactive(leaderip, pool,volname,prot,active,userreq):
  result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
  put(leaderip, volleft,volright)
  logmsg.sendlog('Unmoutsu01','info',userreq,volname,active)
+ leader = get(leaderip,'leader')[0]
+ if leader != myhost:
+   etcdip = get(leaderip,'ready/'+myhost)[0]
+ else:
+   etcdip = leaderip
+ put(etcdip, 'dirty/volume','0')
  return
  
 if __name__=='__main__':
  leaderip = sys.argv[1]
- logmsg.initlog(leaderip, myhost)
+ myhost = sys.argv[2]
  volumeactive(*sys.argv[1:])

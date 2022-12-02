@@ -15,8 +15,9 @@ def delcifs(*args):
    res = docker.split()[-1]
    cmdline = 'docker rm -f '+res
    result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
-   cmdline = '/sbin/pcs resource delete --force '+res
-   result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
+   theip = res.split('-')[1]
+   nmcli conn mod cmynode -ipv4.addresses $theip 
+   nmcli conn up cmynode
    
    
 if __name__=='__main__':

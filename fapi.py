@@ -739,7 +739,7 @@ def volumeconfig(data):
  print(data)
  print(datastr)
  print('###########################')
- cmndstring = '/TopStor/pump.sh VolumeChange'+data['type']+' '+datastr
+ cmndstring = '/TopStor/VolumeChange'+data['type']+' '+datastr
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
@@ -861,7 +861,7 @@ def volumeactive(data):
  prot = allinfo['volumes'][data['name']]['prot']
  owner = allinfo['volumes'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/Volumeactive.py "+leaderip+" "+pool+" "+data['name']+" "+prot+" "+data['active']+" "+data['user']
+ cmndstring = "/TopStor/Volumeactive.py "+leaderip+" "+myhost+" "+pool+" "+data['name']+" "+prot+" "+data['active']+" "+data['user']
  print('##################################')
  print('volumeactive',cmndstring)
  print('##################################')

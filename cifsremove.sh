@@ -9,7 +9,7 @@ volip=`echo $@ | awk '{print $4}'`
 vtype=`echo $@ | awk '{print $5}'`
 echo $@ > /root/`basename "$0"`
 
-/TopStor/logqueue.py `basename "$0"` running $userreq
+docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq
 /TopStor/etcddel.py $leaderip vol $vol
 /TopStor/etcddel.py $leaderip replivol $vol
 /TopStor/etcddel.py $leaderip size $vol 
@@ -31,7 +31,8 @@ docker container rm $resname
 cat /TopStordata/smb.$volip | grep start | grep only
 if [ $? -ne 0 ]
 then 
-  /sbin/pcs resource delete --force $resname  2>/dev/null
+  nmcli conn mod cmynode -ipv4.addresses $volip 
+  nmcli conn up cmynode
   rm -rf /TopStordata/smb.$volip;
 else
  mounts=`cat /TopStordata/smb.$volip | grep '\[' | sed 's/\[//g' | sed 's/\]//g' | sed ':a;N;$!ba;s/\n/,/g'`
@@ -62,8 +63,8 @@ else
   --name $resname 10.11.11.124:5000/smb
   sleep 3
   docker exec $resname sh /hostetc/VolumeCIFSupdate.sh
-  /TopStor/logqueue.py `basename "$0"` stop $userreq
+  /docker exec etcdclient TopStor/logqueue.py `basename "$0"` stop $userreq
 fi
 /TopStor/etcddel.py $leaderip vol $vol
 /TopStor/etcddel.py $leaderip replivol $vol
-/TopStor/logqueue.py `basename "$0"` finish $userreq
+ docker exec etcdclient /TopStor/logqueue.py `basename "$0"` finish $userreq
