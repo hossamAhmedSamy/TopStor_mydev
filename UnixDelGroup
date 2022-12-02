@@ -4,14 +4,14 @@ echo $@ > /root/groupdel
 export ETCDCTL_API=3
 leaderip=`echo $@  | awk '{print $1}'`;
 username=`echo $@ | awk '{print $2}'`;
+echo $username | grep -w Everyone
+if [ $? -eq 0 ];
+then
+exit
+fi
 userreq=`echo $@ | awk '{print $3}'`;
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;
-echo Everyone | grep $username
-if [ $? -eq 0 ];
-then
- exit
-fi
 
 if [[ $contrun == 'true' ]]
 then

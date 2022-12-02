@@ -179,13 +179,15 @@ docker run -itd --rm --name etcd --hostname etcd -v /etc/localtime:/etc/localtim
 
 docker run -itd --rm --name etcdclient --hostname etcdclient -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -v /TopStor/:/TopStor -v /pace/:/pace moataznegm/quickstor:etcdclient 
 
-docker run -itd --privileged \
+docker run -itd --rm --privileged \
+  -v /TopStor/smb.conf:/etc/samba/smb.conf:rw \
   -v /etc/:/hostetc/   \
+  -v /root/gitrepo/resolv.conf:/etc/resolv.conf \
   -v /var/lib/samba/private:/var/lib/samba/private:rw \
-  -v /etc/localtime:/etc/localtime:ro \
-  -v /root/gitrepo/resolv.conf:/etc/resolv.conf
-  -net bridge0
-  --name intsmb --hostname etcdsmb moataznegm/quickstor:smb
+  -v /TopStor/smbuser.sh:/root/smbuser.sh \
+  --net bridge0 \
+  --name intsmb --hostname intsmb moataznegm/quickstor:smb
+ docker exec intsmb sh /hostetc/VolumeCIFSupdate.sh
 #docker run -d --rm --name rmq --hostname rmq  -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $etcd:5672:5672 -v /TopStor/:/TopStor -v /pace/:/pace moataznegm/quickstor:rabbitmq 
 systemctl start rabbitmq-server
 rabbitmqctl add_user rabb_Mezo YousefNadody 2>/dev/null
@@ -218,9 +220,9 @@ do
 		echo docker exec  etcdclient /TopStor/etcdput.py $myclusterip leaderip $myclusterip >> /root/dockerlogs.txt
 		docker exec etcdclient /TopStor/etcdput.py $myclusterip leader $myhost 
 		docker exec etcdclient /TopStor/etcdput.py $myclusterip nextlead/er 'None' 
+		etcdip=$myculsterip
 
 	else
-		echo docker exec etcdclient /pace/etcdget.py $myclusterip clusternode
 		echo isprimaryin0 $isprimary >> /root/dockerlogs.txt
 		docker exec etcdclient /pace/etcdget.py $myclusterip Active --prefix | grep $myhsot
 		if [ $? -ne 0 ];
@@ -238,34 +240,36 @@ do
 				sleep 2
 			fi
 		done
+		etcdip=$mynodeip
 		stamp=`date +%s%N`
+	fi
 
-		myalias=`docker exec etcdclient /pace/etcdget.py $mynodeip $aliast/$myhost`
-		docker exec etcdclient /pace/etcddel.py $myip leader --prefix
-		leader=`docker exec etcdclient /pace/etcdget.py $myclusterip leader`
-		docker exec etcdclient /pace/etcdput.py $myip clusternode $myhost
-		docker exec etcdclient /pace/etcddel.py $myip sync/pools request/$myhost 2>/dev/null
-		docker exec etcdclient /pace/etcddel.py $myip sync/Snapperiod/initial $myhost request/$myhost 2>/dev/null
-        	docker exec etcdclient /pace/etcddel.py $myip pools --prefix 2>/dev/null
-		docker exec etcdclient /pace/etcddel.py $myip volumes --prefix 2>/dev/null
-		docker exec etcdclient /pace/etcddel.py $myip sync/pools Add_ 2>/dev/null
-		docker exec etcdclient /pace/etcddel.py $myip sync/pools Del_ 2>/dev/null
-		docker exec etcdclient /pace/etcddel.py $myip sync/volumes  2>/dev/null
-        	docker exec etcdclient /pace/etcdput.py $myclusterip $aliast/$myhost $myalias
-		/TopStor/syncq.py $myclusterip $myhost 2>/root/syncqerror
-		myalias=`echo $myalias | sed 's/\_/\:\:\:/g'`
-		docker exec etcdclient /pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request ${aliast}_$stamp.
-		docker exec etcdclient /pace/etcdput.py sync/$aliast/Add_${myhost}_$myalias/request/$myhost ${aliast}_$stamp.
-		issync=`docker exec etcdclient /pace/etcdget.py $myip sync initial`initial
-		echo $issync | grep $myhost
-		if [ $? -eq 0 ];
-		then
-	    	echo syncrequests only
-    			docker exec etcdclient /pace/checksyncs.py syncrequest $mycluster $myclusterip $myhost $myip
-       		else
-			echo have to syncall
-			docker exec etcdclient /pace/checksyncs.py syncall $mycluster $myclusterip $myhost $myip
-		fi
+	myalias=`docker exec etcdclient /pace/etcdgetlocal.py $aliast/$myhost`
+	leader=`/pace/etcdget.py $myclusterip leader`
+	docker exec etcdclient /pace/etcdputlocal.py leader $leader 
+	docker exec etcdclient /pace/etcdputlocal.py leaderip $myclusterip
+	docker exec etcdclient /pace/etcdputlocal.py clusternode $myhost
+	docker exec etcdclient /pace/etcddellocal.py sync/Snapperiod/initial $myhost request/$myhost 2>/dev/null
+        docker exec etcdclient /pace/etcddellocal.py pools --prefix 2>/dev/null
+	docker exec etcdclient /pace/etcddellocal.py volumes --prefix 2>/dev/null
+	docker exec etcdclient /pace/etcddellocal.py sync/pools Add_ 2>/dev/null
+	docker exec etcdclient /pace/etcddellocal.py sync/pools Del_ 2>/dev/null
+	docker exec etcdclient /pace/etcddellocal.py sync/volumes Add_ 2>/dev/null
+	docker exec etcdclient /pace/etcddellocal.py sync/volumes Del_ 2>/dev/null
+        docker exec etcdclient /pace/etcdput.py $myclusterip $aliast/$myhost $myalias
+	#/TopStor/syncq.py $myclusterip $myhost 2>/root/syncqerror
+	myalias=`echo $myalias | sed 's/\_/\:\:\:/g'`
+	docker exec etcdclient /pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request ${aliast}_$stamp.
+	docker exec etcdclient /pace/etcdput.py sync/$aliast/Add_${myhost}_$myalias/request/$myhost ${aliast}_$stamp.
+	issync=`docker exec etcdclient /pace/etcdget.py $myip sync initial`initial
+	echo $issync | grep $myhost
+	if [ $? -eq 0 ];
+	then
+		echo syncrequests only
+    		docker exec etcdclient /pace/checksyncs.py syncrequest $mycluster $myclusterip $myhost $myip
+       	else
+		echo have to syncall
+		docker exec etcdclient /pace/checksyncs.py syncall $mycluster $myclusterip $myhost $myip
 	fi
 	checkcluster=`docker exec etcdclient /TopStor/etcdgetlocal.py leaderip`
 	echo $checkcluster >> /root/dockerlogs.txt
@@ -274,7 +278,7 @@ done
 #############################3
 docker exec etcdclient /TopStor/etcddel.py $etcd pools --prefix 
 docker exec etcdclient /TopStor/etcdput.py $etcd mynodeip $mynodeip 
-docker exec etcdclient /TopStor/etcdput.py $etcd mynode $mynode 
+docker exec etcdclient /TopStor/etcdput.py $etcd mynode $myhost 
 docker exec etcdclient /TopStor/etcdput.py $etcd leaderip $myclusterip 
 docker exec etcdclient /TopStor/etcdput.py $etcd isprimary $isprimary 
 isreset=`cat /root/nodestatus`

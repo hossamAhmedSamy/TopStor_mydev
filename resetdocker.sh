@@ -8,11 +8,12 @@ data2dev='enp0s8'
 #hostname localhost
 #echo localhost > /etc/hostname
 
+pkill zfsping 
 pkill iscsiwatchdog
 pkill topstorrecvrep
 pkill syncrequestlooper
 pkill fapilooper
-zpool export -a
+#zpool export -a
 targetcli clearconfig 
 systemctl stop rabbitmq-server
 
