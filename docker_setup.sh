@@ -261,7 +261,7 @@ do
 	myalias=`echo $myalias | sed 's/\_/\:\:\:/g'`
 	docker exec etcdclient /pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request ${aliast}_$stamp.
 	docker exec etcdclient /pace/etcdput.py sync/$aliast/Add_${myhost}_$myalias/request/$myhost ${aliast}_$stamp.
-	issync=`docker exec etcdclient /pace/etcdget.py $myip sync initial`initial
+	issync=`/pace/etcdget.py $myclusterip sync initial`initial
 	echo $issync | grep $myhost
 	if [ $? -eq 0 ];
 	then
