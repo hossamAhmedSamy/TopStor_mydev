@@ -65,7 +65,7 @@ then
  echo /pace/etcdput.py $leaderip volumes/CIFS_$domname/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active >> /root/volcreateparam
  ETCDCTL_API=3 /pace/etcdput.py $leaderip volumes/CIFS_$domname/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active 
  #/pace/broadcasttolocal.py volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/DOMAIN/administrator/yes/$ipaddr/$ipsubnet/$domname/$domsrvn/$domsrvi/$domadmin/$dompass/$active
- ./VolumeActivateCIFSdom vol=$name user=$userreq
+ ./VolumeActivateCIFSdom $leaderip vol=$name user=$userreq
  /pace/putzpool.py $leaderip 
  /TopStor/SnapshotCreateHourlytrend $leaderip $DG $name 0 24 7 system 
  docker exec etcdclient /TopStor/logmsg.py NFS1007 info $userreq $DG/$name

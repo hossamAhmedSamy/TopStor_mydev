@@ -37,7 +37,7 @@ else
 	domainsrvi=`echo $@ | awk '{print $8}'`
 	domadmin=`echo $@ | awk '{print $9}'`
 	adminpass=`echo $@ | awk '{print $10}'`
- 	wrkgrp=`echo $domain | awk -F'\.' '{print $1}'`  
+ 	wrkgrp=`echo $domain | awk -F'.' '{print $1}'`  
 	membername=${wrkgrp}_$RANDOM
  	echo -e 'notyet=1 \nwhile [ $notyet -eq 1 ];\ndo\nsleep 3' > /etc/smb${membername}.sh
  	echo -e 'cat /etc/samba/smb.conf | grep' "'\[public\]'" >> /etc/smb${membername}.sh
@@ -56,13 +56,13 @@ else
 #  -e TZ=Etc/UTC \
  #adminpass=`echo $adminpass | sed 's/\@\@sep/\//g' | sed ':a;N;$!ba;s/\n/ /g'`
  	adminpass=`echo $adminpass | sed 's/\@\@sep/\//g'`
- 	adminpass=`./decthis.sh $domain $adminpass | awk -F'_result' '{print $2}' `
+ 	adminpass=`/TopStor/decthis.sh $domain $adminpass | awk -F'_result' '{print $2}' `
  	docker run -d  $mounts --privileged --rm --add-host "${membername}.$domain ${membername}":$ipaddr  \
   		--hostname ${membername} \
   		-v /etc/localtime:/etc/localtime:ro \
   		-v /etc/:/hostetc/   \
   		-v /TopStordata/smb.${ipaddr}:/etc/smb.conf:rw \
-		-v /TopStordata/resolv.conf:/etc/resolv.conf
+		-v /TopStordata/resolv.conf:/etc/resolv.conf \
   		-e DOMAIN_NAME=$domain \
   		-e ADMIN_SERVER=$domainsrvi \
   		-e WORKGROUP=$wrkgrp  \

@@ -26,8 +26,8 @@ rm -rf /TopStordata/smb.$volip
 cat /TopStordata/smb.${volip}.new
 cat /TopStordata/smb.${volip}.new > /TopStordata/smb.${volip}
 resname=$vtype'-'$volip
-docker stop $resname
-docker container rm $resname 
+resname=`docker ps | grep $volip | awk '{print $NF}'`
+docker  rm -f $resname 
 cat /TopStordata/smb.$volip | grep start | grep only
 if [ $? -ne 0 ]
 then 
