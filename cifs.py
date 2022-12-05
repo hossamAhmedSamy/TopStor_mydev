@@ -31,6 +31,8 @@ def create(leader, leaderip, myhost, myhostip, etcdip, pool, name, ipaddr, ipsub
     if '_' not in vtype:
         cmdline = 'cp /TopStor/VolumeCIFSupdate.sh /etc/'
         subprocess.run(cmdline.split(),stdout=subprocess.PIPE)  
+    print('hihihihi')
+    print('/TopStor/cifs.sh '+resname+' '+mounts+' '+ipaddr+' '+ipsubnet+' '+vtype+' '+" ".join(args))
     cmdline = '/TopStor/cifs.sh '+resname+' '+mounts+' '+ipaddr+' '+ipsubnet+' '+vtype+' '+" ".join(args)
     subprocess.run(cmdline.split(),stdout=subprocess.PIPE)  
     print(mounts)

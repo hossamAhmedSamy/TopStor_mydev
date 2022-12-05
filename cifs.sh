@@ -38,7 +38,7 @@ else
 	domadmin=`echo $@ | awk '{print $9}'`
 	adminpass=`echo $@ | awk '{print $10}'`
  	wrkgrp=`echo $domain | awk -F'.' '{print $1}'`  
-	membername=${wrkgrp}_$RANDOM
+	membername=${wrkgrp}-$RANDOM
  	echo -e 'notyet=1 \nwhile [ $notyet -eq 1 ];\ndo\nsleep 3' > /etc/smb${membername}.sh
  	echo -e 'cat /etc/samba/smb.conf | grep' "'\[public\]'" >> /etc/smb${membername}.sh
  	echo -e 'if [ $? -eq 0 ];\nthen' >> /etc/smb${membername}.sh
@@ -46,7 +46,7 @@ else
  	echo -e ' if [ $? -eq 0 ];\nthen' >> /etc/smb${membername}.sh
  	echo -e '  cat /etc/samba/smb.conf | grep' "'\[home\]'" >> /etc/smb${membername}.sh
  	echo -e '  if [ $? -eq 0 ];\nthen\nnotyet=0\nfi\nfi\nfi\ndone' >> /etc/smb${membername}.sh
- 	echo  "sed -i -e '51,1000d' /etc/samba/smb.conf"  >> /etc/smb${membername}.sh
+ 	echo  "sed -in '/stop/q;p' /etc/samba/smb.conf"  >> /etc/smb${membername}.sh
  	echo  "cat /etc/smb.conf >> /etc/samba/smb.conf"  >> /etc/smb${membername}.sh
  	echo  "service samba --full-restart"  >> /etc/smb${membername}.sh
  	chmod +w /etc/smb${membername}.sh

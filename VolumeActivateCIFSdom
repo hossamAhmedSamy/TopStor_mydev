@@ -196,6 +196,7 @@ then
    then
     zfs mount $pool/$name
     #/TopStor/cifsmember.sh $pool $name $ipaddr $ipsubnet cifs $domain $adwinn $adwini $winadm $winpass
+    echo /TopStor/cifs.py $leader $leaderip $myhost $myhostip $etcd $pool $name $ipaddr $ipsubnet CIFS_$domain $domain $adwinn $adwini $winadm $winpass
     /TopStor/cifs.py $leader $leaderip $myhost $myhostip $etcd $pool $name $ipaddr $ipsubnet CIFS_$domain $domain $adwinn $adwini $winadm $winpass
    else
     zfs unmount $pool/$name

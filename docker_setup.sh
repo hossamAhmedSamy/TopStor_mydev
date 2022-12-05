@@ -271,7 +271,7 @@ then
 	docker exec etcdclient /pace/checksyncs.py syncinit $etcd 
 fi
  /TopStor/topstorrecvreply.py $etcd & disown
-/pace/iscsiwatchdog.sh $etcd >/dev/null 2>/dev/null & disown 
+/pace/iscsiwatchdog.sh $etcd $myhost >/dev/null 2>/dev/null & disown 
 docker exec -it etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
 
 
