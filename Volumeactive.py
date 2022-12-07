@@ -6,6 +6,11 @@ from etcdput import etcdput as put
 
 
 def volumeactive(leaderip, myhost, pool,volname,prot,active,userreq):
+ leader = get(leaderip,'leader')[0]
+ if leader != myhost:
+   etcdip = get(leaderip,'ready/'+myhost)[0]
+ else:
+   etcdip = leaderip
  logmsg.initlog(leaderip, myhost)
  if privthis(prot,userreq) != 'true':
   print('not authorized user to do this task ')
@@ -23,15 +28,10 @@ def volumeactive(leaderip, myhost, pool,volname,prot,active,userreq):
  ipaddr = volright[7]
  volright = '/'.join(volright)
  volleft = volinfo[0]
- cmdline='/TopStor/Volumeactivesh.sh '+pool+' '+volname+' '+prot+' '+active+' '+ipaddr+' '+userreq
+ cmdline='/TopStor/Volumeactivesh.sh '+leaderip+' '+myhost+' '+pool+' '+volname+' '+prot+' '+active+' '+ipaddr+' '+userreq
  result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
  put(leaderip, volleft,volright)
  logmsg.sendlog('Unmoutsu01','info',userreq,volname,active)
- leader = get(leaderip,'leader')[0]
- if leader != myhost:
-   etcdip = get(leaderip,'ready/'+myhost)[0]
- else:
-   etcdip = leaderip
  put(etcdip, 'dirty/volume','0')
  return
  

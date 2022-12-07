@@ -6,6 +6,7 @@ from sendhost import sendhost
 
 def create(leader, leaderip, myhost, myhostip, etcdip, pool, name, ipaddr, ipsubnet, vtype,*args):
     volsip = get(etcdip,'volume',ipaddr)
+    volsip = [ x for x in volsip if 'active' in str(x) ]
     nodesip = get(etcdip, 'Active',ipaddr) 
     notsametype = [ x for x in volsip if vtype not in str(x) ]
     if (len(nodesip) > 0 and 'Active' in str(nodesip))or len(notsametype) > 0:
