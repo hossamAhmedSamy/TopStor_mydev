@@ -49,4 +49,5 @@ then
  docker exec etcdclient /TopStor/logmsg.py NFS1002 info $userreq $pDG/$volname
  docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq
 fi
+ docker exec etcdclient /TopStor/etcdputlocal.py dirty/volume 0
  docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq
