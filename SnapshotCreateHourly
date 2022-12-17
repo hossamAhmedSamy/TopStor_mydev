@@ -1,5 +1,5 @@
 #!/bin/sh
-
+cd /TopStor/
 echo $@ > /root/createhourlyperiods
 export ETCDCTL_API=3
 cronthis='/TopStordata/cronthis.txt'
@@ -12,14 +12,14 @@ pDG=` echo $@ | awk '{print $2}'`;
 FileS=` echo $@ | awk '{print $3}'`;
 receiver=` echo $@ | awk '{print $7}'`;
 userreq=` echo $@ | awk '{print $8}'`;
-docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq 
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
 rm $txtres 2>/dev/null
 DG=$pDG; 
 privilege="SnapShots";
-contrun=`./privthis.sh $privilege $userreq`;
+contrun=`/TopStor/privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
+  docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq 
   docker exec etcdclient /TopStor/logmsg.py Snap1037 info $userreq  
 	myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
 	myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
@@ -49,14 +49,11 @@ if [[ $err -ge  4  ]]; then
   docker exec etcdclient /TopStor/logmsg.py Snap1038 error $userreq $DG/$FileS 
 else 
   docker exec etcdclient /TopStor/logmsg.py Snap1039 info $userreq  Hourly.$keep.$min.$every.$stamp $DG/$FileS
-  /pace/etcdput.py $etcd Snapperiod/Hourly/$DG/$FileS/$stamp  $min%*/$every%*%*%*%/TopStor/Snapshotnowhost%$DG/$FileS%Hourly.$keep.$min.$every.na%$stamp/$receiver
- if [ -z $local ];
- then
+  /pace/etcdput.py $etcd Snapperiod/Hourly/$DG/$FileS/$stamp/$receiver  $min%*/$every%*%*%*%/TopStor/Snapshotnowhost%$DG/$FileS%Hourly.$keep.$min.$every.na%$stamp/$receiver
   /pace/etcdput.py $leaderip sync/Snapperiod/_____/request/$myhost Snapperiod_$stamp
   /pace/etcdput.py $leaderip sync/Snapperiod/_____/request Snapperiod_$stamp
- fi
 
 #ETCDCTL_API=3 /TopStor/broadcast.py  PeriodManage /TopStor/etctocronlocal.sh 
 fi
 fi
-/TopStor/logqueue.py `basename "$0"` stop $userreq 
+docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq 

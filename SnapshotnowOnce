@@ -21,6 +21,7 @@ shortreceiver=`echo $receiver | awk -F'_' '{print $1}'`
  		etcd=$leaderip
  	fi
 
+docker exec etcdclient /TopStor/logqueue.py `basename "$0"` start system 
 echo $receiver | grep NoReceiver
 if [ $? -ne 0 ];
 then 
@@ -39,12 +40,15 @@ else
 fi 
 result='init'
 zfs set snap:type=Once $snapshot 
-echo $receiver | grep NoReceiver 
-if [ $? -ne 0 ];
-then 
- waiting=1
- while [ $waiting -eq 1 ];
- do
+echo $receiver | grep NoReceive
+if [ $? -eq 0 ];
+then
+	waiting=0
+else
+ 	waiting=1
+fi
+while [ $waiting -eq 1 ];
+do
   running=`/TopStor/etcdget.py $etcd running/$receiver`
   echo $running | grep $receiver
   if [ $? -eq 0 ];
@@ -61,12 +65,15 @@ then
   else
    waiting=0
   fi
- done
+done
+echo $receiver | grep NoReceive
+if [ $? -ne 0 ];
+then
  /TopStor/etcdput.py $leaderip running/$receiver $receiver
  /TopStor/etcdput.py $leaderip sync/running/____/request running_$stamp
  /TopStor/etcdput.py $leaderip sync/running/____/request/$leader running_$stamp
  echo ./replicatenow.py $snapshot $receiver
- result=`./replicatenow.py $snapshot $receiver`
+ result=`./replicatenow.py $leaderip $etcd $snapshot $receiver`
  result=`echo $result | grep 'result_' | awk -F'result_' '{print $2}'`
  echo .................................................................
  echo result=$result
@@ -79,8 +86,9 @@ then
  else
    ./logmsg.py Replispacesu01 info $userreq $shortreceiver $vol
  fi 
-fi;
  /TopStor/etcdput.py $leaderip running/$receiver finish 
  /TopStor/etcdput.py $leaderip sync/running/____/request running_$stamp
  /TopStor/etcdput.py $leaderip sync/running/____/request/$leader running_$stamp
+fi 
+docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop system 
 #sleep 2;

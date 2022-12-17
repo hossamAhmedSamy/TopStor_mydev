@@ -37,10 +37,10 @@ fi
 echo $receiver | grep NoReceiver
 if [ $? -ne 0 ];
 then 
- docker exec etcdclient ./logmsg.py Replispacest01 info $userreq $vol $shortreceiver  
+ docker exec etcdclient /TopStor/logmsg.py Replispacest01 info $userreq $vol $shortreceiver  
  echo /logmsg.py Replispacest01 info $userreq $vol $shortreceiver  
 fi
-res=`./Snapshotnow $@ | awk -F'_newsnap' '{print $2}'`
+res=`./Snapshotnow $leaderip $myhost $@ | awk -F'_newsnap' '{print $2}'`
 echo $res | grep Erro
 if [ $? -eq 0 ];
 then
@@ -52,8 +52,15 @@ zfs set snap:type=$stype $snapshot
 echo $receiver | grep NoReceiver 
 if [ $? -ne 0 ];
 then 
- echo ./replicatenow.py $snapshot $receiver
- waiting=1
+ echo ./replicatenow.py $leaderip $etcd $snapshot $receiver
+ echo $receiver | grep NoReceive
+ if [ $? -eq 0 ];
+ then
+ 	waiting=0
+ else
+ 	waiting=1
+ fi
+ echo $receiver, $waiting
  while [ $waiting -eq 1 ];
  do 
   running=`./etcdget.py $leaderip running $receiver`
@@ -77,25 +84,29 @@ then
    waiting=0
   fi
  done
+ echo $receiver | grep NoReceive
+ if [ $? -eq 0 ];
+ then
   ./etcdput.py $leaderip running/$myhost/$receiver $receiver 
   ./etcdput.py $leaderip sync/running/____/request running_$stamp
   ./etcdput.py $leaderip sync/running/____/request/$leader running_$stamp
- result=`./replicatenow.py $snapshot $receiver 2>/root/replicatenow`
- echo result=$result >> /root/replicatenow
- result=`echo $result | grep 'result_' | awk -F'result_' '{print $2}'`
- echo .................................................................
- echo result=$result
- echo ............................................
- echo $result | grep 'fail'
- if [ $? -eq 0 ];
- then
-  #./logmsg.py Replispacefa01 error $userreq $shortreceiver $vol
-  docker exec etcdclient /TopStor/logmsg.py Streamfa01 error $userreq $vol $shortreceiver
- else
-   docker exec etcdclient /TopStor/logmsg.py Replispacesu01 info $userreq $vol $shortreceiver
- fi 
+  result=`./replicatenow.py $snapshot $receiver 2>/root/replicatenow`
+  echo result=$result >> /root/replicatenow
+  result=`echo $result | grep 'result_' | awk -F'result_' '{print $2}'`
+  echo .................................................................
+  echo result=$result
+  echo ............................................
+  echo $result | grep 'fail'
+  if [ $? -eq 0 ];
+  then
+   #./logmsg.py Replispacefa01 error $userreq $shortreceiver $vol
+   docker exec etcdclient /TopStor/logmsg.py Streamfa01 error $userreq $vol $shortreceiver
+  else
+    docker exec etcdclient /TopStor/logmsg.py Replispacesu01 info $userreq $vol $shortreceiver
+  fi 
+ fi
+ ./etcdput.py $leaderip running/$myhost/$receiver finished 
+ ./etcdput.py $leaderip sync/running/____/request running_$stamp
+ ./etcdput.py $leaderip sync/running/____/request/$leader running_$stamp
 fi
-./etcdput.py $leaderip running/$myhost/$receiver finished 
-./etcdput.py $leaderip sync/running/____/request running_$stamp
-./etcdput.py $leaderip sync/running/____/request/$leader running_$stamp
 docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop system 

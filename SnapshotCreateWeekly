@@ -1,26 +1,19 @@
 #!/bin/sh
-myhost=` ./etcdgetlocal.py clusternode`
-leaderip=` ./etcdgetlocal.py leaderip`
-echo $@ weekly > /root/tmp
+echo $@  > /root/tmp
 export ETCDCTL_API=3
 cronthis='/TopStordata/cronthis.txt'
 rm -rf $cronthis 2>/dev/null
-stime=`echo $@ | awk '{print $3}'`;
-ampm=`echo $@ | awk '{print $4}'`;
+stime=`echo $@ | awk '{print $4}'`;
 hr=`echo $stime | awk -F':' '{print $1}'`;
-echo $ampm | grep PM
-if [ $? -eq 0 ];
-then
- hr=$((hr+12))
-fi
+10.11.11.251 pdhcp200401425 newes_192441148 10:50 Sun 2 NoReceiver admi
 leaderip=`echo $@ | awk '{print $1}'`;
 min=`echo $stime | awk -F':' '{print $2}'`;
-every=`echo $@ | awk '{print $6}'` ;
-k=0; keep=`echo $@ | awk '{print $7}'`; keep=$(($keep+$k)); if (($keep < 1)); then keep=1; fi
+every=`echo $@ | awk '{print $5}'` ;
+k=0; keep=`echo $@ | awk '{print $6}'`; keep=$(($keep+$k)); if (($keep < 1)); then keep=1; fi
 pDG=` echo $@ | awk '{print $2}'`; 
 FileS=` echo $@ | awk '{print $3}'`;
-receiver=` echo $@ | awk '{print $8}'`;
-userreq=` echo $@ | awk '{print $9}'`;
+receiver=` echo $@ | awk '{print $7}'`;
+userreq=` echo $@ | awk '{print $8}'`;
 docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq 
 txtres='/TopStordata/'`basename $0`$userreq'.txt'
 rm $txtres 2>/dev/null
@@ -56,7 +49,7 @@ if [ $? -ne  0 ]; then
    docker exec etcdclient /TopStor/logmsg.py Snap1032 error $userreq  $DG/$FileS
 else 
   docker exec etcdclient /TopStor/logmsg.py Snap1033 info $userreq Weekly.$keep.$hr.$min.$every.$stamp $DG/$FileS
-  /pace/etcdput.py $leaderip Snapperiod/Weekly/$DG/$FileS/$stamp  $min%$hr%*%*%$every%/TopStor/Snapshotnowhost%$DG/$FileS%Weekly.$keep.$hr.$min.$every%$stamp/$receiver
+  /pace/etcdput.py $leaderip Snapperiod/Weekly/$DG/$FileS/$stamp/$receiver  $min%$hr%*%*%$every%/TopStor/Snapshotnowhost%$DG/$FileS%Weekly.$keep.$hr.$min.$every%$stamp/$receiver
   /pace/etcdput.py $leaderip sync/Snapperiod/______/request/$leader Snapperiod_$stamp
   /pace/etcdput.py $leaderip sync/Snapperiod/_____/request Snapperiod_$stamp
 fi;

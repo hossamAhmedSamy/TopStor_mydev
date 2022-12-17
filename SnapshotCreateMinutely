@@ -9,8 +9,8 @@ every=0; ev=`echo $@ | awk '{print $4}'`; every=$(($every+$ev)) ; if (($every < 
 keep=0; k=`echo $@ | awk '{print $5}'`; keep=$(($keep+$k)); if (($keep < 1)); then keep=1 ; fi
 pDG=` echo $@ | awk '{print $2}'`; 
 FileS=` echo $@ | awk '{print $3}'`;
-receiver=` echo $@ | awk '{print $4}'`;
-userreq=` echo $@ | awk '{print $5}'`;
+receiver=` echo $@ | awk '{print $6}'`;
+userreq=` echo $@ | awk '{print $7}'`;
 docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq 
 DG=` echo $pDG`;
 privilege="SnapShots";
@@ -50,6 +50,5 @@ else
    /pace/etcdput.py $leaderip sync/Snapperiod/____/request/$leader Snapperiod_$stamp
    /pace/etcdput.py $leaderip sync/Snapperiod/____/request Snapperiod_$stamp
 fi;
- /pace/putzpool.py
 fi
  docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq 
