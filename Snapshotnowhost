@@ -1,10 +1,6 @@
 #!/bin/sh
 export ETCDCTL_API=3
 cd /TopStor
-web='/var/www/html/des20/Data/currentinfo2.log2';
-glog='/var/www/html/des20/Data/TopStor.log';
-logging='/var/www/html/des20/Data/currentinfo2.log'
-runningpools='/pacedata/pools/runningpools'
 pDG=`echo $@ | awk '{print $1}'`;
 DG=`echo $@ | awk -F/ '{print $1}'`;
 vol=`echo $@ | awk '{print $1}'| awk -F/ '{print $2}'`;
@@ -12,26 +8,36 @@ stype=`echo $@ | awk '{print $2}' | awk -F'.' '{print $1}'`;
 receiver=` echo $@ | awk '{print $NF'}`
 shortreceiver=`echo $receiver | awk -F'_' '{print $1}'`
 echo $pDG
-myhost=` ./etcdgetlocal.py clusternode`
-leaderip=` ./etcdgetlocal.py leaderip`
+leaderip=` docker exec etcdclient /TopStor/etcdgetlocal.py leaderip`
+	myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
+	myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
+	leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
+	echo $leader | grep $myhost
+	if [ $? -ne 0 ];
+	then
+ 		etcd=$myhostip
+	else
+ 		etcd=$leaderip
+ 	fi
+
+
 userreq='system'
 stamp=`date +%s`
-leader=` ./etcdgetlocal.py leader `
 pp=`/sbin/zpool list | grep $DG`
 echo pp=$pp
 echo $pp | grep $DG
 if [ $? -ne 0 ]; 
 then
  echo host not owner
- /TopStor/logqueue.py `basename "$0"` stop_cancel system 
+ docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop_cancel system 
  exit
 else
- /TopStor/logqueue.py `basename "$0"` running system 
+ docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running system 
 fi
 echo $receiver | grep NoReceiver
 if [ $? -ne 0 ];
 then 
- ./logmsg.py Replispacest01 info $userreq $vol $shortreceiver  
+ docker exec etcdclient ./logmsg.py Replispacest01 info $userreq $vol $shortreceiver  
  echo /logmsg.py Replispacest01 info $userreq $vol $shortreceiver  
 fi
 res=`./Snapshotnow $@ | awk -F'_newsnap' '{print $2}'`
@@ -84,12 +90,12 @@ then
  if [ $? -eq 0 ];
  then
   #./logmsg.py Replispacefa01 error $userreq $shortreceiver $vol
-  ./logmsg.py Streamfa01 error $userreq $vol $shortreceiver
+  docker exec etcdclient /TopStor/logmsg.py Streamfa01 error $userreq $vol $shortreceiver
  else
-   ./logmsg.py Replispacesu01 info $userreq $vol $shortreceiver
+   docker exec etcdclient /TopStor/logmsg.py Replispacesu01 info $userreq $vol $shortreceiver
  fi 
 fi
 ./etcdput.py $leaderip running/$myhost/$receiver finished 
 ./etcdput.py $leaderip sync/running/____/request running_$stamp
 ./etcdput.py $leaderip sync/running/____/request/$leader running_$stamp
-/TopStor/logqueue.py `basename "$0"` stop system 
+docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop system 
