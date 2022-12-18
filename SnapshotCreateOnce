@@ -24,3 +24,4 @@ then
 /TopStor/SnapshotnowOnce $leaderip $pDG $FileS $name $receiver $userreq > $txtres
 fi
 docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq 
+/pace/putzpool.py
