@@ -2,15 +2,14 @@
 cd /TopStor
 export ETCDCTL_API=3
 enpdev='enp0s8'
-pool=`echo $@ | awk '{print $1}'`
-vol=`echo $@ | awk '{print $2}'`
-volip=`echo $@ | awk '{print $3}'`
-vtype=`echo $@ | awk '{print $4}'`
+leaderip=`echo $@ | awk '{print $1}'`
+pool=`echo $@ | awk '{print $2}'`
+vol=`echo $@ | awk '{print $3}'`
+volip=`echo $@ | awk '{print $4}'`
+vtype=`echo $@ | awk '{print $5}'`
 echo $@ > /root/`basename "$0"`
 
-leaderip=` ./etcdgetlocal.py leaderip `
-myhost=` ./etcdgetlocal.py clusternode `
-/TopStor/logqueue.py `basename "$0"` running $userreq
+docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq
 /TopStor/etcddel.py $leaderip vol $vol
 /TopStor/etcddel.py $leaderip replivol $vol
 /TopStor/etcddel.py $leaderip size $vol 
@@ -27,12 +26,13 @@ rm -rf /TopStordata/smb.$volip
 cat /TopStordata/smb.${volip}.new
 cat /TopStordata/smb.${volip}.new > /TopStordata/smb.${volip}
 resname=$vtype'-'$volip
-docker stop $resname
-docker container rm $resname 
+resname=`docker ps | grep $volip | awk '{print $NF}'`
+docker  rm -f $resname 
 cat /TopStordata/smb.$volip | grep start | grep only
 if [ $? -ne 0 ]
 then 
-  /sbin/pcs resource delete --force $resname  2>/dev/null
+  nmcli conn mod cmynode -ipv4.addresses $volip 
+  nmcli conn up cmynode
   rm -rf /TopStordata/smb.$volip;
 else
  mounts=`cat /TopStordata/smb.$volip | grep '\[' | sed 's/\[//g' | sed 's/\]//g' | sed ':a;N;$!ba;s/\n/,/g'`
@@ -63,8 +63,8 @@ else
   --name $resname 10.11.11.124:5000/smb
   sleep 3
   docker exec $resname sh /hostetc/VolumeCIFSupdate.sh
-  /TopStor/logqueue.py `basename "$0"` stop $userreq
+  /docker exec etcdclient TopStor/logqueue.py `basename "$0"` stop $userreq
 fi
 /TopStor/etcddel.py $leaderip vol $vol
 /TopStor/etcddel.py $leaderip replivol $vol
-/TopStor/logqueue.py `basename "$0"` finish $userreq
+ docker exec etcdclient /TopStor/logqueue.py `basename "$0"` finish $userreq

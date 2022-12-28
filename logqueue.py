@@ -2,13 +2,20 @@
 import sys, datetime
 from time import time
 from etcdput import etcdput as put
-from etcdgetlocalpy import etcdget as get 
+from etcdgetlocalpy import etcdget as getlocal
 from ast import literal_eval as mtuple
 from sendhost import sendhost
 
+leaderip = ''
+myhost = ''
+def initqueue(ldr,host):
+    global leaderip, myhost
+    leaderip = ldr
+    myhost = host
+
+
 def queuethis(*args):
- leaderip = get('myclusterip')[0]
- myhost = get('clusternode')[0]
+ global leaderip, myhost
  z=[]
  put(leaderip,'request/'+args[0]+'/'+myhost,args[1])
  dt=datetime.datetime.now().strftime("%m/%d/%Y")
@@ -24,4 +31,5 @@ def queuethis(*args):
  
 if __name__=='__main__':
  #queuethis('ddlrt.py','start','system')
+ initqueue(getlocal('leaderip')[0], getlocal('clusternode')[0])
  queuethis(*sys.argv[1:])

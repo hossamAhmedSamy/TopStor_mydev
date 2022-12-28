@@ -9,9 +9,12 @@ data2dev='enp0s8'
 #echo localhost > /etc/hostname
 
 pkill iscsiwatchdog
+pkill zfsping 
 pkill topstorrecvrep
+pkill fapilooper
 pkill syncrequestlooper
-zpool export -a
+pkill checksyncs
+#zpool export -a
 targetcli clearconfig 
 systemctl stop rabbitmq-server
 
@@ -20,6 +23,7 @@ systemctl stop rabbitmq-server
 docker stop intdns
 docker stop etcd
 docker stop httpd
+docker stop httpd_local
 docker stop flask
 docker stop etcdclient 
 docker stop rmq 

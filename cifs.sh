@@ -1,103 +1,85 @@
 #!/bin/sh
 cd /TopStor
 export ETCDCTL_API=3
-enpdev='enp0s8'
-pool=`echo $@ | awk '{print $1}'`
-vol=`echo $@ | awk '{print $2}'`
+resname=`echo $@ | awk '{print $1}'`
+mounts=`echo $@ | awk '{print $2}' | sed 's/\-v/ \-v /g'`
 ipaddr=`echo $@ | awk '{print $3}'`
 ipsubnet=`echo $@ | awk '{print $4}'`
 vtype=`echo $@ | awk '{print $5}'`
-leaderip=` ./etcdgetlocal.py leaderip `
-myhost=` ./etcdgetlocal.py clusternode `
-echo $@ > /root/cifsparam
-allvols=`./etcdgetlocal.py volumes --prefix`
-replivols=`echo $allvols | grep $vol `
-echo $replivols | grep active 
+echo $@ > /root/cifstmp
+echo $resname >> /root/cifstmp
+echo $mounts >> /root/cifstmp
+echo $ipaddr $ipsubnet >> /root/cifstmp
+docker rm -f $resname
+nmcli conn mod cmynode -ipv4.addresses ${ipaddr}/$ipsubnet
+nmcli conn mod cmynode +ipv4.addresses ${ipaddr}/$ipsubnet
+nmcli conn up cmynode
+echo $vtype | grep '_' 
 if [ $? -ne 0 ];
 then
- echo it is not active
- exit
-fi
-leaderall=` ./etcdgetlocal.py leader --prefix `
-leader=`echo $leaderall | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
-#docker rm -f `docker ps -a | grep -v Up | grep $ipaddr | awk '{print $1}'` 2>/dev/null
-echo cifs $@
-ipaddrinfo=`/pace/etcdgetlocal.py ipaddr/$myhost $vtype-ipaddr`
-rightip=`echo $ipaddrinfo | awk -F"'," '{print $2}' | awk -F"'" '{print $2}' | sed "s/${vol}\///g" | sed "s/\/${vol}//g" | sed "s/${vtype}\-${ipaddr}\///g" | sed "s/${vtype}\-$ipaddr//g"`
-otherip=`/pace/etcdgetlocal.py ipaddr $vtype-$ipaddr | grep -v $myhost | wc -c`
-othervtype=`/pace/etcdgetlocal.py ipaddr $ipaddr | grep -v $vtype | wc -c`
-/TopStor/logqueue.py `basename "$0"` running $userreq
-if [ $otherip -ge 5 ];
-then 
- echo another host is holding the ip
- echo otherip=$otherip
- /TopStor/logqueue.py `basename "$0"` stop $userreq
- exit
-fi
-if [ $othervtype -ge 5 ];
-then 
- echo the ip is used by another protocol 
- /TopStor/logqueue.py `basename "$0"` stop $userreq
- exit
-fi
-#clearvol=`./prot.py clearvol $vol | awk -F'result=' '{print $2}'`
-#redvol=`./prot.py redvol $vol | awk -F'result=' '{print $2}'`
-resname=$vtype'-'$ipaddr
-if [[ $rightip == '' ]];
-then
- echo nothing found
- rightip=''
- rightvols=$vol
+		docker run -d $mounts --rm --privileged \
+  		-e "HOSTIP=$ipaddr"  \
+  		-p $ipaddr:135:135 \
+  		-p $ipaddr:137:137/udp \
+  		-p $ipaddr:138:138/udp \
+  		-p $ipaddr:139:139 \
+  		-p $ipaddr:445:445 \
+  		-v /TopStordata/smb.${ipaddr}:/config/smb.conf:rw \
+  		-v /TopStor/smb.conf:/etc/samba/smb.conf:rw \
+  		-v /etc/:/hostetc/   \
+  		-v /var/lib/samba/private:/var/lib/samba/private:rw \
+  		--name $resname moataznegm/quickstor:smb
+  		sleep 1 
+  		docker exec $resname sh /hostetc/VolumeCIFSupdate.sh
 else
- echo found other vols
- #rightvols=`/pace/etcdgetlocal.py ipaddr/$myhost/$ipaddr/$ipsubnet | sed "s/$resname\///g"`'/'$vol
- rightvols=$rightip'/'$vol
-fi
- 
- echo /pace/etcdput.py $leaderip ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
- /pace/etcdput.py $leaderip ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
- stamp=`date +%s`;
- /pace/etcdput.py $leaderip sync/ipaddr/__/request ipaddr_$stamp
- /pace/etcdput.py $leaderip sync/ipaddr/__/request/$leader ipaddr_$stamp
- #/pace/broadcasttolocal.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols 
- mounts=`echo $rightvols | sed 's/\// /g'`
- echo rightvol=$rightvols
- echo mounts=$mounts
- mount=''
- rm -rf /TopStordata/tempsmb.$ipaddr
- for x in $mounts; 
- do
-  replivols=`echo $allvols | grep $x `
-  echo $replivols | grep active
-  if [ $? -ne 0 ];
-  then
-   continue
-  fi
-  mount=$mount' -v /'$pool'/'$x':/'$pool'/'$x':rw '
-  cat /TopStordata/smb.$x >> /TopStordata/tempsmb.$ipaddr
- done
- echo mount=$mount
- cp /TopStordata/tempsmb.$ipaddr  /TopStordata/smb.$ipaddr
- cp /TopStor/VolumeCIFSupdate.sh /etc/
- dockers=`docker ps -a`
- echo $dockers | grep $resname
- if [ $? -eq 0 ];
- then
-  docker stop $resname 
-  docker rm -f $resname
- fi
- docker run -d $mount --privileged \
-  -e "HOSTIP=$ipaddr"  \
-  -p $ipaddr:135:135 \
-  -p $ipaddr:137-138:137-138/udp \
-  -p $ipaddr:139:139 \
-  -p $ipaddr:445:445 \
-  -v /etc/localtime:/etc/localtime:ro \
-  -v /TopStordata/smb.${ipaddr}:/config/smb.conf:rw \
-  -v /etc/:/hostetc/   \
-  -v /var/lib/samba/private:/var/lib/samba/private:rw \
-  --name $resname 10.11.11.124:5000/smb
-  sleep 3
-  docker exec $resname sh /hostetc/VolumeCIFSupdate.sh
+	domain=`echo $@ | awk '{print $6}'`
+	domainsrvn=`echo $@ | awk '{print $7}'`
+	domainsrvi=`echo $@ | awk '{print $8}'`
+	domadmin=`echo $@ | awk '{print $9}'`
+	adminpass=`echo $@ | awk '{print $10}'`
+ 	wrkgrp=`echo $domain | awk -F'.' '{print $1}'`  
+	membername=${wrkgrp}-$RANDOM
+	cp /TopStor/smbmember.conf /etc/smbmember.conf_$membername
+	sed -i "s/WRKGRP/$wrkgrp/g" /etc/smbmember.conf_$membername
+	sed -i "s/DOMAINIP/$domainsrvi/g" /etc/smbmember.conf_$membername
+	sed -i "s/DOMAIN/${domain^^}/g" /etc/smbmember.conf_$membername
+  	cat /TopStordata/smb.${ipaddr} >> /etc/smbmember.conf_$membername
+	#cp /TopStordata/smbmember.conf_$membername /etc/smbmember.conf_$membername
+ 	echo -e 'notyet=1 \nwhile [ $notyet -eq 1 ];\ndo\nsleep 3' > /etc/smb${membername}.sh
+ 	echo -e 'cat /etc/samba/smb.conf | grep' "'\[public\]'" >> /etc/smb${membername}.sh
+ 	echo -e 'if [ $? -eq 0 ];\nthen' >> /etc/smb${membername}.sh
+ 	echo -e ' cat /etc/samba/smb.conf | grep' "'\[private\]'" >> /etc/smb${membername}.sh
+ 	echo -e ' if [ $? -eq 0 ];\nthen' >> /etc/smb${membername}.sh
+ 	echo -e '  cat /etc/samba/smb.conf | grep' "'\[home\]'" >> /etc/smb${membername}.sh
+ 	echo -e '  if [ $? -eq 0 ];\nthen\nnotyet=0\nfi\nfi\nfi\ndone' >> /etc/smb${membername}.sh
+	echo -e "cat /hostetc/smbmember.conf_$membername > /etc/samba/smb.conf" >> /etc/smb${membername}.sh
+ 	echo  "service samba --full-restart"  >> /etc/smb${membername}.sh
+ 	chmod +w /etc/smb${membername}.sh
+ 	sync
+ 	cp /etc/resolv.conf /TopStordata/ 
+ 	echo nameserver $domainsrvi > /TopStordata/resolv.conf
+#  -e TZ=Etc/UTC \
+ #adminpass=`echo $adminpass | sed 's/\@\@sep/\//g' | sed ':a;N;$!ba;s/\n/ /g'`
+ 	adminpass=`echo $adminpass | sed 's/\@\@sep/\//g'`
+ 	adminpass=`/TopStor/decthis.sh $domain $adminpass | awk -F'_result' '{print $2}' `
+ 	docker run -d  $mounts --privileged --rm --add-host "${membername}.$domain ${membername}":$ipaddr  \
+  		--hostname ${membername} \
+  		-v /etc/localtime:/etc/localtime:ro \
+  		-v /etc/:/hostetc/   \
+  		-v /TopStordata/smb.${ipaddr}:/etc/smb.conf:rw \
+		-v /TopStordata/resolv.conf:/etc/resolv.conf \
+  		-e DOMAIN_NAME=$domain \
+  		-e ADMIN_SERVER=$domainsrvi \
+  		-e WORKGROUP=$wrkgrp  \
+  		-e AD_USERNAME=$domadmin \
+  		-e AD_PASSWORD=$adminpass \
+  		-p $ipaddr:137:137/udp \
+  		-p $ipaddr:138:138/udp \
+  		-p $ipaddr:139:139/tcp \
+  		-p $ipaddr:445:445/tcp \
+  		--name $resname moataznegm/quickstor:membersmb 
+	#cat /TopStordata/resolv.conf > /etc/resolv.conf
+	echo /TopStor/dockmember.sh $resname sh /hostetc/smb${membername}.sh 
+	/TopStor/dockmember.sh $resname sh /hostetc/smb${membername}.sh & disown
 
-/TopStor/logqueue.py `basename "$0"` finish $userreq
+fi

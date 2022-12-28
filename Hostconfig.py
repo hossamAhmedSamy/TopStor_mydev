@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import socket, subprocess,sys, datetime
 from time import sleep
-from logqueue import queuethis
+from logqueue import queuethis, initqueue
 from etcdgetpy import etcdget as get
 from etcdput import etcdput as put
 from etcddel import etcddel as dels 
@@ -16,6 +16,7 @@ from time import time as stamp
 def config(leader, leaderip, myhost, *bargs):
  rebootme = 0
  arglist = bargs[0]
+ initqueue(leaderip, myhost)
  logmsg.initlog(leaderip, myhost)
  #arglist = {'ipaddr': '10.11.11.123', 'ipaddrsubnet': '24', 'id': '0', 'user': 'admin', 'name': 'dhcp32502'}
  queuethis('Hostconfig','running',arglist)

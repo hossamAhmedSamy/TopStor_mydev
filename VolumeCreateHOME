@@ -2,49 +2,54 @@
 export ETCDCTL_API=3
 cd /TopStor
 echo $@ > /root/volcreatehome
-web='/var/www/html/des20/Data/CIFSstatus.log';
-logging='/var/www/html/des20/Data/currentinfo2.log'
-glog='/var/www/html/des20/Data/TopStor.log';
-runningpools='/pacedata/pools/runningpools'
-shortname=`echo $@ | awk '{print $2}'`;
+leaderip=`echo $@ | awk '{print $1}'`;
+shortname=`echo $@ | awk '{print $3}'`;
 nameid=$RANDOM$RANDOM
 name=${shortname}_$nameid
-pDG=`echo $@ | awk '{print $1}'`;
-quota=`echo $@ | awk '{print $3}'`;
-writev=`echo $@ | awk '{print $4}'`;
-ipaddr=`echo $@ | awk '{print $5}'`;
-ipsubnet=`echo $@ | awk '{print $6}'`;
-userreq=` echo $@ | awk '{print $7}'`;
+pDG=`echo $@ | awk '{print $2}'`;
+quota=`echo $@ | awk '{print $4}'`;
+writev=`echo $@ | awk '{print $5}'`;
+ipaddr=`echo $@ | awk '{print $6}'`;
+ipsubnet=`echo $@ | awk '{print $7}'`;
+userreq=` echo $@ | awk '{print $8}'`;
 DG=$pDG;
 hi=`whoami`
-
-leaderip=` ./etcdgetlocal.py leaderip `
-myhost=`/TopStor/etcdgetlocal.py clusternode`
 echo start $hi $userreq > /root/volcreate
-/TopStor/logqueue.py `basename "$0"` running $userreq 
 echo queuedrunning >> /root/volcreate
 
 privilege="HOME";
 ./privthis.sh $privilege $userreq | grep true ;
 if [ $? -eq 0 ];
 then
+	myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
+	myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
+	leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
+	echo $leader | grep $myhost
+	if [ $? -ne 0 ];
+	then
+ 		etcd=$myhostip
+	else
+ 		etcd=$leaderip
+ 	fi
+	docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq 
+
  echo privileged $name >> /root/volcreate
  echo afterusersinfo >> /root/volcreate
  echo name=$name
  /sbin/zfs list | grep  "$shortname" 
  if [ $? -eq 0  ];
  then 
-  /TopStor/logmsg.py NFS1003 warning $userreq $DG/$name
+  docker exec etcdclient /TopStor/logmsg.py NFS1003 warning $userreq $DG/$name
  fi
  echo afterzfslist info $userreq $DG/$name >> /root/volcreate
- /TopStor/logmsg.py NFS1004 info $userreq $DG/$name
+ docker exec etcdclient /TopStor/logmsg.py NFS1004 info $userreq $DG/$name
  echo here4 >> /root/volcreate
  /sbin/zfs create -o overlay=on -o acltype=posixacl -o aclinherit=passthrough -o xattr=sa -o redundant_metadata=most -o atime=off -o quota=$quota -o dedup=on -o compression=lz4  $DG/$name  
  if [ $? -ne 0 ];
  then
   echo here5 >> /root/volcreate
-  /TopStor/logmsg.py NFS1006 error $userreq $DG/$name
-  /TopStor/logqueue.py `basename "$0"` stop $userreq 
+  docker exec etcdclient /TopStor/logmsg.py NFS1006 error $userreq $DG/$name
+  docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq 
   exit
  fi
  /sbin/zfs set prot:kind=HOME $DG/$name
@@ -53,13 +58,12 @@ then
  echo /pace/etcdput.py $leaderip volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes >> /root/volcreate
  ETCDCTL_API=3 /pace/etcdput.py $leaderip volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet
   stamp=`date +%s`
-  leader=` ./etcdgetlocal.py leader `
   ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request volumes_$stamp
   ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request/$leader volumes_$stamp
  #/pace/broadcasttolocal.py volumes/HOME/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet 
- ./VolumeActivateHome vol=$name user=$userreq
- /pace/putzpool.py 
- /TopStor/SnapshotCreateHourlytrend $DG $name 0 24 7 system 
- /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
+ ./VolumeActivateHome $leaderip vol=$name user=$userreq
+ /pace/putzpool.py $leaderip  
+ /TopStor/SnapshotCreateHourlytrend $leaderip $DG $name 0 24 7 system 
+ docker exec etcdclient /TopStor/logmsg.py NFS1007 info $userreq $DG/$name
 fi
-/TopStor/logqueue.py `basename "$0"` stop $userreq 
+ docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq 

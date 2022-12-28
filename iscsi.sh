@@ -1,58 +1,35 @@
 #!/bin/sh
 cd /TopStor
 export ETCDCTL_API=3
-enpdev='enp0s8'
-pool=`echo $@ | awk '{print $1}'`
-vol=`echo $@ | awk '{print $2}'`
+echo $@ > /root/iscsiparam
+
+resname=`echo $@ | awk '{print $1}'`
+#mounts=`echo $@ | awk '{print $2}' | sed 's/\-v/ \-v /g'`
+vol=`echo $@ | awk '{print $2}' | awk -F'/' '{print $2}' `
+pool=`echo $@ | awk '{print $2}' | awk -F'/' '{print $1}' `
 ipaddr=`echo $@ | awk '{print $3}'`
 ipsubnet=`echo $@ | awk '{print $4}'`
-portalport=`echo $@ | awk '{print $5}'`
-targetiqn=`echo $@ | awk '{print $6}'`
-chapuser=`echo $@ | awk '{print $7}'`
-chappas=`echo $@ | awk '{print $8}'`
-vtype='iscsi'
-leaderip=` ./etcdgetlocal.py leaderip `
-myhost=` ./etcdgetlocal.py clusternode `
-echo $@ > /root/iscsiparam
-allvols=`./etcdgetlocal.py volumes --prefix`
-replivols=`echo $allvols | grep $vol`
-echo $replivols | grep active
-if [ $? -ne 0 ];
-then
- exit
-fi
+vtype=`echo $@ | awk '{print $5}'`
+#docker rm -f $resname
+nmcli conn mod cmynode -ipv4.addresses ${ipaddr}/$ipsubnet
+nmcli conn mod cmynode +ipv4.addresses ${ipaddr}/$ipsubnet
+nmcli conn up cmynode
+enpdev='enp0s8'
+portalport=`echo $@ | awk '{print $6}'`
+targetiqn=`echo $@ | awk '{print $7}'`
+chapuser=`echo $@ | awk '{print $8}'`
+chappas=`echo $@ | awk '{print $9}'`
+myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
+	myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
+	leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
+	echo $leader | grep $myhost
+	if [ $? -ne 0 ];
+	then
+ 		etcd=$myhostip
+	else
+ 		etcd=$leaderip
+ 	fi
 
-rightip=`/pace/etcdgetlocal.py ipaddr/$myhost $vtype-$ipaddr | grep -v $vol`
-otherip=`/pace/etcdgetlocal.py ipaddr $vtype-$ipaddr | grep -v $myhost | wc -c`
-othervtype=`/pace/etcdgetlocal.py ipaddr $ipaddr | grep -v $vtype | wc -c` 
-if [ $otherip -ge 5 ];
-then 
- echo another host is holding the ip
- echo otherip=$otherip
- exit
-fi
-if [ $othervtype -ge 5 ];
-then 
- echo the ip is used by another protocol 
- /TopStor/logmsg.py ISCSIwa01 warning $userreq $ipaddr 
- exit
-fi
-resname=$vtype'-'$ipaddr
-if [[ $rightip == '' ]];
-then
- echo nothing found
- rightip=''
- rightvols=$vol
-else
- echo found other vols
-rightvols=`/pace/etcdgetlocal.py ipaddr/$myhost/$ipaddr/$ipsubnet | sed "s/$resname\///g"`'/'$vol
-fi
- /pace/etcdput.py $leaderip ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols
- #/pace/broadcasttolocal.py ipaddr/$myhost/$ipaddr/$ipsubnet $resname/$rightvols 
- #/sbin/pcs resource delete --force $resname  2>/dev/null
- #/sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
- #/sbin/pcs resource group add ip-all $resname 
-echo continue
 echo /pace/addzfsvolumeastarget.sh $pool ${vol} $ipaddr $portalport $targetiqn $chapuser $chappas
  for i in $(echo $targetiqn | sed "s/,/ /g")
  do

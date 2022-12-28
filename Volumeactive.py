@@ -1,36 +1,39 @@
 #!/usr/bin/python3
-import sys, logmsg, subprocess
+import sys, logmsglocal, subprocess
 from privthis import privthis 
-from etcdgetlocalpy import etcdget as get
+from etcdgetpy import etcdget as get
 from etcdput import etcdput as put 
 
 
-leaderip = get('leaderip')[0]
-myhost = get('clusternode')[0]
-logmsg.initlog(leaderip, myhsot)
-
-def volumeactive(pool,volname,prot,active,userreq):
+def volumeactive(leaderip, myhost, pool,volname,prot,active,userreq):
+ with open('/root/volumactivepy','w') as f:
+  f.write(' '.join([leaderip, myhost, pool,volname,prot,active,userreq]))
+ leader = get(leaderip,'leader')[0]
+ if leader != myhost:
+   etcdip = get(leaderip,'ready/'+myhost)[0]
+ else:
+   etcdip = leaderip
+ logmsglocal.initlog(leaderip, myhost,etcdip)
  if privthis(prot,userreq) != 'true':
   print('not authorized user to do this task ')
   return
- logmsg.sendlog('Unmoutst01','info',userreq,volname,active)
- volinfo=get('volumes',volname)[0]
- if prot == 'CIFS':
-  print('prot is',prot)
-  activpos= maxpos = 9
+ logmsglocal.sendlog('Unmoutst01','info',userreq,volname,active)
+ volinfo=get(leaderip, 'volumes',volname)[0]
+ print('volinfo',volinfo,prot)
  volright = volinfo[1].split('/')
- if len(volright) ==  maxpos:
-  volright.append(active)
- else:
-  volright[-1] = active
+ volright[-1] = active
  ipaddr = volright[7]
  volright = '/'.join(volright)
  volleft = volinfo[0]
- cmdline='/TopStor/Volumeactivesh.sh '+pool+' '+volname+' '+prot+' '+active+' '+ipaddr+' '+userreq
+ cmdline='/TopStor/Volumeactivesh.sh '+leaderip+' '+myhost+' '+pool+' '+volname+' '+prot+' '+active+' '+ipaddr+' '+userreq
+ print('cmdline',cmdline)
  result = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
  put(leaderip, volleft,volright)
- logmsg.sendlog('Unmoutsu01','info',userreq,volname,active)
+ logmsglocal.sendlog('Unmoutsu01','info',userreq,volname,active)
+ put(etcdip, 'dirty/volume','0')
  return
  
 if __name__=='__main__':
+ leaderip = sys.argv[1]
+ myhost = sys.argv[2]
  volumeactive(*sys.argv[1:])

@@ -51,6 +51,7 @@ ServerRoot "/usr/local/apache2"
 #Listen 12.34.56.78:80
 Listen 80
 Listen 443 
+Listen 8080 
 
 #
 # Dynamic Shared Object (DSO) Support
@@ -583,6 +584,19 @@ DirectoryIndex index.html index.php
 		Allow from all
 	</Proxy>
 </VirtualHost>
+<VirtualHost *:8080>
+	DirectoryIndex Login.php
+        DocumentRoot /usr/local/apache2/htdocs
+	#SSLEngine ddon
+	#SSLCertificateFile /usr/local/apache2/topstorwebetc/TopStor.crt
+	#SSLCertificateKeyFile /usr/local/apache2/topstorwebetc/TopStor.key
+        Redirect / https://10.11.11.251/
+	<Proxy *>
+		Order deny,allow
+		Allow from all
+	</Proxy>
+</VirtualHost>
+
 <VirtualHost *:443>
 	DirectoryIndex QuickStor.html
 	SSLEngine on

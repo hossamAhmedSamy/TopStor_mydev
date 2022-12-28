@@ -73,11 +73,13 @@ def login_required(f):
  return decorated_function
 
 
-def postchange(cmndstring,host='leader'):
+def postchange(cmndstring,host='myhost'):
  global leaderip, myhost
+ if host=='myhost':
+  host = myhost
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
- ownerip=get(host,'--prefix')
+ ownerip=get('ready/'+host,'--prefix')
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
 
 def dict_factory(cursor, row):
@@ -248,7 +250,7 @@ def dgsdelpool(data):
  owner = allinfo['pools'][data['pool']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
  datastr = data['pool']+' '+data['user'] 
- cmndstring = '/TopStor/pump.sh DGdestroyPool '+datastr
+ cmndstring = '/TopStor/DGdestroyPool '+leaderip+' '+datastr
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
@@ -296,7 +298,7 @@ def dgsaddtopool(data):
  print(selecteddisks)
  print(datastr)
  print('#########################333')
- cmndstring = '/TopStor/pump.sh DGsetPool '+datastr
+ cmndstring = '/TopStor/DGsetPool '+leaderip+' '+datastr
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
@@ -346,7 +348,7 @@ def dgsnewpool(data):
  print('#############################3')
  print(selecteddisks)
  print('#########################333')
- cmndstring = '/TopStor/pump.sh DGsetPool '+datastr+' '+data['user']
+ cmndstring = '/TopStor/DGsetPool '+leaderip+' '+datastr+' '+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
@@ -424,7 +426,10 @@ def volumesinfo(prot='all'):
     print('##################')
     print(allinfo['volumes'][volume])
     print('##################')
-    volgrouplist =  deepcopy(allinfo['volumes'][volume]['groups'])
+    try:
+        volgrouplist =  deepcopy(allinfo['volumes'][volume]['groups'])
+    except:
+        volgrouplist=[]
     if type(volgrouplist) != list:
       volgrouplist = volgrouplist.split(',')
     for group in allgroups:
@@ -484,7 +489,7 @@ def pgroupchange(data):
     if str(suser['id']) == str(usr):
      usrstr += suser['name']+',' 
   usrstr = usrstr[:-1]
- cmndstring = '/TopStor/pump.sh UnixChangeGroup '+data.get('name')+' users'+usrstr+' '+data['user']
+ cmndstring = '/TopStor/UnixChangeGroup '+leaderip+' '+data.get('name')+' users'+usrstr+' '+data['user']+' '+'change'
  postchange(cmndstring)
  return data
 
@@ -511,7 +516,7 @@ def userchange(data):
   for grp in grps.split(','):
    groupstr += allgroups[int(grp)][0]+','
   groupstr = groupstr[:-1]
- cmndstring = '/TopStor/pump.sh UnixChangeUser '+data.get('name')+' groups'+groupstr+' '+data['user'] 
+ cmndstring = '/TopStor/UnixChangeUser '+leaderip+' '+data.get('name')+' groups'+groupstr+' '+data['user']+' '+'change'
  postchange(cmndstring)
  return data
 
@@ -561,7 +566,9 @@ def getnotification(data):
    try:
     msgbody = msgbody[:-1]+' '+notifbody[notifc]+'.'
    except:
-    msgbody = msgbody +' '+notifbody+'parseerror.'
+    msgbody = str(msgbody) +' '+str(notifbody)+'parseerror.'
+    with open('/root/fapierror','w') as f:
+     f.write(msgbody+'\n'+str(msg))
     print('notification parse error')
     print('############################')
    notifc += 1
@@ -580,9 +587,10 @@ def volumesnapshotscreate(data):
  datastr = ''
  getalltime()
  ownerip = allinfo['hosts'][data['owner']]['ipaddress']
- switch = { 'Once':['snapsel','name','pool','volume'], 'Minutely':['snapsel', 'pool', 'volume', 'every', 'keep'],
-	'Hourly':['snapsel', 'pool', 'volume', 'sminute', 'every', 'keep'], 
-	'Weekly':['snapsel', 'pool', 'volume', 'stime', 'every', 'keep'] }
+ data['leaderip'] = leaderip
+ switch = { 'Once':['snapsel','leaderip', 'name','pool','volume'], 'Minutely':['snapsel', 'leaderip', 'pool', 'volume', 'every', 'keep'],
+	'Hourly':['snapsel', 'leaderip', 'pool', 'volume', 'sminute', 'every', 'keep'], 
+	'Weekly':['snapsel', 'leaderip', 'pool', 'volume', 'stime', 'every', 'keep'] }
  datastr = ''
  for param in switch[data['snapsel']]:
   datastr +=data[param]+' '
@@ -595,7 +603,7 @@ def volumesnapshotscreate(data):
  print(data)
  print(datastr)
  print('###########################')
- cmndstring = '/TopStor/pump.sh SnapshotCreate'+datastr+' '+data['user']
+ cmndstring = '/TopStor/SnapshotCreate'+datastr+' '+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
@@ -620,7 +628,7 @@ def volumecreate(data):
   data['chappas']='MezoAdmin'
   datastr = data['pool']+' '+data['name']+' '+data['size']+' '+data['ipaddress']+' '+data['Subnet']+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+data['active']+' '+data['user']+' '+data['owner']+' '+data['user']
  elif 'CIFSdom' in data['type']:
-  cmdline=['./encthis.sh',data["domname"],data["dompass"]]
+  cmdline=['/TopStor/encthis.sh',data["domname"],data["dompass"]]
   data["dompass"]=subprocess.run(cmdline,stdout=subprocess.PIPE).stdout.decode().split('_result')[1].replace('/','@@sep')
 
   datastr = data['pool']+' '+data['name']+' '+data['size']+' '+' '+data['ipaddress']+' '+data['Subnet']+' '+data['active']+' '+data['user']+' '+data['owner']+' '+data['user']+' '+ data["domname"]+' '+ data["domsrv"]+' '+ data["domip"]+' '+ data["domadmin"]+' '+ data["dompass"]
@@ -630,7 +638,7 @@ def volumecreate(data):
  print(data)
  print(datastr)
  print('###########################')
- cmndstring = '/TopStor/pump.sh VolumeCreate'+data['type']+' '+datastr
+ cmndstring = '/TopStor/VolumeCreate'+data['type']+' '+leaderip+' '+datastr
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
@@ -709,10 +717,14 @@ def volumeconfig(data):
  global allinfo, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
+
  getalltime()
  volume = allinfo['volumes'][data['volume']]
  owner = volume['host']
- ownerip = allinfo['hosts'][owner]['ipaddress']
+ if owner == leader:
+  ownerip = leaderip
+ else:
+  ownerip = allinfo['hosts'][owner]['ipaddress']
  datastr = ''
  data['owner'] = allinfo['hosts'][allinfo['pools'][volume['pool']]['host']]['name']
  if 'ISCSI' in data['type']:
@@ -724,18 +736,21 @@ def volumeconfig(data):
    data['initiators'] = volume['initiators']
   if 'portalport' not in data:
    data['portalport'] = volume['portalport']
-  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+data['ipaddress']+' '+str(volume['Subnet'])+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+data['active']+' '+data['user']+' '+data['owner']+' '+data['user']
+  for ele in data:
+   volume[ele] = data[ele] 
+  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+data['ipaddress']+' '+str(volume['Subnet'])+' '+data['portalport']+' '+data['initiators']+' '+data['chapuser']+' '+data['chappas']+' '+volume['statusmount']+' '+data['user']+' '+data['owner']+' '+data['user']
  else:
+
   if 'groups' in data and len(data['groups']) < 1: 
    data['groups'] = 'NoGroup'
   for ele in data:
    volume[ele] = data[ele] 
-  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+volume['groups']+' '+volume['ipaddress']+' '+str(volume['Subnet'])+' '+data['active']+' '+volume['host']+' '+volume['user']
- print('#############################')
- print(data)
- print(datastr)
- print('###########################')
- cmndstring = '/TopStor/pump.sh VolumeChange'+data['type']+' '+datastr
+  datastr = volume['pool']+' '+volume['name']+' '+str(volume['quota'])+' '+volume['groups']+' '+volume['ipaddress']+' '+str(volume['Subnet'])+' '+volume['statusmount']+' '+volume['host']+' '+volume['user']
+  print('33333333333333333333333333333333333333333333333#############################')
+  print('volume',volume)
+  print('owner',ownerip)
+  print('33333333333333333333333333333333333333333333333#############################')
+ cmndstring = '/TopStor/VolumeChange'+data['type']+' '+leaderip+' '+datastr
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
@@ -801,7 +816,7 @@ def volumesnapshotrol(data):
  pool = allinfo['snapshots'][data['name']]['pool']
  owner = allinfo['snapshots'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/pump.sh SnapShotRollback "+pool+" "+volume+" "+data['name']+" "+data['user']
+ cmndstring = "/TopStor/SnapShotRollback "+pool+" "+volume+" "+data['name']+" "+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  print('##################################')
@@ -821,7 +836,7 @@ def volumesnapshotperioddel(data):
  getalltime()
  owner = allinfo['snapperiods'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/pump.sh SnapShotPeriodDelete "+data['name']+" "+data['user']
+ cmndstring = "/TopStor/SnapShotPeriodDelete "+leaderip+" "+data['name']+" "+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  sendhost(ownerip, str(msg),'recvreply',myhost)
@@ -839,7 +854,7 @@ def volumesnapshotdel(data):
  pool = allinfo['snapshots'][data['name']]['pool']
  owner = allinfo['snapshots'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/pump.sh SnapshotDelete "+pool+" "+volume+" "+data['name']+" "+data['user']
+ cmndstring = "/TopStor/SnapShotDelete "+pool+" "+volume+" "+data['name']+" "+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  print('##################################')
@@ -857,7 +872,7 @@ def volumeactive(data):
  prot = allinfo['volumes'][data['name']]['prot']
  owner = allinfo['volumes'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/pump.sh Volumeactive.py "+pool+" "+data['name']+" "+prot+" "+data['active']+" "+data['user']
+ cmndstring = "/TopStor/Volumeactive.py "+leaderip+" "+myhost+" "+pool+" "+data['name']+" "+prot+" "+data['active']+" "+data['user']
  print('##################################')
  print('volumeactive',cmndstring)
  print('##################################')
@@ -878,7 +893,7 @@ def volumedel(data):
  pool = allinfo['volumes'][data['name']]['pool']
  owner = allinfo['volumes'][data['name']]['host']
  ownerip = allinfo['hosts'][owner]['ipaddress']
- cmndstring = "/TopStor/pump.sh VolumeDelete"+data['type']+" "+pool+" "+data['name']+" "+data['type']+" "+allinfo['volumes'][data['name']]['ipaddress']+" "+data['user']
+ cmndstring = "/TopStor/VolumeDelete"+data['type']+" "+leaderip+" "+pool+" "+data['name']+" "+data['type']+" "+data['user']
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  print('##################################')
@@ -893,7 +908,7 @@ def volumedel(data):
 def groupdel(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- cmndstring = '/TopStor/pump.sh UnixDelGroup '+data.get('name')+' '+data['user'] 
+ cmndstring = '/TopStor/UnixDelGroup '+leaderip+' '+data.get('name')+' '+data['user'] 
  postchange(cmndstring)
  return data
 
@@ -913,7 +928,7 @@ def partnerdel(data):
 def userdel(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
- cmndstring = '/TopStor/pump.sh UnixDelUser '+data.get('name')+' '+data['user']
+ cmndstring = '/TopStor/UnixDelUser '+leaderip+' '+data.get('name')+' '+data['user']
  postchange(cmndstring)
  return data
 
@@ -933,7 +948,7 @@ def UnixAddGroup(data):
     if str(suser['id']) == str(usr):
      usrstr += suser['name']+',' 
   usrstr = usrstr[:-1]
- cmndstring = '/TopStor/pump.sh UnixAddGroup '+data['name']+' '+' users'+usrstr+' '+data['user']
+ cmndstring = '/TopStor/UnixAddGroup '+leaderip+' '+data['name']+' '+' users'+usrstr+' '+data['user']
  postchange(cmndstring)
  return data
 
@@ -952,7 +967,7 @@ def AddPartner(data):
 @app.route('/api/v1/users/UnixAddUser', methods=['GET','POST'])
 @login_required
 def UnixAddUser(data):
- global allgroups
+ global allgroups, leaderip
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  if 'NoHome' in data['Volpool']:
@@ -970,7 +985,7 @@ def UnixAddUser(data):
   for grp in grps.split(','):
    groupstr += allgroups[int(grp)][0]+','
   groupstr = groupstr[:-1]
- cmndstring = '/TopStor/pump.sh UnixAddUser '+data.get('name')+' '+pool+' groups'+groupstr+' ' \
+ cmndstring = '/TopStor/UnixAddUser '+leaderip+' '+data.get('name')+' '+pool+' groups'+groupstr+' ' \
      +data.get('Password')+' '+data.get('Volsize')+'G '+data.get('HomeAddress')+' '+data.get('HomeSubnet')+' hoststub'+' '+data['user']
  postchange(cmndstring)
  return data 
@@ -1150,8 +1165,7 @@ myhost=0
 if __name__=='__main__':
     #leader = sys.argv[2]
     #leaderip = sys.argv[1]
-    print('hihihi')
-    leaderip = get('myclusterip')[0]
+    leaderip = get('leaderip')[0]
     myhost = get('clusternode')[0]
     leader = get('leader')[0]
     logmsg.initlog(leaderip,myhost)

@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 import sys, subprocess
 from allphysicalinfo import getall 
-from etcdgetlocalpy import etcdget as get
+from etcdgetpy import etcdget as get
 from pumpkeys import pumpkeys
 
+leaderip = '0'
+etcdip = '0'
 
 allinfo = {}
 phrase = ''
@@ -13,7 +15,7 @@ nodeloc = ''
 replitype = 'Receiver'
 
 def checkpartner(receiver, nodeip, cmd, isnew):
- global allinfo, phrase, myclusterip, pport, nodeloc, replitype
+ global allinfo, phrase, myclusterip, pport, nodeloc, replitype, leaderip, etcdip
  result=subprocess.run(cmd.split(' '),stdout=subprocess.PIPE)
  response = result.stdout.decode()
  print(result.returncode)
@@ -29,14 +31,13 @@ def checkpartner(receiver, nodeip, cmd, isnew):
  return isopen, response 
 
 def replitargetget(receiver, volume, volused, snapshot):
- global allinfo, phrase, myclusterip, pport, nodeloc, replitype
- partnerinfo = get('Partner/'+receiver)[0].split('/')
+ global allinfo, phrase, myclusterip, pport, nodeloc, replitype, leaderip, etcdip
+ partnerinfo = get(etcdip, 'Partner/'+receiver)[0].split('/')
  replitype = partnerinfo[1]
  pport = partnerinfo[2]
  phrase = partnerinfo[-1]
- myclusterip =  get('leaderip')[0]
- print(replitype, pport, phrase, myclusterip )
- nodesinfo = get('Partnernode/'+receiver,'--prefix')
+ print(replitype, pport, phrase, leaderip )
+ nodesinfo = get(etcdip, 'Partnernode/'+receiver,'--prefix')
  print('hi',nodesinfo)
  nodesinfo.append(('hi/hi/'+partnerinfo[0],'hi'))
  for node in nodesinfo:
@@ -52,7 +53,7 @@ def replitargetget(receiver, volume, volused, snapshot):
  return nodeip, 'closed' if 'open' not in isopen else response
 
 def replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume, csnaps):
- global allinfo, phrase, myclusterip, pport, nodeloc, replitype
+ global allinfo, phrase, myclusterip, pport, nodeloc, replitype, leaderip, etcdip
  myvol = pool+'/'+volume 
  mysnaps = sorted(allinfo['volumes'][volume]['snapshots'], key= lambda x : x.split('.')[-1], reverse=True)
  oldsnap = 'noold'
@@ -60,7 +61,7 @@ def replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume, cs
   if snap in csnaps:
    oldsnap = snap
    break
- volumeline = get('volume', volume)[0]
+ volumeline = get(etcdip, 'volume', volume)[0]
  volumeinfo = volumeline[1].split('/') 
  volip = volumeinfo[7]
  volsubnet = volumeinfo[8]
@@ -104,9 +105,9 @@ def replistream(receiver, nodeip, snapshot, nodeowner, poolvol, pool, volume, cs
  return stream
 
 def repliparam(snapshot, receiver):
- global allinfo, phrase, myclusterip, pport, nodeloc, replitype
- alldsks = get('host','current')
- allinfo = getall(alldsks)
+ global allinfo, phrase, myclusterip, pport, nodeloc, replitype, leaderip, etcdip
+ alldsks = get(etcdip, 'host','current')
+ allinfo = getall(leaderip, alldsks)
  volume = snapshot.split('/')[1].split('@')[0]
  pool = snapshot.split('/')[0]
  snapshot = snapshot.split('@')[1].replace(' ','')
@@ -139,4 +140,6 @@ def repliparam(snapshot, receiver):
 
 
 if __name__=='__main__':
- result = repliparam(*sys.argv[1:])
+ leaderip =  sys.argv[1]
+ etcdip =  sys.argv[2]
+ result = repliparam(*sys.argv[3:])

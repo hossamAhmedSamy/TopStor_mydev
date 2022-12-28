@@ -2,37 +2,33 @@
 export ETCDCTL_API=3
 cd /TopStor/
 echo $@ > /root/dgset
-web="/var/www/html/des20/Data/DGstatus.log";
-logging='/var/www/html/des20/Data/currentinfo2.log';
-glog='/var/www/html/des20/Data/TopStor.log';
-runningpools='/pacedata/pools/runningpools'
-iscsimapping='/pacedata/iscsimapping'
-raid=` echo $@ | awk '{print $1}'`;
-userreq=` echo $@ | awk '{print $2}'`;
-host=` echo $@ | awk '{print $3}'`;
-hostnam=` echo $@ | awk '{print $3}'`;
-disk1=` echo $@ | awk '{print $4}'`;
-diskn1=` echo $@ | awk '{print $5}'`;
-nextpool=` echo $@ | awk '{print $6}'`;
+leaderip=` echo $@ | awk '{print $1}'`;
+raid=` echo $@ | awk '{print $2}'`;
+userreq=` echo $@ | awk '{print $3}'`;
+host=` echo $@ | awk '{print $4}'`;
+hostnam=$host
+disk1=` echo $@ | awk '{print $5}'`;
+diskn1=` echo $@ | awk '{print $6}'`;
+nextpool=` echo $@ | awk '{print $7}'`;
 #disk1=`ls /dev/disk/by-id/ | grep -v part | grep $disk1`
 msgraid="nothing";
-myhost=`hostname -s`
 privilege="DiskGroups";
 contrun=`./privthis.sh $privilege $userreq`;
-echo iamhere
 declare -a params=(`echo $@`);
 declare -a hostparam=();
 declare -a diskparam=();
 if [[ $contrun == 'true' ]];
 then
-leader=`./etcdget.py leader --prefix | awk -F'/' '{print $2}' | awk -F"'" '{print $1}'`
+	myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
+	myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
+	leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
 echo $@ > /root/tmp2
  waiting=1
 waitingc=1
 while [ $waiting -eq 1 ];
 do
  echo to frst while >> /root/tmp2
- currentreq=`/pace/etcdget.py requests/DGsetpool --prefix`'currentreq'
+ currentreq=`/pace/etcdget.py $leaderip requests/DGsetpool --prefix`'currentreq'
  echo currentre=$currentreq  >> /root/tmp2
  echo $currentreq | grep $myhost
  if [ $? -ne 0 ];
@@ -51,7 +47,7 @@ do
   echo to continue 3 >> /root/tmp2
  sleep 1
 done
- /TopStor/logqueue.py `basename "$0"` running $userreq 
+ docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq 
 echo iamhere >> /root/tmp2
 if [[ $raid == "import" ]];
 then
@@ -60,28 +56,28 @@ then
  zpool import | grep $nextpool
  if [ $? -eq 0 ];
  then
-  /TopStor/logmsg.py DGst22 info $userreq ${nextpool} 
+  docker exec etcdclient /TopStor/logmsg.py DGst22 info $userreq ${nextpool} 
   zpool import $nextpool 
   sleep 1
   /sbin/zpool status | grep $nextpool >> /root/tmp2
   if [ $? -ne 0 ]; then
    echo something woring in the import of $nextpool >> /root/tmp2
-   /TopStor/logmsg.py DGfa22 error $userreq ${nextpool} 
+   docker exec etcdclient /TopStor/logmsg.py DGfa22 error $userreq ${nextpool} 
   else 
    echo success importing  of $nextpool >> /root/tmp2
-    ETCDCTL_API=3 /pace/etcdput.py balancetype/$nextpool Availability 
+    ETCDCTL_API=3 /pace/etcdput.py $leaderip balancetype/$nextpool Availability 
     stamp=`date +%s`
-    ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_${nextpool}_Availability/request balancedtype_$stamp 
-    ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_${nextpool}_Availability/request/$leader balancedtype_$stamp 
-    ETCDCTL_API=3 /pace/etcdput.py activepool/$nextpool imported 
-    ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_${nextpool}_imported/request activepool_$stamp 
-    ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_${nextpool}_imported/request/$leader activepool_$stamp 
+    ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/balancedtype/Add_${nextpool}_Availability/request balancedtype_$stamp 
+    ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/balancedtype/Add_${nextpool}_Availability/request/$leader balancedtype_$stamp 
+    ETCDCTL_API=3 /pace/etcdput.py $leaderip activepool/$nextpool imported 
+    ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/activepool/Add_${nextpool}_imported/request activepool_$stamp 
+    ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/activepool/Add_${nextpool}_imported/request/$leader activepool_$stamp 
     #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/$nextpool imported 
-    ETCDCTL_API=3 /pace/etcdputlocal.py fixpool/$nextpool imported 
-   /TopStor/logmsg.py DGsu22 info $userreq ${nextpool} 
+    #ETCDCTL_API=3 /pace/etcdput.py $myhostip fixpool/$nextpool imported 
+   docker exec etcdclient /TopStor/logmsg.py DGsu22 info $userreq ${nextpool} 
   fi
  else
-  /pace/etcddel.py active $nextpool
+  /pace/etcddel.py $leaderip active $nextpool
  fi
 else
  echo not to import
@@ -101,10 +97,10 @@ else
  disksarr=(${disks});
  if [[ $raid == "addmirror" ]]; then
   diskargs=$((diskargs-1));
-  i=2
+  i=3
   disk1=" ";
   diskns="";
-  while [ $i -lt $diskargs ]; do
+  while [ $i -lt $((diskargs)) ]; do
    i=$((i+1));
    disk=`echo ${params[$i]} | awk -F':' '{print $1}'`
    diskn=`echo ${params[$i]} | awk -F':' '{print $2}'`
@@ -117,128 +113,127 @@ else
     echo '#############################'
     echo disk1:$disk1, disk2:$diskns, pool:${nextpool}
     echo '#############################'
-   /TopStor/logmsg.py DGst20 info $userreq ${nextpool} $diskns .
-  /sbin/zpool add -f ${nextpool} mirror ${disk1} 2>txt/${0:2}$userreq.txt
+   docker exec etcdclient /TopStor/logmsg.py DGst20 info $userreq ${nextpool} $diskns .
+  /sbin/zpool add -f ${nextpool} mirror ${disk1} 
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
-    /TopStor/logmsg.py DGsu20 info $userreq ${nextpool} $diskns .
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
+    docker exec etcdclient /TopStor/logmsg.py DGsu20 info $userreq ${nextpool} $diskns .
   else
-    /TopStor/logmsg.py DGfa20 error $userreq ${nextpool} $diskns .
+    docker exec etcdclient /TopStor/logmsg.py DGfa20 error $userreq ${nextpool} $diskns .
   fi
  fi 
  if [[ $raid == "attachmirror" ]]; then
-  disk2=` echo $@ | awk '{print $6}'`;
+  disk2=` echo $@ | awk '{print $7}'`;
   #disk2=`ls /dev/disk/by-id/ | grep -v part | grep $disk2`
-  diskn2=` echo $@ | awk '{print $7}'`;
-  /TopStor/logmsg.py DGst7 info $userreq $diskn2 $grpn
+  diskn2=` echo $@ | awk '{print $8}'`;
+  docker exec etcdclient /TopStor/logmsg.py DGst7 info $userreq $diskn2 $grpn
   /sbin/zpool labelclear /dev/disk/by-id/${disk2};
   echo /sbin/zpool attach -f ${nextpool} ${disk1} ${disk2} > /root/tmp
   /sbin/zpool attach -f ${nextpool} ${disk1} ${disk2}
   if [ $? -ne 0 ]; then
-    /TopStor/logmsg.py DGfa7 error $userreq $diskn2 stripe
+    docker exec etcdclient /TopStor/logmsg.py DGfa7 error $userreq $diskn2 stripe
   else
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
-    /TopStor/logmsg.py DGsu7 info $userreq $diskn2 stripe 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
+    docker exec etcdclient /TopStor/logmsg.py DGsu7 info $userreq $diskn2 stripe 
   fi
  fi
  if [[ $raid == "delspecial" ]]; then
-   /TopStor/logmsg.py DGst9 info $userreq $diskn1 
-  /sbin/zpool remove  ${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
+   docker exec etcdclient /TopStor/logmsg.py DGst9 info $userreq $diskn1 
+  /sbin/zpool remove  ${nextpool} ${disk1} 
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
-    /TopStor/logmsg.py DGsu9 info $userreq $diskn1 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
+    docker exec etcdclient /TopStor/logmsg.py DGsu9 info $userreq $diskn1 
   else 
-     /TopStor/logmsg.py DGfa9 error $userreq $diskn1 
+     docker exec etcdclient /TopStor/logmsg.py DGfa9 error $userreq $diskn1 
   fi
  fi 
  if [[ $raid == "addcache" ]]; then
-   /TopStor/logmsg.py DGst10 info $userreq $diskn1 
+   docker exec etcdclient /TopStor/logmsg.py DGst10 info $userreq $diskn1 
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
   echo /sbin/zpool add -f ${nextpool} cache ${disk1} 
   /sbin/zpool add -f ${nextpool} cache ${disk1} 
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
-    /TopStor/logmsg.py DGsu10 info $userreq $diskn1 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
+    docker exec etcdclient /TopStor/logmsg.py DGsu10 info $userreq $diskn1 
   else 
-    /TopStor/logmsg.py DGfa10 error $userreq $diskn1 
+    docker exec etcdclient /TopStor/logmsg.py DGfa10 error $userreq $diskn1 
   fi
  fi 
  if [[ $raid == "addlog" ]]; then
-   /TopStor/logmsg.py DGst11 info $userreq $diskn1 
+   docker exec etcdclient /TopStor/logmsg.py DGst11 info $userreq $diskn1 
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
-  /sbin/zpool add -f ${nextpool} log ${disk1} 2>txt/${0:2}$userreq.txt
+  /sbin/zpool add -f ${nextpool} log ${disk1}
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
-    /TopStor/logmsg.py DGsu11 info $userreq $diskn1 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
+    docker exec etcdclient /TopStor/logmsg.py DGsu11 info $userreq $diskn1 
   else 
-    /TopStor/logmsg.py DGfa11 error $userreq $diskn1 
+    docker exec etcdclient /TopStor/logmsg.py DGfa11 error $userreq $diskn1 
   fi
  fi 
  if [[ $raid == "addspare" ]]; then
   #diskn=`grep -nr $disk1 $iscsimapping | awk -F':' '{print $1}'`
-   /TopStor/logmsg.py DGst8 info $userreq $diskn1 
+   docker exec etcdclient /TopStor/logmsg.py DGst8 info $userreq $diskn1 
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
   echo /sbin/zpool add -f ${nextpool} spare ${disk1}
 
   /sbin/zpool add -f ${nextpool} spare ${disk1}
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
-    /TopStor/logmsg.py DGsu8 info $userreq $diskn1 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
+    docker exec etcdclient /TopStor/logmsg.py DGsu8 info $userreq $diskn1 
   else 
-    /TopStor/logmsg.py DGfa8 error $userreq $diskn1 
+    docker exec etcdclient /TopStor/logmsg.py DGfa8 error $userreq $diskn1 
   fi
  fi 
  if [[ $raid == "Single" ]]; then
    nextpool='dhcp'${RANDOM}$RANDOM;
-   /TopStor/logmsg.py DG1st6 info $userreq ${nextpool} $diskn1
+   docker exec etcdclient /TopStor/logmsg.py DG1st6 info $userreq ${nextpool} $diskn1
   /sbin/zpool labelclear /dev/disk/by-id/${disk1};
   /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1}
-  
   if [ $? -ne 0 ]; then
-    /TopStor/logmsg.py DG1fa6 error $userreq ${nextpool} $diskn1 
+    docker exec etcdclient /TopStor/logmsg.py DG1fa6 error $userreq ${nextpool} $diskn1 
   else 
      zfs set acltype=posixacl p$nextpool
      zfs set avail:type=single p$nextpool
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool
-     ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip pools/p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip activepool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
      #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdputlocal.py fixpool/p$nextpool running 
-    /TopStor/logmsg.py DG1su6 info $userreq ${nextpool} $diskn1 
+     #ETCDCTL_API=3 /pace/etcdput.py $myhostip fixpool/p$nextpool running 
+    docker exec etcdclient /TopStor/logmsg.py DG1su6 info $userreq ${nextpool} $diskn1 
   fi
  fi 
  if [[ $raid == "addparity3" ]]; then
   diskargs=${#params[@]};
   diskargs=$((diskargs-1));
-  i=2
+  i=3
   disk1=" ";
   diskns="";
-  while [ $i -lt $diskargs ]; do
+  while [ $i -lt $((diskargs-3)) ]; do
    i=$((i+1));
    disk=`echo ${params[$i]} | awk -F':' '{print $1}'`
    diskn=`echo ${params[$i]} | awk -F':' '{print $2}'`
@@ -247,25 +242,25 @@ else
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-   /TopStor/logmsg.py DGst12 info $userreq p${nextpool} $diskns
-  /sbin/zpool add -f  p${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
+   docker exec etcdclient /TopStor/logmsg.py DGst12 info $userreq p${nextpool} $diskns
+  /sbin/zpool add -f  p${nextpool} raidz3 ${disk1} 
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip 'pools/'p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
-    /TopStor/logmsg.py DGsu12 info $userreq p${nextpool} $diskns
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
+    docker exec etcdclient /TopStor/logmsg.py DGsu12 info $userreq p${nextpool} $diskns
   else
-    /TopStor/logmsg.py DGfa12 error $userreq p${nextpool} $diskns
+    docker exec etcdclient /TopStor/logmsg.py DGfa12 error $userreq p${nextpool} $diskns
   fi
  fi 
  if [[ $raid == "parity3" ]]; then
   diskargs=${#params[@]};
   diskargs=$((diskargs-1));
-  i=2
+  i=3
   disk1=" "
   diskns=""
-  while [ $i -lt $diskargs ]; do
+  while [ $i -lt $((diskargs-3)) ]; do
    i=$((i+1));
    disk=`echo ${params[$i]} | awk -F':' '{print $1}'`
    diskn=`echo ${params[$i]} | awk -F':' '{print $2}'`
@@ -275,38 +270,38 @@ else
    diskns=${diskns}$diskn","
   done;
   nextpool='dhcp'${RANDOM}$RANDOM;
-   /TopStor/logmsg.py DGst13 info $userreq p${nextpool} $diskns
-  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz3 ${disk1} 2>txt/${0:2}$userreq.txt
+   docker exec etcdclient /TopStor/logmsg.py DGst13 info $userreq p${nextpool} $diskns
+  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz3 ${disk1} 
   if [ $? -eq 0 ]; then
      zfs set acltype=posixacl p$nextpool
      zfs set avail:type=Availbility p$nextpool
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool
-     ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip pools/p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py balancetype/p$nextpool Availability 
-     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_Availability/request balancedtype_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_Availability/request/$leader balancedtype_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip balancetype/p$nextpool Availability 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/balancedtype/Add_p${nextpool}_Availability/request balancedtype_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/balancedtype/Add_p${nextpool}_Availability/request/$leader balancedtype_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip activepool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
      #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdputlocal.py fixpool/p$nextpool running 
-    /TopStor/logmsg.py DGsu13 info $userreq p${nextpool} $diskns
+     #ETCDCTL_API=3 /pace/etcdput.py $myhostip fixpool/p$nextpool running 
+    docker exec etcdclient /TopStor/logmsg.py DGsu13 info $userreq p${nextpool} $diskns
   else
-    /TopStor/logmsg.py DGfa13 info $userreq p${nextpool} $diskns
+    docker exec etcdclient /TopStor/logmsg.py DGfa13 info $userreq p${nextpool} $diskns
   fi
  fi  
  if [[ $raid == "addparity2" ]]; then
   diskargs=${#params[@]};
   diskargs=$((diskargs-2));
-  i=2
+  i=3
   disk1=" "
   diskns=""
-  while [ $i -lt $diskargs ]; do
+  while [ $i -lt $((diskargs-3)) ]; do
    i=$((i+1));
    disk=`echo ${params[$i]} | awk -F':' '{print $1}'`
    diskn=`echo ${params[$i]} | awk -F':' '{print $2}'`
@@ -314,25 +309,25 @@ else
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-   /TopStor/logmsg.py DGst14 info $userreq p${nextpool} $diskns
-  /sbin/zpool add -f ${nextpool} raidz2 ${disk1} 2>txt/${0:2}$userreq.txt
+   docker exec etcdclient /TopStor/logmsg.py DGst14 info $userreq p${nextpool} $diskns
+  /sbin/zpool add -f ${nextpool} raidz2 ${disk1} 
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
-    /TopStor/logmsg.py DGsu14 info $userreq p${nextpool} $diskns
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
+    docker exec etcdclient /TopStor/logmsg.py DGsu14 info $userreq p${nextpool} $diskns
   else
-    /TopStor/logmsg.py DGfa14 error $userreq p${nextpool} $diskns
+    docker exec etcdclient /TopStor/logmsg.py DGfa14 error $userreq p${nextpool} $diskns
   fi
  fi  
  if [[ $raid == "parity2" ]]; then
   diskargs=${#params[@]};
   diskargs=$((diskargs-1));
-  i=2
+  i=3
   disk1=" "
   diskns="";
-  while [ $i -lt $diskargs ]; do
+  while [ $i -lt $((diskargs-3)) ]; do
    i=$((i+1));
    disk=`echo ${params[$i]} | awk -F':' '{print $1}'`
    diskn=`echo ${params[$i]} | awk -F':' '{print $2}'`
@@ -342,38 +337,38 @@ else
    diskns=${diskns}$diskn","
   done;
   nextpool='dhcp'${RANDOM}$RANDOM;
-   /TopStor/logmsg.py DGst15 info $userreq p${nextpool} $diskns
-  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz2 ${disk1} 2>txt/${0:2}$userreq.txt
+   docker exec etcdclient /TopStor/logmsg.py DGst15 info $userreq p${nextpool} $diskns
+  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} raidz2 ${disk1} 
   if [ $? -eq 0 ]; then
      zfs set acltype=posixacl p$nextpool
      zfs set avail:type=Availbility p$nextpool
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool
-     ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip pools/p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py balancetype/p$nextpool Availability 
-     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_running/request balancedtype_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_running/request/$leader balancedtype_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip balancetype/p$nextpool Availability 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/balancedtype/Add_p${nextpool}_running/request balancedtype_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/balancedtype/Add_p${nextpool}_running/request/$leader balancedtype_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip activepool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
      #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdputlocal.py fixpool/p$nextpool running 
-    /TopStor/logmsg.py DGsu15 info $userreq p${nextpool} $diskns
+     #ETCDCTL_API=3 /pace/etcdput.py $myhostip fixpool/p$nextpool running 
+    docker exec etcdclient /TopStor/logmsg.py DGsu15 info $userreq p${nextpool} $diskns
   else
-    /TopStor/logmsg.py DGfa15 info $userreq p${nextpool} $diskns
+    docker exec etcdclient /TopStor/logmsg.py DGfa15 error $userreq p${nextpool} $diskns
   fi
  fi 
  if [[ $raid == "addparity" ]]; then
   diskargs=${#params[@]};
   diskargs=$((diskargs-2));
-  i=2
+  i=3
   disk1=" "
   diskns=""
-  while [ $i -lt $diskargs ]; do
+  while [ $i -lt $((diskargs)) ]; do
    i=$((i+1));
    disk=`echo ${params[$i]} | awk -F':' '{print $1}'`
    diskn=`echo ${params[$i]} | awk -F':' '{print $2}'`
@@ -381,27 +376,27 @@ else
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
-   /TopStor/logmsg.py DGst16 info $userreq p${nextpool} $diskns
+   docker exec etcdclient /TopStor/logmsg.py DGst16 info $userreq p${nextpool} $diskns
   /sbin/zpool add -f ${nextpool} raidz1 ${disk1} 
   if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip 'pools/'$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
-    /TopStor/logmsg.py DGsu16 info $userreq ${nextpool} $diskns
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_${nextpool}_$myhost/request/$leader pools_$stamp 
+    docker exec etcdclient /TopStor/logmsg.py DGsu16 info $userreq ${nextpool} $diskns
   else
-    /TopStor/logmsg.py DGfa16 info $userreq ${nextpool} $diskns
+    docker exec etcdclient /TopStor/logmsg.py DGfa16 error $userreq ${nextpool} $diskns
   fi
  fi 
  if [[ $raid == "parity" ]]; then
   echo Iam parity>>/root/tmp2
   diskargs=${#params[@]};
   diskargs=$((diskargs-2));
-  i=2
+  i=3
   disk1=" "
   diskns=""
   nextpool='dhcp'${RANDOM}$RANDOM;
-  while [ $i -lt $diskargs ]; do
+  while [ $i -lt $((diskargs)) ]; do
    echo inwhile, i, $diskn >>/root/tmp2
    i=$((i+1));
    disk=`echo ${params[$i]} | awk -F':' '{print $1}'`
@@ -412,7 +407,7 @@ else
    diskns=${diskns}$diskn","
   done;
    echo stop disks $diskns >>/root/tmp2
-   /TopStor/logmsg.py DGst17 info $userreq ${nextpool} $diskns
+   docker exec etcdclient /TopStor/logmsg.py DGst17 info $userreq ${nextpool} $diskns
    echo stop loggging  >>/root/tmp2
   echo /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on cachefile=/TopStordata/p${nextpool} -f p${nextpool} raidz1 ${disk1} >/root/tmp
   echo /sbin/zpool create -o ashift=12 -o autoexpand=on -o autoreplace=on cachefile=/TopStordata/p${nextpool} -f p${nextpool} raidz1 ${disk1}
@@ -425,83 +420,101 @@ else
      zfs export p$nextpool
      sleep 1
      zfs import p$nextpool
-     ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip pools/p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py balancetype/p$nextpool Availability 
-     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_Availability/request balancedtype_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_Availability/request/$leader balancedtype_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip balancetype/p$nextpool Availability 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/balancedtype/Add_p${nextpool}_Availability/request balancedtype_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/balancedtype/Add_p${nextpool}_Availability/request/$leader balancedtype_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip activepool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
      #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdputlocal.py fixpool/p$nextpool running 
-    /TopStor/logmsg.py DGsu17 info $userreq p${nextpool} $diskns
+     #ETCDCTL_API=3 /pace/etcdput.py $myhostip fixpool/p$nextpool running 
+    docker exec etcdclient /TopStor/logmsg.py DGsu17 info $userreq p${nextpool} $diskns
   else
     echo itis not done >> /root/tmp2
-    /TopStor/logmsg.py DGfa17 error $userreq p${nextpool} $diskns
+    docker exec etcdclient /TopStor/logmsg.py DGfa17 error $userreq p${nextpool} $diskns
   fi
  fi 
- if [[ $raid == "add" ]]; then
+ if [[ $raid == "addstripeset" ]]; then
    echo adding $disk1
-   /TopStor/logmsg.py DGst18 info $userreq ${nextpool} $diskn1
-  /sbin/zpool add  -f ${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
-  if [ $? -eq 0 ]; then
-     ETCDCTL_API=3 /pace/etcdput.py 'pools/'p$nextpool $myhost
+   docker exec etcdclient /TopStor/logmsg.py DGst18 info $userreq ${nextpool} $diskn1
+  diskargs=${#params[@]};
+  diskargs=$((diskargs-1));
+  i=3
+  disk1=" "
+  flag=1
+  diskns=""
+  while [ $i -lt $((diskargs-1)) ]; do
+   i=$((i+1));
+   disk=`echo ${params[$i]} | awk -F':' '{print $1}'`
+   diskn=`echo ${params[$i]} | awk -F':' '{print $2}'`
+   disk=`ls /dev/disk/by-id/ | grep -v part | grep $disk`
+   /sbin/zpool labelclear -f /dev/disk/by-id/$disk
+   /sbin/zpool add  -f ${nextpool} ${disk}
+   if [ $? -eq 0 ];
+   then
+       flag=0
+   fi
+   sleep 1
+   disk1=${disk1}$disk" "
+   diskns=${diskns}$diskn","
+  done;
+  if [ $flag -eq 0 ]; then
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip 'pools/'p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
-    /TopStor/logmsg.py DGsu18 info $userreq ${nextpool} $diskn1
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
+    docker exec etcdclient /TopStor/logmsg.py DGsu18 info $userreq ${nextpool} $diskn1
   else
-    /TopStor/logmsg.py DGfa18 info $userreq ${nextpool} $diskn1
+    docker exec etcdclient /TopStor/logmsg.py DGfa18 info $userreq ${nextpool} $diskn1
   fi
  fi 
  if [[ $raid == "stripeset" ]]; then
   diskargs=${#params[@]};
   diskargs=$((diskargs-1));
-  i=2
+  i=3
   disk1=" "
   diskns=""
-  while [ $i -lt $diskargs ]; do
+  while [ $i -lt $((diskargs-3)) ]; do
    i=$((i+1));
    disk=`echo ${params[$i]} | awk -F':' '{print $1}'`
    diskn=`echo ${params[$i]} | awk -F':' '{print $2}'`
    disk=`ls /dev/disk/by-id/ | grep -v part | grep $disk`
-   /sbin/zpool labelclear /dev/disk/by-id/$disk;
+   /sbin/zpool labelclear -f /dev/disk/by-id/$disk
    disk1=${disk1}$disk" "
    diskns=${diskns}$diskn","
   done;
   nextpool='dhcp'${RANDOM}$RANDOM;
-   /TopStor/logmsg.py DGst21 info $userreq p${nextpool} $diskns
-  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1} 2>txt/${0:2}$userreq.txt
+   docker exec etcdclient /TopStor/logmsg.py DGst21 info $userreq p${nextpool} $diskns
+  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} ${disk1}
   if [ $? -eq 0 ]; then
+     echo zfs set acltype=posixacl p$nextpool
      zfs set acltype=posixacl p$nextpool
      zfs set avail:type=volset p$nextpool
-     zfs export p$nextpool
-     sleep 1
-     zfs import p$nextpool
-     ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip pools/p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip activepool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
      #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdputlocal.py fixpool/p$nextpool running 
-    /TopStor/logmsg.py DGsu21 info $userreq p${nextpool} $diskns
+     #ETCDCTL_API=3 /pace/etcdput.py $myhostip fixpool/p$nextpool running 
+    docker exec etcdclient /TopStor/logmsg.py DGsu21 info $userreq p${nextpool} $diskns
   else
-    /TopStor/logmsg.py DGfa21 error $userreq p${nextpool} $diskns
+    docker exec etcdclient /TopStor/logmsg.py DGfa21 error $userreq p${nextpool} $diskns
   fi
  fi 
  if [[ $raid == "mirror" ]]; then
   diskargs=${#params[@]};
   diskargs=$((diskargs-1));
-  i=2
+  i=3
   disk1=" "
   diskns=""
-  while [ $i -lt $diskargs ]; do
+  while [ $i -lt $((diskargs-3)) ]; do
    i=$((i+1));
    disk=`echo ${params[$i]} | awk -F':' '{print $1}'`
    diskn=`echo ${params[$i]} | awk -F':' '{print $2}'`
@@ -511,37 +524,33 @@ else
    diskns=${diskns}$diskn","
   done;
   nextpool='dhcp'${RANDOM}$RANDOM;
-   /TopStor/logmsg.py DGst19 info $userreq p${nextpool} $diskns
-  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} mirror ${disk1} 2>txt/${0:2}$userreq.txt
+   docker exec etcdclient /TopStor/logmsg.py DGst19 info $userreq p${nextpool} $diskns
+  /sbin/zpool create -o cachefile=/TopStordata/p${nextpool} -o ashift=12 -o autoexpand=on -o autoreplace=on -f p${nextpool} mirror ${disk1} 
   if [ $? -eq 0 ]; then
      zfs set acltype=posixacl p$nextpool
      zfs set avail:type=Availability p$nextpool
-     zfs export p$nextpool
-     sleep 1
-     zfs import p$nextpool
-     ETCDCTL_API=3 /pace/etcdput.py pools/p$nextpool $myhost
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip pools/p$nextpool $myhost
      stamp=`date +%s`
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py balancetype/p$nextpool Availability 
-     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_Availability/request balancedtype_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/balancedtype/Add_p${nextpool}_Availability/request/$leader balancedtype_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
-     ETCDCTL_API=3 /pace/etcdput.py sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/pools/Add_p${nextpool}_$myhost/request/$leader pools_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip balancetype/p$nextpool Availability 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/balancedtype/Add_p${nextpool}_Availability/request balancedtype_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/balancedtype/Add_p${nextpool}_Availability/request/$leader balancedtype_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip activepool/p$nextpool running 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/activepool/Add_p${nextpool}_running/request activepool_$stamp 
+     ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/activepool/Add_p${nextpool}_running/request/$leader activepool_$stamp 
      #ETCDCTL_API=3 /pace/broadcasttolocal.py activepool/p$nextpool running 
-     ETCDCTL_API=3 /pace/etcdputlocal.py fixpool/p$nextpool running 
-    /TopStor/logmsg.py DGsu19 info $userreq p${nextpool} $diskns
+     #ETCDCTL_API=3 /pace/etcdput.py $myhostip fixpool/p$nextpool running 
+    docker exec etcdclient /TopStor/logmsg.py DGsu19 info $userreq p${nextpool} $diskns
   else
-    /TopStor/logmsg.py DGfa19  error $userreq p${nextpool} $diskns
+    docker exec etcdclient /TopStor/logmsg.py DGfa19  error $userreq p${nextpool} $diskns
   fi
  fi 
 fi
 #rm txt/${0:2}$userreq.txt
 sed -i "/p${nextpool}/c\\" $runningpools
 fi
-/pace/etcddel.py requests/DGsetpool/$myhost $myhost/$userreq
+/pace/etcddel.py $leaderip requests/DGsetpool/$myhost $myhost/$userreq
 #systemctl restart zfs-zed
-/pace/putzpool.py 
-/TopStor/logqueue.py `basename "$0"` stop $userreq 
-
+docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq 
+/pace/putzpool.py $leaderip
