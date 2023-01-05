@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+from privthis import privthis 
 import subprocess,sys, datetime
 import json
 from etcdgetlocalpy import etcdget as getlocal
@@ -14,7 +15,7 @@ def initlog(ldr,host):
     leaderip = ldr
     myhost = host
 
-def sendlog(*args):
+def main(*args):
  global leaderip, myhost
  z=[]
  knowns=[]
@@ -23,7 +24,7 @@ def sendlog(*args):
  z=['/TopStor/logmsg2.sh', dt, tm, myhost ]
  for arg in args:
   z.append(arg)
- knowninfo=get(leaderip, 'known','--prefix')
+ knowninfo=getlocal('known','--prefix')
  for k in knowninfo:
   knowns.append(k[1])
  msg={'req': 'msg2', 'reply':z}
@@ -34,5 +35,9 @@ def sendlog(*args):
   knowns.append(k[1])
 
 if __name__=='__main__':
- initlog(getlocal('leaderip')[0], getlocal('clusternode')[0])
- sendlog(*sys.argv[1:])
+    leaderip=sys.argv[1]
+    groupname=sys.argv[2]
+    groupusers=sys.argv[3].replace('users','')
+    userreq=sys.argv[4]
+    ischange=sys.argv[5]
+    main(*sys.argv[1:])
