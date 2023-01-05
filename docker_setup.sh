@@ -1,8 +1,13 @@
 myclusterf='/topstorwebetc/mycluster'
 mynodef='/topstorwebetc/mynode'
 myhost=`hostname`
-zpool export -a
-nmcli conn up mynode
+
+echo ${myhost}$@ | grep reboot
+if [ $? -ne 0 ];
+then
+ nmcli conn up mynode
+ zpool export -a
+fi
 targetcli clearconfig confirm=True	
 echo ${myhost}$@ | egrep 'init|local'
 if [ $? -eq 0 ];
@@ -254,9 +259,11 @@ do
 	if [ $? -eq 0 ];
 	then
 		echo syncrequests only
+		echo row 262 checksync init >> /root/checksync
     		docker exec etcdclient /pace/checksyncs.py syncrequest $myclusterip $myhost $myip
        	else
 		echo have to syncall
+		echo row 266 checksync init >> /root/checksync
 		docker exec etcdclient /pace/checksyncs.py syncall $myclusterip $myhost $myip
 	fi
 	checkcluster=`docker exec etcdclient /TopStor/etcdgetlocal.py leaderip`
@@ -283,12 +290,11 @@ if [ $isprimary -eq 1 ];
 then
 	echo adding all sync inits as I am primary
 	echo docker exec etcdclient /pace/checksyncs.py syncinit $etcd
+	echo row 293 checksync init >> /root/checksync
 	docker exec etcdclient /pace/checksyncs.py syncinit $etcd 
 fi
  echo running rabbit receive daemon
  /TopStor/topstorrecvreply.py $etcd & disown
- echo running iscsi watchdog daemon
-/pace/iscsiwatchdog.sh $etcd $myhost >/dev/null 2>/dev/null & disown 
 docker exec -it etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
 
 
@@ -313,4 +319,5 @@ docker exec etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip
 stamp=`date +%s%N`
 docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_$myhost_$mynodeip/request ready_$stamp
 docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_$myhost_$mynodeip/request/$leader ready_$stamp
-
+echo running iscsi watchdog daemon
+/pace/iscsiwatchdog.sh $etcd $myhost >/dev/null 2>/dev/null & disown 
