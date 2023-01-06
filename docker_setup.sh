@@ -1,8 +1,13 @@
 myclusterf='/topstorwebetc/mycluster'
 mynodef='/topstorwebetc/mynode'
 myhost=`hostname`
-zpool export -a
-nmcli conn up mynode
+
+echo ${myhost}$@ | grep reboot
+if [ $? -ne 0 ];
+then
+ nmcli conn up mynode
+ zpool export -a
+fi
 targetcli clearconfig confirm=True	
 echo ${myhost}$@ | egrep 'init|local'
 if [ $? -eq 0 ];
@@ -134,11 +139,16 @@ else
 	fi
 
 fi
+echo adding cmynode
 nmcli conn up cmynode
+echo strting target
 systemctl start target
+echo starting iscsid
 systemctl start iscsid 
+echo starting docker
 systemctl start docker
 
+echo starting intdns
 docker run --rm --name intdns --hostname intdns --net bridge0 -e DNS_DOMAIN=qs.dom -e DNS_IP=10.11.12.7 -e LOG_QUERIES=true -itd --ip 10.11.12.7 -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/dnshosts:/etc/hosts moataznegm/quickstor:dns
 if [ $isprimary -eq 1 ];
 then
@@ -148,11 +158,14 @@ then
 else
 	etcd=$mynodeip
 fi
-echo docker run -itd --rm --name etcd --hostname etcd -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $etcd:2379:2379 -v /TopStor/:/TopStor -v /root/etcddata:/default.etcd --net bridge0 moataznegm/quickstor:etcd
+
+echo starting etcd 
 docker run -itd --rm --name etcd --hostname etcd -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $etcd:2379:2379 -v /TopStor/:/TopStor -v /root/etcddata:/default.etcd --net bridge0 moataznegm/quickstor:etcd
 
+echo starting etcdclient 
 docker run -itd --rm --name etcdclient --hostname etcdclient -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -v /TopStor/:/TopStor -v /pace/:/pace moataznegm/quickstor:etcdclient 
 
+echo starting intstub 
 docker run -itd --rm --privileged \
   -v /TopStor/smb.conf:/etc/samba/smb.conf:rw \
   -v /etc/:/hostetc/   \
@@ -163,12 +176,14 @@ docker run -itd --rm --privileged \
   --name intsmb --hostname intsmb moataznegm/quickstor:smb
  docker exec intsmb sh /hostetc/VolumeCIFSupdate.sh
 #docker run -d --rm --name rmq --hostname rmq  -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $etcd:5672:5672 -v /TopStor/:/TopStor -v /pace/:/pace moataznegm/quickstor:rabbitmq 
+echo starting rabbitmq 
 systemctl start rabbitmq-server
 rabbitmqctl add_user rabb_Mezo YousefNadody 2>/dev/null
 rabbitmqctl set_permissions -p / rabb_Mezo ".*" ".*" ".*" 2>/dev/null
 started=0
 while [ $started -eq 0 ];
 do
+		echo waiting etcd to settle 
 		docker logs etcd | grep 'successfully notified init daemon' 
 		if [ $? -eq 0 ];
 	 	then
@@ -187,6 +202,7 @@ do
 	docker exec etcdclient /pace/etcdputlocal.py clusternode $myhost
 	if [ $isprimary -eq 1 ];
 	then
+		echo initializing etcd params 
 		echo docker exec etcdclient /pace/etcdput.py $myclusterip clusternode $myhost
 		echo isprimary $isprimary >> /root/dockerlogs.txt
 		docker exec etcdclient /TopStor/etcdput.py $myclusterip ActivePartners/$myhost $mynodeip 
@@ -197,11 +213,13 @@ do
 		etcdip=$myculsterip
 
 	else
+		echo waiting for me to join the cluster 
 		echo isprimaryin0 $isprimary >> /root/dockerlogs.txt
 		docker exec etcdclient /pace/etcdget.py $myclusterip Active --prefix | grep $myhsot
 		if [ $? -ne 0 ];
 		then
 			docker exec etcdclient /TopStor/etcdput.py $myclusterip possible$myhost $mynodeip 
+			echo I joined the cluster
 		fi
 		stillpossible=1
 		while [ $stillpossible -eq 1 ];
@@ -212,12 +230,13 @@ do
 				stillpossible=0
 			else
 				sleep 2
+				echo waiting for me to join the cluster 
 			fi
 		done
 		etcdip=$mynodeip
 		stamp=`date +%s%N`
 	fi
-
+	echo initializaing volume pool leader clsuternode data
 	myalias=`docker exec etcdclient /pace/etcdgetlocal.py $aliast/$myhost`
 	leader=`/pace/etcdget.py $myclusterip leader`
 	docker exec etcdclient /pace/etcdputlocal.py leader $leader 
@@ -240,9 +259,11 @@ do
 	if [ $? -eq 0 ];
 	then
 		echo syncrequests only
+		echo row 262 checksync init >> /root/checksync
     		docker exec etcdclient /pace/checksyncs.py syncrequest $myclusterip $myhost $myip
        	else
 		echo have to syncall
+		echo row 266 checksync init >> /root/checksync
 		docker exec etcdclient /pace/checksyncs.py syncall $myclusterip $myhost $myip
 	fi
 	checkcluster=`docker exec etcdclient /TopStor/etcdgetlocal.py leaderip`
@@ -259,7 +280,7 @@ isreset=`cat /root/nodestatus`
 echo ${isreset}$isprimary | grep reset1
 if [ $? -eq 0 ];
 then
-
+	echo initializing admin user
 	docker exec etcdclient /TopStor/UnixsetUser.py $myclusterip `hostname` admin tmatem
 	/TopStor/UnixAddGroup $etcd Everyone usersNoUser admin
 	echo runningnode > /root/nodestatus
@@ -267,11 +288,13 @@ fi
 #rm -rf /TopStor/key/adminfixed.gpg && cp /TopStor/factory/factoryadmin /TopStor/key/adminfixed.gpg
 if [ $isprimary -eq 1 ];
 then
+	echo adding all sync inits as I am primary
 	echo docker exec etcdclient /pace/checksyncs.py syncinit $etcd
+	echo row 293 checksync init >> /root/checksync
 	docker exec etcdclient /pace/checksyncs.py syncinit $etcd 
 fi
+ echo running rabbit receive daemon
  /TopStor/topstorrecvreply.py $etcd & disown
-/pace/iscsiwatchdog.sh $etcd $myhost >/dev/null 2>/dev/null & disown 
 docker exec -it etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
 
 
@@ -287,6 +310,7 @@ then
 	cp $templhttp $shttpdf
 	sed -i "s/MYCLUSTERH/$myclusterip/g" $shttpdf
 	sed -i "s/MYCLUSTER/$myclusterip/g" $shttpdf
+	echo running httpd fowrarder as I am not primary
 	docker run --rm --name httpd --hostname shttpd --net bridge0 -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $myclusterip:19999:19999 -p $myclusterip:80:80 -p $myclusterip:443:443 -v $shttpdf:/usr/local/apache2/conf/httpd.conf -v /root/topstorwebetc:/usr/local/apache2/topstorwebetc -v /topstorweb:/usr/local/apache2/htdocs/ -itd moataznegm/quickstor:git
 	docker run -itd --rm --name flask --hostname apisrv -v /etc/localtime:/etc/localtime:ro -v /pace/:/pace -v /pacedata/:/pacedata/ -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /TopStordata/:/TopStordata moataznegm/quickstor:flask
 fi
@@ -295,4 +319,5 @@ docker exec etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip
 stamp=`date +%s%N`
 docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_$myhost_$mynodeip/request ready_$stamp
 docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_$myhost_$mynodeip/request/$leader ready_$stamp
-
+echo running iscsi watchdog daemon
+/pace/iscsiwatchdog.sh $etcd $myhost >/dev/null 2>/dev/null & disown 

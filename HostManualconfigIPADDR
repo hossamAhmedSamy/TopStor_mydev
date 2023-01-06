@@ -14,7 +14,17 @@ then
 fi
 dev='enp0s8'
 newip=`/TopStor/etcdget.py $leaderip ipaddr/$myhost`
-echo nmcli conn mod mynode ipv4.addresses $newip 
-nmcli conn mod mynode ipv4.addresses $newip 
+oldip=`nmcli conn show mynode`
 
+echo nmcli conn mod mynode ipv4.addresses $newip >/root/tmpmyip
+nmcli conn mod mynode ipv4.addresses $newip 
+echo $oldip | grep $newip
+if [ $? -ne 0 ];
+then
+ echo running sleep >>/root/tmpmyip
+ ./etcdput.py $leaderip rebootme/$myhost pls
+# sleep 5
+# /TopStor/resetdocker.sh
+# reboot
+fi
 #/sbin/reboot

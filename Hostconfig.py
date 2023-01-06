@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import socket, subprocess,sys, datetime
 from time import sleep
-from logqueue import queuethis
+from logqueue import queuethis, initqueue
 from etcdgetpy import etcdget as get
 from etcdput import etcdput as put
 from etcddel import etcddel as dels 
@@ -16,6 +16,7 @@ from time import time as stamp
 def config(leader, leaderip, myhost, *bargs):
  rebootme = 0
  arglist = bargs[0]
+ initqueue(leaderip, myhost)
  logmsg.initlog(leaderip, myhost)
  #arglist = {'ipaddr': '10.11.11.123', 'ipaddrsubnet': '24', 'id': '0', 'user': 'admin', 'name': 'dhcp32502'}
  queuethis('Hostconfig','running',arglist)
@@ -48,8 +49,8 @@ def config(leader, leaderip, myhost, *bargs):
   #if myhost == leader:
   # updatenamespace(arglist['cluster'],oldarg)
   dels(leaderip, 'sync', 'namespace_')
-  put(leaderip, 'sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster']+'/request','namespace_'+str(stamp()))
-  put(leaderip, 'sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster']+'/request/'+myhost,'namespace_'+str(stamp()))
+  put(leaderip, 'sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster'].replace('/','::')+'/request','namespace_'+str(stamp()))
+  put(leaderip, 'sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster'].replace('/','::')+'/request/'+myhost,'namespace_'+str(stamp()))
   put(leaderip, 'namespace/mgmtip',arglist['cluster'])
   logmsg.sendlog('HostManual1su7','info',arglist['user'],oldarg,arglist['cluster'])
   queuethis('Hostconfig_cluster','finish',arglist['user'])
@@ -149,8 +150,8 @@ def config(leader, leaderip, myhost, *bargs):
   put(leaderip, 'ActivePartners/'+arglist['name'],arglist['ipaddr'])
   dels(leaderip, 'sync', 'ipaddr_'+arglist['name'])
   put(leaderip, 'sync/ipaddr/HostManualconfigIPADDR_'+'_'+arglist['name']+'/request','ipaddr_'+arglist['name']+'_'+str(stamp()))
-  put(leaderip, 'sync/ipaddr/Add_ActivePartners_'+arglist['name']+'_'+arglist['ipaddr']+'/request','ActivePartners_'+arglist['name']+'_'+str(stamp()))
-  put(leaderip, 'sync/ipaddr/Add_ActivePartners_'+arglist['name']+'_'+arglist['ipaddr']+'/request/'+leader,'ActivePartners_'+arglist['name']+'_'+str(stamp()))
+  put(leaderip, 'sync/ipaddr/Add_ActivePartners_'+arglist['name']+'_'+arglist['ipaddr'].replace('/','::')+'/request','ActivePartners_'+arglist['name']+'_'+str(stamp()))
+  put(leaderip, 'sync/ipaddr/Add_ActivePartners_'+arglist['name']+'_'+arglist['ipaddr'].replace('/','::')+'/request/'+leader,'ActivePartners_'+arglist['name']+'_'+str(stamp()))
   logmsg.sendlog('HostManual1su6','info',arglist['user'], str(oldipaddr),arglist['ipaddr']+'/'+arglist['ipaddrsubnet'])
 ######################################
 ############# need to reboot  ###############
@@ -189,6 +190,7 @@ if __name__=='__main__':
  arg={'cluster': '10.11.11.252/24', 'id': '0', 'user': 'admin', 'name': 'dhcp207722', 'token': '2f9124d029074800677590f565c7cb5a', 'response': 'admin'}
  arg={'ipaddr': '10.11.11.240', 'ipaddrsubnet': '24', 'id': '0', 'user': 'admin', 'name': 'dhcp207722', 'token': 'c20580a16e1c42a2d63f68719ab40ea9', 'response': 'admin'}
  arg={'ipaddr': '10.11.11.240', 'ipaddrsubnet': '24', 'id': '0', 'user': 'admin', 'name': 'dhcp207722', 'token': '9df4c7384591ccb9e699d0c4ec4321ac', 'response': 'admin'}
+ arg={'ipaddr': '10.11.11.241', 'ipaddrsubnet': '24', 'id': '0', 'user': 'admin', 'name': 'dhcp250171', 'token': '869927c8ed2149878087f60124fe148a', 'response': 'admin'}
  config(leader, leaderip, myhost, arg)
 
 #{'cluster': '10.11.11.250/24', 'tz': 'Kuwait%(GMT+03!00)_Kuwait^_Riyadh^_Baghdad', 'id': '0', 'user': 'admin', 'name': 'dhcp32570', 'token': '501ef1257322d1814125b1e16af95aa9', 'response': 'admin'}
