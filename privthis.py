@@ -7,15 +7,16 @@ from ast import literal_eval as mtuple
 from socket import gethostname as hostname
 from sendhost import sendhost
 def privthis(*bargs):
- priv = bargs[0] 
- userreq = bargs[1]
+ etcd = bargs[0]
+ priv = bargs[1] 
+ userreq = bargs[2]
  if userreq in ['admin','system']:
   return 'true' 
- userpriv = get('usersinfo/'+userreq)
- if priv in str(userpriv):
+ userpriv = get(etcd, 'usersinfo/'+userreq)
+ if priv in str(userpriv) and str(userpriv) != '-1':
    return userpriv[0].split(priv+'-')[1].split('/')[0]
  else:
-  return False
+  return 'False'
 
 if __name__=='__main__':
  privthis(*sys.argv[1:])

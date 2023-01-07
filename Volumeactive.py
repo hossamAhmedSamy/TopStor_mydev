@@ -14,7 +14,7 @@ def volumeactive(leaderip, myhost, pool,volname,prot,active,userreq):
  else:
    etcdip = leaderip
  logmsglocal.initlog(leaderip, myhost,etcdip)
- if privthis(prot,userreq) != 'true':
+ if privthis(etcdip, prot,userreq) != 'true':
   print('not authorized user to do this task ')
   return
  logmsglocal.sendlog('Unmoutst01','info',userreq,volname,active)

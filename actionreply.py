@@ -6,7 +6,6 @@ from base64 import decodebytes as decode
 from ast import literal_eval as mtuple
 from etcdgetpy import etcdget as get
 import subprocess, socket
-import logmsg
 from logqueueheap import heapthis, syncnextlead
 from syncq import syncq 
 
