@@ -565,20 +565,20 @@ DirectoryIndex index.html index.php
 	#SSLEngine ddon
 	#SSLCertificateFile /usr/local/apache2/topstorwebetc/TopStor.crt
 	#SSLCertificateKeyFile /usr/local/apache2/topstorwebetc/TopStor.key
-        Redirect / https://10.11.11.251/
+        Redirect / https://10.11.11.250/
 	RewriteEngine On
 	ProxyRequests Off
 	ProxypreserveHost On
-	ProxyPass "/netdata" "http://10.11.11.251:19999/"
-	ProxyPass "/api" "http://10.11.11.251:19999/api/"
-	ProxyPass "/css" "http://10.11.11.251:19999/css/"
-	ProxyPass "/dashboard.js" "http://10.11.11.251:19999/dashboard.js"
-	ProxyPass "/fonts" "http://10.11.11.251:19999/fonts/"
-	RewriteRule ^/netdata$ https://10.11.11.251/netdata/ [L,R=301]
-	RewriteRule ^/api$ https://10.11.11.251/api/ [L,R=301]
-	RewriteRule ^/css$ https://10.11.11.251/css/ [L,R=301]
-	RewriteRule ^/dashboard$ https://10.11.11.251/netdata/dashboard [L,R=301]
-	RewriteRule ^/fonts$ https://10.11.11.251/netdata/fonts/ [L,R=301]
+	ProxyPass "/netdata" "http://10.11.11.250:19999/"
+	ProxyPass "/api" "http://10.11.11.250:19999/api/"
+	ProxyPass "/css" "http://10.11.11.250:19999/css/"
+	ProxyPass "/dashboard.js" "http://10.11.11.250:19999/dashboard.js"
+	ProxyPass "/fonts" "http://10.11.11.250:19999/fonts/"
+	RewriteRule ^/netdata$ https://10.11.11.250/netdata/ [L,R=301]
+	RewriteRule ^/api$ https://10.11.11.250/api/ [L,R=301]
+	RewriteRule ^/css$ https://10.11.11.250/css/ [L,R=301]
+	RewriteRule ^/dashboard$ https://10.11.11.250/netdata/dashboard [L,R=301]
+	RewriteRule ^/fonts$ https://10.11.11.250/netdata/fonts/ [L,R=301]
 	<Proxy *>
 		Order deny,allow
 		Allow from all
@@ -612,6 +612,6 @@ DirectoryIndex index.html index.php
 		Order deny,allow
 		Allow from all
 	</Proxy>
-	ProxyPass /api http://10.11.11.251:5001/api
-	ProxyPassReverse /api http://10.11.11.251:5001/api
+	ProxyPass /api http://10.11.11.250:5001/api
+	ProxyPassReverse /api http://10.11.11.250:5001/api
 </VirtualHost>
