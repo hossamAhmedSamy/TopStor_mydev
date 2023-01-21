@@ -15,7 +15,14 @@ then
 	myhost='dhcp'`echo $RANDOM$RANDOM | cut -c -6`
 	hostname $myhost
 	echo $myhost > /etc/hostname
+	echo frstreboot > /root/hostname
 	echo InitiatorName=iqn.1994-05.com.redhat:$myhost > /etc/iscsi/initiatorname.iscsi
+	reboot
+fi
+cat /root/hostname | grep frstreboot
+if [ $? -eq 0 ];
+then
+	echo $myhost > /root/hostname
 	reboot
 fi
 eth1='enp0s8'

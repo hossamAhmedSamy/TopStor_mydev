@@ -48,3 +48,6 @@ systemd-oom:x:986:
 docker:x:985:
 epmd:x:984:
 rabbitmq:x:983:
+Everyone:x:1000:
+rpc:x:32:
+rpcuser:x:29:
