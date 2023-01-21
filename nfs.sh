@@ -1,75 +1,9 @@
 #!/bin/sh
 export ETCDCTL_API=3
-enpdev='enp0s8'
-leaderip=`echo $@ | awk '{print $1}'`
-pool=`echo $@ | awk '{print $2}'`
-vol=`echo $@ | awk '{print $3}'`
-ipaddr=`echo $@ | awk '{print $4}'`
-ipsubnet=`echo $@ | awk '{print $5}'`
-	myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
-	myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
-	leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
-	echo $leader | grep $myhost
-	if [ $? -ne 0 ];
-	then
- 		etcd=$myhostip
-	else
- 		etcd=$leaderip
- 	fi
-
-echo $@ > /root/nfsparam
-allvols=`./etcdget.py $leaderip volumes --prefix`
-replivols=`echo $allvols | grep $vol`
-echo $replivols | grep active
-if [ $? -ne 0 ];
-then
- exit
-fi
-docker rm -f `docker ps -a | grep -v Up | grep $ipaddr | awk '{print $1}'` 2>/dev/null
-clearvol=`./prot.py clearvol $vol | awk -F'result=' '{print $2}'`
-if [ $clearvol != '-1' ];
-then
- /sbin/pcs resource delete --force $clearvol  2>/dev/null
-fi
-redvol=`./prot.py redvol $vol | awk -F'result=' '{print $2}'`
-if [ $redvol != '-1' ];
-then
- redipaddr=`echo $redvol | awk -F'/' '{print $1}' | awk -F'-' '{print $NF}'`
- echo iam here 1
- /TopStor/delblock.py ${vol} ${vol} /TopStordata/exports.${ipaddr}  ;
- cp /TopStordata/exports.${ipaddr}.new /TopStordata/exports.${ipaddr};
- cat /etc/exports | grep -v $vol  > /etc/exports
- cat /TopStordata/exports.${ipaddr} >> /etc/exports ;
- systemctl start nfs-server
- systemctl reload nfs-server
- resname=`echo $redvol | awk -F'/' '{print $1}'`
- newright=$redvol 
- mounts=`echo $newright |sed 's/\// /g'| awk '{$1=""; print}'`
- mount=''
- for x in $mounts; 
- do
-  replivols=`echo $allvols | grep $x`
-  echo $replivols | grep active
-  if [ $? -ne 0 ];
-  then
-   continue
-  fi
-  mount=$mount'-v /'$pool'/'$x':/'$pool'/'$x':rw '
- done
-fi 
-rightip=`/pace/etcdget.py $etcd ipaddr/$ipaddr/$ipsubnet`
-resname=`echo $rightip | awk -F'/' '{print $1}'`
- echo iam here 2
- resname=nfs-$pool-$vol-$ipaddr
- /pace/etcdput.py $leaderip ipaddr/$ipaddr/$ipsubnet $resname/$vol 
- #/pace/broadcasttolocal.py ipaddr/$ipaddr/$ipsubnet $resname/$vol 
- #yes | cp /etc/{passwd,group,shadow} /etc
- cp /TopStordata/exports.${vol} /TopStordata/exports.$ipaddr; 
- cat /etc/exports | grep -v $vol  > /TopStordata/exports;
- cp /TopStordata/exports  /etc/exports;
- cat /TopStordata/exports.${ipaddr} >> /etc/exports ;
- systemctl reload nfs-server
- /sbin/pcs resource delete --force $resname  2>/dev/null
- /sbin/pcs resource create $resname ocf:heartbeat:IPaddr2 ip=$ipaddr nic=$enpdev cidr_netmask=$ipsubnet op monitor interval=5s on-fail=restart
- /sbin/pcs resource group add ip-all $resname
-systemctl start nfs-server
+ipaddr=`echo $@ | awk '{print $1}'`
+ipsubnet=`echo $@ | awk '{print $2}'`
+nmcli conn mod cmynode +ipv4.addresses ${ipaddr}/$ipsubnet
+nmcli conn up cmynode
+echo '# init' > /etc/exports
+cat /TopStordata/exportip.* > /etc/exports
+exportfs -r
