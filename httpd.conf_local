@@ -590,7 +590,7 @@ DirectoryIndex index.html index.php
 	#SSLEngine ddon
 	#SSLCertificateFile /usr/local/apache2/topstorwebetc/TopStor.crt
 	#SSLCertificateKeyFile /usr/local/apache2/topstorwebetc/TopStor.key
-        Redirect / https://10.11.11.251/
+        Redirect / https://10.11.11.250/
 	<Proxy *>
 		Order deny,allow
 		Allow from all
