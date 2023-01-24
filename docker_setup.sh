@@ -1,7 +1,8 @@
 myclusterf='/topstorwebetc/mycluster'
 mynodef='/topstorwebetc/mynode'
 myhost=`hostname`
-
+echo '# init' > /etc/exports
+rm -rf /TopStordata/exportip.*
 echo ${myhost}$@ | grep reboot
 if [ $? -ne 0 ];
 then

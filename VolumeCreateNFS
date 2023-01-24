@@ -12,7 +12,7 @@ writev=`echo $@ | awk '{print $5}'`;
 ipaddr=`echo $@ | awk '{print $6}'`;
 ipsubnet=`echo $@ | awk '{print $7}'`;
 active=`echo $@ | awk '{print $8}'`;
-userreq=` echo $@ | awk '{print $8}'`;
+userreq=` echo $@ | awk '{print $9}'`;
 DG=`echo $pDG `;
 hostnam=`echo $pDG`;
 #sshost=`cat $runningpools | grep $hostnam | awk '{print $1}'`;
@@ -55,7 +55,7 @@ then
   docker exec etcdclient /TopStor/logmsg.py NFS1004 info  $userreq $name
  fi
  cd /TopStor
- /sbin/zfs create -o overlay=on -o acltype=posixacl -o aclinherit=passthrough -o xattr=sa -o atime=off -o redundant_metadata=most -o quota=$quota -o dedup=on -o compression=lz4  $DG/$name 2> $txtres
+ /sbin/zfs create -o overlay=on -o acltype=posixacl -o aclinherit=passthrough -o xattr=sa -o atime=off -o redundant_metadata=most -o quota=$quota -o dedup=on -o compression=lz4  $DG/$name
  /sbin/zfs set prot:kind=NFS $DG/$name 
  /sbin/zfs set ip:addr=$ipaddr $DG/$name
  /sbin/zfs set ip:subnet=$ipsubnet $DG/$name
@@ -73,11 +73,20 @@ then
  then
   docker exec etcdclient /TopStor/logmsg.py NFS1005 error  $userreq $name
  else 
-  ETCDCTL_API=3 /pace/etcdput.py $leaderip volumes/NFS/$myhost/$DG/$name $DG/$name/$who/rw/sync/insecure/no_root_squash/no_all_squash/$writev/$ipaddr/$ipsubnet/$active
+  l=$DG'/'$name'/'$who'/rw/sync/insecure/no_root_squash/no_all_squash/'$writev'/'$ipaddr'/'$ipsubnet'/'$active
+  stamp=`date +%s`
+  ETCDCTL_API=3 /pace/etcdput.py $leaderip volumes/NFS/$myhost/$DG/$name $l
+  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request volumes_$stamp
+  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request/$leader volumes_$stamp
+  echo /$DG/$name' '$who'('rw','sync','insecure','no_root_squash','no_all_squash')' > /TopStordata/exports.$name 
+  echo '# SUMMARY' volumes/NFS/$myhost/$DG/$name $l  >> /TopStordata/exports.${name}
+  mv /TopStordata/exports.${name} /$DG/
   docker exec etcdclient /TopStor/logmsg.py NFS1007 info $userreq $name
  fi;
  /TopStor/SnapshotCreateHourlytrend $leaderip $DG $name 0 24 7 system 
- /TopStor/VolumeActivateNFS $leaderip vol=$name user=$userreq
+ #/TopStor/VolumeActivateNFS $leaderip vol=$name user=$userreq
+ echo /TopStor/nfs.py $leader $leaderip $myhost $myhostip $etcd $DG $name $ipaddr $ipsubnet NFS 
+ /TopStor/nfs.py $leader $leaderip $myhost $myhostip $etcd $DG $name $ipaddr $ipsubnet NFS 
  /pace/putzpool.py $leaderip  
 fi
 
