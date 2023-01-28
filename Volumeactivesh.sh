@@ -15,6 +15,16 @@ contrun=`./privthis.sh $privilege $userreq`;
 if [[ $contrun == 'true' ]]
 then
  docker exec etcdclient /TopStor/logqueue.py `basename "$0"` running $userreq
+ 	myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
+        myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
+        leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
+        echo $leader | grep $myhost
+        if [ $? -ne 0 ];
+        then
+                etcd=$myhostip
+        else
+                etcd=$leaderip
+        fi 
  echo prot=$prot, $active
  echo $prot | grep CIFS
  if [ $? -eq 0 ]
@@ -33,5 +43,22 @@ then
    zfs set status:mount=active $pDG/$name
   fi
  fi
+ echo $prot | grep NFS 
+ if [ $? -eq 0 ]
+ then
+  echo $active | grep disabled
+  if [ $? -eq 0 ]
+  then
+   sed -i 's/active/disabled/g' /$pDG/exports.$name
+   zfs set status:mount=disabled $pDG/$name
+   zfs unmount -f $pDG/$name
+  else
+   sed -i 's/disabled/active/g' /$pDG/exports.$name*
+   zfs mount $pDG/$name
+   zfs set status:mount=active $pDG/$name
+  fi
+  rm -rf /TopStordata/exportip*
+ fi
+ /TopStor/etcdput.py $etcd dirty/volume 0     
 fi
  docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq

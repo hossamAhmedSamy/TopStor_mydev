@@ -32,8 +32,6 @@ def create(leader, leaderip, myhost, myhostip, etcdip, pool, name, ipaddr, ipsub
     
     cmdline = '/TopStor/nfs.sh '+ipaddr+' '+ipsubnet
     subprocess.run(cmdline.split(),stdout=subprocess.PIPE)  
-    cmdline = '/TopStor/nfs.sh '+ipaddr+' '+ipsubnet
-    subprocess.run(cmdline.split(),stdout=subprocess.PIPE)  
 
     return
     #if len(checkipaddr1) != 0 or len :
