@@ -78,8 +78,8 @@ then
   ETCDCTL_API=3 /pace/etcdput.py $leaderip volumes/NFS/$myhost/$DG/$name $l
   ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request volumes_$stamp
   ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request/$leader volumes_$stamp
-  echo /$DG/$name' '$who'('rw','sync','insecure','no_root_squash','no_all_squash')' > /TopStordata/exports.$name 
-  echo '# SUMMARY' volumes/NFS/$myhost/$DG/$name $l  >> /TopStordata/exports.${name}
+  echo '# SUMMARY' volumes/NFS/$myhost/$DG/$name $l  > /TopStordata/exports.${name}
+  echo /$DG/$name' '$who'('rw','sync','insecure','no_root_squash','no_all_squash')' >> /TopStordata/exports.$name 
   mv /TopStordata/exports.${name} /$DG/
   docker exec etcdclient /TopStor/logmsg.py NFS1007 info $userreq $name
  fi;
