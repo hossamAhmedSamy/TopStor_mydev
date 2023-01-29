@@ -565,22 +565,6 @@ DirectoryIndex index.html index.php
 	#SSLEngine ddon
 	#SSLCertificateFile /usr/local/apache2/topstorwebetc/TopStor.crt
 	#SSLCertificateKeyFile /usr/local/apache2/topstorwebetc/TopStor.key
-<<<<<<< HEAD
-        Redirect / https://10.11.11.244/
-	RewriteEngine On
-	ProxyRequests Off
-	ProxypreserveHost On
-	ProxyPass "/netdata" "http://10.11.11.244:19999/"
-	ProxyPass "/api" "http://10.11.11.244:19999/api/"
-	ProxyPass "/css" "http://10.11.11.244:19999/css/"
-	ProxyPass "/dashboard.js" "http://10.11.11.244:19999/dashboard.js"
-	ProxyPass "/fonts" "http://10.11.11.244:19999/fonts/"
-	RewriteRule ^/netdata$ https://10.11.11.244/netdata/ [L,R=301]
-	RewriteRule ^/api$ https://10.11.11.244/api/ [L,R=301]
-	RewriteRule ^/css$ https://10.11.11.244/css/ [L,R=301]
-	RewriteRule ^/dashboard$ https://10.11.11.244/netdata/dashboard [L,R=301]
-	RewriteRule ^/fonts$ https://10.11.11.244/netdata/fonts/ [L,R=301]
-=======
         Redirect / https://10.11.11.250/
 	RewriteEngine On
 	ProxyRequests Off
@@ -595,7 +579,6 @@ DirectoryIndex index.html index.php
 	RewriteRule ^/css$ https://10.11.11.250/css/ [L,R=301]
 	RewriteRule ^/dashboard$ https://10.11.11.250/netdata/dashboard [L,R=301]
 	RewriteRule ^/fonts$ https://10.11.11.250/netdata/fonts/ [L,R=301]
->>>>>>> 95ffb5afab547cb2f28bfd5f7c94d7319d370072
 	<Proxy *>
 		Order deny,allow
 		Allow from all
@@ -607,11 +590,7 @@ DirectoryIndex index.html index.php
 	#SSLEngine ddon
 	#SSLCertificateFile /usr/local/apache2/topstorwebetc/TopStor.crt
 	#SSLCertificateKeyFile /usr/local/apache2/topstorwebetc/TopStor.key
-<<<<<<< HEAD
-        Redirect / https://10.11.11.244/
-=======
         Redirect / https://10.11.11.250/
->>>>>>> 95ffb5afab547cb2f28bfd5f7c94d7319d370072
 	<Proxy *>
 		Order deny,allow
 		Allow from all
@@ -633,11 +612,6 @@ DirectoryIndex index.html index.php
 		Order deny,allow
 		Allow from all
 	</Proxy>
-<<<<<<< HEAD
-	ProxyPass /api http://10.11.11.244:5001/api
-	ProxyPassReverse /api http://10.11.11.244:5001/api
-=======
 	ProxyPass /api http://10.11.11.250:5001/api
 	ProxyPassReverse /api http://10.11.11.250:5001/api
->>>>>>> 95ffb5afab547cb2f28bfd5f7c94d7319d370072
 </VirtualHost>
