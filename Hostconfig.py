@@ -131,8 +131,9 @@ def config(leader, leaderip, myhost, *bargs):
    logmsg.sendlog('HostManual1st12','info',arglist['user'])
   else:
    logmsg.sendlog('HostManual2st12','info',arglist['user'])
-  cmdline=['/TopStor/HostManualconfigCF',arglist['configured']]
-  result=subprocess.run(cmdline,stdout=subprocess.PIPE)
+  put(leaderip, 'configured/'+arglist['name'],arglist['configured'])
+  dels(leaderip, 'sync/cf', 'confiugred_'+arglist['name'])
+  put(leaderip, 'sync/cf/HostManualconfigCF_'+'_'+arglist['name']+'/request','configured_'+arglist['name']+'_'+str(stamp()))
   if 'yes' in arglist['configured']:
    logmsg.sendlog('HostManual1su12','info',arglist['user'])
   else:
