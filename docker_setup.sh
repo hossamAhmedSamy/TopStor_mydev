@@ -93,42 +93,65 @@ nmcli conn up clusterstub
 nmcli conn up mynode
 nmcli conn delete cmynode
 nmcli conn delete cmycluster
-isinitn=`nmcli conn show | grep mynode | wc -c`
-if [ $isinitn -le 5 ];
+#isinitn=`nmcli conn show | grep mynode | wc -c`
+isinitn=`cat /root/nodeconfigured`'s'
+echo $isinitn | grep 'yess'
+#if [ $isinitn -le 5 ];
+if [ $? -ne 0 ];
 then
-	mynode='10.11.11.244/24'
+	#mynode='10.11.11.244/24'
+	isconf='no'
+	x=$(( ( RANDOM % 40 )  + 3 ))
+	mynode='10.11.11.'$x'/24'
 	nmcli conn add con-name mynode type ethernet ifname $mynodedev ip4 $mynode
 	nmcli conn delete clusterstub
 	nmcli conn add con-name clusterstub type ethernet ifname $myclusterdev ip4 169.168.12.12 
 	nmcli conn up clusterstub 
 	targetcli clearconfig confirm=True	
 	targetcli saveconfig 
-else
-	mynode=`nmcli conn show mynode | grep ipv4.addresses | awk '{print $2}'`
-fi
-isinitn=`nmcli conn show | grep mycluster | wc -c`
-if [ $isinitn -le 5 ];
-then
-	mycluster='10.11.11.250/24'
+	ping -w 3 10.11.11.250
+	if [ $? -ne 0 ];
+	then
+		mycluster='10.11.11.250/24'
+		isconf_prim='noyes'
+		isprimary=1
+	else
+		mycluster=$mynode
+		isconf_prim='nono'
+		isprimary=0
+	fi
 	nmcli conn add con-name mycluster type ethernet ifname $myclusterdev ip4 $mycluster
-
 else
+	isconf='yes'
+	mynode=`nmcli conn show mynode | grep ipv4.addresses | awk '{print $2}'`
 	mycluster=`nmcli conn show mycluster | grep ipv4.addresses | awk '{print $2}'`
+	myclusterip=`echo $mycluster | awk -F'/' '{print $1}'`
+	ping -w 3 $myclusterip 
+	if [ $? -ne 0 ];
+	then 
+		isconf_prim='yesyes'
+		isprimary=1
+	else
+		isconf_prim='yesno'
+		isprimary=0
+	fi
 fi
-
+myclusterip=`echo $mycluster | awk -F'/' '{print $1}'`
 mynodeip=`echo $mynode | awk -F'/' '{print $1}'`
 myip=$mynodeip
-myclusterip=`echo $mycluster | awk -F'/' '{print $1}'`
-ping -w 3 $myclusterip 
-if [ $? -ne 0 ];
-then 
-	isprimary=1
-else
-	isprimary=0
-fi
 echo $mynodedev | grep $myclusterdev
 if [ $? -eq 0 ];
 then
+	case $isconf_prim in 
+		nono)
+		;;
+		noyes)
+		;;
+		yesno)
+		;;
+		yesyes)
+		;;
+	esac
 	if [ $isprimary -ne 0 ];
 	then
 		echo I am prmary
@@ -139,6 +162,16 @@ then
 		nmcli conn add con-name cmynode type ethernet ifname $mynodedev ip4 $mynode
 	fi
 else
+	case $isconf_prim in 
+		nono)
+		;;
+		noyes)
+		;;
+		yesno)
+		;;
+		yesyes)
+		;;
+	esac
 	nmcli conn add con-name cmynode type ethernet ifname $mynodedev ip4 $mynode
 	nmcli conn add con-name cmycluster type ethernet ifname $myclusterdev ip4 $mycluster
 	if [ $isprimary -ne 0 ];
@@ -149,10 +182,13 @@ else
 fi
 echo adding cmynode
 nmcli conn up cmynode
-echo strting target
-systemctl start target
-echo starting iscsid
-systemctl start iscsid 
+if [[ $isconf == 'yes' ]];
+then
+	echo strting target
+	systemctl start target
+	echo starting iscsid
+	systemctl start iscsid 
+fi
 echo starting docker
 systemctl start docker
 
