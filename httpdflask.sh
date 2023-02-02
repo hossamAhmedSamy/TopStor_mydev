@@ -2,7 +2,7 @@
 eth1='enp0s8'
 eth2='enp0s8'
 templhttp='/TopStor/httpd_template.conf'
-shttpdf='/TopStor/httpd.conf'
+shttpdf='/TopStordata/httpd.conf'
 myclusterip=`echo $@ | awk '{print $1}'`
 req54=`echo $@ | awk '{print $2}'`
 initip='10.11.11.254'

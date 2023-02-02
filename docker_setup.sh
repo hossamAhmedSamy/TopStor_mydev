@@ -106,19 +106,20 @@ then
 	nmcli conn add con-name mynode type ethernet ifname $mynodedev ip4 $mynode
 	nmcli conn delete clusterstub
 	nmcli conn add con-name clusterstub type ethernet ifname $myclusterdev ip4 169.168.12.12 
-	nmcli conn up clusterstub 
-	targetcli clearconfig confirm=True	
-	targetcli saveconfig 
+	#nmcli conn up clusterstub 
+
 	ping -w 3 10.11.11.250
 	if [ $? -ne 0 ];
 	then
 		mycluster='10.11.11.250/24'
 		isconf_prim='noyes'
 		isprimary=1
+		echo the ping didn\'t find the initial cluster 250 so I am primary
 	else
 		mycluster=$mynode
 		isconf_prim='nono'
 		isprimary=0
+		echo the ping found the initial cluster so I will not be primary
 	fi
 	nmcli conn add con-name mycluster type ethernet ifname $myclusterdev ip4 $mycluster
 else
@@ -208,6 +209,18 @@ docker run -itd --rm --name etcd --hostname etcd -v /etc/localtime:/etc/localtim
 
 echo starting etcdclient 
 docker run -itd --rm --name etcdclient --hostname etcdclient -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -v /TopStor/:/TopStor -v /pace/:/pace moataznegm/quickstor:etcdclient 
+if [[ $isconf_prim == 'nono' ]];
+then
+ /pace/watchdoginit & disown
+ /pace/keepsendingprim & disown
+ exit
+fi
+if [[ $isconf_prim == 'noyes' ]];
+then
+ /pace/watchdogprim & disown
+ /pace/watchdoginit & disown
+ /pace/keepsendingprim & disown
+fi
 
 echo starting intstub 
 docker run -itd --rm --privileged \
