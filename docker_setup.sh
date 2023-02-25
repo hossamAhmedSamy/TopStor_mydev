@@ -42,6 +42,7 @@ then
 		echo $1 | grep reset
 		if [ $? -eq 0 ];
 		then
+			rm -rf /root/node*
 			rm  -rf /root/etcddata/* 
 			echo yes | cp /TopStor/passwd /etc/
 			echo yes | cp /TopStor/group /etc/
@@ -358,7 +359,9 @@ docker exec -it etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip
 
 #docker run --restart unless-stopped --name git -v /root/gitrepo:/usr/local/apache2/htdocs/ --hostname sgit -p 10.11.11.252:80:80 -v /root/gitrepo/httpd.conf:/usr/local/apache2/conf/httpd.conf -itd -v /root/gitrepo/resolv.conf:/etc/resolv.conf moataznegm/quickstor:git
 templhttp='/TopStor/httpd_template.conf'
-shttpdf='/TopStor/httpd.conf'
+rm -rf /TopStordata/httpd.conf
+cp /TopStor/httpd.conf /TopStordata/
+shttpdf='/TopStordata/httpd.conf'
 docker rm -f httpd
 docker rm -f flask
 rm -rf $httpdf

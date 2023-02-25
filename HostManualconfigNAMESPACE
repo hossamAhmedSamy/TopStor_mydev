@@ -9,6 +9,7 @@ hostip=`echo $@ | awk '{print $4}'`
 myclusterdev='enp0s8'
 newip=`/TopStor/etcdget.py $leaderip namespace/mgmtip`
 nmcli conn mod mycluster ipv4.addresses $newip 
+echo yes > /root/nodeconfigured
 echo checking $leader $myhost >> /root/tmpnamespace
 echo $leader | grep $myhost
 if [ $? -eq 0 ];
