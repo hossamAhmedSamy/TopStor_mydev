@@ -1,0 +1,21 @@
+#!/usr/bin/python3
+from etcdput import etcdput as put
+from etcdget import etcdget as get 
+import sys
+
+def syncpls(*args):
+ leaderip=args[0]
+ discip=args[1]
+ donemembers = get(leaderip,'possible','--prefix')+ get(leaderip,'Active','--prefix')
+ poses = get(discip,'possible','--prefix')
+ for pos in poses:
+    host=pos[0].split('/')[1]
+    if host not in str(donemembers):
+        hostip = pos[1]
+        put(leaderip,pos[0],pos[1])
+ return 
+
+
+if __name__=='__main__':
+  syncpls(*sys.argv[1:])
+
