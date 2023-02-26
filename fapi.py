@@ -206,6 +206,12 @@ def hostsactive():
   hid +=1
  return jsonify(activehosts)
 
+
+@app.route('/api/v1/hosts/discover', methods=['GET','POST'])
+def discover():
+    cmndstring = '/TopStor/getdiscovery.sh '
+    postchange(cmndstring)
+    return
 @app.route('/api/v1/hosts/possible', methods=['GET','POST'])
 def hostspossible():
  global allhosts, readyhosts, activehosts, losthosts, possiblehosts, leaderip
