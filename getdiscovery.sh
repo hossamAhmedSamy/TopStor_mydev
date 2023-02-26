@@ -1,7 +1,7 @@
 #!/usr/bin/sh
 etcd='10.11.11.253'
 cd /TopStor
-rm -rf /root/discovery
+rm -rf /root/discovery/*
 mkdir /root/discovery
 
 nmcli conn mod cmynode +ipv4.addresses $etcd/24
@@ -26,7 +26,7 @@ do
 	lines=`/TopStor/etcdget.py $etcd possible --prefix`
 	echo $lines
 	lines=`/TopStor/etcdget.py $etcd tostop`'s'
-	echo /pace/syncpossibles.py $leaderip $etcd
+	/TopStor/syncpossibles.py $leaderip $etcd
 	echo $lines | grep yes
 	if [ $? -eq 0 ];
 	then
