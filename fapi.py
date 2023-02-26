@@ -219,7 +219,7 @@ def hostspossible():
  possiblehosts = []
  hid = 0
  for host in hosts:
-  name = host[0].replace('possible','')
+  name = host[0].split('/')[1]
   ip = host[1]
   possiblehosts.append({'name':name, 'ip': ip, 'id': hid}) 
   hid +=1
