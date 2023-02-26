@@ -94,10 +94,8 @@ nmcli conn up clusterstub
 nmcli conn up mynode
 nmcli conn delete cmynode
 nmcli conn delete cmycluster
-#isinitn=`nmcli conn show | grep mynode | wc -c`
 isinitn=`cat /root/nodeconfigured`'s'
 echo $isinitn | grep 'yess'
-#if [ $isinitn -le 5 ];
 if [ $? -ne 0 ];
 then
 	#mynode='10.11.11.244/24'
