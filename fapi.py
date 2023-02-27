@@ -555,6 +555,8 @@ def getnotification(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  notifbody = get('notification')[0].split(' ')[1:]
+ with open('/root/tmptmp','a') as f:
+    f.write(str(notifbody))
  requests = get('request','--prefix')
  requestdict = {}
  for req in requests:
@@ -795,9 +797,13 @@ def hostconfig(data):
 @app.route('/api/v1/hosts/joincluster', methods=['GET','POST'])
 @login_required
 def hostjoincluster(data):
+ global leaderip, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  data['user'] = data['response']
+ discover()
+ data['leaderip'] = leaderip
+ data ['myhost'] = myhost
  Joincluster.do(data) 
  return data
 
@@ -808,6 +814,9 @@ def hostevacuate(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  data['user'] = data['response']
+ #with open('/root/Evacuate','w') as f:
+  #f.write(" ".join([leaderip, myhost, data['name'], data['user']]))
+ discover()
  Evacuate.do(leaderip, myhost, data['name'], data['user']) 
  return data
 
