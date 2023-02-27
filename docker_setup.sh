@@ -271,7 +271,7 @@ do
 	else
 		echo waiting for me to join the cluster 
 		echo isprimaryin0 $isprimary >> /root/dockerlogs.txt
-		docker exec etcdclient /pace/etcdget.py $myclusterip Active --prefix | grep $myhsot
+		docker exec etcdclient /pace/etcdget.py $myclusterip Active --prefix | grep $myhost
 		if [ $? -ne 0 ];
 		then
 			docker exec etcdclient /TopStor/etcdput.py $myclusterip possible$myhost $mynodeip 
@@ -373,6 +373,7 @@ then
 	docker run -itd --rm --name flask --hostname apisrv -v /etc/localtime:/etc/localtime:ro -v /pace/:/pace -v /pacedata/:/pacedata/ -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /TopStordata/:/TopStordata moataznegm/quickstor:flask
 fi
 /TopStor/ioperf.py $etcd $myhost
+echo docker exec etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
 docker exec etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
 stamp=`date +%s%N`
 docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_$myhost_$mynodeip/request ready_$stamp
