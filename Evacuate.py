@@ -26,14 +26,15 @@ def do(leaderip,myhost, *args):
   return
  logmsg.sendlog('Evacuaest01','info',args[-1],args[-2])
  evacip = get('ActivePartners/'+args[-2])[0]
- dels(discip,'possible', args[-2])
- dels(leaderip,"", args[-2])
  leader=get('leader','--prefix')[0][0].replace('leader/','')
  stamp = time()
  put(leaderip, 'sync/evacuatehost/syncfn_setall_'+args[-2]+'_'+evacip+'_'+args[-1]+'/request', 'evacuatehost_'+str(stamp))
  put(leaderip, 'sync/evacuatehost/syncfn_setall_'+args[-2]+'_'+evacip+'_'+args[-1]+'/request/'+myhost, 'evacuatehost_'+str(stamp))
  if myhost == leader:
-  setall(args[-2],evacip,args[-1])
+  setall(leaderip, myhost,args[-2],evacip,args[-1])
+ dels(discip,'possible', args[-2])
+ dels(leaderip,"", args[-2])
+ #logmsg.sendlog('Evacuaesu01','info',args[-1],args[-2])
 
 if __name__=='__main__':
  do(*sys.argv[1:])
