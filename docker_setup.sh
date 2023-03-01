@@ -377,8 +377,8 @@ fi
 echo docker exec etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
 docker exec etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
 stamp=`date +%s%N`
-docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_$myhost_$mynodeip/request ready_$stamp
-docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_$myhost_$mynodeip/request/$leader ready_$stamp
+docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_${myhost}_$mynodeip/request ready_$stamp
+docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp
 echo running iscsi watchdog daemon
 echo /pace/iscsiwatchdog.sh $etcd $myhost > /root/iscsiwatch 
 #/pace/iscsiwatchdog.sh $etcd $myhost >/dev/null 2>/dev/null & disown 
