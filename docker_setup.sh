@@ -203,6 +203,7 @@ else
 	etcd=$mynodeip
 fi
 
+echo nameserver 10.11.12.7 >  /root/gitrepo/resolv.conf
 echo starting etcd 
 docker run -itd --rm --name etcd --hostname etcd -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $etcd:2379:2379 -v /TopStor/:/TopStor -v /root/etcddata:/default.etcd --net bridge0 moataznegm/quickstor:etcd
 
@@ -379,4 +380,5 @@ stamp=`date +%s%N`
 docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_$myhost_$mynodeip/request ready_$stamp
 docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_$myhost_$mynodeip/request/$leader ready_$stamp
 echo running iscsi watchdog daemon
-/pace/iscsiwatchdog.sh $etcd $myhost >/dev/null 2>/dev/null & disown 
+echo /pace/iscsiwatchdog.sh $etcd $myhost > /root/iscsiwatch 
+#/pace/iscsiwatchdog.sh $etcd $myhost >/dev/null 2>/dev/null & disown 

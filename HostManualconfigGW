@@ -9,20 +9,23 @@ myip=`echo $@ | awk '{print $4}'`
 hostname=$myhost
 dev='enp0s8'
 gateway=`ETCDCTL_API=3 /TopStor/etcdget.py $leaderip gw/$leader`
+if [ $gateway -eq -1 ];
+then 
+ gateway=0
+fi
+gatewayn=`echo $gateway | wc -c`
 oldgateway=`ip route | grep default | awk '{print $3}'`
-echo $gateway | grep '\.'
-if [ $? -ne 0 ];
+oldgatewayn=`echo $oldgateway | wc -c`
+if [ $gatewayn -le 2 ];
 then
- echo $oldgateway | grep '\.'
- if [ $? -ne 0 ];
+ if [ $oldgatewayn -le 6 ];
  then
-  oldgateway='NoGateway'
+  oldgateway=0 
  fi
 else
  ./etcdput.py $myip gw/$hostname $gateway
  ./etcdput.py $leaderip gw/$hostname $gateway
- echo $oldgateway | grep '\.'
- if [ $? -eq 0 ];
+ if [ $oldgatewayn -ge 7 ];
  then
   route del default gw $oldgateway 
  fi
