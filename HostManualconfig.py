@@ -33,11 +33,11 @@ def setall(*bargs):
   z.append(aarg)
  msg={'req': 'LocalManualConfig', 'reply':z}
  ownerip=get('leader',owner)
- if ownerip[0]== -1:
+ if ownerip[0]== '_1':
   ownerip=get('known',owner)
-  if ownerip[0]== -1:
+  if ownerip[0]== '_1':
    with open('/root/tmp','a') as f:
-    f.write('ownerip is -1')
+    f.write('ownerip is _1')
    return 3
  with open('/root/HostManualconfigtmp','w') as f:
   f.write('owner '+owner+"\n")

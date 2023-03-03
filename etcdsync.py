@@ -16,8 +16,8 @@ mylist=getp(leaderip,key,'--prefix')
 dellocal(thehost,tokey,'--prefix')
 
 print('mylist:',mylist)
-if '-1' in mylist:
- print('-1')
+if '_1' in mylist:
+ print('_1')
  exit()
 for item in mylist:
  moditem=""

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+x#!/usr/bin/python3
 import subprocess,sys
 from ast import literal_eval as mtuple
 from etcdgetpy import etcdget as getp
@@ -13,7 +13,7 @@ leaderip = get('leaderip')
 result=getp(leaderip, key,'--prefix')
 print("the result",result)
 if result==[]:
- print('-1')
+ print('_1')
  exit(1)
 for item in result:
  x=item[0].replace('/','')

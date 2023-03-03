@@ -78,7 +78,7 @@ def takedecision(allmsgs):
   else:
    logmsg.sendlog(msg[0],'info','system',*msg[1:])
  faultydisks = get(leaderip, 'disks','FAULT')
- if '-1' in str(faultydisks):
+ if '_1' in str(faultydisks):
   faultydisks = [] 
  for disk in allinfo['disks']:
   if disk in str(faultydisks):
@@ -162,7 +162,7 @@ def checkhosts():
  alldsks = get(leaderip, 'host','current')
  allinfo = getall(alldsks)
  lastalldsks = get(leaderip, 'hosts','last')
- if lastalldsks[0] == -1:
+ if lastalldsks[0] == '_1':
   put(leaderip, 'hosts/last',json.dumps(allinfo) )
   return
  alllastinfo = mtuple(lastalldsks[0][1])

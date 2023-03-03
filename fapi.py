@@ -655,7 +655,7 @@ def volumecreate(data):
 def getlogin(token):
  global leaderip
  logindata = get('login',token)[0]
- if logindata == -1:
+ if logindata == '_1':
   logmsg.sendlog('Lognno0','warning','system',token)
   return 'baduser'
  oldtimestamp = logindata[1].split('/')[1]

@@ -9,15 +9,7 @@ myip=`echo $@ | awk '{print $4}'`
 hostname=$myhost
 dev='enp0s8'
 dns=`ETCDCTL_API=3 /TopStor/etcdget.py $leaderip dnsname/$leader`
-if [ $dns -eq -1 ];
-then 
- dns=0
-fi
 searchdns=`ETCDCTL_API=3 /TopStor/etcdget.py $leaderip dnssearch/$leader`
-if [ $searchdns -eq -1 ];
-then 
- searchdns=0
-fi
 olddns=`cat /etc/resolv.conf | grep nameserver | head -1 | awk '{print $2}'`
 olddnssearch=`cat /etc/resolv.conf | grep search | head -1 | awk '{print $2}'`
 echo  hihihihihihi $dns
