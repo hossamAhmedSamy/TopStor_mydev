@@ -310,13 +310,15 @@ do
 	#/TopStor/syncq.py $myclusterip $myhost 2>/root/syncqerror
 	stamp=`date +%s%N`
 	myalias=`echo $myalias | sed 's/\_/\:\:\:/g'`
+	/pace/etcddel.py $myclusterip sync/$aliast/Add_${myhost} --prefix
 	if [ $isprimary -ne 0 ];
 	then
  		/pace/etcddel.py $myclusterip ready --prefix
- 		/pace/etcddel.py $mynodeip ready --prefix
  		/pace/etcddel.py $myclusterip sync/ready/Add --prefix
+	else
+ 		/pace/etcddel.py $mynodeip ready --prefix
+	
 	fi		
-	/pace/etcddel.py $myclusterip sync/$aliast/Add_${myhost} --prefix
 	/pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request ${aliast}_$stamp.
 	/pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request/$myhost ${aliast}_$stamp.
 	/pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request/$leader ${aliast}_$stamp.
