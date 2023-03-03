@@ -381,4 +381,4 @@ docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_${myhost}_$mynod
 docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp
 echo running iscsi watchdog daemon
 echo /pace/iscsiwatchdog.sh $etcd $myhost > /root/iscsiwatch 
-#/pace/iscsiwatchdog.sh $etcd $myhost >/dev/null 2>/dev/null & disown 
+/pace/iscsiwatchdog.sh $etcd $myhost >/dev/null 2>/dev/null & disown 
