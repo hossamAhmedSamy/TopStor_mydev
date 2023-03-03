@@ -310,11 +310,16 @@ do
 	#/TopStor/syncq.py $myclusterip $myhost 2>/root/syncqerror
 	stamp=`date +%s%N`
 	myalias=`echo $myalias | sed 's/\_/\:\:\:/g'`
- 	/pace/etcddel.py $myclusterip ready --prefix
- 	/pace/etcddel.py $myclusterip sync/ready/Add --prefix
+	if [ $isprimary -ne 0 ];
+	then
+ 		/pace/etcddel.py $myclusterip ready --prefix
+ 		/pace/etcddel.py $mynodeip ready --prefix
+ 		/pace/etcddel.py $myclusterip sync/ready/Add --prefix
+	fi		
 	/pace/etcddel.py $myclusterip sync/$aliast/Add_${myhost} --prefix
 	/pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request ${aliast}_$stamp.
 	/pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request/$myhost ${aliast}_$stamp.
+	/pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request/$leader ${aliast}_$stamp.
 	issync=`/pace/etcdget.py $myclusterip sync initial`initial
 	echo $issync | grep $myhost
 	if [ $? -eq 0 ];
@@ -385,5 +390,8 @@ stamp=`date +%s%N`
 /TopStor/etcdput.py $etcd sync/ready/Add_${myhost}_$mynodeip/request ready_$stamp
 /TopStor/etcdput.py $etcd sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp
 echo running iscsi watchdog daemon
-echo /pace/iscsiwatchdog.sh $etcd $myhost > /root/iscsiwatch 
-/pace/iscsiwatchdog.sh $etcd $myhost >/dev/null 2>/dev/null & disown 
+if [ $isprimary -ne 0 ];
+then
+ echo /pace/iscsiwatchdog.sh $etcd $myhost > /root/iscsiwatch 
+ /pace/iscsiwatchdog.sh $etcd $myhost >/dev/null 2>/dev/null & disown 
+fi
