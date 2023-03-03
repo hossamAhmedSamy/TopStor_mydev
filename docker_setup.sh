@@ -310,6 +310,9 @@ do
 	#/TopStor/syncq.py $myclusterip $myhost 2>/root/syncqerror
 	stamp=`date +%s%N`
 	myalias=`echo $myalias | sed 's/\_/\:\:\:/g'`
+ 	/pace/etcddel.py $myclusterip ready --prefix
+ 	/pace/etcddel.py $myclusterip sync/ready/Add --prefix
+	/pace/etcddel.py $myclusterip sync/$aliast/Add_${myhost} --prefix
 	/pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request ${aliast}_$stamp.
 	/pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request/$myhost ${aliast}_$stamp.
 	issync=`/pace/etcdget.py $myclusterip sync initial`initial
@@ -378,6 +381,7 @@ fi
 echo docker exec etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
 /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
 stamp=`date +%s%N`
+/pace/etcddel.py $myclusterip sync/ready/Add_${myhost} --prefix
 /TopStor/etcdput.py $etcd sync/ready/Add_${myhost}_$mynodeip/request ready_$stamp
 /TopStor/etcdput.py $etcd sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp
 echo running iscsi watchdog daemon
