@@ -308,9 +308,10 @@ do
 	docker exec etcdclient /pace/etcddellocal.py sync/volume Del_ 2>/dev/null
         docker exec etcdclient /pace/etcdput.py $myclusterip $aliast/$myhost $myalias
 	#/TopStor/syncq.py $myclusterip $myhost 2>/root/syncqerror
+	stamp=`date +%s%N`
 	myalias=`echo $myalias | sed 's/\_/\:\:\:/g'`
-	docker exec etcdclient /pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request ${aliast}_$stamp.
-	docker exec etcdclient /pace/etcdput.py sync/$aliast/Add_${myhost}_$myalias/request/$myhost ${aliast}_$stamp.
+	/pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request ${aliast}_$stamp.
+	/pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request/$myhost ${aliast}_$stamp.
 	issync=`/pace/etcdget.py $myclusterip sync initial`initial
 	echo $issync | grep $myhost
 	if [ $? -eq 0 ];
@@ -375,10 +376,10 @@ then
 fi
 /TopStor/ioperf.py $etcd $myhost
 echo docker exec etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
-docker exec etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
+/TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
 stamp=`date +%s%N`
-docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_${myhost}_$mynodeip/request ready_$stamp
-docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp
+/TopStor/etcdput.py $etcd sync/ready/Add_${myhost}_$mynodeip/request ready_$stamp
+/TopStor/etcdput.py $etcd sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp
 echo running iscsi watchdog daemon
 echo /pace/iscsiwatchdog.sh $etcd $myhost > /root/iscsiwatch 
 /pace/iscsiwatchdog.sh $etcd $myhost >/dev/null 2>/dev/null & disown 
