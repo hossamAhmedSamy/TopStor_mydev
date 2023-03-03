@@ -13,14 +13,15 @@ searchdns=`ETCDCTL_API=3 /TopStor/etcdget.py $leaderip dnssearch/$leader`
 olddns=`cat /etc/resolv.conf | grep nameserver | head -1 | awk '{print $2}'`
 olddnssearch=`cat /etc/resolv.conf | grep search | head -1 | awk '{print $2}'`
 echo  hihihihihihi $dns
+touch /etc/resolv.conf
 dnsn=` echo $dns | wc -c `
 olddnsn=` echo $olddns | wc -c `
 searchdnsn=` echo $searchdnsn | wc -c `
 olddnssearchn=` echo $olddnssearch | wc -c `
-if [ $dnsn -le 2 ];
+if [ $dnsn -le 3 ];
 then
 echo leader=$leader, dns=$dns, searchdns=$searchdns
- if [ $olddnsn -le 2 ];
+ if [ $olddnsn -le 3 ];
  then
   olddns='NoDNS'
  fi
@@ -33,7 +34,7 @@ echo $? hereherehere $myip
  ./etcdput.py $leaderip dnsname/$hostname $dns
  echo 'supersede domain-name-server '$dns';' > /etc/dhcp/dhclient.conf
  echo nameserver $dns > /etc/resolv.conf
- if [ $searchdnsn -ge 3 ];
+ if [ $searchdnsn -gt 3 ];
  then
   echo 'supersede domain-search "'$searchdns'";' >> /etc/dhcp/dhclient.conf
   echo search $searchdns >> /etc/resolv.conf

@@ -12,7 +12,7 @@ gateway=`ETCDCTL_API=3 /TopStor/etcdget.py $leaderip gw/$leader`
 gatewayn=`echo $gateway | wc -c`
 oldgateway=`ip route | grep default | awk '{print $3}'`
 oldgatewayn=`echo $oldgateway | wc -c`
-if [ $gatewayn -le 2 ];
+if [ $gatewayn -le 3 ];
 then
  if [ $oldgatewayn -le 6 ];
  then

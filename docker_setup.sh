@@ -385,12 +385,12 @@ then
 	docker run -itd --rm --name flask --hostname apisrv -v /etc/localtime:/etc/localtime:ro -v /pace/:/pace -v /pacedata/:/pacedata/ -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /TopStordata/:/TopStordata moataznegm/quickstor:flask
 fi
 /TopStor/ioperf.py $etcd $myhost
-echo docker exec etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
-/TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
+echo docker exec etcdclient /TopStor/etcdput.py $myclusterip ready/$myhost $mynodeip 
+/TopStor/etcdput.py $myclusterip ready/$myhost $mynodeip 
 stamp=`date +%s%N`
-/pace/etcddel.py $myclusterip sync/ready/Add_${myhost} --prefix
-/TopStor/etcdput.py $etcd sync/ready/Add_${myhost}_$mynodeip/request ready_$stamp
-/TopStor/etcdput.py $etcd sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp
+/pace/etcddel.py $etcd sync/ready/Add_${myhost} --prefix
+/TopStor/etcdput.py $myclusterip sync/ready/Add_${myhost}_$mynodeip/request ready_$stamp
+/TopStor/etcdput.py $myclusterip sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp
 echo running iscsi watchdog daemon
 if [ $isprimary -ne 0 ];
 then
