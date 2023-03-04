@@ -1,7 +1,7 @@
 #!/usr/bin/sh
 fnloop () {
 cd /TopStor
-/TopStor/iscsiwatchdog.sh
+/TopStor/iscsiwatchdog.sh $1 $2 $3
 }
 
 

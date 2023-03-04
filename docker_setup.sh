@@ -394,7 +394,6 @@ stamp=`date +%s%N`
 echo running iscsi watchdog daemon
 if [ $isprimary -ne 0 ];
 then
- echo /pace/iscsiwatchdog.sh $etcd $myhost > /root/iscsiwatch 
  /pace/etcddel.py $mynodeip sync/ready/Add_${myhost} --prefix
 else
  /TopStor/etcdput.py $myclusterip nextlead/er $myhost
@@ -406,7 +405,7 @@ fi
  /pace/zfsping.py $leaderip $myhost & disown
  /pace/rebootmeplslooper.sh $leaderip $myhost & disown
  /TopStor/receivereplylooper.sh & disown
- /TopStor/iscsiwatchdoglooper.sh $mynodeip $myhost >/dev/null 2>/dev/null & disown 
+ /TopStor/iscsiwatchdoglooper.sh $mynodeip $myhost & disown 
  /pace/heartbeatlooper.sh & disown
  /pace/fapilooper.sh & disown
 
