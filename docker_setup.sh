@@ -197,7 +197,7 @@ docker run --rm --name intdns --hostname intdns --net bridge0 -e DNS_DOMAIN=qs.d
 leaderip=$myclusterip
 if [ $isprimary -eq 1 ];
 then
-	utcd=$myclusterip
+	etcd=$myclusterip
 	leader=$myhost
 else
 	etcd=$mynodeip
