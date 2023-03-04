@@ -406,7 +406,7 @@ fi
  /pace/zfsping.py $leaderip $myhost & disown
  /pace/rebootmeplslooper.sh $leaderip $myhost & disown
  /TopStor/receivereplylooper.sh & disown
- /TopStor/iscsiwatchdog.sh $mynodeip $myhost >/dev/null 2>/dev/null & disown 
+ /TopStor/iscsiwatchdoglooper.sh $mynodeip $myhost >/dev/null 2>/dev/null & disown 
  /pace/heartbeatlooper.sh & disown
  /pace/fapilooper.sh & disown
 

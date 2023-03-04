@@ -4,7 +4,9 @@ lsscsi=0
 #dmesg -n 1
 rabbitip=`echo $@ | awk '{print $1}'`
 myhost=`echo $@ | awk '{print $2}'`
+initipstatus=`echo $@ | awk '{print $3}'`
 #echo start >> /root/iscsiwatch
+myhostip=$rabbitip
 targetn=0
 leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
 echo $leader | grep $myhost
@@ -14,9 +16,23 @@ then
 else
  	initip=3
 fi
+if [ $iscrashed -eq 1 ];
+then
+ initipstatus=`docker ps` 
+ echo $initipstatus | grep 8080
+ if [ $? -eq 0 ];
+ then
+  echo $initipstatus | grep $myhostip
+  if [ $? -eq 0 ];
+  then
+   initip=4
+  else
+   initip=2
+  fi
+ fi
+fi
 initstamp=`date +%s`
 echo $initstamp > /TopStordata/initstamp
-echo $initstamp 
 leaderip=`docker exec etcdclient /TopStor/etcdgetlocal.py leaderip`
 isinitn=`cat /root/nodeconfigured`'s'
 echo $isinitn | grep 'yess'
