@@ -9,7 +9,7 @@ then
  nmcli conn up mynode
  zpool export -a
 fi
-targetcli clearconfig confirm=True	
+/usr/bin/targetcli clearconfig confirm=True	
 echo ${myhost}$@ | egrep 'init|local'
 if [ $? -eq 0 ];
 then
