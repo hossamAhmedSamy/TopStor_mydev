@@ -407,6 +407,6 @@ fi
  /pace/rebootmeplslooper.sh $leaderip $myhost & disown
  /TopStor/receivereplylooper.sh & disown
  /TopStor/iscsiwatchdog.sh $mynodeip $myhost >/dev/null 2>/dev/null & disown 
- /pace/heartbeatlooper & disown
+ /pace/heartbeatlooper.sh & disown
  /pace/fapilooper.sh & disown
 
