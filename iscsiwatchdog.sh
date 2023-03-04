@@ -5,7 +5,7 @@ lsscsi=0
 rabbitip=`echo $@ | awk '{print $1}'`
 myhost=`echo $@ | awk '{print $2}'`
 initipstatus=`echo $@ | awk '{print $3}'`
-#echo start >> /root/iscsiwatch
+echo start >> /root/iscsiwatch
 myhostip=$rabbitip
 targetn=0
 leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`

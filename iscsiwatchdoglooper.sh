@@ -1,7 +1,7 @@
 #!/usr/bin/sh
 fnloop () {
 cd /TopStor
-/TopStor/iscsiwathdog.py
+/TopStor/iscsiwatchdog.sh
 }
 
 
