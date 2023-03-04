@@ -10,6 +10,7 @@ then
  zpool export -a
 fi
 /usr/bin/targetcli clearconfig confirm=True	
+targetcli saveconfig
 echo ${myhost}$@ | egrep 'init|local'
 if [ $? -eq 0 ];
 then
