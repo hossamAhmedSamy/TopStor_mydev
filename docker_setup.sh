@@ -194,11 +194,11 @@ systemctl start docker
 
 echo starting intdns
 docker run --rm --name intdns --hostname intdns --net bridge0 -e DNS_DOMAIN=qs.dom -e DNS_IP=10.11.12.7 -e LOG_QUERIES=true -itd --ip 10.11.12.7 -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/dnshosts:/etc/hosts moataznegm/quickstor:dns
+leaderip=$myclusterip
 if [ $isprimary -eq 1 ];
 then
-	etcd=$myclusterip
+	utcd=$myclusterip
 	leader=$myhost
-	leaderip=$myclusterip
 else
 	etcd=$mynodeip
 fi
@@ -388,12 +388,24 @@ fi
 echo docker exec etcdclient /TopStor/etcdput.py $myclusterip ready/$myhost $mynodeip 
 /TopStor/etcdput.py $myclusterip ready/$myhost $mynodeip 
 stamp=`date +%s%N`
-/pace/etcddel.py $etcd sync/ready/Add_${myhost} --prefix
+/pace/etcddel.py $myclusterip sync/ready/Add_${myhost} --prefix
 /TopStor/etcdput.py $myclusterip sync/ready/Add_${myhost}_$mynodeip/request ready_$stamp
 /TopStor/etcdput.py $myclusterip sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp
 echo running iscsi watchdog daemon
 if [ $isprimary -ne 0 ];
 then
  echo /pace/iscsiwatchdog.sh $etcd $myhost > /root/iscsiwatch 
- /pace/iscsiwatchdog.sh $etcd $myhost >/dev/null 2>/dev/null & disown 
+ /pace/etcddel.py $mynodeip sync/ready/Add_${myhost} --prefix
+else
+ /TopStor/etcdput.py $myclusterip nextlead/er $myhost
+ /TopStor/etcddel.py $myclusterip sync/nextlead/Add_er_ --prefix
+ /TopStor/etcdput.py $myclusterip sync/nextlead/Add_er_${myhost}/request nextlead_$stamp
+ /TopStor/etcdput.py $myclusterip sync/nextlead/Add_er_${myhost}/request/$leader nextlead_$stamp
 fi
+ /pace/syncrequestlooper.sh $leaderip $myhost & disown
+ /pace/zfsping.py $leaderip $myhost & disown
+ /pace/rebootmeplslooper.sh $leaderip $myhost & disown
+ /TopStor/receivereplylooper.sh & disown
+ /TopStor/iscsiwatchdog.sh $mynodeip $myhost >/dev/null 2>/dev/null & disown 
+ /pace/fapilooper.sh & disown
+
