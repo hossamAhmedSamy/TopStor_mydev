@@ -106,6 +106,7 @@ then
 	isconf='no'
 	x=$(( ( RANDOM % 40 )  + 3 ))
 	mynode='10.11.11.'$x'/24'
+	nmcli conn delete mynode
 	nmcli conn add con-name mynode type ethernet ifname $mynodedev ip4 $mynode
 	nmcli conn delete clusterstub
 	nmcli conn add con-name clusterstub type ethernet ifname $myclusterdev ip4 169.168.12.12 
@@ -124,6 +125,7 @@ then
 		isprimary=0
 		echo the ping found the initial cluster so I will not be primary
 	fi
+	nmcli conn delete mycluster
 	nmcli conn add con-name mycluster type ethernet ifname $myclusterdev ip4 $mycluster
 else
 	isconf='yes'
@@ -159,10 +161,12 @@ then
 	if [ $isprimary -ne 0 ];
 	then
 		echo I am prmary
+		nmcli conn delete cmynode 
 		echo nmcli conn add con-name cmynode type ethernet ifname $mynodedev ip4 $mynode ip4 $mycluster
 		nmcli conn add con-name cmynode type ethernet ifname $mynodedev ip4 $mynode ip4 $mycluster
 	else
 		echo I am a cluster node 
+		nmcli conn delete cmynode 
 		nmcli conn add con-name cmynode type ethernet ifname $mynodedev ip4 $mynode
 	fi
 else
@@ -394,10 +398,14 @@ fi
 /TopStor/ioperf.py $etcd $myhost
 echo docker exec etcdclient /TopStor/etcdput.py $myclusterip ready/$myhost $mynodeip 
 /TopStor/etcdput.py $myclusterip ready/$myhost $mynodeip 
+/TopStor/etcdput.py $myclusterip ActivePartners/$myhost $mynodeip 
 stamp=`date +%s%N`
 /pace/etcddel.py $myclusterip sync/ready/Add_${myhost} --prefix
+/pace/etcddel.py $myclusterip sync/ActivePartners/Add_${myhost} --prefix
 /TopStor/etcdput.py $myclusterip sync/ready/Add_${myhost}_$mynodeip/request ready_$stamp
 /TopStor/etcdput.py $myclusterip sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp
+/TopStor/etcdput.py $myclusterip sync/ActivePartners/Add_${myhost}_$mynodeip/request/$leader ready_$stamp
+/TopStor/etcdput.py $myclusterip sync/ActivePartners/Add_${myhost}_$mynodeip/request ActivePartners_$stamp
 echo running iscsi watchdog daemon
 if [ $isprimary -ne 0 ];
 then
@@ -414,14 +422,23 @@ else
 fi
  /TopStor/etcddel.py $myclusterip sync/diskref --prefix
  /TopStor/etcdput.py $myclusterip sync/diskref/______/request diskref_$stamp
+ docker exec etcdclient /TopStor/etcdput.py etcd ready/$myhost $mynodeip
+ /pace/diskref.sh $leader $myclusterip $myhost $mynodeip
  /TopStor/refreshdisown.sh & disown 
  /TopStor/etcdput.py $etcd refreshdisown yes 
 
  #/pace/syncrequestlooper.sh $leaderip $myhost & disown
  #/pace/zfsping.py $leaderip $myhost & disown
- /pace/rebootmeplslooper.sh $leaderip $myhost & disown
+ /pace/rebootmeplslooper.sh $myclusterip $myhost & disown
  #/TopStor/receivereplylooper.sh & disown
  #/TopStor/iscsiwatchdoglooper.sh $mynodeip $myhost & disown 
  /pace/heartbeatlooper.sh & disown
  /pace/fapilooper.sh & disown
 
+if [ $isprimary -ne 0 ];
+then
+	/pace/checksyncs.py syncrequest $myclusterip $myhost 
+	/pace/checksyncs.py restetcd $myclusterip $myhost 
+ 	/TopStor/etcddel.py $myclusterip sync/diskref --prefix
+ 	/TopStor/etcdput.py $myclusterip sync/diskref/______/request diskref_$stamp
+fi
