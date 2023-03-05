@@ -4,31 +4,28 @@ import binascii
 from base64 import decodebytes as decode
 #from base64 import decodestring as decode
 from ast import literal_eval as mtuple
-from etcdgetpy import etcdget as get
 import subprocess, socket
 from logqueueheap import heapthis, syncnextlead
 from syncq import syncq 
 
 archive = 1 
 
-def do(myip, body):
+def do(leader, leaderip, myhost, myip, etcdip, body):
  global archive
- myhost = get(myip, 'clusternode')[0]
- leaderip = get(myip, 'leaderip')[0]
  logmsg.initlog(leaderip, myhost)
  z=[]
+ print('body',body)
+ print('""""""""""""""""""""""""""""""""""')
+ print('mtuple',mtuple(body.replace("'",'"')), type(mtuple(body.replace("'",'"'))))
+ print('""""""""""""""""""""""""""""""""""')
+ r=mtuple(body.replace("'",'"'))
  with open('/root/recv','w') as f:
   f.write('Recevied a reply:'+str(body[2:][:-1])+'\n')
- y=body[2:][:-1].replace('\\','').replace("'{",'"{').replace("}'",'}"').replace('"b\'',"'b;").replace('\n','').replace('"]','\\"]')
+ print('############################3')
  with open('/root/recv','w') as f:
-   f.write('Received '+y)
- t=mtuple(y)
- yy=t['req'].replace("'b;",'"b\'')
+   f.write('Received '+r['req'])
  with open('/root/recv','w') as f:
-  f.write('Recevied a reply:'+yy+'\n')
- r=mtuple(yy) 
- with open('/root/recv','a') as f:
-  f.write('tis:'+'found'+'\n')
+  f.write('Recevied a reply:'+str(r['reply'])+'\n')
  with open('/root/recv','a') as f:
    f.write('Request details:'+r['req']+'\n')
 ########## if user ######################
@@ -125,7 +122,6 @@ def do(myip, body):
     print('wirtten archive')
    #cmdline=['/sbin/logrotate','logqueue.cfg','-f']
    #subprocess.run(cmdline,stdout=subprocess.PIPE)
-   leader = get(myip, 'leader','--prefix')[0][0].split('/')[1]
    syncq(leader,myhost,archive)
    if archive:
     archive = 0
@@ -325,5 +321,17 @@ def do(myip, body):
 
 if __name__=='__main__':
  import sys
- msg=str({'host': 'localhost', 'req': sys.argv[1]})
- do('b"'+msg+'"') 
+ cmdline='docker exec etcdclient /TopStor/etcdgetlocal.py leader'
+ leader=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').replace('\n','').replace(' ','')
+ cmdline='docker exec etcdclient /TopStor/etcdgetlocal.py leaderip'
+ leaderip=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').replace('\n','').replace(' ','')
+ cmdline='docker exec etcdclient /TopStor/etcdgetlocal.py clusternode'
+ myhost=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').replace('\n','').replace(' ','')
+ cmdline='docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip'
+ myip=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').replace('\n','').replace(' ','')
+ if leader == myhost:
+    etcdip = leaderip
+ else:
+    etcdip = myip
+ msg=str({'host': 'localhost', 'req':  "{'req': 'Pumpthis', 'reply': ['/TopStor/UnixAddUser', '10.11.11.251', 'mezo', 'NoHome', 'groupsEveryone', '123', '1G', 'NoAddress', '8', 'hoststub', 'admin']}"})
+ do(leader, leaderip, myhost, myip, etcdip, 'b"'+msg+'"') 
