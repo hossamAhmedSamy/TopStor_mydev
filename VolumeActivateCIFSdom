@@ -57,10 +57,10 @@ then
   echo No Volumes
   exit
  fi
- echo "${vols[@]}" |  grep "\-1"
+ echo "${vols[@]}" |  grep "\_1"
  if [ $? -eq 0 ];
  then
-  echo No Volumes -1
+  echo No Volumes _1
   exit
  fi
  ispoolonly=`echo $ips | wc -c `

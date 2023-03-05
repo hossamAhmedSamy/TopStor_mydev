@@ -31,5 +31,5 @@ myhost=$hostname
 stamp=`date +%s%N`
 ./etcdput.py sync/dataip/Add_nothing_nothing/request/$myhost dataip_$stamp 
 ./etcdput.py sync/dataip/Add_nothing_nothing/request dataip_$stamp 
-./etcdput.py sync/datip/$myhost $stamp 
+#./etcdput.py sync/datip/$myhost dataip_$stamp 
 #./broadcasttolocal.py sync/dataip/$myhost $stamp 

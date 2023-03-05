@@ -1,33 +1,42 @@
 #!/usr/bin/python3
-import subprocess,sys, datetime,socket
-from logqueue import queuethis
-import json
+from logqueue import queuethis, initqueue
 from etcdput import etcdput as put 
 from etcddel import etcddel as dels 
-from etcdgetlocalpy import etcdget as get 
+from etcdget import etcdget as get 
 import logmsg
+from time import time as stamp
 
-myhost = get('clusternode')[0] 
-myip = get('clusternodeip')[0] 
-leaderip = get('leaderip')[0]
-leader = get('leader')[0]
-leaderip = get('leaderip')[0]
-logmsg.initlog(leaderip, myhost)
-def dosync(leader,sync, *args):
-  global leaderip
+discip = '10.11.11.253'
+def dosync(sync, *args):
+  global leaderip, leader
   dels(leaderip, sync)
   put(leaderip, *args)
   put(leaderip, args[0]+'/'+leader,args[1])
   return 
 
 def do(data):
+ global leaderip, discip, myhost, leader
  name=data['name']
  user=data['user']
+ leaderip = data['leaderip']
+ myhost = data['myhost']
+ print('hihihihihhh', leaderip)
+ leader = get(leaderip, 'leader')[0]
+ logmsg.initlog(leaderip, myhost)
+ initqueue(leaderip, myhost)
  queuethis('AddHost','running',user)
  logmsg.sendlog('AddHostst01','info',user,name)
+ put(discip, 'tojoin/'+name,leaderip)
  put(leaderip, 'allowedPartners',name)
- dosync(leader,'Partnr_str_', 'sync/allowedPartners/Add_'+myhost+'_'+myip+'/request','Partnr_str_'+str(stamp())) 
+ nameip = get(discip,'possible/'+name)[0]
+ print('nameip', nameip, name)
+ put(leaderip, 'ActivePartners/'+name, nameip) 
+ dosync('Partnr_str_', 'sync/allowedPartners/Add_'+name+'_'+nameip+'/request','Partnr_str_'+str(stamp())) 
+ dosync('Partnr_str_', 'sync/ActivePartners/Add_'+name+'_'+nameip+'/request','Partnr_str_'+str(stamp())) 
+ dels(leaderip,'possible',name)
+ dels(leaderip,'possible',name)
  queuethis('AddHost','stop',user)
 
 if __name__=='__main__':
- do(*sys.argv[1:])
+ data = { 'name' : 'dhcp298511', 'user':'admin' , 'leaderip': '10.11.11.251', 'myhost': 'dhcp207492' }
+ do(data)

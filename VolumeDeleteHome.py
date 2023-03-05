@@ -16,7 +16,7 @@ def send(*bargs):
  owner=get('pools/'+pool)[0]
  myhost=hostname()
  ownerip=get('leader',owner)
- if ownerip[0]== -1:
+ if ownerip[0]== '_1':
   return 3
  z=['/TopStor/pump.sh','VolumeDeleteHome']
  for arg in args:

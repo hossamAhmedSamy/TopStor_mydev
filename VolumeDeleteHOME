@@ -1,4 +1,4 @@
-#!/bin/sh
+!/bin/sh
 cd /TopStor
 export ETCDCTL_API=3
 echo $@ > /root/VolumeDeleteHOME 
@@ -27,7 +27,7 @@ then
   docker exec etcdclient /TopStor/logmsg.py NFS1000 info $userreq $volname
  cd /TopStor
  clearvol=`./prot.py clearvol $volname | awk -F'result=' '{print $2}'`
- if [ $clearvol != '-1' ];
+ if [ $clearvol != '_1' ];
  then
   docker stop $clearvol 
   docker container rm $clearvol 
@@ -35,7 +35,7 @@ then
   rm /etc/samba/smb.$ipaddr;
  fi
  redvol=`./prot.py redvol $volname | awk -F'result=' '{print $2}'`
- if [ $redvol != '-1' ];
+ if [ $redvol != '_1' ];
  then
   redipaddr=`echo $redvol | awk -F'/' '{print $1}' | awk -F'-' '{print $NF}'`
   /TopStor/delblock.py start${volname}_only stop${volname}_only /TopStordata/smb.${redipaddr}  ;

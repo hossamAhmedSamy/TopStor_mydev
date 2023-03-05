@@ -9,7 +9,8 @@ then
  nmcli conn up mynode
  zpool export -a
 fi
-targetcli clearconfig confirm=True	
+/usr/bin/targetcli clearconfig confirm=True	
+targetcli saveconfig
 echo ${myhost}$@ | egrep 'init|local'
 if [ $? -eq 0 ];
 then
@@ -42,6 +43,7 @@ then
 		echo $1 | grep reset
 		if [ $? -eq 0 ];
 		then
+			rm -rf /root/node*
 			rm  -rf /root/etcddata/* 
 			echo yes | cp /TopStor/passwd /etc/
 			echo yes | cp /TopStor/group /etc/
@@ -93,42 +95,64 @@ nmcli conn up clusterstub
 nmcli conn up mynode
 nmcli conn delete cmynode
 nmcli conn delete cmycluster
-isinitn=`nmcli conn show | grep mynode | wc -c`
-if [ $isinitn -le 5 ];
+isinitn=`cat /root/nodeconfigured`'s'
+echo $isinitn | grep 'yess'
+if [ $? -ne 0 ];
 then
-	mynode='10.11.11.244/24'
+	#mynode='10.11.11.244/24'
+	isconf='no'
+	x=$(( ( RANDOM % 40 )  + 3 ))
+	mynode='10.11.11.'$x'/24'
 	nmcli conn add con-name mynode type ethernet ifname $mynodedev ip4 $mynode
 	nmcli conn delete clusterstub
 	nmcli conn add con-name clusterstub type ethernet ifname $myclusterdev ip4 169.168.12.12 
-	nmcli conn up clusterstub 
-	targetcli clearconfig confirm=True	
-	targetcli saveconfig 
-else
-	mynode=`nmcli conn show mynode | grep ipv4.addresses | awk '{print $2}'`
-fi
-isinitn=`nmcli conn show | grep mycluster | wc -c`
-if [ $isinitn -le 5 ];
-then
-	mycluster='10.11.11.250/24'
+	#nmcli conn up clusterstub 
+
+	ping -w 3 10.11.11.250
+	if [ $? -ne 0 ];
+	then
+		mycluster='10.11.11.250/24'
+		isconf_prim='noyes'
+		isprimary=1
+		echo the ping didn\'t find the initial cluster 250 so I am primary
+	else
+		mycluster=$mynode
+		isconf_prim='nono'
+		isprimary=0
+		echo the ping found the initial cluster so I will not be primary
+	fi
 	nmcli conn add con-name mycluster type ethernet ifname $myclusterdev ip4 $mycluster
-
 else
+	isconf='yes'
+	mynode=`nmcli conn show mynode | grep ipv4.addresses | awk '{print $2}'`
 	mycluster=`nmcli conn show mycluster | grep ipv4.addresses | awk '{print $2}'`
+	myclusterip=`echo $mycluster | awk -F'/' '{print $1}'`
+	ping -w 3 $myclusterip 
+	if [ $? -ne 0 ];
+	then 
+		isconf_prim='yesyes'
+		isprimary=1
+	else
+		isconf_prim='yesno'
+		isprimary=0
+	fi
 fi
-
+myclusterip=`echo $mycluster | awk -F'/' '{print $1}'`
 mynodeip=`echo $mynode | awk -F'/' '{print $1}'`
 myip=$mynodeip
-myclusterip=`echo $mycluster | awk -F'/' '{print $1}'`
-ping -w 3 $myclusterip 
-if [ $? -ne 0 ];
-then 
-	isprimary=1
-else
-	isprimary=0
-fi
 echo $mynodedev | grep $myclusterdev
 if [ $? -eq 0 ];
 then
+	case $isconf_prim in 
+		nono)
+		;;
+		noyes)
+		;;
+		yesno)
+		;;
+		yesyes)
+		;;
+	esac
 	if [ $isprimary -ne 0 ];
 	then
 		echo I am prmary
@@ -139,6 +163,16 @@ then
 		nmcli conn add con-name cmynode type ethernet ifname $mynodedev ip4 $mynode
 	fi
 else
+	case $isconf_prim in 
+		nono)
+		;;
+		noyes)
+		;;
+		yesno)
+		;;
+		yesyes)
+		;;
+	esac
 	nmcli conn add con-name cmynode type ethernet ifname $mynodedev ip4 $mynode
 	nmcli conn add con-name cmycluster type ethernet ifname $myclusterdev ip4 $mycluster
 	if [ $isprimary -ne 0 ];
@@ -149,29 +183,45 @@ else
 fi
 echo adding cmynode
 nmcli conn up cmynode
-echo strting target
-systemctl start target
-echo starting iscsid
-systemctl start iscsid 
+if [[ $isconf == 'yes' ]];
+then
+	echo strting target
+	systemctl start target
+	echo starting iscsid
+	systemctl start iscsid 
+fi
 echo starting docker
 systemctl start docker
 
 echo starting intdns
 docker run --rm --name intdns --hostname intdns --net bridge0 -e DNS_DOMAIN=qs.dom -e DNS_IP=10.11.12.7 -e LOG_QUERIES=true -itd --ip 10.11.12.7 -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/dnshosts:/etc/hosts moataznegm/quickstor:dns
+leaderip=$myclusterip
 if [ $isprimary -eq 1 ];
 then
 	etcd=$myclusterip
 	leader=$myhost
-	leaderip=$myclusterip
 else
 	etcd=$mynodeip
 fi
 
+echo nameserver 10.11.12.7 >  /root/gitrepo/resolv.conf
 echo starting etcd 
 docker run -itd --rm --name etcd --hostname etcd -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $etcd:2379:2379 -v /TopStor/:/TopStor -v /root/etcddata:/default.etcd --net bridge0 moataznegm/quickstor:etcd
 
 echo starting etcdclient 
 docker run -itd --rm --name etcdclient --hostname etcdclient -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -v /TopStor/:/TopStor -v /pace/:/pace moataznegm/quickstor:etcdclient 
+if [[ $isconf_prim == 'nono' ]];
+then
+ /pace/watchdoginit & disown
+ /pace/keepsendingprim & disown
+ exit
+fi
+if [[ $isconf_prim == 'noyes' ]];
+then
+ /pace/watchdogprim & disown
+ /pace/watchdoginit & disown
+ /pace/keepsendingprim & disown
+fi
 
 echo starting intstub 
 docker run -itd --rm --privileged \
@@ -223,7 +273,7 @@ do
 	else
 		echo waiting for me to join the cluster 
 		echo isprimaryin0 $isprimary >> /root/dockerlogs.txt
-		docker exec etcdclient /pace/etcdget.py $myclusterip Active --prefix | grep $myhsot
+		docker exec etcdclient /pace/etcdget.py $myclusterip Active --prefix | grep $myhost
 		if [ $? -ne 0 ];
 		then
 			docker exec etcdclient /TopStor/etcdput.py $myclusterip possible$myhost $mynodeip 
@@ -259,9 +309,20 @@ do
 	docker exec etcdclient /pace/etcddellocal.py sync/volume Del_ 2>/dev/null
         docker exec etcdclient /pace/etcdput.py $myclusterip $aliast/$myhost $myalias
 	#/TopStor/syncq.py $myclusterip $myhost 2>/root/syncqerror
+	stamp=`date +%s%N`
 	myalias=`echo $myalias | sed 's/\_/\:\:\:/g'`
-	docker exec etcdclient /pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request ${aliast}_$stamp.
-	docker exec etcdclient /pace/etcdput.py sync/$aliast/Add_${myhost}_$myalias/request/$myhost ${aliast}_$stamp.
+	/pace/etcddel.py $myclusterip sync/$aliast/Add_${myhost} --prefix
+	if [ $isprimary -ne 0 ];
+	then
+ 		/pace/etcddel.py $myclusterip ready --prefix
+ 		/pace/etcddel.py $myclusterip sync/ready/Add --prefix
+	else
+ 		/pace/etcddel.py $mynodeip ready --prefix
+	
+	fi		
+	/pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request ${aliast}_$stamp.
+	/pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request/$myhost ${aliast}_$stamp.
+	/pace/etcdput.py $myclusterip sync/$aliast/Add_${myhost}_$myalias/request/$leader ${aliast}_$stamp.
 	issync=`/pace/etcdget.py $myclusterip sync initial`initial
 	echo $issync | grep $myhost
 	if [ $? -eq 0 ];
@@ -309,7 +370,9 @@ docker exec -it etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip
 
 #docker run --restart unless-stopped --name git -v /root/gitrepo:/usr/local/apache2/htdocs/ --hostname sgit -p 10.11.11.252:80:80 -v /root/gitrepo/httpd.conf:/usr/local/apache2/conf/httpd.conf -itd -v /root/gitrepo/resolv.conf:/etc/resolv.conf moataznegm/quickstor:git
 templhttp='/TopStor/httpd_template.conf'
-shttpdf='/TopStor/httpd.conf'
+rm -rf /TopStordata/httpd.conf
+cp /TopStor/httpd.conf /TopStordata/
+shttpdf='/TopStordata/httpd.conf'
 docker rm -f httpd
 docker rm -f flask
 rm -rf $httpdf
@@ -323,9 +386,27 @@ then
 	docker run -itd --rm --name flask --hostname apisrv -v /etc/localtime:/etc/localtime:ro -v /pace/:/pace -v /pacedata/:/pacedata/ -v /root/gitrepo/resolv.conf:/etc/resolv.conf --net bridge0 -p $myclusterip:5001:5001 -v /TopStor/:/TopStor -v /TopStordata/:/TopStordata moataznegm/quickstor:flask
 fi
 /TopStor/ioperf.py $etcd $myhost
-docker exec etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
+echo docker exec etcdclient /TopStor/etcdput.py $myclusterip ready/$myhost $mynodeip 
+/TopStor/etcdput.py $myclusterip ready/$myhost $mynodeip 
 stamp=`date +%s%N`
-docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_$myhost_$mynodeip/request ready_$stamp
-docker exec etcdclient /TopStor/etcdput.py $etcd sync/ready/Add_$myhost_$mynodeip/request/$leader ready_$stamp
+/pace/etcddel.py $myclusterip sync/ready/Add_${myhost} --prefix
+/TopStor/etcdput.py $myclusterip sync/ready/Add_${myhost}_$mynodeip/request ready_$stamp
+/TopStor/etcdput.py $myclusterip sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp
 echo running iscsi watchdog daemon
-/pace/iscsiwatchdog.sh $etcd $myhost >/dev/null 2>/dev/null & disown 
+if [ $isprimary -ne 0 ];
+then
+ /pace/etcddel.py $mynodeip sync/ready/Add_${myhost} --prefix
+else
+ /TopStor/etcdput.py $myclusterip nextlead/er $myhost
+ /TopStor/etcddel.py $myclusterip sync/nextlead/Add_er_ --prefix
+ /TopStor/etcdput.py $myclusterip sync/nextlead/Add_er_${myhost}/request nextlead_$stamp
+ /TopStor/etcdput.py $myclusterip sync/nextlead/Add_er_${myhost}/request/$leader nextlead_$stamp
+fi
+ /pace/syncrequestlooper.sh $leaderip $myhost & disown
+ /pace/zfsping.py $leaderip $myhost & disown
+ /pace/rebootmeplslooper.sh $leaderip $myhost & disown
+ /TopStor/receivereplylooper.sh & disown
+ /TopStor/iscsiwatchdoglooper.sh $mynodeip $myhost & disown 
+ /pace/heartbeatlooper.sh & disown
+ /pace/fapilooper.sh & disown
+

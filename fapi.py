@@ -206,6 +206,12 @@ def hostsactive():
   hid +=1
  return jsonify(activehosts)
 
+
+@app.route('/api/v1/hosts/discover', methods=['GET','POST'])
+def discover():
+    cmndstring = '/TopStor/getdiscovery.sh '
+    postchange(cmndstring)
+    return
 @app.route('/api/v1/hosts/possible', methods=['GET','POST'])
 def hostspossible():
  global allhosts, readyhosts, activehosts, losthosts, possiblehosts, leaderip
@@ -213,7 +219,7 @@ def hostspossible():
  possiblehosts = []
  hid = 0
  for host in hosts:
-  name = host[0].replace('possible','')
+  name = host[0].split('/')[1]
   ip = host[1]
   possiblehosts.append({'name':name, 'ip': ip, 'id': hid}) 
   hid +=1
@@ -549,6 +555,8 @@ def getnotification(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  notifbody = get('notification')[0].split(' ')[1:]
+ with open('/root/tmptmp','a') as f:
+    f.write(str(notifbody))
  requests = get('request','--prefix')
  requestdict = {}
  for req in requests:
@@ -647,7 +655,7 @@ def volumecreate(data):
 def getlogin(token):
  global leaderip
  logindata = get('login',token)[0]
- if logindata == -1:
+ if logindata == '_1':
   logmsg.sendlog('Lognno0','warning','system',token)
   return 'baduser'
  oldtimestamp = logindata[1].split('/')[1]
@@ -789,9 +797,13 @@ def hostconfig(data):
 @app.route('/api/v1/hosts/joincluster', methods=['GET','POST'])
 @login_required
 def hostjoincluster(data):
+ global leaderip, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  data['user'] = data['response']
+ discover()
+ data['leaderip'] = leaderip
+ data ['myhost'] = myhost
  Joincluster.do(data) 
  return data
 
@@ -802,6 +814,9 @@ def hostevacuate(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  data['user'] = data['response']
+ #with open('/root/Evacuate','w') as f:
+  #f.write(" ".join([leaderip, myhost, data['name'], data['user']]))
+ discover()
  Evacuate.do(leaderip, myhost, data['name'], data['user']) 
  return data
 

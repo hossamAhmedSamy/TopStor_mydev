@@ -2,15 +2,15 @@
 eth1='enp0s8'
 eth2='enp0s8'
 templhttp='/TopStor/httpd_template.conf'
-shttpdf='/TopStor/httpd.conf'
+shttpdf='/TopStordata/httpd_8080.conf'
 myclusterip=`echo $@ | awk '{print $1}'`
 req54=`echo $@ | awk '{print $2}'`
 initip='10.11.11.254'
-
+leaderip=`docker exec etcdclient /TopStor/etcdgetlocal.py leaderip`
 docker rm -f httpd_local
 rm -rf $shttpdf
 cp $templhttp ${shttpdf}_local
-sed -i "s/MYCLUSTER/$myclusterip/g" ${shttpdf}_local
+sed -i "s/MYCLUSTER/$leaderip/g" ${shttpdf}_local
 echo hihih${req54} | egrep 'yes|y' 
 if [ $? -eq 0 ]; 
 then
