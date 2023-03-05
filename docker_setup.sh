@@ -341,6 +341,9 @@ do
 done
 #############################3
 docker exec etcdclient /TopStor/etcddel.py $etcd pools --prefix 
+docker exec etcdclient /TopStor/etcddel.py $etcd sync/pools --prefix 
+docker exec etcdclient /TopStor/etcddel.py $etcd volume --prefix 
+docker exec etcdclient /TopStor/etcddel.py $etcd sync/volume --prefix 
 docker exec etcdclient /TopStor/etcdput.py $etcd mynodeip $mynodeip 
 docker exec etcdclient /TopStor/etcdput.py $etcd mynode $myhost 
 docker exec etcdclient /TopStor/etcdput.py $etcd leaderip $myclusterip 
@@ -362,8 +365,8 @@ then
 	echo row 293 checksync init >> /root/checksync
 	docker exec etcdclient /pace/checksyncs.py syncinit $etcd 
 fi
- echo running rabbit receive daemon
- /TopStor/topstorrecvreply.py $etcd & disown
+# echo running rabbit receive daemon
+# /TopStor/topstorrecvreply.py $etcd & disown
 docker exec -it etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
 
 
@@ -395,7 +398,11 @@ stamp=`date +%s%N`
 echo running iscsi watchdog daemon
 if [ $isprimary -ne 0 ];
 then
- /pace/etcddel.py $mynodeip sync/ready/Add_${myhost} --prefix
+ /pace/etcddel.py $myclusterip sync/ready/Add_${myhost} --prefix
+ /pace/etcddel.py $myclusterip pools --prefix
+ /pace/etcddel.py $myclusterip hosts --prefix
+ /pace/etcddel.py $myclusterip vol  --prefix
+ /pace/etcddel.py $myclusterip list --prefix
 else
  /TopStor/etcdput.py $myclusterip nextlead/er $myhost
  /TopStor/etcddel.py $myclusterip sync/nextlead/Add_er_ --prefix
@@ -404,11 +411,14 @@ else
 fi
  /TopStor/etcddel.py $myclusterip sync/diskref --prefix
  /TopStor/etcdput.py $myclusterip sync/diskref/______/request diskref_$stamp
- /pace/syncrequestlooper.sh $leaderip $myhost & disown
- /pace/zfsping.py $leaderip $myhost & disown
+ /TopStor/refreshdisown.sh & disown 
+ /TopStor/etcdput.py $etcd refreshdisown yes 
+
+ #/pace/syncrequestlooper.sh $leaderip $myhost & disown
+ #/pace/zfsping.py $leaderip $myhost & disown
  /pace/rebootmeplslooper.sh $leaderip $myhost & disown
- /TopStor/receivereplylooper.sh & disown
- /TopStor/iscsiwatchdoglooper.sh $mynodeip $myhost & disown 
+ #/TopStor/receivereplylooper.sh & disown
+ #/TopStor/iscsiwatchdoglooper.sh $mynodeip $myhost & disown 
  /pace/heartbeatlooper.sh & disown
  /pace/fapilooper.sh & disown
 

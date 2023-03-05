@@ -2,15 +2,14 @@
 cd /pace/
 lsscsi=0
 #dmesg -n 1
-rabbitip=`echo $@ | awk '{print $1}'`
-myhost=`echo $@ | awk '{print $2}'`
 iscrashed=`echo $@ | awk '{print $3}'`
 echo param $rabbitip , $myhost, $iscrashed
 echo start >> /root/iscsiwatch
 targetn=0
 leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
 leaderip=`docker exec etcdclient /TopStor/etcdgetlocal.py leaderip`
-myhostip=$rabbitip
+myhost=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternode`
+myhostip=`docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip`
 echo $leader | grep $myhost
 if [ $? -eq 0 ];
 then
