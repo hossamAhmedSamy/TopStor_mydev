@@ -57,13 +57,13 @@ do
 	if [ $lsscsinew -ne $lsscsi ];
 	then
 		lsscsi=$lsscsinew
-		/pace/addtargetdisks.sh $etcdip $myhost
-		/pace/iscsirefresh.sh $etcdip $myhost
-		/pace/listingtargets.sh $etcdip
-		/TopStor/etcdput.py $etcdip dirty/pool 0
-		stamp=$((stamp+300))
-		/TopStor/etcdput.py $leaderip sync/diskref/____/request diskref_$stamp
-		/TopStor/etcdput.py $leaderip sync/diskref/____/request/$myhost diskref_$stamp
+	#	/pace/addtargetdisks.sh $etcdip $myhost
+	#	/pace/iscsirefresh.sh $etcdip $myhost
+	#	/pace/listingtargets.sh $etcdip
+#		/TopStor/etcdput.py $etcdip dirty/pool 0
+#		stamp=$((stamp+300))
+#		/TopStor/etcdput.py $leaderip sync/diskref/____/request diskref_$stamp
+#		/TopStor/etcdput.py $leaderip sync/diskref/____/request/$myhost diskref_$stamp
 	fi
 	targetnewn=`targetcli ls | wc -c`
 	if [ $targetnewn -ne $targetn ];
