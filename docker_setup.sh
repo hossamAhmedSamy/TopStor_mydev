@@ -402,6 +402,7 @@ else
  /TopStor/etcdput.py $myclusterip sync/nextlead/Add_er_${myhost}/request nextlead_$stamp
  /TopStor/etcdput.py $myclusterip sync/nextlead/Add_er_${myhost}/request/$leader nextlead_$stamp
 fi
+ /TopStor/etcdput.py $myclusterip sync/diskref/______/request diskref_$stamp
  /pace/syncrequestlooper.sh $leaderip $myhost & disown
  /pace/zfsping.py $leaderip $myhost & disown
  /pace/rebootmeplslooper.sh $leaderip $myhost & disown
