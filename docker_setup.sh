@@ -341,6 +341,9 @@ do
 done
 #############################3
 docker exec etcdclient /TopStor/etcddel.py $etcd pools --prefix 
+docker exec etcdclient /TopStor/etcddel.py $etcd sync/pools --prefix 
+docker exec etcdclient /TopStor/etcddel.py $etcd volume --prefix 
+docker exec etcdclient /TopStor/etcddel.py $etcd sync/volume --prefix 
 docker exec etcdclient /TopStor/etcdput.py $etcd mynodeip $mynodeip 
 docker exec etcdclient /TopStor/etcdput.py $etcd mynode $myhost 
 docker exec etcdclient /TopStor/etcdput.py $etcd leaderip $myclusterip 
