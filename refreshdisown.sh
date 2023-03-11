@@ -18,7 +18,6 @@ else
 	etcdip=$myhostip
 fi
 cjobs=(`echo iscsiwatchdog zfsping topstorrecvreply receivereplylooper checksyncs syncrequestlooper`)
-cjobs=(`echo zfsping`)
 declare  -A cmdcjobs
 cmdcjobs['iscsiwatchdog']="/TopStor/iscsiwatchdoglooper.sh" 
 cmdcjobs['zfsping']="/pace/zfsping.py"
@@ -53,7 +52,7 @@ do
 		cjobs=(`echo "${cjobs[@]}" | grep -v $job`)
 		#cmd=`echo -e $cmdcjobs | grep $job`
 		cmd=${cmdcjobs[$job]}
-	 	echo $cmd $leaderip $myhost \& disown	
+	 	echo $cmd $leaderip $myhost \& disown	>> /root/refreshtemp
 	 	$cmd $leaderip $myhost & disown	
 	fi
 	flag=$((flag+isproc))

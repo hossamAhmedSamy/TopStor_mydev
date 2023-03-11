@@ -412,7 +412,8 @@ fi
  /TopStor/etcddel.py $myclusterip sync/diskref --prefix
  /TopStor/etcdput.py $myclusterip sync/diskref/______/request diskref_$stamp
  /TopStor/refreshdisown.sh & disown 
- /TopStor/etcdput.py $etcdip refreshdisown yes 
+ /TopStor/etcdput.py $etcd refreshdisown yes 
+
  #/pace/syncrequestlooper.sh $leaderip $myhost & disown
  #/pace/zfsping.py $leaderip $myhost & disown
  /pace/rebootmeplslooper.sh $leaderip $myhost & disown
