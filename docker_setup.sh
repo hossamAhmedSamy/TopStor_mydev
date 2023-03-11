@@ -1,6 +1,9 @@
 myclusterf='/topstorwebetc/mycluster'
 mynodef='/topstorwebetc/mynode'
 myhost=`hostname`
+firewall-cmd --permanent --add-port=5672/tcp
+firewall-cmd --permanent --add-port=5672/udp
+firewall-cmd --reload
 echo '# init' > /etc/exports
 rm -rf /TopStordata/exportip.*
 echo ${myhost}$@ | grep reboot
