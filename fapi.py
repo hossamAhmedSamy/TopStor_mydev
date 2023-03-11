@@ -80,8 +80,8 @@ def postchange(cmndstring,host='myhost'):
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  ownerip=get('ready/'+host,'--prefix')
- with open('/TopStor/tempdata','w') as f:
-  f.write(str((ownerip[0][1], str(msg),'recvreply',myhost)))
+ #with open('/TopStor/tempdata','w') as f:
+ # f.write(str((ownerip[0][1], str(msg),'recvreply',myhost)))
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
 
 def dict_factory(cursor, row):
