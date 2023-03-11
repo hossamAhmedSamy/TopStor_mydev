@@ -401,6 +401,8 @@ then
  /pace/etcddel.py $mynodeip sync/ready/Add_${myhost} --prefix
  /pace/etcddel.py $mynodeip pools --prefix
  /pace/etcddel.py $mynodeip hosts --prefix
+ /pace/etcddel.py $mynodeip vol  --prefix
+ /pace/etcddel.py $mynodeip list --prefix
 else
  /TopStor/etcdput.py $myclusterip nextlead/er $myhost
  /TopStor/etcddel.py $myclusterip sync/nextlead/Add_er_ --prefix
