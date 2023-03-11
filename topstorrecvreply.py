@@ -4,12 +4,25 @@ import actionreply
 
 
 def callback(ch, method, properties, body):
- actionreply.do(myip, str(body))
+ global leader, leaderip, myhost, myip, etcdip
+ #with open('/root/toactionreply','w') as f:
+ #f.write(" ".join([leader, leaderip, myhost, myip,etcdip, str(body)]))
+ print(" ".join([leader, leaderip, myhost, myip,etcdip, str(body)]))
+ actionreply.do(leader, leaderip, myhost, myip,etcdip, body.decode())
 
-
+cmdline='docker exec etcdclient /TopStor/etcdgetlocal.py leader'
+leader=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').replace('\n','').replace(' ','')
+cmdline='docker exec etcdclient /TopStor/etcdgetlocal.py leaderip'
+leaderip=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').replace('\n','').replace(' ','')
+cmdline='docker exec etcdclient /TopStor/etcdgetlocal.py clusternode'
+myhost=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').replace('\n','').replace(' ','')
 cmdline='docker exec etcdclient /TopStor/etcdgetlocal.py clusternodeip'
 myip=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').replace('\n','').replace(' ','')
-#myip=sys.argv[1]
+if leader == myhost:
+    etcdip = leaderip
+else:
+    etcdip = myip
+print('myip',myip)
 cred = pika.PlainCredentials('rabb_Mezo', 'YousefNadody')
 param = pika.ConnectionParameters(myip,5672, '/', cred)
 conn = pika.BlockingConnection(param)

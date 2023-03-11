@@ -10,11 +10,7 @@ def sendhost(host, req, que, frmhst, port=5672):
  param=pika.ConnectionParameters(host, port, '/', creds)
  conn=pika.BlockingConnection(param)
  chann=conn.channel()
- try: 
-  chann.basic_publish(exchange='',routing_key=que, body=str(msg))
-  return 0
- except:
-  return 1
+ chann.basic_publish(exchange='',routing_key=que, body=str(req))
 if __name__ == "__main__":
  import sys
  sendhost(*sys.argv[1:])
