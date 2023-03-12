@@ -394,10 +394,14 @@ fi
 /TopStor/ioperf.py $etcd $myhost
 echo docker exec etcdclient /TopStor/etcdput.py $myclusterip ready/$myhost $mynodeip 
 /TopStor/etcdput.py $myclusterip ready/$myhost $mynodeip 
+/TopStor/etcdput.py $myclusterip ActivePartners/$myhost $mynodeip 
 stamp=`date +%s%N`
 /pace/etcddel.py $myclusterip sync/ready/Add_${myhost} --prefix
+/pace/etcddel.py $myclusterip sync/ActivePartners/Add_${myhost} --prefix
 /TopStor/etcdput.py $myclusterip sync/ready/Add_${myhost}_$mynodeip/request ready_$stamp
 /TopStor/etcdput.py $myclusterip sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp
+/TopStor/etcdput.py $myclusterip sync/ActivePartners/Add_${myhost}_$mynodeip/request/$leader ready_$stamp
+/TopStor/etcdput.py $myclusterip sync/ActivePartners/Add_${myhost}_$mynodeip/request ActivePartners_$stamp
 echo running iscsi watchdog daemon
 if [ $isprimary -ne 0 ];
 then
