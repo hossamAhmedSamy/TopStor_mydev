@@ -434,3 +434,10 @@ fi
  /pace/heartbeatlooper.sh & disown
  /pace/fapilooper.sh & disown
 
+if [ $isprimary -ne 0 ];
+then
+	/pace/checksyncs.py syncrequest $myclusterip $myhost 
+	/pace/checksyncs.py restetcd $myclusterip $myhost 
+ 	/TopStor/etcddel.py $myclusterip sync/diskref --prefix
+ 	/TopStor/etcdput.py $myclusterip sync/diskref/______/request diskref_$stamp
+fi
