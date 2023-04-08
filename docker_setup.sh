@@ -422,11 +422,16 @@ else
 fi
  /TopStor/etcddel.py $myclusterip sync/diskref --prefix
  /TopStor/etcdput.py $myclusterip sync/diskref/______/request diskref_$stamp
- docker exec etcdclient /TopStor/etcdput.py etcd ready/$myhost $mynodeip
  /pace/diskref.sh $leader $myclusterip $myhost $mynodeip
+#if [ $isprimary -ne 0 ];
+#then
+	/pace/checksyncs.py restetcd $myclusterip $myhost 
+	/pace/checksyncs.py syncrequest $myclusterip $myhost 
+ 	/TopStor/etcddel.py $myclusterip sync/diskref --prefix
+ 	/TopStor/etcdput.py $myclusterip sync/diskref/______/request diskref_$stamp
+#fi
  /TopStor/refreshdisown.sh & disown 
  /TopStor/etcdput.py $etcd refreshdisown yes 
-
  #/pace/syncrequestlooper.sh $leaderip $myhost & disown
  #/pace/zfsping.py $leaderip $myhost & disown
  /pace/rebootmeplslooper.sh $myclusterip $myhost & disown
@@ -434,11 +439,6 @@ fi
  #/TopStor/iscsiwatchdoglooper.sh $mynodeip $myhost & disown 
  /pace/heartbeatlooper.sh & disown
  /pace/fapilooper.sh & disown
+ docker exec etcdclient /TopStor/etcdput.py etcd ready/$myhost $mynodeip
 
-if [ $isprimary -ne 0 ];
-then
-	/pace/checksyncs.py syncrequest $myclusterip $myhost 
-	/pace/checksyncs.py restetcd $myclusterip $myhost 
- 	/TopStor/etcddel.py $myclusterip sync/diskref --prefix
- 	/TopStor/etcdput.py $myclusterip sync/diskref/______/request diskref_$stamp
-fi
+

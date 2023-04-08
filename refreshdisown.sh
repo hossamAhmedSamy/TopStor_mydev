@@ -17,7 +17,7 @@ then
 else
 	etcdip=$myhostip
 fi
-cjobs=(`echo iscsiwatchdog zfsping topstorrecvreply receivereplylooper checksyncs syncrequestlooper`)
+cujobs=(`echo iscsiwatchdog zfsping topstorrecvreply receivereplylooper checksyncs syncrequestlooper`)
 declare  -A cmdcjobs
 cmdcjobs['iscsiwatchdog']="/TopStor/iscsiwatchdoglooper.sh" 
 cmdcjobs['zfsping']="/pace/zfsping.py"
@@ -34,6 +34,19 @@ do
  if [ $? -eq 0 ];
  then
   flag=1
+  leader=`docker exec etcdclient /TopStor/etcdgetlocal.py leader`
+  leaderip=`docker exec etcdclient /TopStor/etcdgetlocal.py leaderip`
+  #/pace/diskref.sh $leader $leaderip $myhost $myhostip
+  echo newleader  $leader $leaderip > /root/refreshdisown
+  echo $leader | grep $myhost
+  if [ $? -eq 0 ];
+  then
+	etcdip=$leaderip
+  else
+	etcdip=$myhostip
+  fi
+  echo 'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSstart'
+  cjobs=(`echo "${cujobs[@]}"`)
   docker exec etcdclient /TopStor/etcdput.py etcd refreshdisown 0 
  fi
  while [ $flag -ne 0 ];
@@ -46,6 +59,7 @@ do
 	echo '###########################################'
  	echo $job
   	flag=`docker exec etcdclient /TopStor/etcdgetlocal.py refreshdisown`
+        echo flaginfor $flag
  	fnkillall $job
  	isproc=`ps -ef | grep $job | grep -v color | grep -v grep | awk '{print $2}' | wc -l`
 	if [ $isproc -eq 0 ];
@@ -54,14 +68,16 @@ do
 		#cmd=`echo -e $cmdcjobs | grep $job`
 		cmd=${cmdcjobs[$job]}
 	 	echo $cmd $leaderip $myhost \& disown	>> /root/refreshtemp
-	 	$cmd $leaderip $myhost & disown	
+	 	$cmd $leaderip $myhost >/dev/null & disown	
 	fi
 	flag=$((flag+isproc))
+	echo flagwithiscproc=$flag
   	docker exec etcdclient /TopStor/etcdput.py etcd refreshdisown $flag 
 	echo flag=$flag
   done
-  flag=`docker exec etcdclient /TopStor/etcdgetlocal.py etcd refreshdisown`
+  flag=`docker exec etcdclient /TopStor/etcdgetlocal.py refreshdisown`
   echo flaginwhile=$flag
  done
+ echo 'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSstop'
  sleep 2
 done
