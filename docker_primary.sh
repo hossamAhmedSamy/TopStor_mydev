@@ -14,7 +14,7 @@ myclusterdev=$eth1
 data1dev=$eth2
 data2dev=$eth2
 setenforce 0
-targetcli clearconfig confirm=true
+#targetcli clearconfig confirm=true
 nmcli conn mod cmynode +ipv4.addresses $myclusterip 
 nmcli conn up cmynode
 myclusterip=$leaderip
