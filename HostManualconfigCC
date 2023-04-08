@@ -45,6 +45,5 @@ fi
  /pace/etcdput.py sync/ready/Add_ready::$myhost_$hostip/request ready_$stamp
 #configured=`./etcdput.py configured/$myhost yes`
 ./UpdateHosts $myhost $hostip
-/sbin/pcs resource update CC cidr_netmask=$subnet ip=$hostip
 /pace/keysend.sh $hostip
 #fi
