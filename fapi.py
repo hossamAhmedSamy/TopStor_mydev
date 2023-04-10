@@ -92,7 +92,7 @@ def dict_factory(cursor, row):
 
 def getusers():
  global leaderip
- userlst = etcdgetjson('usersinfo','--prefix') 
+ userlst = etcdgetjson(leaderip,'usersinfo','--prefix') 
  uid = 0
  users = []
  for user in userlst:
@@ -103,7 +103,7 @@ def getusers():
 
 def getgroups():
  global leaderip
- groupslst = etcdgetjson('usersigroup','--prefix') 
+ groupslst = etcdgetjson(leaderip, 'usersigroup','--prefix') 
  gid = 0
  groups = []
  for group in groupslst:
@@ -1056,7 +1056,7 @@ def userauths(data):
   return {'response': 'baduser'}
  if  data['username'] == 'admin':
   return {'auths':'true','response':data['response']}
- userlst = etcdgetjson('usersinfo','--prefix')
+ userlst = etcdgetjson(leaderip,'usersinfo','--prefix')
  for user in userlst:
   username = user['name'].replace('usersinfo/','')
   if username == data['username']:
@@ -1068,7 +1068,7 @@ def userauths(data):
 def api_partners_userslist():
  global leaderip
  allpartners=[]
- partnerlst = etcdgetjson('Partner/','--prefix')
+ partnerlst = etcdgetjson(leaderip,'Partner/','--prefix')
  for partner in partnerlst:
   alias =  partner["name"].split('/')[1] 
   split = partner["prop"].split('/') 
@@ -1078,7 +1078,7 @@ def api_partners_userslist():
 @app.route('/api/v1/users/userlist', methods=['GET'])
 def api_users_userslist():
  global allgroups, allusers, leaderip
- userlst = etcdgetjson('usersinfo','--prefix')
+ userlst = etcdgetjson(leaderip,'usersinfo','--prefix')
  allgroups = getgroups()
  userdict = dict()
  allusers = []

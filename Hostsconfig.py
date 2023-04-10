@@ -23,7 +23,10 @@ def getall(*bargs):
   dnsname = get('dnsname/'+hostname)[0]
   dnssearch = get('dnssearch/'+hostname)[0]
   alias = get('alias/'+hostname)[0]
-  ipaddrsubnet = get('ipaddr/'+hostname)[0].split('/')[1]
+  try:
+     ipaddrsubnet = get('ipaddr/'+hostname)[0].split('/')[1]
+  except:
+    ipaddrsubnet = '24'
   configured = get('configured/'+hostname)[0]
   if ipaddrsubnet == '_1':
    ipaddrsubnet = '24'
