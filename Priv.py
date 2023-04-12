@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import sys, subprocess
 from etcdget import etcdget as get
+from etcddel import etcddel as dels 
 from etcdput import etcdput as put
 from time import time as stamp
 import logmsg
@@ -13,6 +14,8 @@ def dosync(leader, leaderip, sync, *args):
 
 
 def changepriv(leader, leaderip, myhost, myip, user,priv,request='admin'):
+ with open('/root/Privtmp','w') as f:
+  f.write(' '.join([leader, leaderip, myhost, myip, user,priv,request])+'/n')
  logmsg.initlog(leaderip,myhost)
  if leader == myhost:
     etcdip = leaderip
