@@ -293,10 +293,10 @@ Snap1020: Problem occurred adding Weekly snapshot schedule for :
 Snap1021: Success adding Weekly snapshot schedule : for volume :
 Priv1000: Changing perivileges of user : ........
 Priv1001: Success changing privileges of user :
-Priv1002:1: : from : Changing perivileges of user : ........ It will overwrite conflicting group privileges
-Priv1102:1: : from : Changing perivileges of group : ........
-Priv1003:2: : from : Success changing privileges of user : It will overwrite conflicting group privileges
-Priv1103:2: : from : Success changing privileges of group :
+Priv1002:1: : from :: Changing perivileges of user : ........ It will overwrite conflicting group privileges
+Priv1102:1: : from :: Changing perivileges of group : ........
+Priv1003:2: : from :: Success changing privileges of user : It will overwrite conflicting group privileges
+Priv1103:2: : from :: Success changing privileges of group :
 Replivol1000:0: : from :: Receiving new snapshot for volume : from partner :
 Replidf1000:0: : from :: Receiving new Snapshot for volume : from partner :
 VolCst01:1: : from ::  Start changing volume : access properties

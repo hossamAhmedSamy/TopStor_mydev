@@ -715,7 +715,7 @@ def usersauth(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  print('#######################')
- cmndstring = '/TopStor/pump.sh Priv.py '+data['tochange']+' '+data['auths'].replace(',','/')+' '+data['user']
+ cmndstring = '/TopStor/Priv.py '+leader+' '+leaderip+' '+myhost+' '+myhostip+' '+data['tochange']+' '+data['auths'].replace(',','/')+' '+data['user']
  print(cmndstring)
  print('#######################')
  postchange(cmndstring)
@@ -1185,6 +1185,7 @@ if __name__=='__main__':
     #leaderip = sys.argv[1]
     leaderip = get('leaderip')[0]
     myhost = get('clusternode')[0]
+    myhostip = get('clusternodeip')[0]
     leader = get('leader')[0]
     logmsg.initlog(leaderip,myhost)
     #myhost = sys.argv[2]

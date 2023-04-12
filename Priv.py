@@ -6,7 +6,6 @@ from time import time as stamp
 import logmsg
 
 def dosync(leader, leaderip, sync, *args):
-  global leaderip, leader
   dels(leaderip, sync)
   put(leaderip, *args)
   put(leaderip, args[0]+'/'+leader,args[1])
@@ -28,7 +27,7 @@ def changepriv(leader, leaderip, myhost, myip, user,priv,request='admin'):
  userinfo = get(etcdip,'usersinfo/'+user)
  leftpart = userinfo[0].split('/')[0:4]
  put(leaderip, 'usersinfo/'+user, '/'.join(leftpart)+'/'+priv)
- dosync(leader, leaderip, 'sync/priv/'+user,'sync/priv/'+user, 'priv_'+str(stamp()))
+ dosync(leader, leaderip, 'sync/priv/'+user,'sync/priv/'+user+'/request', 'priv_'+user+'_'+str(stamp()))
  #put(leaderip, 'user/'+myhost,str(stamp()))
  #broadcasttolocal('usersinfo/'+user, '/'.join(leftpart)+'/'+priv)
  print('/'.join(leftpart)+'/'+priv)
