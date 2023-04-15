@@ -568,7 +568,14 @@ def getnotification(data):
   if reqname not in requestdict:
    requestdict[reqname] = {}
   requestdict[reqname][reqhost] = reqstatus
- msg = logdict[notifbody[3]]
+ try:
+    msg = logdict[notifbody[3]]
+ except:
+    msg = logdict['NotSupported']
+    logmsg.sendlog('NotSupported','warning','system',str(notifbody))
+    return { 'response': 'Ok' }
+    
+   
  msgbody = '.'
  notifc = 6
  for word in msg[4:]:
