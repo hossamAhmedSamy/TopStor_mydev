@@ -283,7 +283,7 @@ do
 		docker exec etcdclient /pace/etcdget.py $myclusterip Active --prefix | grep $myhost
 		if [ $? -ne 0 ];
 		then
-			docker exec etcdclient /TopStor/etcdput.py $myclusterip possible$myhost $mynodeip 
+			docker exec etcdclient /TopStor/etcdput.py $myclusterip possible/$myhost $mynodeip 
 			echo I joined the cluster
 		fi
 		stillpossible=1

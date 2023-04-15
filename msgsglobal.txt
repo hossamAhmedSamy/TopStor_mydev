@@ -195,6 +195,7 @@ Replispacest01:1: : from :: Preparing to replicate volume : to the replication p
 Replispacesu01:1: : from :: Success to replicate volume : to the replication partner : 
 Replispacefa01:1: : from :: No Space is found in replication partner : to replicate volume :
 Streamfa01:1: : from :: Couldn't replicate the volume : to Partner :
+NotSupported:1: : from :: Not Supported notification code : ......
 DGst5:1: : from :: Deleting Pool : ......
 DGsu5:2: : from :: Success deleting Pool :
 DGfa5:2: : from :: Failed deleting Pool :
