@@ -38,15 +38,18 @@ else
  homebase='-b /'$userhome' -M'  
 fi
 cp /TopStor/smbuserfix.sh /etc/
-currentcifs=`docker ps | awk '{print $NF}' | grep CIFS`
 useradd -c"TopStor"$userpass $homebase -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username
-currentcifs=`pcs resource | grep cifs | awk '{print $1}'`
+currentcifs=`docker ps | awk '{print $NF}' | grep CIFS`
 echo "$currentcifs" | while read y
 do 
- echo dock=$y
- docker exec $y  sh /hostetc/smbuserfix.sh x $username $pas 
+ echo $y | grep CIFS
+ if [ $? -eq 0 ];
+ then
+ 	echo dock=$y
+ 	docker exec $y  sh /hostetc/smbuserfix.sh x $username $pas 
+ fi
 done 
-echo useradd \-c"TopStor"$userpass $homebase \-g $usergd \-u $userid \-p $userpass \-s /usr/sbin/nologin $username > /root/tmpuser
+echo useradd \-c"TopStor"$userpass $homebase \-g $usergd \-u $userid \-p $userpass \-s /usr/sbin/nologin $username 
 #(echo $userpass; echo $userpass) | /usr/bin/smbpasswd -s -a $username 2>> $txtres
 #cat $txtres
  #echo $userpass > key/${username}fixed

@@ -23,10 +23,10 @@ then
  then
   echo "$currentcifs" | while read y; do docker exec $y /bin/smbpasswd -x $username;  done; 
  fi
-/bin/smbpasswd -x $username;
+#/bin/smbpasswd -x $username;
 #rm -rf /home/$username &>/dev/null
 userdel -rf  $username 
-rm  key/${username}fixed
+#rm  key/${username}fixed
 datenow=`date +%m/%d/%Y`;timenow=`date +%T`;
 #cat /etc/passwd |  grep $username
 #if [ $? -eq 0 ]; then
