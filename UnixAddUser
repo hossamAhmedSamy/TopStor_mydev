@@ -105,7 +105,6 @@ if [ $? -eq 0 ];
 then
 	echo hi2
 	stamp=`date +%s%N`
-	params=`echo /TopStor/$myscript $@ $stamp | sed 's\ \\_\g'`
 	myscript=`basename "$0"`
 	params=`echo $myscript $@ $stamp | sed 's\ \\_\g'`
 	/pace/etcdput.py $leaderip sync/user/$params/request/$myhost user_${username}_$stamp
