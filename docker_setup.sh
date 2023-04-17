@@ -439,6 +439,10 @@ fi
  #/TopStor/iscsiwatchdoglooper.sh $mynodeip $myhost & disown 
  /pace/heartbeatlooper.sh & disown
  /pace/fapilooper.sh & disown
+ stamp=`date +%s%N`
+ docker exec etcdclient /TopStor/etcddel.py etcd sync/ready --prefix 
  docker exec etcdclient /TopStor/etcdput.py etcd ready/$myhost $mynodeip
+ docker exec etcdclient /TopStor/etcdput.py etcd sync/ready/Add_${myhost}_$mynodeip/request ready_$stamp 
+ docker exec etcdclient /TopStor/etcdput.py etcd sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp 
 
 
