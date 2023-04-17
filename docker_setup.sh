@@ -4,6 +4,7 @@ myhost=`hostname`
 firewall-cmd --permanent --add-port=5672/tcp
 firewall-cmd --permanent --add-port=5672/udp
 firewall-cmd --reload
+sed -i 's/\=enforcing/\=disabled/g' /etc/selinux/config
 echo '# init' > /etc/exports
 rm -rf /TopStordata/exportip.*
 echo ${myhost}$@ | grep reboot
@@ -55,6 +56,7 @@ then
 			targetcli clearconfig confirm=True	
 			targetcli saveconfig 
 			/TopStor/resetdocker.sh	
+			sed -i 's/
 			nmcli conn up clusterstub 
 			nmcli conn delete mynode 
 			nmcli conn delete mycluster 
@@ -270,26 +272,26 @@ do
 		echo initializing etcd params 
 		echo docker exec etcdclient /pace/etcdput.py $myclusterip clusternode $myhost
 		echo isprimary $isprimary >> /root/dockerlogs.txt
-		docker exec etcdclient /TopStor/etcdput.py $myclusterip ActivePartners/$myhost $mynodeip 
-		docker exec etcdclient /TopStor/etcdput.py $myclusterip leaderip $myclusterip 
+		/TopStor/etcdput.py $myclusterip ActivePartners/$myhost $mynodeip 
+		/TopStor/etcdput.py $myclusterip leaderip $myclusterip 
 		echo docker exec  etcdclient /TopStor/etcdput.py $myclusterip leaderip $myclusterip >> /root/dockerlogs.txt
-		docker exec etcdclient /TopStor/etcdput.py $myclusterip leader $myhost 
-		docker exec etcdclient /TopStor/etcdput.py $myclusterip nextlead/er 'None' 
+		/TopStor/etcdput.py $myclusterip leader $myhost 
+		/TopStor/etcdput.py $myclusterip nextlead/er 'None' 
 		etcdip=$myculsterip
 
 	else
 		echo waiting for me to join the cluster 
 		echo isprimaryin0 $isprimary >> /root/dockerlogs.txt
-		docker exec etcdclient /pace/etcdget.py $myclusterip Active --prefix | grep $myhost
+		/pace/etcdget.py $myclusterip Active --prefix | grep $myhost
 		if [ $? -ne 0 ];
 		then
-			docker exec etcdclient /TopStor/etcdput.py $myclusterip possible/$myhost $mynodeip 
+			/TopStor/etcdput.py $myclusterip possible/$myhost $mynodeip 
 			echo I joined the cluster
 		fi
 		stillpossible=1
 		while [ $stillpossible -eq 1 ];
 		do
-			docker exec etcdclient /TopStor/etcdget possible --prefix | grep $myhost
+			/TopStor/etcdget.py possible --prefix | grep $myhost
 			if [ $? -ne 0 ];
 			then
 				stillpossible=0
@@ -314,7 +316,7 @@ do
 	docker exec etcdclient /pace/etcddellocal.py sync/pool Del_ 2>/dev/null
 	docker exec etcdclient /pace/etcddellocal.py sync/volume Add_ 2>/dev/null
 	docker exec etcdclient /pace/etcddellocal.py sync/volume Del_ 2>/dev/null
-        docker exec etcdclient /pace/etcdput.py $myclusterip $aliast/$myhost $myalias
+        /pace/etcdput.py $myclusterip $aliast/$myhost $myalias
 	#/TopStor/syncq.py $myclusterip $myhost 2>/root/syncqerror
 	stamp=`date +%s%N`
 	myalias=`echo $myalias | sed 's/\_/\:\:\:/g'`
@@ -336,25 +338,25 @@ do
 	then
 		echo syncrequests only
 		echo row 262 checksync init >> /root/checksync
-    		docker exec etcdclient /pace/checksyncs.py syncrequest $myclusterip $myhost $myip
+    		/pace/checksyncs.py syncrequest $myclusterip $myhost $myip
        	else
 		echo have to syncall
 		echo row 266 checksync init >> /root/checksync
-		docker exec etcdclient /pace/checksyncs.py syncall $myclusterip $myhost $myip
+		/pace/checksyncs.py syncall $myclusterip $myhost $myip
 	fi
 	checkcluster=`docker exec etcdclient /TopStor/etcdgetlocal.py leaderip`
 	echo $checkcluster >> /root/dockerlogs.txt
 	echo hihi$checkcluster | grep $myclusterip
 done
 #############################3
-docker exec etcdclient /TopStor/etcddel.py $etcd pools --prefix 
-docker exec etcdclient /TopStor/etcddel.py $etcd sync/pools --prefix 
-docker exec etcdclient /TopStor/etcddel.py $etcd volume --prefix 
-docker exec etcdclient /TopStor/etcddel.py $etcd sync/volume --prefix 
-docker exec etcdclient /TopStor/etcdput.py $etcd mynodeip $mynodeip 
-docker exec etcdclient /TopStor/etcdput.py $etcd mynode $myhost 
-docker exec etcdclient /TopStor/etcdput.py $etcd leaderip $myclusterip 
-docker exec etcdclient /TopStor/etcdput.py $etcd isprimary $isprimary 
+/TopStor/etcddel.py $etcd pools --prefix 
+/TopStor/etcddel.py $etcd sync/pools --prefix 
+/TopStor/etcddel.py $etcd volume --prefix 
+/TopStor/etcddel.py $etcd sync/volume --prefix 
+/TopStor/etcdput.py $etcd mynodeip $mynodeip 
+/TopStor/etcdput.py $etcd mynode $myhost 
+/TopStor/etcdput.py $etcd leaderip $myclusterip 
+/TopStor/etcdput.py $etcd isprimary $isprimary 
 isreset=`cat /root/nodestatus`
 echo ${isreset}$isprimary | grep reset1
 if [ $? -eq 0 ];
@@ -370,11 +372,11 @@ then
 	echo adding all sync inits as I am primary
 	echo docker exec etcdclient /pace/checksyncs.py syncinit $etcd
 	echo row 293 checksync init >> /root/checksync
-	docker exec etcdclient /pace/checksyncs.py syncinit $etcd 
+	/pace/checksyncs.py syncinit $etcd 
 fi
 # echo running rabbit receive daemon
 # /TopStor/topstorrecvreply.py $etcd & disown
-docker exec -it etcdclient /TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
+/TopStor/etcdput.py $etcd ready/$myhost $mynodeip 
 
 
 
@@ -440,9 +442,9 @@ fi
  /pace/heartbeatlooper.sh & disown
  /pace/fapilooper.sh & disown
  stamp=`date +%s%N`
- docker exec etcdclient /TopStor/etcddel.py etcd sync/ready --prefix 
- docker exec etcdclient /TopStor/etcdput.py etcd ready/$myhost $mynodeip
- docker exec etcdclient /TopStor/etcdput.py etcd sync/ready/Add_${myhost}_$mynodeip/request ready_$stamp 
- docker exec etcdclient /TopStor/etcdput.py etcd sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp 
+/TopStor/etcddel.py $myclusterip sync/ready --prefix 
+/TopStor/etcdput.py $myclusterip ready/$myhost $mynodeip
+/TopStor/etcdput.py $myclusterip sync/ready/Add_${myhost}_$mynodeip/request ready_$stamp 
+/TopStor/etcdput.py $myclusterip sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp 
 
 
