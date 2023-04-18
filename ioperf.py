@@ -6,19 +6,19 @@ from etcddel import etcddel as dels
 
 def ioperf(myclusterip,myhost):
 
- cmdline="/TopStor/loadavg.sh"
- cores, load =subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split(' ')
- print( 'cores',str(100*float(load)/float(cores)))
+ #cmdline="/TopStor/loadavg.sh"
+ #cores, load =subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split(' ')
+ #print( 'cores',str(100*float(load)/float(cores)))
  cmdline='iostat -k'
  result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8').split('\n')
  #cpures = result[:4][-1].split()[:-1]
  #tcpu = 0
  #tcpu = round(float(cpures[0])+float(cpures[2]),2)
- tcpu = 100*float(cores)/float(load)
- tcpu = str(100*float(load)/float(cores))
- print(float(cores), tcpu)
+ #tcpu = 100*float(cores)/float(load)
+ #tcpu = str(100*float(load)/float(cores))
+ #print(float(cores), tcpu)
  #cmdline='docker exec etcdclient /TopStor/etcdput.py '+myclusterip+' cpuperf/'+myhost+' '+str(tcpu)
- put(myclusterip,'cpuperf/'+myhost,str(tcpu))
+ #put(myclusterip,'cpuperf/'+myhost,str(tcpu))
  #result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
  diskres = result[6:]
  diskresdict = {}
@@ -41,9 +41,9 @@ def ioperf(myclusterip,myhost):
  #dels(myclusterip,'dskperf',myhost)
  for dsk in disks:
   thedsk = disks[dsk]
-  cmdline='docker exec etcdclient /TopStor/etcdput.py '+myclusterip+' dskperf/'+myhost+'/'+thedsk['name']+' '+str(thedsk['tps'])+'/'+str(thedsk['through'])+'/'+str(thedsk['read'])+'/'+dsk
-  #put(myclusterip,'dskperf/'+myhost+'/'+thedsk['name'], str(thedsk['tps'])+'/'+str(thedsk['throuput'])+'/'+str(thedsk['read'])+'/'+dsk)
-  result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
+  #cmdline='docker exec etcdclient /TopStor/etcdput.py '+myclusterip+' dskperf/'+myhost+'/'+thedsk['name']+' '+str(thedsk['tps'])+'/'+str(thedsk['through'])+'/'+str(thedsk['read'])+'/'+dsk
+  put(myclusterip,'dskperf/'+myhost+'/'+thedsk['name'], str(thedsk['tps'])+'/'+str(thedsk['throuput'])+'/'+str(thedsk['read'])+'/'+dsk)
+  #result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
   with open('/pacedata/perfmon') as f:
    perfmon = f.readline()
   #if '1' in perfmon:
