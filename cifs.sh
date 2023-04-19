@@ -1,6 +1,7 @@
 #!/bin/sh
 cd /TopStor
 export ETCDCTL_API=3
+echo $@ > /root/cifsshtmp
 resname=`echo $@ | awk '{print $1}'`
 mounts=`echo $@ | awk '{print $2}' | sed 's/\-v/ \-v /g'`
 ipaddr=`echo $@ | awk '{print $3}'`
