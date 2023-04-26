@@ -34,13 +34,30 @@ cp /TopStor/discovery.sh /TopStordata/etcd.sh
 sed -i 's/SLEEP//g' /TopStordata/etcd.sh
 sed -i "s/ETCDIP/$newip/g" /TopStordata/etcd.sh
 docker run -itd --rm --name etcd --hostname etcd -v /etc/localtime:/etc/localtime:ro -v /root/gitrepo/resolv.conf:/etc/resolv.conf -p $myclusterip:2379:2379 -v /TopStor/:/TopStor -v /root/etcddata:/default.etcd  -v /TopStordata/etcd.sh:/runme.sh --net bridge0 moataznegm/quickstor:etcd
+started=0
+while [ $started -eq 0 ];
+do
+		echo waiting etcd to settle 
+		docker logs etcd | grep 'successfully notified init daemon' 
+		if [ $? -eq 0 ];
+	 	then
+			started=1
+	 	else
+		 	sleep 1
+	 	fi
+done
+
+echo /pace/etcddel.py $leaderip sync/leader/Add_ --prefix
+stamp=`date +%s%N`
 /pace/etcddel.py $leaderip sync/leader/Add_ --prefix
+echo /pace/etcdput.py $leaderip sync/leader/Add_${myhost}_$myhostip/request leader_$stamp
 /pace/etcdput.py $leaderip sync/leader/Add_${myhost}_$myhostip/request leader_$stamp
+echo /pace/etcdput.py $leaderip sync/leader/Add_${myhost}_$myhostip/request/$myhost leader_$stamp
 /pace/etcdput.py $leaderip sync/leader/Add_${myhost}_$myhostip/request/$myhost leader_$stamp
+echo finihsedfirst
 templhttp='/TopStor/httpd_template.conf'
-rm -rf /TopStordata/httpd.conf
-cp /TopStor/httpd.conf /TopStordata/
 shttpdf='/TopStordata/httpd.conf'
+rm -rf $shttpdf 
 cp $templhttp $shttpdf
 sed -i "s/MYCLUSTERH/$leaderip/g" $shttpdf
 sed -i "s/MYCLUSTER/$leaderip/g" $shttpdf
@@ -53,5 +70,5 @@ docker run -itd --rm --name flask --hostname apisrv -v /etc/localtime:/etc/local
 #/pace/fapilooper.sh & disown
 #/pace/zfsping.py $leaderip $myhost & disown
 #/pace/rebootmeplslooper.sh $leaderip $myhost & disown 
-
+echo hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 /TopStor/ioperf.py $leaderip $myhost
