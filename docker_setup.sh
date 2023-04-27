@@ -56,7 +56,6 @@ then
 			targetcli clearconfig confirm=True	
 			targetcli saveconfig 
 			/TopStor/resetdocker.sh	
-			sed -i 's/
 			nmcli conn up clusterstub 
 			nmcli conn delete mynode 
 			nmcli conn delete mycluster 

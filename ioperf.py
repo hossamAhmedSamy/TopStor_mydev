@@ -17,9 +17,9 @@ def ioperf(myclusterip,myhost):
  tcpu = 100*float(cores)/float(load)
  tcpu = str(100*float(load)/float(cores))
  print(float(cores), tcpu)
- cmdline='docker exec etcdclient /TopStor/etcdput.py '+myclusterip+' cpuperf/'+myhost+' '+str(tcpu)
- #put(myclusterip,'cpuperf/'+myhost,str(tcpu))
- result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
+ #cmdline='docker exec etcdclient /TopStor/etcdput.py '+myclusterip+' cpuperf/'+myhost+' '+str(tcpu)
+ put(myclusterip,'cpuperf/'+myhost,str(tcpu))
+ #result=subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode('utf-8')
  diskres = result[6:]
  diskresdict = {}
  for dsk in diskres:
