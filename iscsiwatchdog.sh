@@ -69,8 +69,35 @@ do
 	then
 		targetn=$targetnewn
 		lsscsi=0
+		#ps -ef | grep diskchange | grep -v grep
+		#if [ $? -ne 0 ];
+		#then
+	#		cat /TopStordata/diskchange | grep -e 'stop|start'
+#			if [ $? -ne 0 ];
+#			then
+#				echo 33333333333333333333333333333333333333333333start watchdog diskchange
+#				/pace/diskchange.sh `cat /TopStordata/diskchange`
+#				/pace/diskchange.sh add add add
+#				echo 33333333333333333333333333333333333333333333stop watchdog diskchange
+#			fi
+#		fi
 
 	fi
+	ps -ef | grep diskchange | grep -v grep
+	if [ $? -ne 0 ];
+	then
+		cat /TopStordata/diskchange | grep stop
+		if [ $? -ne 0 ];
+		then
+			diskchange=`cat /TopStordata/diskchange`
+			echo 33333333333333333333333333333333333333333333start watchdog diskchange
+			echo /pace/diskchange.sh $diskchange
+			/pace/diskchange.sh $diskchange 
+			/pace/diskchange.sh add add add
+			echo 33333333333333333333333333333333333333333333stop watchdog diskchange
+		fi
+	fi
+
         /pace/putzpool.py $leader $leaderip $myhost $myhostip 
 	echo '###############################################################'
 	echo initip $initip
