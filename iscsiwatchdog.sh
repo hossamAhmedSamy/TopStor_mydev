@@ -69,6 +69,7 @@ do
 	then
 		targetn=$targetnewn
 		lsscsi=0
+		/pace/diskchange.sh add change add
 		#ps -ef | grep diskchange | grep -v grep
 		#if [ $? -ne 0 ];
 		#then
