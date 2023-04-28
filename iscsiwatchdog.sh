@@ -94,6 +94,7 @@ do
 			echo 33333333333333333333333333333333333333333333start watchdog diskchange
 			echo /pace/diskchange.sh $diskchange
 			/pace/diskchange.sh $diskchange 
+			echo stop stop stop stop >/TopStordata/diskchange
 			/pace/diskchange.sh add add add
 			echo 33333333333333333333333333333333333333333333stop watchdog diskchange
 		fi
