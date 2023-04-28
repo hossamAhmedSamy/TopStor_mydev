@@ -4,6 +4,10 @@ myhost=`hostname`
 firewall-cmd --permanent --add-port=5672/tcp
 firewall-cmd --permanent --add-port=5672/udp
 firewall-cmd --reload
+mypid='/TopStordata/diskchange'
+echo stop stop stop stop > $mypid
+cp /TopStor/101-qstor.rules /usr/lib/udev/rules.d/
+udevadm control -R
 sed -i 's/\=enforcing/\=disabled/g' /etc/selinux/config
 echo '# init' > /etc/exports
 rm -rf /TopStordata/exportip.*
@@ -210,6 +214,7 @@ then
 	leader=$myhost
 else
 	etcd=$mynodeip
+	leader=`/etcdget.py $myclusterip leader`
 fi
 
 echo nameserver 10.11.12.7 >  /root/gitrepo/resolv.conf
@@ -443,7 +448,9 @@ fi
  stamp=`date +%s%N`
 /TopStor/etcddel.py $myclusterip sync/ready --prefix 
 /TopStor/etcdput.py $myclusterip ready/$myhost $mynodeip
+/TopStor/etcdput.py $mynodeip ready/$myhost $mynodeip
 /TopStor/etcdput.py $myclusterip sync/ready/Add_${myhost}_$mynodeip/request ready_$stamp 
 /TopStor/etcdput.py $myclusterip sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp 
-
+#/pace/diskref.py $leader $myculsterip $myhost $mynodeip 
+/pace/diskchange.sh add initial disk
 
