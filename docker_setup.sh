@@ -427,14 +427,14 @@ else
  /TopStor/etcdput.py $myclusterip sync/nextlead/Add_er_${myhost}/request/$leader nextlead_$stamp
 fi
  /TopStor/etcddel.py $myclusterip sync/diskref --prefix
- /TopStor/etcdput.py $myclusterip sync/diskref/______/request diskref_$stamp
+ /TopStor/etcdput.py $myclusterip sync/diskref/add_add_add______/request diskref_$stamp
  /pace/diskref.sh $leader $myclusterip $myhost $mynodeip
 #if [ $isprimary -ne 0 ];
 #then
 	/pace/checksyncs.py restetcd $myclusterip $myhost 
 	/pace/checksyncs.py syncrequest $myclusterip $myhost 
  	/TopStor/etcddel.py $myclusterip sync/diskref --prefix
- 	/TopStor/etcdput.py $myclusterip sync/diskref/______/request diskref_$stamp
+ 	/TopStor/etcdput.py $myclusterip sync/diskref/add_add_add______/request diskref_$stamp
 #fi
  /TopStor/refreshdisown.sh & disown 
  /TopStor/etcdput.py $etcd refreshdisown yes 
