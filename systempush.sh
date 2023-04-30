@@ -1,6 +1,5 @@
 #!/usr/bin/sh
 fnupdate () {
-	cd /$1
 	git checkout -b $1
 	#git reset --hard
 	git add --all
@@ -33,11 +32,10 @@ do
 	do
 		echo '###########################################'
  		echo $job
+		cd /$job
 		fnupdate $branch 
 		echo cjobsssssssssssss=${cjobs[@]}
 		cjobs=(`echo "${cjobs[@]}" | sed "s/$job//g" `)
-		lencjobs=`echo ${cjobs[@]} | wc -c`
-		echo will I iterate  $lencjobs
   	done
 	echo cjobs=$cjobs
 	lencjobs=`echo $cjobs | wc -c`
@@ -47,4 +45,5 @@ do
 		flag=0
 	fi
 done
+cd /TopStor
 echo finished
