@@ -1,5 +1,6 @@
 #!/usr/bin/sh
 fnupdate () {
+	cd /$1
 	git checkout -b $1
 	#git reset --hard
 	git add --all
