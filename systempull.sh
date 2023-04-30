@@ -1,11 +1,12 @@
 #!/usr/bin/sh
 fnupdate () {
 	git checkout -b $1
-	git checkout  $1
-	#git reset --hard
-	git add --all
-	git commit -am 'fixing' 
-	git push origin $1
+	git checkout $1
+	git reset --hard
+	git clean -f
+	#git add --all
+	#git commit -am 'fixing' 
+	git pull origin $1
 	if [ $? -ne 0 ];
 	then
 		echo something went wrong while updating $1 .... consult the devleloper
