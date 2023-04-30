@@ -29,8 +29,12 @@ do
 		echo '###########################################'
  		echo $job
 		cd /$job
+		if [ $? -ne 0 ];
+		then
+			echo the directory $job is not found... exiting
+			exit
+		fi
 		fnupdate $branch 
-		echo cjobsssssssssssss=${cjobs[@]}
 		cjobs=(`echo "${cjobs[@]}" | sed "s/$job//g" `)
   	done
 	echo cjobs=$cjobs
