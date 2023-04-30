@@ -4,6 +4,7 @@ myhost=`hostname`
 firewall-cmd --permanent --add-port=5672/tcp
 firewall-cmd --permanent --add-port=5672/udp
 firewall-cmd --reload
+
 mypid='/TopStordata/diskchange'
 echo stop stop stop stop > $mypid
 cp /TopStor/101-qstor.rules /usr/lib/udev/rules.d/
