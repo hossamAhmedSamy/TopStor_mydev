@@ -37,9 +37,7 @@ do
 		fnupdate $branch 
 		cjobs=(`echo "${cjobs[@]}" | sed "s/$job//g" `)
   	done
-	echo cjobs=$cjobs
 	lencjobs=`echo $cjobs | wc -c`
-	echo will I iterate  $lencjobs
 	if [ $lencjobs -le 3 ];
 	then
 		flag=0
