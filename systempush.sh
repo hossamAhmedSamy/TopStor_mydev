@@ -11,7 +11,7 @@ fnupdate () {
 		exit
 	fi
 }
-cjobs=(`echo TopStor pace topstorweb`)
+cjobs=(`echo TopStor pacee topstorweb`)
 branch=$1
 branchc=`echo $branch | wc -c`
 if [ $branchc -le 3 ];
@@ -19,10 +19,6 @@ then
 	echo no valid branch is supplied .... exiting
 	exit
 fi 
-declare  -A cmdcjobs
-cmdcjobs['TopStor']="TopStor" 
-cmdcjobs['pace']="pace" 
-cmdcjobs['topstorweb']="topstorweb" 
 flag=1
 while [ $flag -ne 0 ];
 do
