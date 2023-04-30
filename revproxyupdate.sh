@@ -4,7 +4,7 @@ fnupdate () {
 	git checkout $1
 	git reset --hard
 	git clean -f
-	git config pull.rebase --replace-all false
+	git config --replace-all pull.rebase false
 	origin=`git remote -v | grep 252 | head -1 | awk '{print $1}'`
 	remote=`git remote -v | grep github | head -1 | awk '{print $1}'`
 	git pull $origin $1
