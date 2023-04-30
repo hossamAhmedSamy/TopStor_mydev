@@ -11,7 +11,7 @@ fnupdate () {
 		exit
 	fi
 }
-cjobs=(`echo TopStor pacee topstorweb`)
+cjobs=(`echo TopStor pace topstorweb`)
 branch=$1
 branchc=`echo $branch | wc -c`
 if [ $branchc -le 3 ];
