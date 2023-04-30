@@ -48,7 +48,7 @@ do
 				then
 					isexit=0
 				fi
-			if
+			fi
 			if [ $isexit -eq 1 ];
 			then
 				echo the directory $job is not found... exiting
