@@ -11,6 +11,9 @@ fnupdate () {
 		echo something went wrong while updating $1 .... consult the devleloper
 		exit
 	fi
+	sync
+	sync
+	sync
 }
 cjobs=(`echo TopStor pace topstorweb`)
 branch=$1

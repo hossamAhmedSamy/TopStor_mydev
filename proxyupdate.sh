@@ -19,6 +19,9 @@ fnupdate () {
 		echo something went wrong while pushing to origin: $origin, branch: $1 .... consult the devleloper
 		exit
 	fi
+	sync
+	sync
+	sync
 }
 cjobs=(`echo TopStor pace topstorweb`)
 branch=$1
