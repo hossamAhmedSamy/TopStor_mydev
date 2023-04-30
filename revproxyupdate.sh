@@ -7,13 +7,13 @@ fnupdate () {
 	git config pull.rebase --replace-all false
 	origin=`git remote -v | grep 252 | head -1 | awk '{print $1}'`
 	remote=`git remote -v | grep github | head -1 | awk '{print $1}'`
-	git pull $remote $1
+	git pull $origin $1
 	if [ $? -ne 0 ];
 	then
 		echo something went wrong while pulling from remote $remote, branch: $1 .... consult the devleloper
 		exit
 	fi
-	git push $origin $1
+	git push $remote $1
 	if [ $? -ne 0 ];
 	then
 		echo something went wrong while pushing to origin: $origin, branch: $1 .... consult the devleloper
