@@ -553,10 +553,10 @@ def renewtoken(data):
 @login_required
 def getcversion(data):
     global leaderip, leader, myhost
-    cmdline=['/TopStor/getcversion.sh',leaderip,leader,myhost]
-    subprocess.run(cmdline,stdout=subprocess.PIPE)
-    cversions = get(leaderip,'cversion/'+leader)[0][1]
-    return { 'response':'Ok', 'cversion':cversions }
+    #cmdline=['/TopStor/getcversion.sh',leaderip,leader,myhost]
+    #subprocess.run(cmdline,stdout=subprocess.PIPE)
+    cversions = get('cversion/'+myhost)[0]
+    return { 'response':'Ok', 'cversion': str(cversions)}
 
 
 
