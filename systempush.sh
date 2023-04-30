@@ -47,24 +47,3 @@ do
 	fi
 done
 echo finished
-exit
-  	flag=`docker exec etcdclient /TopStor/etcdgetlocal.py refreshdisown`
-        echo flaginfor $flag
- 	fnkillall $job
- 	isproc=`ps -ef | grep $job | grep -v color | grep -v grep | awk '{print $2}' | wc -l`
-	if [ $isproc -eq 0 ];
-	then
-		cjobs=(`echo "${cjobs[@]}" | grep -v $job`)
-		#cmd=`echo -e $cmdcjobs | grep $job`
-		cmd=${cmdcjobs[$job]}
-	 	echo $cmd $leaderip $myhost \& disown	>> /root/refreshtemp
-	 	$cmd $leaderip $myhost >/dev/null & disown	
-	fi
-	flag=$((flag+isproc))
-	echo flagwithiscproc=$flag
-  	docker exec etcdclient /TopStor/etcdput.py etcd refreshdisown $flag 
-	echo flag=$flag
-  flag=`docker exec etcdclient /TopStor/etcdgetlocal.py refreshdisown`
-  echo flaginwhile=$flag
- echo 'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSstop'
- sleep 2
