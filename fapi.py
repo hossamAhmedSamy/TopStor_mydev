@@ -549,6 +549,16 @@ def renewtoken(data):
  return data
 
 
+@app.route('/api/v1/info/cversion', methods=['GET','POST'])
+@login_required
+def getcversion(data):
+    global leaderip, leader, myhost
+    cmdline=['/TopStor/getcversion.sh',leaderip,leader,myhost]
+    subprocess.run(cmdline,stdout=subprocess.PIPE)
+    cversions = get(leaderip,'cversion/'+leader)[0][1]
+    return { 'response':'Ok', 'cversion':cversions }
+
+
 
 @app.route('/api/v1/info/notification', methods=['GET','POST'])
 @login_required
