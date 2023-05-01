@@ -6,6 +6,7 @@ fnupdate () {
 	git clean -f
 	git config --replace-all pull.rebase false
 	git checkout -- *
+	git rm -rf __py*
 	#git add --all
 	#git commit -am 'fixing' 
 	git pull origin $1
