@@ -9,7 +9,8 @@ fnupdate () {
 	git push origin $1
 	if [ $? -ne 0 ];
 	then
-		echo something went wrong while updating $1 .... consult the devleloper
+		fold=`pwd | awk -F'/' '{print $NF'`
+		echo something went wrong while updating $1 in directory $fold.... consult the devleloper
 		exit
 	fi
 	sync
