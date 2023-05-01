@@ -6,6 +6,7 @@ fnupdate () {
 	git clean -f
 	git config --replace-all pull.rebase false
 	git checkout -- *
+	git rm -rf __py*
 	origin=`git remote -v | grep 252 | head -1 | awk '{print $1}'`
 	remote=`git remote -v | grep github | head -1 | awk '{print $1}'`
 	git pull $remote $1
