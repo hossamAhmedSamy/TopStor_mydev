@@ -5,6 +5,7 @@ fnupdate () {
 	git reset --hard
 	git clean -f
 	git config --replace-all pull.rebase false
+	git checkout -- *
 	#git add --all
 	#git commit -am 'fixing' 
 	git pull origin $1
