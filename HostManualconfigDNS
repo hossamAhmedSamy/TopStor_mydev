@@ -26,12 +26,23 @@ echo leader=$leader, dns=$dns, searchdns=$searchdns
   olddns='NoDNS'
  fi
 else
+
  ./etcdput.py $myip dnssearch/$hostname $searchdns
  echo ./etcdput.py $myip dnssearch/$hostname $searchdns
 echo $? hereherehere $myip
  ./etcdput.py $myip dnsname/$hostname $dns
  ./etcdput.py $leaderip dnssearch/$hostname $searchdns
  ./etcdput.py $leaderip dnsname/$hostname $dns
+ echo $leader | grep $myhost
+ if [ $? -eq 0 ];
+ then
+  stamp=`date +%s`
+  ./etcdput.py $leaderip sync/deens/_____/request teezee_$stamp
+  ./etcdput.py $leaderip sync/deens/_____/request/$leader teezee_$stamp
+# ./etcdput.py $leaderip rebootme/$myhost pls
+
+fi
+
  echo 'supersede domain-name-server '$dns';' > /etc/dhcp/dhclient.conf
  echo nameserver $dns > /etc/resolv.conf
  if [ $searchdnsn -gt 3 ];
@@ -52,3 +63,4 @@ echo $? hereherehere $myip
  nmcli con mod mycluster ipv4.dns $dns 
  #systemctl restart network
 fi
+
