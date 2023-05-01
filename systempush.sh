@@ -4,6 +4,7 @@ fnupdate () {
 	git checkout  $1
 	#git reset --hard
 	git add --all
+	git rm -rf __py*
 	git commit -am 'fixing' 
 	git push origin $1
 	if [ $? -ne 0 ];
