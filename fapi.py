@@ -568,6 +568,7 @@ def getnotification(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  notifbody = get('notification')[0].split(' ')[1:]
+ isinsync = get('isinsync')[0]
  with open('/root/tmptmp','a') as f:
     f.write(str(notifbody))
  requests = get('request','--prefix')
@@ -584,7 +585,7 @@ def getnotification(data):
  except:
     msg = logdict['NotSupported']
     logmsg.sendlog('NotSupported','warning','system',str(notifbody))
-    return { 'response': 'Ok' }
+    return { 'isinsync': isinsync, 'response': 'Ok' }
     
    
  msgbody = '.'
@@ -602,7 +603,7 @@ def getnotification(data):
    notifc += 1
   elif len(word) > 0:
    msgbody = msgbody[:-1]+' '+word+'.' 
- notif = { 'importance':msg[0].replace(':',''), 'msgcode': notifbody[3], 'date':notifbody[0], 'time':notifbody[1],
+ notif = { 'isinsync': isinsync, 'importance':msg[0].replace(':',''), 'msgcode': notifbody[3], 'date':notifbody[0], 'time':notifbody[1],
 	 'host':notifbody[2], 'type':notifbody[4], 'user': notifbody[5], 'msgbody': msgbody[1:],'requests':requestdict, 'response':'Ok'}
  return jsonify(notif)
 
