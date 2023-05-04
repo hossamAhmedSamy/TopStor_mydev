@@ -102,7 +102,7 @@ then
  ETCDCTL_API=3 /pace/etcdput.py $leaderip volumes/CIFS/$myhost/$DG/$name $DG/$name/no/yes/$writev/administrator/yes/$ipaddr/$ipsubnet/$active
  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request volumes_$stamp
  ETCDCTL_API=3 /pace/etcdput.py $leaderip sync/volumes/${DG}_$name/request/$leader volumes_$stamp
-
+ chmod 777 /$DG/$name
  /TopStor/cifs.py $leader $leaderip $myhost $myhostip $etcd $DG $name $ipaddr $ipsubnet CIFS
     #/TopStor/cifs.sh $leaderip $pool $name $ipaddr $ipsubnet cifs
  #./VolumeActivateCIFS $leaderip vol=$name user=$userreq

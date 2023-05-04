@@ -46,7 +46,7 @@ def create(leader, leaderip, myhost, myhostip, etcdip, pool, name, ipaddr, ipsub
             username = user[0].splt('/')[1]
             cmdline = '/TopStor/decthis.sh '+username+' '+user[1]
             passwd = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode().split('_result')[1]
-            cmdline = 'docker exec '+resname+' /hostetc/smbuserfix.sh '+username+' '+passwd
+            cmdline = 'docker exec '+resname+' /hostetc/smbuserfix.sh x '+username+' '+passwd
             subprocess.run(cmdline.split(),stdout=subprocess.PIPE)  
             
     print(mounts)
