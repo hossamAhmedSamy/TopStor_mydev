@@ -27,6 +27,7 @@ def config(leader, leaderip, myhost, *bargs):
    arglist[key] = '-1'
  with open('/TopStordata/Hostconfig','w') as f:
   f.write(str(arglist)+'\n')
+ stampi = str(stamp())
  ######### changing alias ###############
  if 'alias' in arglist:
   queuethis('Hostconfig_alias','running',arglist['user'])
@@ -35,8 +36,8 @@ def config(leader, leaderip, myhost, *bargs):
   allhosts = get(leaderip, 'ActivePartner','--prefix')
   put(leaderip, 'alias/'+arglist['name'],arglist['alias'])
   dels(leaderip, 'sync', 'alias_')
-  put(leaderip, 'sync/alias/Add_'+arglist['name']+'_'+arglist['alias'].replace('_',':::').replace('/',':::')+'/request','alias_'+str(stamp()))
-  put(leaderip, 'sync/alias/Add_'+arglist['name']+'_'+arglist['alias'].replace('_',':::').replace('/',':::')+'/request/'+myhost,'alias_'+str(stamp()))
+  put(leaderip, 'sync/alias/Add_'+arglist['name']+'_'+arglist['alias'].replace('_',':::').replace('/',':::')+'/request','alias_'+stampi)
+  put(leaderip, 'sync/alias/Add_'+arglist['name']+'_'+arglist['alias'].replace('_',':::').replace('/',':::')+'/request/'+myhost,'alias_'+stampi)
   logmsg.sendlog('HostManual1su5','info',arglist['user'],oldarg, arglist['alias'])
   queuethis('Hostconfig_alias','running',arglist['user'])
 ######### changing cluster address ###############
@@ -49,8 +50,8 @@ def config(leader, leaderip, myhost, *bargs):
   #if myhost == leader:
   # updatenamespace(arglist['cluster'],oldarg)
   dels(leaderip, 'sync', 'namespace_')
-  put(leaderip, 'sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster'].replace('/','::')+'/request','namespace_'+str(stamp()))
-  put(leaderip, 'sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster'].replace('/','::')+'/request/'+myhost,'namespace_'+str(stamp()))
+  put(leaderip, 'sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster'].replace('/','::')+'/request','namespace_'+stampi)
+  put(leaderip, 'sync/namespace/Add_'+'namespace::mgmtip_'+arglist['cluster'].replace('/','::')+'/request/'+myhost,'namespace_'+stampi)
   put(leaderip, 'namespace/mgmtip',arglist['cluster'])
   logmsg.sendlog('HostManual1su7','info',arglist['user'],oldarg,arglist['cluster'])
   queuethis('Hostconfig_cluster','finish',arglist['user'])
@@ -67,8 +68,8 @@ def config(leader, leaderip, myhost, *bargs):
   cmdlinep=['/TopStor/UnixChangePass',arglist['username'],arglist['user']]
   result=subprocess.run(cmdlinep,stdout=subprocess.PIPE)
   dels(leaderip, 'sync', 'passwd_')
-  put(leaderip, 'sync/passwd/UnixChangePass_'+arglist['username']+'_'+arglist['user']+'/request','passwd_'+str(stamp()))
-  put(leaderip, 'sync/passwd/UnixChangePass_'+arglist['username']+'_'+arglist['user']+'/request/'+myhost,'passwd_'+str(stamp()))
+  put(leaderip, 'sync/passwd/UnixChangePass_'+arglist['username']+'_'+arglist['user']+'/request','passwd_'+stampi)
+  put(leaderip, 'sync/passwd/UnixChangePass_'+arglist['username']+'_'+arglist['user']+'/request/'+myhost,'passwd_'+stampi)
 #  broadcast('UserPassChange','/TopStor/pump.sh','UnixChangePass',arglist['password'],arglist['username'],arglist['user'])
   queuethis('ChangeUserPass','finish',arglist['user'])
 ############ changing time zone ###############
@@ -80,7 +81,7 @@ def config(leader, leaderip, myhost, *bargs):
   leader = get(leaderip, 'leader')[0]
   put(leaderip, 'tz/'+leader,arglist['tz'])
   dels(leaderip, 'sync', 'tz_')
-  put(leaderip, 'sync/tz/HostManualconfigTZ_'+'_'+arglist['tz']+'/request','tz_'+str(stamp()))
+  put(leaderip, 'sync/tz/HostManualconfigTZ_'+'_'+arglist['tz']+'/request','tz_'+stampi)
   logmsg.sendlog('HostManual1su10','info',arglist['user'], oldarg, argtz)
   queuethis('Hostconfig_tzone','finish',arglist['user'])
 ########### changing ntp server ###############
@@ -91,7 +92,7 @@ def config(leader, leaderip, myhost, *bargs):
   leader = get(leaderip, 'leader')[0]
   put(leaderip, 'ntp/'+leader,arglist['ntp'])
   dels(leaderip, 'sync', 'ntp_')
-  put(leaderip, 'sync/ntp/HostManualconfigNTP_'+'_'+arglist['ntp']+'/request','ntp_'+str(stamp()))
+  put(leaderip, 'sync/ntp/HostManualconfigNTP_'+'_'+arglist['ntp']+'/request','ntp_'+stampi)
   logmsg.sendlog('HostManual1su9','info',arglist['user'],oldarg, arglist['ntp'])
   queuethis('Hostconfig_ntp','finish',arglist['user'])
 ########### changing dns  ###############
@@ -108,7 +109,7 @@ def config(leader, leaderip, myhost, *bargs):
   put(leaderip, 'dnsname/'+leader,arglist['dnsname'])
   put(leaderip, 'dnssearch/'+leader,arglist['dnssearch'])
   dels(leaderip, 'sync', 'dns_')
-  put(leaderip, 'sync/dns/HostManualconfigDNS'+'_'+arglist['dnsname']+'_'+arglist['dnssearch']+'/request','dns_'+str(stamp()))
+  put(leaderip, 'sync/dns/HostManualconfigDNS'+'_'+arglist['dnsname']+'_'+arglist['dnssearch']+'/request','dns_'+stampi)
   logmsg.sendlog('HostManual1su13','info',arglist['user'],oldargname, oldargsearch, arglist['dnsname'],arglist['dnssearch'])
   queuethis('Hostconfig_dns','finish',arglist['user'])
  
@@ -120,7 +121,7 @@ def config(leader, leaderip, myhost, *bargs):
   leader = get(leaderip, 'leader')[0]
   put(leaderip, 'gw/'+leader,arglist['gw'])
   dels(leaderip, 'sync', 'gw_')
-  put(leaderip, 'sync/gw/HostManualconfigGW_'+'_'+arglist['gw']+'/request','gw_'+str(stamp()))
+  put(leaderip, 'sync/gw/HostManualconfigGW_'+'_'+arglist['gw']+'/request','gw_'+stampi)
   logmsg.sendlog('HostManual1su11','info',arglist['user'],oldarg, arglist['gw'])
   queuethis('Hostconfig_gw','finish',arglist['user'])
  ############# changing configured  ###############
@@ -133,7 +134,7 @@ def config(leader, leaderip, myhost, *bargs):
    logmsg.sendlog('HostManual2st12','info',arglist['user'])
   put(leaderip, 'configured/'+arglist['name'],arglist['configured'])
   dels(leaderip, 'sync/cf', 'confiugred_'+arglist['name'])
-  put(leaderip, 'sync/cf/HostManualconfigCF_'+'_'+arglist['name']+'/request','configured_'+arglist['name']+'_'+str(stamp()))
+  put(leaderip, 'sync/cf/HostManualconfigCF_'+'_'+arglist['name']+'/request','configured_'+arglist['name']+'_'+stampi)
   if 'yes' in arglist['configured']:
    logmsg.sendlog('HostManual1su12','info',arglist['user'])
   else:
@@ -150,9 +151,9 @@ def config(leader, leaderip, myhost, *bargs):
   dels(leaderip, 'ActivePartners/'+arglist['name'])
   put(leaderip, 'ActivePartners/'+arglist['name'],arglist['ipaddr'])
   dels(leaderip, 'sync', 'ipaddr_'+arglist['name'])
-  put(leaderip, 'sync/ipaddr/HostManualconfigIPADDR_'+'_'+arglist['name']+'/request','ipaddr_'+arglist['name']+'_'+str(stamp()))
-  put(leaderip, 'sync/ipaddr/Add_ActivePartners_'+arglist['name']+'_'+arglist['ipaddr'].replace('/','::')+'/request','ActivePartners_'+arglist['name']+'_'+str(stamp()))
-  put(leaderip, 'sync/ipaddr/Add_ActivePartners_'+arglist['name']+'_'+arglist['ipaddr'].replace('/','::')+'/request/'+leader,'ActivePartners_'+arglist['name']+'_'+str(stamp()))
+  put(leaderip, 'sync/ipaddr/HostManualconfigIPADDR_'+'_'+arglist['name']+'/request','ipaddr_'+arglist['name']+'_'+stampi)
+  put(leaderip, 'sync/ipaddr/Add_ActivePartners_'+arglist['name']+'_'+arglist['ipaddr'].replace('/','::')+'/request','ActivePartners_'+arglist['name']+'_'+stampi)
+  put(leaderip, 'sync/ipaddr/Add_ActivePartners_'+arglist['name']+'_'+arglist['ipaddr'].replace('/','::')+'/request/'+leader,'ActivePartners_'+arglist['name']+'_'+stampi)
   logmsg.sendlog('HostManual1su6','info',arglist['user'], str(oldipaddr),arglist['ipaddr']+'/'+arglist['ipaddrsubnet'])
 ######################################
 ############# need to reboot  ###############
