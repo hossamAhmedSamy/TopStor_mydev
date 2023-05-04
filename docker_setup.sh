@@ -455,4 +455,5 @@ fi
 /TopStor/etcdput.py $myclusterip sync/ready/Add_${myhost}_$mynodeip/request/$leader ready_$stamp 
 #/pace/diskref.py $leader $myculsterip $myhost $mynodeip 
 /pace/diskchange.sh add initial disk
+
 /TopStor/getcversion.sh $myclusterip $leader $myhost
