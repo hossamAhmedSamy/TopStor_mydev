@@ -18,7 +18,11 @@ fnupdate () {
 	sync
 }
 
-touch /TopStor/systempull.sh
+cd /TopStor/
+echo `git show --abbrev-commit | grep commit ` > /TopStor/lastcommit
+git add --all
+git commit -am'fixing'
+sleep 1
 cjobs=(`echo TopStor pace topstorweb`)
 branch=$1
 branchc=`echo $branch | wc -c`
