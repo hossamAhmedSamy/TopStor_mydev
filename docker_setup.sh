@@ -456,5 +456,4 @@ fi
 #/pace/diskref.py $leader $myculsterip $myhost $mynodeip 
 /pace/diskchange.sh add initial disk
 
-
 /TopStor/getcversion.sh $myclusterip $leader $myhost
