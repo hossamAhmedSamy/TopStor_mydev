@@ -27,6 +27,11 @@ then
 	echo no valid branch is supplied .... exiting
 	exit
 fi 
+echo $branch | grep samebranch
+if [ $? -eq 0 ];
+then
+	branch=`git branch | grep '*' | awk '{print $1}'`
+fi
 flag=1
 while [ $flag -ne 0 ];
 do
