@@ -17,6 +17,8 @@ fnupdate () {
 	sync
 	sync
 }
+
+touch /TopStor/systempull.sh
 cjobs=(`echo TopStor pace topstorweb`)
 branch=$1
 branchc=`echo $branch | wc -c`
