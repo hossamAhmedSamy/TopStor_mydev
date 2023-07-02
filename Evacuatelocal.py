@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import subprocess,sys, datetime
-from logqueue import queuethis
+from logqueue import queuethis, initqueue
 from etcdput import etcdput as put 
 from time import sleep
 from etcdputlocal import etcdput as putlocal
@@ -15,12 +15,15 @@ def setall(*bargs):
   perfmon = f.readline()
  if '1' in perfmon:
   queuethis('Evacuate','running','system')
- myhost = get('clusternode')[0]
- leaderip = get('leaderip')[0]
- myip = get('clusternodeip')[0]
- hostn=bargs[0]
- hostip=bargs[1]
- userreq=bargs[2]
+ myhost = bargs[1] 
+ leaderip = bargs[0] 
+ logmsg.initlog(leaderip, myhost)
+ initqueue(leaderip, myhost)
+
+ myip = get(leaderip,'ready/'+myhost)[0]
+ hostn=bargs[2]
+ hostip=bargs[3]
+ userreq=bargs[-1]
  print('hihih',hostip, hostn)
  leader=get('leader','--prefix')[0][0].split('/')[1]
  print('iiiiiiiiiiiiiiiii',hostn,myhost, leader, hostip)

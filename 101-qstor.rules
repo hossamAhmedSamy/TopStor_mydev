@@ -1,0 +1,11 @@
+# QuickStor rule 
+
+# enable in-kernel evnet
+#SUBSYSTEM=="block", ATTRS{vendor}=="LIO*", ACTION=="add", KERNEL=="[A-Za-z]", RUN+="/pace/diskchange.sh LIO %k add"
+#ATTRS{vendor}=="ATA*", ACTION=="add", SUBSYSTEM=="block", KERNEL=="[A-Za-z]", RUN+="/pace/diskchange.sh local %k add"
+ACTION=="add", SUBSYSTEM=="block", KERNEL=="[A-Za-z]*", RUN+="/pace/diskchange.sh local %k add"
+#SUBSYSTEM=="block", ATTRS{vendor}=="LIO*", ACTION=="remove", KERNEL=="*", RUN+="/pace/diskchange.sh LIO %k remove"
+#ATTRS{vendor}=="ATA*", ACTION=="remove", SUBSYSTEM=="block", KERNEL=="*", RUN+="/pace/diskchange.sh local %k remove"
+ACTION=="remove", SUBSYSTEM=="block", KERNEL=="[A-Za-z]*", RUN+="/pace/diskchange.sh local %k remove"
+
+

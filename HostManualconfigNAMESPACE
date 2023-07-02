@@ -9,11 +9,17 @@ hostip=`echo $@ | awk '{print $4}'`
 myclusterdev='enp0s8'
 newip=`/TopStor/etcdget.py $leaderip namespace/mgmtip`
 nmcli conn mod mycluster ipv4.addresses $newip 
+echo yes > /root/nodeconfigured
 echo checking $leader $myhost >> /root/tmpnamespace
 echo $leader | grep $myhost
 if [ $? -eq 0 ];
 then
  echo addingpls >> /root/tmpnamespace
- ./etcdput.py $leaderip rebootme/$myhost pls
+ /TopStor/etcdput.py $hostip namespace/mgmtip $newip
+ stamp=`date +%s`
+ ./etcdput.py $leaderip sync/nmspce/_____/request nmspce_$stamp
+  ./etcdput.py $leaderip sync/nmspce/_____/request/$leader nmspce_$stamp
+# ./etcdput.py $leaderip rebootme/$myhost pls
+
 fi
 #/sbin/reboot

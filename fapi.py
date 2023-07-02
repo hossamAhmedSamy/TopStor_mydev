@@ -80,6 +80,8 @@ def postchange(cmndstring,host='myhost'):
  z= cmndstring.split(' ')
  msg={'req': 'Pumpthis', 'reply':z}
  ownerip=get('ready/'+host,'--prefix')
+ #with open('/TopStor/tempdata','w') as f:
+ # f.write(str((ownerip[0][1], str(msg),'recvreply',myhost)))
  sendhost(ownerip[0][1], str(msg),'recvreply',myhost)
 
 def dict_factory(cursor, row):
@@ -90,7 +92,7 @@ def dict_factory(cursor, row):
 
 def getusers():
  global leaderip
- userlst = etcdgetjson('usersinfo','--prefix') 
+ userlst = etcdgetjson(leaderip,'usersinfo','--prefix') 
  uid = 0
  users = []
  for user in userlst:
@@ -101,7 +103,7 @@ def getusers():
 
 def getgroups():
  global leaderip
- groupslst = etcdgetjson('usersigroup','--prefix') 
+ groupslst = etcdgetjson(leaderip, 'usersigroup','--prefix') 
  gid = 0
  groups = []
  for group in groupslst:
@@ -206,6 +208,12 @@ def hostsactive():
   hid +=1
  return jsonify(activehosts)
 
+
+@app.route('/api/v1/hosts/discover', methods=['GET','POST'])
+def discover():
+    cmndstring = '/TopStor/getdiscovery.sh '
+    postchange(cmndstring)
+    return
 @app.route('/api/v1/hosts/possible', methods=['GET','POST'])
 def hostspossible():
  global allhosts, readyhosts, activehosts, losthosts, possiblehosts, leaderip
@@ -213,7 +221,7 @@ def hostspossible():
  possiblehosts = []
  hid = 0
  for host in hosts:
-  name = host[0].replace('possible','')
+  name = host[0].split('/')[1]
   ip = host[1]
   possiblehosts.append({'name':name, 'ip': ip, 'id': hid}) 
   hid +=1
@@ -541,6 +549,17 @@ def renewtoken(data):
  return data
 
 
+@app.route('/api/v1/info/cversion', methods=['GET','POST'])
+#@login_required
+def getcversion():
+    global leaderip, leader, myhost
+    cmdline='/TopStor/getcversion.sh '+leaderip+' '+leader+' '+myhost
+    #subprocess.run(cmdline,stdout=subprocess.PIPE)
+    postchange(cmdline)
+    cversions = get('cversion/'+myhost)[0]
+    return { 'response':'Ok', 'cversion': str(cversions)}
+
+
 
 @app.route('/api/v1/info/notification', methods=['GET','POST'])
 @login_required
@@ -549,6 +568,9 @@ def getnotification(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  notifbody = get('notification')[0].split(' ')[1:]
+ isinsync = get('isinsync')[0]
+ with open('/root/tmptmp','a') as f:
+    f.write(str(notifbody))
  requests = get('request','--prefix')
  requestdict = {}
  for req in requests:
@@ -558,7 +580,14 @@ def getnotification(data):
   if reqname not in requestdict:
    requestdict[reqname] = {}
   requestdict[reqname][reqhost] = reqstatus
- msg = logdict[notifbody[3]]
+ try:
+    msg = logdict[notifbody[3]]
+ except:
+    msg = logdict['NotSupported']
+    logmsg.sendlog('NotSupported','warning','system',str(notifbody))
+    return { 'isinsync': isinsync, 'response': 'Ok' }
+    
+   
  msgbody = '.'
  notifc = 6
  for word in msg[4:]:
@@ -574,7 +603,7 @@ def getnotification(data):
    notifc += 1
   elif len(word) > 0:
    msgbody = msgbody[:-1]+' '+word+'.' 
- notif = { 'importance':msg[0].replace(':',''), 'msgcode': notifbody[3], 'date':notifbody[0], 'time':notifbody[1],
+ notif = { 'isinsync': isinsync, 'importance':msg[0].replace(':',''), 'msgcode': notifbody[3], 'date':notifbody[0], 'time':notifbody[1],
 	 'host':notifbody[2], 'type':notifbody[4], 'user': notifbody[5], 'msgbody': msgbody[1:],'requests':requestdict, 'response':'Ok'}
  return jsonify(notif)
 
@@ -647,7 +676,7 @@ def volumecreate(data):
 def getlogin(token):
  global leaderip
  logindata = get('login',token)[0]
- if logindata == -1:
+ if logindata == '_1':
   logmsg.sendlog('Lognno0','warning','system',token)
   return 'baduser'
  oldtimestamp = logindata[1].split('/')[1]
@@ -705,7 +734,7 @@ def usersauth(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  print('#######################')
- cmndstring = '/TopStor/pump.sh Priv.py '+data['tochange']+' '+data['auths'].replace(',','/')+' '+data['user']
+ cmndstring = '/TopStor/Priv.py '+leader+' '+leaderip+' '+myhost+' '+myhostip+' '+data['tochange']+' '+data['auths'].replace(',','/')+' '+data['user']
  print(cmndstring)
  print('#######################')
  postchange(cmndstring)
@@ -789,9 +818,13 @@ def hostconfig(data):
 @app.route('/api/v1/hosts/joincluster', methods=['GET','POST'])
 @login_required
 def hostjoincluster(data):
+ global leaderip, myhost
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  data['user'] = data['response']
+ discover()
+ data['leaderip'] = leaderip
+ data ['myhost'] = myhost
  Joincluster.do(data) 
  return data
 
@@ -802,6 +835,9 @@ def hostevacuate(data):
  if 'baduser' in data['response']:
   return {'response': 'baduser'}
  data['user'] = data['response']
+ #with open('/root/Evacuate','w') as f:
+  #f.write(" ".join([leaderip, myhost, data['name'], data['user']]))
+ discover()
  Evacuate.do(leaderip, myhost, data['name'], data['user']) 
  return data
 
@@ -987,6 +1023,7 @@ def UnixAddUser(data):
   groupstr = groupstr[:-1]
  cmndstring = '/TopStor/UnixAddUser '+leaderip+' '+data.get('name')+' '+pool+' groups'+groupstr+' ' \
      +data.get('Password')+' '+data.get('Volsize')+'G '+data.get('HomeAddress')+' '+data.get('HomeSubnet')+' hoststub'+' '+data['user']
+
  postchange(cmndstring)
  return data 
 
@@ -1038,7 +1075,7 @@ def userauths(data):
   return {'response': 'baduser'}
  if  data['username'] == 'admin':
   return {'auths':'true','response':data['response']}
- userlst = etcdgetjson('usersinfo','--prefix')
+ userlst = etcdgetjson(leaderip,'usersinfo','--prefix')
  for user in userlst:
   username = user['name'].replace('usersinfo/','')
   if username == data['username']:
@@ -1050,7 +1087,7 @@ def userauths(data):
 def api_partners_userslist():
  global leaderip
  allpartners=[]
- partnerlst = etcdgetjson('Partner/','--prefix')
+ partnerlst = etcdgetjson(leaderip,'Partner/','--prefix')
  for partner in partnerlst:
   alias =  partner["name"].split('/')[1] 
   split = partner["prop"].split('/') 
@@ -1060,7 +1097,7 @@ def api_partners_userslist():
 @app.route('/api/v1/users/userlist', methods=['GET'])
 def api_users_userslist():
  global allgroups, allusers, leaderip
- userlst = etcdgetjson('usersinfo','--prefix')
+ userlst = etcdgetjson(leaderip,'usersinfo','--prefix')
  allgroups = getgroups()
  userdict = dict()
  allusers = []
@@ -1167,6 +1204,7 @@ if __name__=='__main__':
     #leaderip = sys.argv[1]
     leaderip = get('leaderip')[0]
     myhost = get('clusternode')[0]
+    myhostip = get('clusternodeip')[0]
     leader = get('leader')[0]
     logmsg.initlog(leaderip,myhost)
     #myhost = sys.argv[2]

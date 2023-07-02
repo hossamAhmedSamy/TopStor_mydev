@@ -38,7 +38,10 @@ timedatectl set-timezone $tzone
 echo $leader | grep $myhost
 if [ $? -ne 0 ];
 then
-	./etcdput.py $myip tz/$myhost $fulltz 
+	./etcdput.py $leaderip tz/$myhost $fulltz 
+	stamp=`date +%s`
+  	./etcdput.py $leaderip sync/teezee/_____/request teezee_$stamp
+  	./etcdput.py $leaderip sync/teezee/_____/request/$leader teezee_$stamp
 
 fi
 echo $perfmon | grep 1

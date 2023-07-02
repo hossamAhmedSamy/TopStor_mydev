@@ -40,7 +40,7 @@ then
  /sbin/zfs destroy -rf $pDG/$volname 
  if [ $? -ne 0  ]; then
    docker exec etcdclient /TopStor/logmsg.py NFS1001 error $userreq $volname
-   echo /sbin/zfs destroy -rf $pDG/$volname >/root/errorVolumeDeleteHOME
+   echo /sbin/zfs destroy -rf $pDG/$volname >/root/errorVolumeDeleteCIFS
    docker exec etcdclient /TopStor/logqueue.py `basename "$0"` stop $userreq
    exit
  fi

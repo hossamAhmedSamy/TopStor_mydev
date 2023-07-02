@@ -12,24 +12,40 @@ dns=`ETCDCTL_API=3 /TopStor/etcdget.py $leaderip dnsname/$leader`
 searchdns=`ETCDCTL_API=3 /TopStor/etcdget.py $leaderip dnssearch/$leader`
 olddns=`cat /etc/resolv.conf | grep nameserver | head -1 | awk '{print $2}'`
 olddnssearch=`cat /etc/resolv.conf | grep search | head -1 | awk '{print $2}'`
-echo $dns | grep .
-if [ $? -ne 0 ];
+echo  hihihihihihi $dns
+touch /etc/resolv.conf
+dnsn=` echo $dns | wc -c `
+olddnsn=` echo $olddns | wc -c `
+searchdnsn=` echo $searchdnsn | wc -c `
+olddnssearchn=` echo $olddnssearch | wc -c `
+if [ $dnsn -le 3 ];
 then
 echo leader=$leader, dns=$dns, searchdns=$searchdns
- echo $olddns | grep '\.'
- if [ $? -ne 0 ];
+ if [ $olddnsn -le 3 ];
  then
   olddns='NoDNS'
  fi
 else
+
  ./etcdput.py $myip dnssearch/$hostname $searchdns
+ echo ./etcdput.py $myip dnssearch/$hostname $searchdns
+echo $? hereherehere $myip
  ./etcdput.py $myip dnsname/$hostname $dns
  ./etcdput.py $leaderip dnssearch/$hostname $searchdns
  ./etcdput.py $leaderip dnsname/$hostname $dns
+ echo $leader | grep $myhost
+ if [ $? -eq 0 ];
+ then
+  stamp=`date +%s`
+  ./etcdput.py $leaderip sync/deens/_____/request teezee_$stamp
+  ./etcdput.py $leaderip sync/deens/_____/request/$leader teezee_$stamp
+# ./etcdput.py $leaderip rebootme/$myhost pls
+
+fi
+
  echo 'supersede domain-name-server '$dns';' > /etc/dhcp/dhclient.conf
  echo nameserver $dns > /etc/resolv.conf
- echo $searchdns | grep '\-1'
- if [ $? -ne 0 ];
+ if [ $searchdnsn -gt 3 ];
  then
   echo 'supersede domain-search "'$searchdns'";' >> /etc/dhcp/dhclient.conf
   echo search $searchdns >> /etc/resolv.conf
@@ -47,3 +63,4 @@ else
  nmcli con mod mycluster ipv4.dns $dns 
  #systemctl restart network
 fi
+

@@ -19,6 +19,8 @@ def create(leader, leaderip, myhost, myhostip, etcdip, pool, name, ipaddr, ipsub
     resname = vtype+'-'+ipaddr
     cmdline='rm -rf /TopStordata/tempsmb.'+ipaddr
     subprocess.run(cmdline.split(),stdout=subprocess.PIPE)  
+    cmdline='rm -rf /TopStordata/smb.'+ipaddr
+    subprocess.run(cmdline.split(),stdout=subprocess.PIPE)  
     mounts =''
     for vol in volsip:
         if vol in notsametype:
@@ -26,7 +28,7 @@ def create(leader, leaderip, myhost, myhostip, etcdip, pool, name, ipaddr, ipsub
         leftvol = vol[0].split('/')[4]
         mounts += '-v/'+pool+'/'+leftvol+':/'+pool+'/'+leftvol+':rw'
         with open('/TopStordata/tempsmb.'+ipaddr,'a') as fip:
-            with open('/TopStordata/smb.'+leftvol, 'r') as fvol:
+            with open('/'+pool+'/smb.'+leftvol, 'r') as fvol:
                 fip.write(fvol.read())
     cmdline = 'cp /TopStordata/tempsmb.'+ipaddr+' /TopStordata/smb.'+ipaddr
     subprocess.run(cmdline.split(),stdout=subprocess.PIPE)  
@@ -37,6 +39,16 @@ def create(leader, leaderip, myhost, myhostip, etcdip, pool, name, ipaddr, ipsub
     print('/TopStor/cifs.sh '+resname+' '+mounts+' '+ipaddr+' '+ipsubnet+' '+vtype+' '+" ".join(args))
     cmdline = '/TopStor/cifs.sh '+resname+' '+mounts+' '+ipaddr+' '+ipsubnet+' '+vtype+' '+" ".join(args)
     subprocess.run(cmdline.split(),stdout=subprocess.PIPE)  
+    if '_' not in vtype:
+        users=get(etcdip,'usershash','--prefix')
+        users=[x for x in users if 'admin' not in x[0] ]
+        for user in users:
+            username = user[0].splt('/')[1]
+            cmdline = '/TopStor/decthis.sh '+username+' '+user[1]
+            passwd = subprocess.run(cmdline.split(),stdout=subprocess.PIPE).stdout.decode().split('_result')[1]
+            cmdline = 'docker exec '+resname+' /hostetc/smbuserfix.sh '+username+' '+passwd
+            subprocess.run(cmdline.split(),stdout=subprocess.PIPE)  
+            
     print(mounts)
     return
     #if len(checkipaddr1) != 0 or len :

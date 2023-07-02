@@ -96,7 +96,7 @@ def getall(leadip, alldsks='0'):
    volumesdict[voldict['name']] = voldict.copy()
  
  for alldsk in alldsks:
-  if alldsk == -1:
+  if alldsk == '_1':
    continue
   host = alldsk[0].split('/')[1]
   pools = mtuple(alldsk[1])

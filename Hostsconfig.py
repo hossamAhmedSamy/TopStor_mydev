@@ -23,10 +23,15 @@ def getall(*bargs):
   dnsname = get('dnsname/'+hostname)[0]
   dnssearch = get('dnssearch/'+hostname)[0]
   alias = get('alias/'+hostname)[0]
-  ipaddrsubnet = get('hostipsubnet/'+hostname)[0]
+  try:
+     ipaddrsubnet = get('ipaddr/'+hostname)[0].split('/')[1]
+  except:
+    ipaddrsubnet = '24'
   configured = get('configured/'+hostname)[0]
-  if ipaddrsubnet == -1:
-   ipaddrsubnet = 24
+  if ipaddrsubnet == '_1':
+   ipaddrsubnet = '24'
+  if configured == '_1':
+   configured = 'yes' 
   mgmt = get('namespace/mgmtip')[0] 
   allhosts.append({'name':hostname, 'configured':configured, 'alias':alias, 'ipaddr': hostip,'ipaddrsubnet':ipaddrsubnet, 'ntp':ntp, 'tz':tz, 'gw': gw,'dnsname':dnsname, 'dnssearch':dnssearch, 'cluster':mgmt})
   hostsdict[hostname] = { 'configured':configured, 'alias':alias, 'ipaddr': hostip, 'ipaddrsubnet':ipaddrsubnet, 'ntp':ntp, 'tz':tz, 'gw': gw, 'dnsname':dnsname, 'dnssearch':dnssearch, 'cluster':mgmt }
