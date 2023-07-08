@@ -1197,6 +1197,24 @@ def api_filter():
 
     results = cur.execute(query, to_filter).fetchall()
     return jsonify(results)
+
+import controlDisk
+@app.route('/api/v1/pools/actionOnDisk', methods=['GET','POST'])
+@login_required
+def offlineOrOnlineDisk(data):
+    action = data['action']
+    pool = data['pool']
+    disk = data['disk']
+    cmdline=['zpool', action, pool, disk]
+    result=subprocess.run(cmdline, capture_output=True)
+    error = str(result.stderr.decode()).replace('\n\n','\n').split('\n')
+    status = ''
+    if (error[0] == ''):
+        status = 'OK'
+    else:
+        status = 'ERROR'
+    return {'Status': status, 'Error': error}
+
 leaderip =0 
 myhost=0
 if __name__=='__main__':
