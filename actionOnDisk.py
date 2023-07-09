@@ -4,12 +4,11 @@ def control(action, pool, disk):
     cmdline=['zpool', action, pool, disk]
     result=subprocess.run(cmdline, capture_output=True)
     error = str(result.stderr.decode()).replace('\n\n','\n').split('\n')
-    status = ''
-    if (error[0] == ''):
-        status = 'OK'
+    error = [i for i in error if i] 
+    if (not error or error[0] == ''):
+        return {'Status': 'Ok'}
     else:
-        status = 'ERROR'
-    return {'Status': status, 'Error': error}
+        return {'Status': 'ERROR', 'Error': error}
     
 if __name__=='__main__':
     action = sys.argv[1]
