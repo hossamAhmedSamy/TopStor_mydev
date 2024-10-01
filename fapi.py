@@ -52,7 +52,44 @@ for log in logcatalog:
 allinfo = 0
 
 
+###########################################################
+@app.route('/api/v1/software/upgradefromfile', methods=['GET','POST'])
+@login_required
+def upgradefromfile(data):
+    global leaderip, myhost
+    
+    if 'baduser' in data['response']:
+        return {'response': 'baduser'}
+    
+    # Extract filename from request data
+    if 'filename' not in data:
+        logmsg.sendlog('UpgradeErr1', 'error', data['user'])
+        return {'response': 'filename missing'}
+    
+    filename = data['filename'].replace(' ', '')
+    filePath = f'/TopStordata/{filename}'
+    
+    # Check if the file exists in /TopStordata
+    if not os.path.exists(filePath):
+        logmsg.sendlog('UpgradeErr2', 'error', data['user'])
+        return {'response': 'file not found'}
+    
+    # Use the filename as the password for unzipping (needed?)
+    password = filename
+    
+    # Command to run the shell script to unzip and upgrade
+    cmdline = f'bash /TopStor/Updatefromfile.sh {filename} {password}'
+    
+    # Execute the shell script
+    try:
+        subprocess.run(cmdline, shell=True, check=True)
+        logmsg.sendlog('UpgradeSuccess', 'info', data['user'])
+        return {'response': 'upgrade successful'}
+    except subprocess.CalledProcessError as e:
+        logmsg.sendlog('UpgradeErr3', 'error', data['user'])
+        return {'response': 'upgrade failed', 'error': str(e)} 
 
+##########################################################################
 def getalltime(renew='no'):
  global allinfo,alldsks, getalltimestamp, leaderip
  if (getalltimestamp+30) < timestamp() or renew == 'yes':
