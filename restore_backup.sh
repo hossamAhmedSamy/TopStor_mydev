@@ -11,10 +11,10 @@ else
     exit 1
 fi
 
-if [ -d "$BACKUP_PATH/TopStor" ] && [ -d "$BACKUP_PATH/pace" ]; then
-    echo "Both TopStor and pace found in the backup folder."
+if [ -d "$BACKUP_PATH/TopStor" ] && [ -d "$BACKUP_PATH/pace" ] && [ -d "$BACKUP_PATH/topstorweb" ]; then
+    echo "TopStor, pace, and topstorweb found in the backup folder."
 else
-    echo "Error: TopStor or pace not found in the backup folder."
+    echo "Error: TopStor, pace, or topstorweb not found in the backup folder."
     exit 1
 fi
 
@@ -25,19 +25,31 @@ echo "Creating a backup of the current directories at $BACKUP_CURRENT_PATH..."
 mkdir -p "$BACKUP_CURRENT_PATH"
 
 if [ -d "/TopStor" ]; then
-    mv /TopStor "$BACKUP_CURRENT_PATH/"
+    mv -i /TopStor "$BACKUP_CURRENT_PATH/"
     echo "Moved current TopStor to $BACKUP_CURRENT_PATH."
 fi
 
 if [ -d "/pace" ]; then
-    mv /pace "$BACKUP_CURRENT_PATH/"
+    mv -i /pace "$BACKUP_CURRENT_PATH/"
     echo "Moved current pace to $BACKUP_CURRENT_PATH."
 fi
 
-echo "Replacing current directories with the backup versions using rsync..."
+if [ -d "/topstorweb" ]; then
+    mv -i /topstorweb "$BACKUP_CURRENT_PATH/"
+    echo "Moved current topstorweb to $BACKUP_CURRENT_PATH."
+fi
 
+if [ ! -d "/TopStor" ] && [ ! -d "/pace" ] && [ ! -d "/topstorweb" ]; then
+    echo "All directories successfully moved, starting the replacement process..."
+else
+    echo "Error: Moving the directories failed, aborting replacement."
+    exit 1
+fi
+
+echo "Replacing current directories with the backup versions using rsync..."
 rsync -av --delete "$BACKUP_PATH/TopStor/" /TopStor/
 rsync -av --delete "$BACKUP_PATH/pace/" /pace/
+rsync -av --delete "$BACKUP_PATH/topstorweb/" /topstorweb/
 
 echo "Replacement complete."
 
