@@ -1040,7 +1040,10 @@ def UnixAddGroup(data):
     if str(suser['id']) == str(usr):
      usrstr += suser['name']+',' 
   usrstr = usrstr[:-1]
- cmndstring = '/TopStor/UnixAddGroup '+leaderip+' '+data['name']+' '+' users'+usrstr+' '+data['user']
+  uid='2929'
+  #uid = data.get('uid')            <<<<<<<<<<<<<<<< TO BE USED (Frontend)
+
+ cmndstring = '/TopStor/UnixAddGroup '+leaderip+' '+data['name']+' '+' users'+usrstr+' '+data['user']+' ' +uid
  postchange(cmndstring)
  return data
 
@@ -1077,8 +1080,14 @@ def UnixAddUser(data):
   for grp in grps.split(','):
    groupstr += allgroups[int(grp)][0]+','
   groupstr = groupstr[:-1]
- cmndstring = '/TopStor/UnixAddUser '+leaderip+' '+data.get('name')+' '+pool+' groups'+groupstr+' ' \
-     +data.get('Password')+' '+data.get('Volsize')+'G '+data.get('HomeAddress')+' '+data.get('HomeSubnet')+' hoststub'+' '+data['user']
+
+  uid=''
+ # uid = data.get('uid')            <<<<<<<<<<<<<<<< TO BE USED (Frontend)
+
+
+ cmndstring = '/TopStor/UnixAddUser ' + leaderip + ' ' + data.get('name') + ' ' + pool + ' groups' + groupstr + ' ' \
+                 + data.get('Password') + ' ' + data.get('Volsize') + 'G ' + data.get('HomeAddress') + ' ' + \
+                 data.get('HomeSubnet') + ' hoststub ' +  data['user'] + ' ' + uid
 
  postchange(cmndstring)
  return data 

@@ -1,0 +1,12 @@
+UID: admin
+contrun true, admin
+['10.11.11.100']
+['dhcp156601']
+dhcp156601
+('usershash/teto3', 'U2FsdGVkX19TUa6dE5Vt8b2VApcD')
+('usersigroup/Everyone', '1000:1000:nogrouphome/nogroupsize/blabizo,userq,user3,user4,userh,userh2,userh4,teto3/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no')
+('usersinfo/teto3', '1014:1014:/NoHome/teto3/1G/admin/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no')
+['10.11.11.100']
+['dhcp156601']
+['10.11.11.100']
+['dhcp156601']

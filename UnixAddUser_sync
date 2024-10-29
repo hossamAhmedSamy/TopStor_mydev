@@ -13,6 +13,8 @@ userpass=`echo $@ | awk '{print $6}'`;
 userid=`echo $@ | awk '{print $7}'`;
 usergd=`echo $@ | awk '{print $8}'`;
 userhome=`echo $@ | awk '{print $9}'`;
+uid=`echo $@ | awk '{print $10}'`;
+
 userreq='system';
 privilege="Box_Users";
 contrun=`./privthis.sh $privilege $userreq`;

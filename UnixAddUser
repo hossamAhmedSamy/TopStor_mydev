@@ -12,10 +12,10 @@ size=`echo $@ | awk '{print $6}'`;
 HomeAddr=`echo $@  | awk '{print $7}' `;
 HomeSubnet=`echo $@  | awk '{print $8}'`;
 pullsync=`echo $@  | awk '{print $9}'`;
+userid=$(echo $@ | awk '{print $11}');                            #>>>>>>>>>>>>>>>>
 echo $pullsync | grep pull
 if [ $? -eq 0 ]
 then
-	userid=`echo $@  | awk '{print $10}'`;
 	usergd=`echo $@  | awk '{print $11}'`;
 	active=`echo $@  | awk '{print $12}'`;
 	permis=`echo $@  | awk '{print $13}'`;
@@ -87,16 +87,20 @@ then
 	fi
  fi
  echo $pullsync | grep pull
- if [ $? -eq 0 ]
- then
-	useradd -c"TopStor"$pas  $homebase -u $userid -p $userpass -s /usr/sbin/nologin $username
-	groupmod -g $usergd $username
-	echo useradd \-c"TopStor"$userpass $homebase \-g $usergd \-u $userid \-p $userpass \-s /usr/sbin/nologin $username
-	
- else
-	echo useradd \-c"TopStor"$pas $homebase \-p $userpass \-s /usr/sbin/nologin $username
- 	useradd -c"TopStor"$pas $homebase -p $userpass -s /usr/sbin/nologin $username 
- fi
+if [ $? -eq 0 ]; then
+    useradd -c "TopStor$pas" $homebase -u $userid -p $userpass -s /usr/sbin/nologin $username
+    groupmod -g $usergd $username
+    echo useradd -c "TopStor$userpass" $homebase -g $usergd -u $userid -p $userpass -s /usr/sbin/nologin $username
+else
+    if [ -z "$userid" ]; then
+        echo useradd -c "TopStor$pas" $homebase -p $userpass -s /usr/sbin/nologin $username
+        useradd -c "TopStor$pas" $homebase -p $userpass -s /usr/sbin/nologin $username
+    else
+        echo useradd -c "TopStor$pas" $homebase -u $userid -p $userpass -s /usr/sbin/nologin $username
+        useradd -c "TopStor$pas" $homebase -u $userid -p $userpass -s /usr/sbin/nologin $username
+    fi
+fi
+
  echo $pullsync | grep pull
  if [ $? -ne 0 ]
  then
@@ -135,13 +139,17 @@ then
 	fi
  else 
  # openssl rsautl -encrypt -inkey key/public_key.pem -pubin -in <( echo $userpass) -out key/$username;  
-  userid=`echo $userline | awk -F':' '{print $3}'`
+
+ if [ -z "$userid" ]; then
+    userid=`echo $userline | awk -F':' '{print $3}'`
+ fi                                                                                   
+                                                                             
   usergd=`echo $userline | awk -F':' '{print $4}'`
   userhome=`echo $userline | awk -F':' '{print $6}'`
   #userhash=`echo $userline | awk -F':' '{print $5}' | awk -F'TopStor' '{print $2}'`
   userhash=$pas
   
-  /TopStor/etcdput.py $etcd 'usersinfo/'$username $userid':'$usergd':/'$homePool'/'$username'/'$size'/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no'
+  /TopStor/etcdput.py $etcd 'usersinfo/'$username $userid'/'$homePool'/'$username'/'$size'/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no/no'
   /TopStor/etcdput.py $etcd 'usershash/'$username $userhash
   #/TopStor/broadcast.py UserAdd /TopStor/pump.sh UnixAddUser_sync -d$myhost $username $userhash $userid $usergd $userhome
   echo $etcd 2222222222222222222222222222222222222222222222222222222222222222 
